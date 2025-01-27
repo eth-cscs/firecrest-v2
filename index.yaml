@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  firecrest-api:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2025-01-27T17:07:32.501797244Z"
+    description: FirecREST APIs (version 2)
+    digest: bae34707c3229a9270ceeac8538e67399cdb46a170aa8dc4f9eb8853e1dde397
+    name: firecrest-api
+    type: application
+    urls:
+    - https://eth-cscs.github.io/firecrest-v2/firecrest-api-2.1.3-beta.3.tgz
+    version: 2.1.3-beta.3
+generated: "2025-01-27T17:07:32.501541514Z"
