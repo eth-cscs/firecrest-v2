@@ -1,11 +1,11 @@
 ## FirecREST-v2 Helm Charts
 
-This is a repository for a Helm chart to deploy [FirecREST version 2](https://github.com/eth-cscs/firecrests-v2).
+This is a repository for a Helm chart to deploy [FirecREST version 2](https://github.com/eth-cscs/firecrest-v2).
 
 ### Fetching the repository
 
 ```bash
-helm repo add firecrest-v2 https://eth-cscs.github.io/firecrests-v2
+helm repo add firecrest-v2 https://eth-cscs.github.io/firecrest-v2
 helm repo update
 ```
 
