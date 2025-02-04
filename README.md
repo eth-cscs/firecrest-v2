@@ -12,11 +12,11 @@ helm repo update
 The available versions can be listed with
 
 ```bash
-helm search repo firecrest-v2/firecrest-v2 --versions
+helm search repo firecrest-v2/firecrest-api --versions
 ```
 
 ### Deploying the chart
 
 ```bash
-helm install --create-namespace <deployment-name> -n<namespace> firecrest-v2/firecrest-v2 --values values.yaml
+helm install --create-namespace <deployment-name> -n <namespace> firecrest-v2/firecrest-api --values values.yaml
 ```
