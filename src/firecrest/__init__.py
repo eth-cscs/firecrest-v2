@@ -55,7 +55,7 @@ def create_app(settings: config.Settings) -> FastAPI:
 
     app = FastAPI(
         title="FirecREST",
-        version="2.0.x",
+        version=settings.app_version,
         servers=settings.doc_servers,
         debug=settings.app_debug,
         root_path=settings.apis_root_path,

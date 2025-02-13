@@ -180,35 +180,23 @@ class Auth(CamelModel):
 
 
 class Settings(BaseSettings):
-    # General variables
-    environment: str = "production"
-    admin_email: str = "support@cscs.ch"
-    # App variables
+    # FastAPI App variables
     app_debug: bool = False
-    app_name: str = "FirecREST - APIs"
-    app_description: str = "FirecREST - APIs"
-    app_version: str = "0.0.1"
-    # Service variables
-    service_ws: str = ""
-    service_name: str = "firecrest-api"
-    # Logging variables
-    logging_level: str = "DEBUG"
-    # APIs variables
+    app_version: str = "2.x.x"
     apis_root_path: str = ""
     doc_servers: Optional[List[Dict]] = None
+    # Authentication and Authorization settings
     auth: Auth = None
-    # Slurm
-    clusters: List[HPCCluster] = []
-
-    # SSH Service
+    # SSH Credentials
     ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys]
-    # storage
+    # HPC Clusters definition 
+    clusters: List[HPCCluster] = []
+    # HPC Storage definition
     storage: Storage = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        secrets_dir="/app/secrets/",
     )
 
     @field_validator("clusters", mode="before")
