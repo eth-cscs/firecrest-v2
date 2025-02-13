@@ -115,6 +115,10 @@ class SlurmCliClient(SlurmBaseClient):
 
         cmd_result_i: int = 0
 
+        # check if job was found
+        if not results[cmd_result_i]:
+            return None
+
         # fallback to sacct command if scontrol failde to retreive job info
         if not isinstance(results[cmd_result_i], list) and len(results) == 4:
             cmd_result_i = 2
@@ -124,11 +128,13 @@ class SlurmCliClient(SlurmBaseClient):
         if isinstance(results[cmd_result_i], Exception):
             return results[cmd_result_i]
 
-        return [
-            SlurmJobMetadata(
-                **{**results[cmd_result_i][0], **results[cmd_result_i + 1][0]}
-            )
-        ]
+        jobs = []
+        for i in range(len(results[cmd_result_i])):
+            jobs.append(SlurmJobMetadata(
+                **{**results[cmd_result_i][i], **results[cmd_result_i + 1][i]}
+            ))
+            
+        return jobs
 
     async def get_jobs(self, username: str, jwt_token: str) -> List[SlurmJob] | None:
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)

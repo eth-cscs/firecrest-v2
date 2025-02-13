@@ -45,9 +45,7 @@ class ScontrolJobCommand(ScontrolBase):
                 if attr_match:
                     job[attr_name] = attr_match.group(1)
                 else:
-                    raise ValueError(
-                        f"Could not parse attribute '{attr_name}' in " f"'{job_str}'"
-                    )
+                    job[attr_name] = None
 
             jobs.append(job)
 
