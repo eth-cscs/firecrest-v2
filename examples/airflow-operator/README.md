@@ -1,8 +1,8 @@
 # FirecREST Operators for Airflow
 
-[Apache Airflow](https://airflow.apache.org) is an open-source workflow management platform. Airflow uses directed acyclic graphs (DAGs) to manage the workflows. Tasks and dependencies are defined in Python and then Airflow takes care of the scheduling and execution. DAGs can be run either on a schedule or based on external event triggers.
+[Apache Airflow](https://airflow.apache.org) is an open-source workflow management platform. It uses directed acyclic graphs (DAGs) of tasks toorgnize the workflows. Tasks and dependencies are defined in Python and then passed to Airflow, which takes care of scheduling and executing them. DAGs can be run either on a schedule or based on external event triggers.
 
-For this tutorial we have defined an Airflow DAG combining small tasks which can run localy and compute-intensive tasks that must run on a supercomputer. Our goal is to add to Airflow the support for executing the DAG's compute-intensive tasks in Piz Daint via [FirecREST](https://firecrest.readthedocs.io). For that we are going to write [custom Airflow operators](https://airflow.apache.org/docs/apache-airflow/stable/howto/custom-operator.html) that will use FirecREST to access Piz Daint.
+For this tutorial we have defined an Airflow DAG that combines small tasks that can run localy on a laptopand compute-intensive tasks that must run on a supercomputer. Our goal is to add to Airflow the support for executing the DAG's compute-intensive tasks in Piz Daint via [FirecREST](https://firecrest.readthedocs.io). For that we are going to write [custom Airflow operators](https://airflow.apache.org/docs/apache-airflow/stable/howto/custom-operator.html) that will use FirecREST to interact with Piz Daint.
 
 The idea behind this is very simple.
 Operators are defined as units of work for Airflow to complete. Custom operators can be written by extending Airflow's [`BaseOperator`](https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/models/baseoperator/index.html#airflow.models.baseoperator.BaseOperatorMeta) class.
@@ -28,7 +28,7 @@ We can export as environment variables the credentials that FirecREST will use a
 ```bash
 export FIRECREST_CLIENT_ID=<client-id>
 export FIRECREST_CLIENT_SECRET=<client-secret>
-export AUTH_TOKEN_URL=https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token
+export AUTH_TOKEN_URL=https://<token-url>
 export FIRECREST_URL=https://<firecrest-url>
 ```
 
@@ -65,6 +65,7 @@ standalone | Airflow is ready
 standalone | Login with username: admin  password: <password>
 standalone | Airflow Standalone is for development purposes only. Do not use this in production!
 ```
+The password can be found as well in `$AIRFLOW_HOME/standalone_admin_password.txt`.
 
 ## Hands On
 
