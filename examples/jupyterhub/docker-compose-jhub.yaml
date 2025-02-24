@@ -1,0 +1,21 @@
+services:
+  base:
+    image: "slurm2x"
+    build:
+      context: .
+      dockerfile: ./build/docker/slurm-cluster/Dockerfile
+      args:
+          SLURM_VERSION: "24.05.1"
+    entrypoint: ["echo", "0"]
+
+  slurm:
+    image: "slurm2x:jhub"
+    build:
+      context: .
+      dockerfile: $JHUB_DOCKERFILE_DIR/Dockerfile
+    ports:
+      - 6820:6820
+      - 2222:22
+      - 56123:56123
+    depends_on:
+      - base
