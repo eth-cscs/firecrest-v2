@@ -21,20 +21,16 @@ system = 'eiger'                                # HPC system name
 job_script = """#!/bin/bash -l
 
 #SBATCH --job-name=airflow-example
-#SBATCH --output=/home/fireuser/airflow/slurm-%j.out
+#SBATCH --output=slurm-%j.out
 #SBATCH --time=00:05:00
-##SBATCH --nodes=1
-##SBATCH --ntasks-per-core=1
-##SBATCH --ntasks-per-node=1
-##SBATCH --cpus-per-task=12
-##SBATCH --constraint=gpu
-##SBATCH --account=csstaff
-
-module load QuantumESPRESSO
+#SBATCH --nodes=1
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
-srun pw.x -in si.scf.in
+uenv repo create
+uenv image pull quantumespresso/v7.3.1:v2
+
+srun --uenv quantumespresso/v7.3.1:v2 --view default pw.x -in si.scf.in
 """
 
 with DAG(
@@ -43,7 +39,7 @@ with DAG(
     start_date=pendulum.datetime(2023, 9, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=datetime.timedelta(minutes=60),
-    tags=["firecrest-training-2023"],
+    tags=["firecrest-v2-demo"],
 ) as dag:
 
     wait_for_file = FileSensor(
