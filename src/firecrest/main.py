@@ -5,13 +5,10 @@
 
 import uvicorn
 
-
 # plugins
 from firecrest.plugins import settings
 
-
 import logging
-import re
 import types
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -53,6 +50,12 @@ from apscheduler.eventbrokers.local import LocalEventBroker
 
 
 logger = logging.getLogger(__name__)
+
+from lib.loggers.tracing_logs import (
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
 
 
 def create_app(settings: config.Settings) -> FastAPI:
@@ -127,30 +130,16 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
+            # Push logging data set
+            set_tracing_data(request.url.path)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
-
-            system_name = None
-            # /filesystem/{system_name}/.*
-            # /compute/{system_name}/.*
-            # /status/{system_name}
-            if match := re.search(
-                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
-                request.url.path,
-                re.IGNORECASE,
-            ):
-                system_name = match.group(1)
-
-            logger.info(
-                {
-                    "username": username,
-                    "system": system_name,
-                    "endpoint": request.url.path,
-                    "satus_code": response.status_code,
-                }
-            )
+            # Append log trace ID to the request
+            response.headers["F7T-f7t_v2_tracing_log-ID"] = get_log_traceid()
+            # Logging from Middleware
+            tracing_log_middleware(username, response.status_code)
             return response
         except Exception as e:
             logger.error(
