@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for private key passphrase.
 ### Changed
 - Images are now built for multiple platforms: linux/amd64, linux/arm64
+- Images are now built for multiple platforms: linux/amd64, linux/arm64
 
 ### Fixed
 

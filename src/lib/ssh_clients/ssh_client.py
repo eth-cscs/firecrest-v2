@@ -4,17 +4,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
+import contextvars
 from time import time
 from typing import Any, Dict
 import asyncssh
 from asyncssh import ChannelOpenError, ConnectionLost, SSHClientConnection
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
+import logging
 
 # clients
 from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
+
+from lib.loggers.tracing_logs import tracing_log_command
 
 from lib.loggers.tracing_logs import tracing_log_command
 
@@ -47,6 +51,7 @@ class SSHClient:
     def __init__(
         self,
         conn: SSHClientConnection,
+        username: str,
         idle_timeout: int = 60,
         execute_timeout: int = 5,
         keep_alive: int = 5,
@@ -54,6 +59,7 @@ class SSHClient:
     ):
         self.idle_timeout = idle_timeout
         self.conn = conn
+        self.username = username
         self.conn.set_keepalive(interval=keep_alive, count_max=3)
         self.execute_timeout = execute_timeout
         self.buffer_limit = buffer_limit
@@ -71,6 +77,7 @@ class SSHClient:
 
         try:
             async with asyncio.timeout(self.execute_timeout):
+                self.conn
                 process = await self.conn.create_process(command.get_command())
 
                 if stdin:

@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import uvicorn
+
+# plugins
+from firecrest.plugins import settings
+
 import logging
 import types
 from contextlib import asynccontextmanager
@@ -63,8 +67,26 @@ init_tracing_log(settings.logs.enable_tracing_log)
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
+from lib.loggers.tracing_logs import (
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
 
-def create_app(settings: Settings) -> FastAPI:
+from lib.loggers.tracing_logs import (
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
+
+from lib.loggers.tracing_logs import (
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
+
+def create_app(settings: config.Settings) -> FastAPI:
+
     # Instance app
     app = FastAPI(
         title="FirecREST",

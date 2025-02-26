@@ -33,6 +33,9 @@ from firecrest.dependencies import (
     ServiceAvailabilityDependency,
 )
 
+# logs
+from lib.loggers.tracing_logs import tracing_log_command
+
 # clients
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 
@@ -367,6 +370,7 @@ async def post_download(
             "get_object",
             {"Bucket": username, "Key": object_name},
         )
+    tracing_log_command(username, router.prefix, 0)
     return {
         "downloadUrl": get_download_url,
         "transferJob": TransferJob(
@@ -424,6 +428,7 @@ async def move_mv(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -483,6 +488,7 @@ async def post_cp(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -540,6 +546,7 @@ async def delete_rm(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -608,6 +615,7 @@ async def compress(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -665,6 +673,7 @@ async def extract(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
