@@ -58,6 +58,12 @@ from lib.loggers.tracing_log import tracing_log_middleware
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
+from lib.loggers.tracing_logs import (
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
+
 
 def create_app(settings: config.Settings) -> FastAPI:
 
@@ -136,6 +142,8 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
+            # Push logging data set
+            set_tracing_data(request.url.path)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
