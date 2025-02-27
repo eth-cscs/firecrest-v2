@@ -47,8 +47,8 @@ class MockedCommand(CamelModel):
 
 class MockedSSHClient(SSHClient):
 
-    def __init__(self, conn):
-        super().__init__(conn=conn)
+    def __init__(self, conn, username):
+        super().__init__(conn=conn, username=username)
 
 
 class MockSSHClientPool(SSHClientPool):
@@ -91,4 +91,4 @@ class MockSSHClientPool(SSHClientPool):
             async with asyncssh.connect(
                 host="localhost", port=port, known_hosts=None
             ) as conn:
-                yield MockedSSHClient(conn)
+                yield MockedSSHClient(conn, username)
