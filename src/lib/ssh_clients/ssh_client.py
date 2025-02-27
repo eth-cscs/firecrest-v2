@@ -4,14 +4,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
-import contextvars
 from time import time
 from typing import Any, Dict
 import asyncssh
 from asyncssh import ChannelOpenError, ConnectionLost, SSHClientConnection
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
-import logging
 
 # clients
 from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
@@ -75,7 +73,6 @@ class SSHClient:
 
         try:
             async with asyncio.timeout(self.execute_timeout):
-                self.conn
                 process = await self.conn.create_process(command.get_command())
 
                 if stdin:

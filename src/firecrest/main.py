@@ -48,14 +48,13 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
-
-logger = logging.getLogger(__name__)
-
 from lib.loggers.tracing_logs import (
     get_log_traceid,
     tracing_log_middleware,
     set_tracing_data,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(settings: config.Settings) -> FastAPI:
