@@ -255,7 +255,7 @@ completeUploadXML="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/
 
 # Complete multipart upload
 status=$(curl -f --show-error -s -i -o /dev/null -w "%{http_code}" -d "$completeUploadXML" -X POST $complete_multipart_url)
-echo "curl -f --show-error -s -i -o /dev/null -w "%{http_code}" -d "$completeUploadXML" -X POST $complete_multipart_url"
+
 if [[ "$status" == '200' ]]
 then
     echo "[INFO] Multipart file upload successfully completed"
