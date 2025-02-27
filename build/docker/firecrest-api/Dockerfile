@@ -38,5 +38,7 @@ COPY ./src/firecrest ./firecrest
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
 USER appuser
 
+RUN if [ -e "$YAML_LOG_CONFIG_FILE" ] ; then export LOG_CONFIG="--log-config=$YAML_LOG_CONFIG_FILE" ; else export LOG_CONFIG="" ; fi
+
 # Run the app with uvicorn
-CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000", "$YAML_LOG_CONFIG_FILE"]
+CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000", "$LOG_CONFIG"]
