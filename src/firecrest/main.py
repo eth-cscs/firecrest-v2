@@ -136,7 +136,7 @@ def register_middlewares(app: FastAPI):
             if hasattr(request.state, "username"):
                 username = request.state.username
             # Append log trace ID to the request
-            response.headers["F7T-f7t_v2_tracing_log-ID"] = get_log_traceid()
+            response.headers["f7t-tracing-log-id"] = get_log_traceid()
             # Logging from Middleware
             tracing_log_middleware(username, response.status_code)
             return response
