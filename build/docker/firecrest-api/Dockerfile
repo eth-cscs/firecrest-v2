@@ -25,11 +25,12 @@ COPY ./requirements.txt ./requirements.txt
 COPY ./requirements-testing.txt ./requirements-testing.txt
 
 
-
 # Build the dependencies
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 RUN if [ "$ENVIRONMENT" = "development" ] ; then pip install --no-cache-dir --upgrade -r ./requirements-testing.txt ; fi
 
+# Log configuration parameter for Uvicorn
+RUN if [ -e "$YAML_LOG_CONFIG_FILE" ] ; then export LOG_CONFIG="--log-config=$YAML_LOG_CONFIG_FILE" ; else export LOG_CONFIG="" ; fi
 
 # Copy the code
 COPY ./src/lib ./lib
@@ -41,4 +42,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # Run the app with uvicorn
-CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000", "$LOG_CONFIG"]
