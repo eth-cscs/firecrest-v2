@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added f7tlog for debugging and general usage.
 
 
+## [2.2.1]
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Templates for upload and download using `filesystems/transfer` endpoint.
+
 ## [2.2.0]
 
 ### Added
