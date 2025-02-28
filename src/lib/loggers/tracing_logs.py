@@ -5,7 +5,7 @@
 
 import contextvars
 import json
-import re
+#import re
 import uuid
 import logging
 
@@ -42,7 +42,7 @@ def set_tracing_data(request_url: str, route_name: str, method: str):
     tracing_data.set(json.dumps(
         {
             "system_name": system,
-            "route": route_name,
+            "router": route_name,
             "method": method,
             "endpoint": request_url
         })
