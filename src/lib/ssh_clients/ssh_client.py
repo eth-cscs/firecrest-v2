@@ -29,6 +29,10 @@ class BaseCommand(ABC):
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         pass
 
+    @abstractmethod
+    def get_log() -> str:
+        return "cmd"
+
 
 class OutputLimitExceeded(Exception):
     pass
@@ -73,7 +77,8 @@ class SSHClient:
 
         try:
             async with asyncio.timeout(self.execute_timeout):
-                process = await self.conn.create_process(command.get_command())
+                action = command.get_command()
+                process = await self.conn.create_process(action)
 
                 if stdin:
                     process.stdin.write(stdin)
@@ -93,7 +98,10 @@ class SSHClient:
                 await process.wait_closed()
                 # Logging command execution
                 tracing_log_command(
-                    self.username, command.get_command(), process.exit_status
+                    username=self.username,
+                    command_action=action,
+                    exit_status=process.exit_status,
+                    command=command.get_log(),
                 )
                 return command.parse_output(
                     stdout_data, stdout_error, process.exit_status

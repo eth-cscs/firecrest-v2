@@ -57,7 +57,7 @@ def tracing_log_middleware(username: str, status_code: int):
     tracing_logger.info(log_data)
 
 
-def tracing_log_command(username, command_action, exit_status):
+def tracing_log_command(username, command_action, exit_status, command=""):
 
     # Load f7t_v2_tracing_log data
     traced_data = json.loads(tracing_data.get())
@@ -82,7 +82,7 @@ def tracing_log_command(username, command_action, exit_status):
             "machinename": traced_data['system_name'],
             "message": command_action,
             "group" : command_group,
-            "command" : command_label,
+            "command" : command,
             "exit_status": exit_status
         }
         tracing_logger.info(log_data)
