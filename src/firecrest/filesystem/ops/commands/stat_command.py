@@ -19,6 +19,9 @@ class StatCommand(BaseCommandWithTimeout):
         self.target_path = target_path
         self.dereference = dereference
 
+    def get_log(self) -> str:
+        return "stat"
+
     def get_command(
         self,
     ) -> str:

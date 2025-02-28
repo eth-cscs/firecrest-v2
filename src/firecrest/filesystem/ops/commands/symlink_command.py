@@ -17,6 +17,9 @@ class SymlinkCommand(BaseCommandWithTimeout):
         self.link_path = link_path
         self.ls_command = LsBaseCommand(target_path, no_recursion=True)
 
+    def get_log(self) -> str:
+        return "ln"
+
     def get_command(self) -> str:
 
         return f"{super().get_command()} ln -s -- '{self.target_path}' '{self.link_path}' && {self.ls_command.get_command()}"

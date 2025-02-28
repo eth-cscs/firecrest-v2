@@ -31,6 +31,10 @@ class BaseCommand(ABC):
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         pass
 
+    @abstractmethod
+    def get_log() -> str:
+        return "cmd"
+
 
 class OutputLimitExceeded(Exception):
     pass

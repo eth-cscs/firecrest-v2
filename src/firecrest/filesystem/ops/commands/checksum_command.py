@@ -28,6 +28,9 @@ class ChecksumCommand(BaseCommandWithTimeout):
         self.selected_algorithm = algorithm
         self.target_path = target_path
 
+    def get_log(self) -> str:
+        return "checksum"
+
     def get_command(self) -> str:
         return f"{super().get_command()} {available_algorithms[self.selected_algorithm]} -- '{self.target_path}'"
 

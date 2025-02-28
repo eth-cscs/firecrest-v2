@@ -20,6 +20,9 @@ class FileCommand(BaseCommandWithTimeout):
         super().__init__()
         self.target_path = target_path
 
+    def get_log(self) -> str:
+        return "file"
+
     def get_command(self) -> str:
         return f"{super().get_command()} file -b -- '{self.target_path}'"
 

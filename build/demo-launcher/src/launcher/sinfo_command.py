@@ -18,6 +18,9 @@ class SinfoVersionCommand(BaseCommandWithTimeout):
     ) -> None:
         super().__init__()
 
+    def get_log(self) -> str:
+        return "sinfo"
+
     def get_command(self) -> str:
         return f"{super().get_command()} sinfo -V"
 

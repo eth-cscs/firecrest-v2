@@ -32,6 +32,9 @@ class TarCommand(BaseCommandWithTimeout):
         self.dereference = dereference
         self.operation = operation
 
+    def get_log(self) -> str:
+        return "tar"
+
     def get_command(
         self,
     ) -> str:

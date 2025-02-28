@@ -27,6 +27,9 @@ class HeadCommand(BaseCommandWithTimeout):
         self.lines = lines
         self.skip_trailing = skip_trailing
 
+    def get_log(self) -> str:
+        return "head"
+
     def get_command(self) -> str:
         options = ""
         if self.file_bytes:
