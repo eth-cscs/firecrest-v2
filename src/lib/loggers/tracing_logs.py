@@ -9,6 +9,8 @@ import re
 import uuid
 import logging
 
+from fastapi import Request
+
 # # configs
 # from firecrest import config
 # from firecrest.plugins import settings as plugin_settings
@@ -25,35 +27,39 @@ def get_log_traceid():
     return tracing_id.get()
 
 
-def set_tracing_data(request_url: str):
-    router = ""
+def set_tracing_data(request_url: str, route_name: str, method: str):
     system = ""
-    method = ""
 
-    if match := re.search(
-        r"^\/([^\/\s]+)\/([^\/\s]+)\/(.*)$",
-        request_url,
-        re.IGNORECASE,
-    ):
-        router = match.group(1)
-        system = match.group(2)
-        method = match.group(3)
+    # if match := re.search(
+    #     r"^\/([^\/\s]+)\/([^\/\s]+)\/(.*)$",
+    #     request_url,
+    #     re.IGNORECASE,
+    # ):
+    #     router = match.group(1)
+    #     system = match.group(2)
+    #     method = match.group(3)
 
     tracing_data.set(json.dumps(
         {
             "system_name": system,
-            "router": router,
+            "route": route_name,
             "method": method,
             "endpoint": request_url
         })
     )
 
 
-def tracing_log_middleware(username: str, status_code: int):
+def tracing_log_middleware(request: Request, username: str, status_code: int):
     log_data = json.loads(tracing_data.get())
     log_data["trace_id"] = get_log_traceid()
     log_data["username"] = username
     log_data["status_code"] = status_code
+    log_data["base_url"] = request.base_url
+    log_data["user_agent"] = request.headers['user-agent']
+    log_data["path"] = request.scope['path']
+    log_data["root_path"] = request.scope['root_path']
+    log_data["components"] = request.url.components[2]
+    log_data["scheme"] = request.url.scheme
     tracing_logger.info(log_data)
 
 
@@ -61,19 +67,7 @@ def tracing_log_command(username, command_action, exit_status, command=""):
 
     # Load f7t_v2_tracing_log data
     traced_data = json.loads(tracing_data.get())
-    if traced_data:
-        # Extract command 
-        command_group = ""
-        command_label = ""
-        # Extract command identification
-        if match := re.search(
-            r"^([^\/\s]+)\/(.*)$",
-            traced_data["method"],
-            re.IGNORECASE,
-        ):
-            command_group = match.group(1)
-            command_label = match.group(2)
-        
+    if traced_data:      
         # Log data packet
         log_data = {
             "trace_id": get_log_traceid(),
@@ -81,7 +75,6 @@ def tracing_log_command(username, command_action, exit_status, command=""):
             "microservice": traced_data['router'],
             "machinename": traced_data['system_name'],
             "message": command_action,
-            "group" : command_group,
             "command" : command,
             "exit_status": exit_status
         }
