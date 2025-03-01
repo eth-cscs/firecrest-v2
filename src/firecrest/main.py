@@ -48,17 +48,25 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+# FirecREST tracing JSON logger
 from lib.loggers.tracing_logs import (
     get_log_traceid,
     tracing_log_middleware,
     set_tracing_data,
 )
+# FirecREST debug logger
+from lib.loggers.debug_logs import debug_logger, debug_logger_set_level
 
+# Apply default level for debug_logger
+debug_logger_set_level()
+
+# Uvicorn logger
 logger = logging.getLogger(__name__)
 
 
 def create_app(settings: config.Settings) -> FastAPI:
-
+    # Debug log level notification
+    debug_logger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
@@ -129,7 +137,7 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
-            # Push logging information data set
+            # Store logging information data set
             set_tracing_data(request)
             response = await call_next(request)
             username = None
@@ -137,7 +145,7 @@ def register_middlewares(app: FastAPI):
                 username = request.state.username
             # Append log trace ID to the request
             response.headers["f7t-tracing-log-id"] = get_log_traceid()
-            # Logging from Middleware            
+            # Logging from Middleware
             tracing_log_middleware(username, response.status_code)
             return response
         except Exception as e:

@@ -8,12 +8,9 @@ import json
 import re
 import uuid
 import logging
+import firecrest.plugins
 
 from fastapi import Request
-
-# # configs
-# from firecrest import config
-# from firecrest.plugins import settings as plugin_settings
 
 # Trace ID is autmatically generated with any Request
 tracing_id = contextvars.ContextVar("tracing_id", default=str(uuid.uuid4()))
@@ -59,6 +56,8 @@ def set_tracing_data(request: Request) -> None:
 
 
 def tracing_log_middleware(username: str, status_code: int) -> None:
+    if not firecrest.plugins.settings.logs.enable_tracing_log:
+        return
     log_data = json.loads(tracing_data.get())    
     log_data["trace_id"] = get_log_traceid()
     log_data["username"] = username
@@ -67,6 +66,8 @@ def tracing_log_middleware(username: str, status_code: int) -> None:
 
 
 def tracing_log_command(username, command_action, exit_status, command="") -> None:
+    if not firecrest.plugins.settings.logs.enable_tracing_log:
+        return
     # Load f7t_v2_tracing_log data
     traced_data = json.loads(tracing_data.get())
     if traced_data:      

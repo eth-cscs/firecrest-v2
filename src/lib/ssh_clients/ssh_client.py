@@ -17,6 +17,7 @@ from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
 from lib.loggers.tracing_logs import tracing_log_command
+from lib.loggers.debug_logs import debug_logger
 
 
 class BaseCommand(ABC):

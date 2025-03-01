@@ -24,6 +24,7 @@ from pydantic_settings import (
 from datetime import datetime
 from functools import lru_cache
 from typing import List, Optional
+from logging import DEBUG
 
 from lib.models.base_model import CamelModel
 from lib.models.config_model import LoadFileSecretStr, Oidc, SSHUserKeys
@@ -203,6 +204,11 @@ class Auth(CamelModel):
     authorization: Optional[OpenFGA] = None
 
 
+class Logs(CamelModel):
+    enable_tracing_log: Optional[bool] = False
+    debug_log_level: Optional[int] = DEBUG
+
+
 class Settings(BaseSettings):
     # FastAPI App variables
     app_debug: bool = False
@@ -217,6 +223,7 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = []
     # HPC Storage definition
     storage: Optional[Storage] = None
+    logs: Optional[Logs] = Logs()
 
     model_config = SettingsConfigDict(
         env_file=".env",
