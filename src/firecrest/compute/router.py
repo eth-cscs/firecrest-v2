@@ -58,7 +58,11 @@ async def post_job_submit(
         username=username,
         jwt_token=access_token,
     )
-    tracing_log_command(username, 'submit_job', 0 if job_id is not None else status.HTTP_500_INTERNAL_SERVER_ERROR)
+    tracing_log_command(
+        username,
+        "submit_job",
+        0 if job_id is not None else status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
     if job_id is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -83,7 +87,7 @@ async def get_jobs(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(username=username, jwt_token=access_token)
-    tracing_log_command(username, 'list_jobs', 0)
+    tracing_log_command(username, "list_jobs", 0)
     return {"jobs": jobs}
 
 
@@ -106,7 +110,11 @@ async def get_job(
     jobs = await scheduler_client.get_job(
         job_id=job_id, username=username, jwt_token=access_token
     )
-    tracing_log_command(username, 'job_info', 0 if jobs is not None else status.HTTP_404_NOT_FOUND)
+    tracing_log_command(
+        username,
+        "job_info",
+        0 if jobs is not None else status.HTTP_404_NOT_FOUND,
+    )
     if jobs is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found."
@@ -133,7 +141,11 @@ async def get_job_metadata(
     jobs = await scheduler_client.get_job_metadata(
         job_id=job_id, username=username, jwt_token=access_token
     )
-    tracing_log_command(username, 'job_metadata', 0 if jobs is not None else status.HTTP_404_NOT_FOUND)
+    tracing_log_command(
+        username,
+        "job_metadata",
+        0 if jobs is not None else status.HTTP_404_NOT_FOUND,
+    )
     if jobs is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found."
@@ -163,7 +175,7 @@ async def attach(
         username=username,
         jwt_token=access_token,
     )
-    tracing_log_command(username, 'attach_job_process', 0)
+    tracing_log_command(username, "attach_job_process", 0)
     return None
 
 
@@ -185,7 +197,11 @@ async def delete_job_cancel(
     confirmed = await scheduler_client.cancel_job(
         job_id=job_id, username=username, jwt_token=access_token
     )
-    tracing_log_command(username, 'cancel_job', 0 if confirmed is not None else status.HTTP_404_NOT_FOUND)
+    tracing_log_command(
+        username,
+        "cancel_job",
+        0 if confirmed is not None else status.HTTP_404_NOT_FOUND,
+    )
     if confirmed is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"

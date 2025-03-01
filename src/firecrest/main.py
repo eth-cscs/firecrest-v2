@@ -58,15 +58,10 @@ from lib.loggers.tracing_log import tracing_log_middleware
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
-from lib.loggers.tracing_logs import (
-    get_log_traceid,
-    tracing_log_middleware,
-    set_tracing_data,
-)
-
 
 def create_app(settings: config.Settings) -> FastAPI:
-
+    # Debug log level notification
+    debug_logger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
