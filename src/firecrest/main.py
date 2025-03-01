@@ -129,23 +129,16 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
-            # Push logging data set
-            # logger.error(request.base_url)
-            # logger.error(request.headers['user-agent'])
-            # logger.error(request.scope['path'])
-            # logger.error(request.scope['root_path'])
-            # logger.error(request.url.components)
-            # logger.error(request.url.scheme)
-            # logger.error(request.url.fragment)
-            set_tracing_data(request.url.path, "router", "method")
+            # Push logging information data set
+            set_tracing_data(request)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
             # Append log trace ID to the request
             response.headers["f7t-tracing-log-id"] = get_log_traceid()
-            # Logging from Middleware
-            tracing_log_middleware(request, username, response.status_code)
+            # Logging from Middleware            
+            tracing_log_middleware(username, response.status_code)
             return response
         except Exception as e:
             logger.error(

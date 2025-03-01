@@ -5,7 +5,7 @@
 
 import contextvars
 import json
-#import re
+import re
 import uuid
 import logging
 
@@ -27,44 +27,46 @@ def get_log_traceid():
     return tracing_id.get()
 
 
-def set_tracing_data(request_url: str, route_name: str, method: str):
-    system = ""
-
-    # if match := re.search(
-    #     r"^\/([^\/\s]+)\/([^\/\s]+)\/(.*)$",
-    #     request_url,
-    #     re.IGNORECASE,
-    # ):
-    #     router = match.group(1)
-    #     system = match.group(2)
-    #     method = match.group(3)
+def set_tracing_data(request: Request) -> None:
+    url_path = request.scope['path']
+    root_path = request.scope['root_path']
+    # Normalize endpoint
+    endpoint = url_path.removeprefix(root_path) if root_path != "" else url_path
+    # Extract data from endpoint format "/router/system/method"
+    if match := re.search(
+        r"^\/([^\/\s]+)\/([^\/\s]+)\/(.*)$",
+        endpoint,
+        re.IGNORECASE,
+    ):
+        router = match.group(1)
+        system = match.group(2)
+        method = match.group(3)
+    else:
+        router = ""
+        system = ""
+        method = ""
 
     tracing_data.set(json.dumps(
         {
+            "router": router,
             "system_name": system,
-            "router": route_name,
             "method": method,
-            "endpoint": request_url
+            "endpoint": endpoint,
+            "url_path": url_path,
+            "user_agent": request.headers['user-agent']
         })
     )
 
 
-def tracing_log_middleware(request: Request, username: str, status_code: int):
-    log_data = json.loads(tracing_data.get())
+def tracing_log_middleware(username: str, status_code: int) -> None:
+    log_data = json.loads(tracing_data.get())    
     log_data["trace_id"] = get_log_traceid()
     log_data["username"] = username
     log_data["status_code"] = status_code
-    log_data["base_url"] = request.base_url
-    log_data["user_agent"] = request.headers['user-agent']
-    log_data["path"] = request.scope['path']
-    log_data["root_path"] = request.scope['root_path']
-    log_data["components"] = request.url.components[2]
-    log_data["scheme"] = request.url.scheme
     tracing_logger.info(log_data)
 
 
-def tracing_log_command(username, command_action, exit_status, command=""):
-
+def tracing_log_command(username, command_action, exit_status, command="") -> None:
     # Load f7t_v2_tracing_log data
     traced_data = json.loads(tracing_data.get())
     if traced_data:      
