@@ -22,7 +22,7 @@ def init_f7tlog_string(log_level: str):
 
 def f7tlog_set_level(level: int = 0) -> None:
     if level == 0:
-        f7tlogger.warning(f"Log level not updated.")
+        f7tlogger.warning("Log level not updated.")
         return
     if level in [
         logging.CRITICAL,
