@@ -4,10 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import uvicorn
-
-# plugins
-from firecrest.plugins import settings
-
 import logging
 import types
 from contextlib import asynccontextmanager
@@ -17,8 +13,8 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # configs
-from firecrest import config
-from firecrest.plugins import settings as plugin_settings
+from firecrest.config import Settings
+from firecrest.plugins import settings
 
 # request vars
 from lib import request_vars
@@ -48,25 +44,29 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+# FirecREST debug logger
+from lib.loggers.f7tlog import f7tlogger, init_f7tlog_string
+
 # FirecREST tracing JSON logger
 from lib.loggers.tracing_logs import (
+    init_tracing_log,
     get_log_traceid,
     tracing_log_middleware,
     set_tracing_data,
 )
-# FirecREST debug logger
-from lib.loggers.debug_logs import debug_logger, debug_logger_set_level
 
-# Apply default level for debug_logger
-debug_logger_set_level()
+
+# Initialize loggers
+init_f7tlog_string(settings.logs.f7tlog_level)
+init_tracing_log(settings.logs.enable_tracing_log)
 
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: config.Settings) -> FastAPI:
+def create_app(settings: Settings) -> FastAPI:
     # Debug log level notification
-    debug_logger.info("Debug log messages active")
+    f7tlogger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
 
 
 async def schedule_tasks(scheduler: AsyncScheduler):
-    for cluster in plugin_settings.clusters:
+    for cluster in settings.clusters:
         await scheduler.add_schedule(
             SchedulerHealthChecker(cluster).check,
             IntervalTrigger(seconds=cluster.probing.interval),
@@ -158,7 +158,7 @@ def register_middlewares(app: FastAPI):
             raise e
 
 
-def register_routes(app: FastAPI, settings: config.Settings):
+def register_routes(app: FastAPI, settings: Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
     app.include_router(compute_router)

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # configs
-import firecrest.config
+from firecrest.config import get_settings
 
 # Settings
-settings = firecrest.config.get_settings()
+settings = get_settings()
