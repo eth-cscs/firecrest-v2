@@ -129,8 +129,6 @@ def slurm_cluster_with_ssh_config():
 
 @pytest.fixture(scope="session", autouse=True)
 def app():
-    settings = get_settings()
-
     app = create_app(settings=settings)
     yield app
 
@@ -162,7 +160,6 @@ def client(app, s3_client, ssh_client):
 
 @pytest.fixture(scope="session", autouse=True)
 def set_up_cluster_health():
-    settings = get_settings()
     for cluster in settings.clusters:
         health = [
             {

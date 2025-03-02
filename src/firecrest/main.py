@@ -4,10 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import uvicorn
-
-# plugins
-from firecrest.plugins import settings
-
 import logging
 import types
 from contextlib import asynccontextmanager
@@ -20,8 +16,8 @@ from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
 
 # configs
-from firecrest import config
-from firecrest.plugins import settings as plugin_settings
+from firecrest.config import Settings
+from firecrest.plugins import settings
 
 # request vars
 from lib import request_vars
@@ -52,6 +48,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+# FirecREST debug logger
+from lib.loggers.f7tlog import f7tlogger, init_f7tlog_string
+
 # FirecREST tracing JSON logger
 from lib.loggers.tracing_log import tracing_log_middleware
 
@@ -59,9 +58,9 @@ from lib.loggers.tracing_log import tracing_log_middleware
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: config.Settings) -> FastAPI:
+def create_app(settings: Settings) -> FastAPI:
     # Debug log level notification
-    debug_logger.info("Debug log messages active")
+    f7tlogger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
@@ -157,7 +156,7 @@ def register_middlewares(app: FastAPI):
             raise e
 
 
-def register_routes(app: FastAPI, settings: config.Settings):
+def register_routes(app: FastAPI, settings: Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
     app.include_router(status_liveness_router)
