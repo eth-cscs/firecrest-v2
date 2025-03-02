@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added log tracing of SSH commands, filesystem and scheduler interactions with standard JSON format.
-- Added f7tlog for debugging and general usage
+- Added f7tlog for debugging and general usage.
 
 
 ## [2.2.0]
