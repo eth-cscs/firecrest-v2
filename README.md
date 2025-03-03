@@ -1,6 +1,20 @@
 # FirecREST v2
 
-FirecREST provides a REST API through which developers can interact with HPC resources (Schedulers, Filesystems, etc.). In addition FirecREST provides methods to authenticate and authorize, execution of  jobs through, file-system operations, and access to accounting or status information.
+A lightweight REST API for accessing HPC resources.
+
+FirecREST is a high performance proxy providing a standardized interface to access HPC infrastructures from the web, with authentication and authorization, supporting multiple schedulers, storages, and filesystems types.
+
+## Features
+
+-	🔐 Authentication and authorization layer integrating [OAuth v2](https://oauth.net/2/) and [OpenFGA](https://openfga.dev/)
+- ⚡ High-performance RESTful API powered by [asyncIO](https://docs.python.org/3/library/asyncio.html)
+-	✨ Abstracts underlying HPC technology (schedulers, filesystems, storage, etc.)
+-	📡 Async SSH connection pool enabling high-throughput regime
+-	🩺 Integrated HPC cluster health checker
+-	💠 Modular architecture with a lightweight and modern stack
+
+
+
 
 # FirecREST v2 Demo
 
