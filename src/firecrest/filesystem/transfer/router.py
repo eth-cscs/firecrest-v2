@@ -11,7 +11,6 @@ from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
 from jinja2 import Environment, FileSystemLoader
 
-
 # plugins
 from firecrest.config import HPCCluster, HealthCheckType
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
@@ -34,6 +33,9 @@ from firecrest.dependencies import (
     ServiceAvailabilityDependency,
 )
 
+# logs
+from lib.loggers.tracing_logs import tracing_log_command
+
 # clients
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 
@@ -54,7 +56,7 @@ from firecrest.filesystem.transfer.models import (
     CompressRequest,
     CompressResponse,
     ExtractRequest,
-    ExtractResponse
+    ExtractResponse,
 )
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -90,11 +92,9 @@ class JobHelper:
 
 
 def _build_script(filename: str, parameters):
-
     script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)),
-        autoescape=True
-        )
+        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
+    )
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)
@@ -116,7 +116,6 @@ async def _generate_presigned_url(client, action, params, method=None):
 
 
 def _format_directives(directives: List[str], account: str):
-
     directives_str = "\n".join(directives)
     if "{account}" in directives_str:
         if account is None:
@@ -155,7 +154,9 @@ async def post_upload(
     job_id = None
     object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -230,6 +231,7 @@ async def post_upload(
             username=username,
             jwt_token=access_token,
         )
+        tracing_log_command(username, router.prefix, 0)
 
     return {
         "partsUploadUrls": post_external_upload_urls,
@@ -279,7 +281,9 @@ async def post_download(
     job_id = None
     object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -366,6 +370,7 @@ async def post_download(
             "get_object",
             {"Bucket": username, "Key": object_name},
         )
+    tracing_log_command(username, router.prefix, 0)
     return {
         "downloadUrl": get_download_url,
         "transferJob": TransferJob(
@@ -399,7 +404,9 @@ async def move_mv(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -421,6 +428,7 @@ async def move_mv(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -463,7 +471,9 @@ async def post_cp(
         "target_path": request.target_path,
     }
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -478,6 +488,7 @@ async def post_cp(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -513,7 +524,9 @@ async def delete_rm(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -533,6 +546,7 @@ async def delete_rm(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -566,7 +580,9 @@ async def compress(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -599,6 +615,7 @@ async def compress(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(
@@ -632,7 +649,9 @@ async def extract(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -654,6 +673,7 @@ async def extract(
         username=username,
         jwt_token=access_token,
     )
+    tracing_log_command(username, router.prefix, 0)
 
     return {
         "transferJob": TransferJob(

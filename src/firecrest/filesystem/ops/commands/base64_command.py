@@ -18,6 +18,9 @@ class Base64Command(BaseCommand, BaseCommandErrorHandling):
         self.path = path
         self.decode = decode
 
+    def get_log(self) -> str:
+        return "base64"
+
     def get_command(
         self,
     ) -> str:

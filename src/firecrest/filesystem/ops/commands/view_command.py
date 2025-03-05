@@ -19,6 +19,9 @@ class ViewCommand(BaseCommand, BaseCommandErrorHandling):
         super().__init__()
         self.target_path = target_path
 
+    def get_log(self) -> str:
+        return "view"
+
     def get_command(self) -> str:
         return f"timeout {UTILITIES_TIMEOUT} head --bytes {SIZE_LIMIT} -- '{self.target_path}'"
 

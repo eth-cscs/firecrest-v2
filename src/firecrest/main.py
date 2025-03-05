@@ -4,14 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import uvicorn
-
-
-# plugins
-from firecrest.plugins import settings
-
-
 import logging
-import re
 import types
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -20,8 +13,8 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # configs
-from firecrest import config
-from firecrest.plugins import settings as plugin_settings
+from firecrest.config import Settings
+from firecrest.plugins import settings
 
 # request vars
 from lib import request_vars
@@ -51,12 +44,29 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+# FirecREST debug logger
+from lib.loggers.f7tlog import f7tlogger, init_f7tlog_string
 
+# FirecREST tracing JSON logger
+from lib.loggers.tracing_logs import (
+    init_tracing_log,
+    get_log_traceid,
+    tracing_log_middleware,
+    set_tracing_data,
+)
+
+
+# Initialize loggers
+init_f7tlog_string(settings.logs.f7tlog_level)
+init_tracing_log(settings.logs.enable_tracing_log)
+
+# Uvicorn logger
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: config.Settings) -> FastAPI:
-
+def create_app(settings: Settings) -> FastAPI:
+    # Debug log level notification
+    f7tlogger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
@@ -99,7 +109,7 @@ async def lifespan(app: FastAPI):
 
 
 async def schedule_tasks(scheduler: AsyncScheduler):
-    for cluster in plugin_settings.clusters:
+    for cluster in settings.clusters:
         await scheduler.add_schedule(
             SchedulerHealthChecker(cluster).check,
             IntervalTrigger(seconds=cluster.probing.interval),
@@ -127,30 +137,16 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
+            # Store logging information data set
+            set_tracing_data(request)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
-
-            system_name = None
-            # /filesystem/{system_name}/.*
-            # /compute/{system_name}/.*
-            # /status/{system_name}
-            if match := re.search(
-                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
-                request.url.path,
-                re.IGNORECASE,
-            ):
-                system_name = match.group(1)
-
-            logger.info(
-                {
-                    "username": username,
-                    "system": system_name,
-                    "endpoint": request.url.path,
-                    "satus_code": response.status_code,
-                }
-            )
+            # Append log trace ID to the request
+            response.headers["f7t-tracing-log-id"] = get_log_traceid()
+            # Logging from Middleware
+            tracing_log_middleware(username, response.status_code)
             return response
         except Exception as e:
             logger.error(
@@ -162,7 +158,7 @@ def register_middlewares(app: FastAPI):
             raise e
 
 
-def register_routes(app: FastAPI, settings: config.Settings):
+def register_routes(app: FastAPI, settings: Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
     app.include_router(compute_router)
