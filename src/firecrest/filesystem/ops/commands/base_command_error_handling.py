@@ -34,6 +34,11 @@ class BaseCommandErrorHandling:
         if len(stderr) > 0:
             error_mess += f" and error message:{stderr.strip()}"
 
+        if exit_status == 124:
+            raise HTTPException(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
+            )
+
         if "No such file or directory" in stderr:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=error_mess
