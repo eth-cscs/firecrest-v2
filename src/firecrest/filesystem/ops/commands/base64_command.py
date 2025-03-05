@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
 UTILITIES_TIMEOUT = 5
 
 
-class Base64Command(BaseCommand, BaseCommandErrorHandling):
+class Base64Command(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(self, path: str | None = None, decode: bool = False) -> None:
         super().__init__()

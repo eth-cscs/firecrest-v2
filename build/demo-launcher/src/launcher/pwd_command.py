@@ -5,14 +5,14 @@
 
 # commands
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
 UTILITIES_TIMEOUT = 5
 
 
-class PwdCommand(BaseCommand, BaseCommandErrorHandling):
+class PwdCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(
         self,
