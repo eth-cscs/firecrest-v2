@@ -5,7 +5,7 @@
 
 # commands
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -13,7 +13,7 @@ UTILITIES_TIMEOUT = 5
 SIZE_LIMIT = 5 * 1024 * 1024
 
 
-class ViewCommand(BaseCommand, BaseCommandErrorHandling):
+class ViewCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(self, target_path: str = None) -> None:
         super().__init__()

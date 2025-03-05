@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -12,7 +12,7 @@ UTILITIES_TIMEOUT = 5
 UTILITIES_MAX_FILE = 5 * 1024 * 1024  # 5MB
 
 
-class TailCommand(BaseCommand, BaseCommandErrorHandling):
+class TailCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(
         self,

@@ -5,14 +5,14 @@
 
 # commands
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 
 UTILITIES_TIMEOUT = 5
 
 
-class ChownCommand(LsBaseCommand, BaseCommandErrorHandling):
+class ChownCommand(LsBaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(
         self, target_path: str = None, owner: str = None, group: str = None

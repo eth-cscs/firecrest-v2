@@ -5,7 +5,7 @@
 
 # commands
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -13,7 +13,7 @@ ID = 0
 UTILITIES_TIMEOUT = 5
 
 
-class StatCommand(BaseCommand, BaseCommandErrorHandling):
+class StatCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(self, target_path: str = None, dereference: bool = False) -> None:
         super().__init__()

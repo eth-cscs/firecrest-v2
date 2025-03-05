@@ -6,7 +6,7 @@
 # commands
 from fastapi import status, HTTPException
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -22,7 +22,7 @@ available_algorithms = {
 }
 
 
-class ChecksumCommand(BaseCommand, BaseCommandErrorHandling):
+class ChecksumCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(self, target_path: str = None, algorithm: str = "SHA256") -> None:
         super().__init__()
