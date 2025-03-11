@@ -18,7 +18,9 @@ ENV YAML_CONFIG_FILE="/app/config/app-config.yaml"
 RUN apt update -y \
     && apt install -y sudo \
     supervisor \
-    iputils-ping
+    iputils-ping \
+    && curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
+    && apt install -y nodejs
 
 RUN mkdir /run/secrets
 
@@ -45,5 +47,8 @@ ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 
 # Run the app with uvicorn
 #CMD ["uvicorn", "launcher.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
+
+# Copy the UI code
+COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app /usr/server/app
 
 ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]
