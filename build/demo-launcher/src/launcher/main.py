@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 import os
 import sys
 from packaging.version import Version
-from fastapi import Depends, FastAPI, Form, HTTPException
+from fastapi import Depends, FastAPI, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import asyncssh
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -192,9 +193,43 @@ def get_token(
     return {"access_token": token, "token_type": "bearer"}
 
 
+@app.post("/auth/realms/kcrealm/protocol/openid-connect/token")
+def get_token(
+    credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
+    grant_type: Optional[str] = Form(default=None),
+    client_id: Optional[str] = Form(default=None),
+    client_secret: Optional[str] = Form(default=None),
+):
+    username: str = None
+    if client_id:
+        username = client_id
+    if credentials and credentials.username:
+        username = credentials.username
+
+    token = generate_token(username)
+
+    return {"access_token": token, "token_type": "bearer"}
+
+
 @app.get("/certs")
 def download_certificate():
     return {"keys": [get_jwk()]}
+
+
+@app.get("/auth/realms/kcrealm/protocol/openid-connect/auth")
+def auth(state: str):
+
+    # 1 https://auth-tds.cscs.ch/auth/realms/cscs/protocol/openid-connect/auth?scope=openid+profile+email&response_type=code&client_id=firecrest-web-ui-v2-tds&redirect_uri=https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback&state=09e9d3b1-8331-478b-9cac-7856c6d0ebc9
+    # 2 https://auth-tds.cscs.ch/auth/realms/cscs/login-actions/authenticate?session_code=LB7-kU-rwkcYQYdCqYYeRULW9mLqvjDh4UfwkWYwmQo&execution=33b67c08-d21d-4d1d-9a00-1f574069d7f6&client_id=firecrest-web-ui-v2-tds&tab_id=A-oZrlT1WHw
+    # 3 https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback?state=09e9d3b1-8331-478b-9cac-7856c6d0ebc9&session_state=8b9ca80c-825c-4290-88c7-3507657f6094&iss=https://auth-tds.cscs.ch/auth/realms/cscs&code=f239fba7-ca21-4ac5-a39f-1612acbea8e7.8b9ca80c-825c-4290-88c7-3507657f6094.f41d2904-9ba3-4506-a46b-9089a8e90cf4
+
+    #
+    # https://auth-tds.cscs.ch/auth/realms/cscs/login-actions/authenticate?session_code=HPEMesZI4d86UQBirVZPLRMQLYJhBrJxGreSCILEHnk&execution=33b67c08-d21d-4d1d-9a00-1f574069d7f6&client_id=firecrest-web-ui-v2-tds&tab_id=JP4BaiH44cQ
+    # https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback?
+
+    redirect_url = f"http://localhost:3000/auth/callback?state={state}&iss=http://localhost:8080/realms/kcrealm&code=8349988e-8cbf-45d6-a77e-1c74265446cc.cbad517e-9d56-42a5-8242-b53d17655747.f41d2904-9ba3-4506-a46b-9089a8e90cf4"
+
+    return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
 
 
 class Scheduler(BaseModel):
