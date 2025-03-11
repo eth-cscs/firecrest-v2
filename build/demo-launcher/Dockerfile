@@ -19,14 +19,8 @@ RUN apt update -y \
     && apt install -y sudo \
     supervisor \
     iputils-ping \
-    ca-certificates \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Add NodeSource repository and install Node.js 21
-RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - && \
-    apt update && apt install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+    && curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
+    && apt install -y nodejs npm
 
 RUN mkdir /run/secrets
 
