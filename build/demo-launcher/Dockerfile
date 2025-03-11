@@ -19,8 +19,14 @@ RUN apt update -y \
     && apt install -y sudo \
     supervisor \
     iputils-ping \
-    && curl -fsSL https://deb.nodesource.com/setup_21.x | bash - \
-    && apt install -y nodejs npm
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add NodeSource repository and install Node.js 21
+RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - && \
+    apt update && apt install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /run/secrets
 
@@ -46,34 +52,8 @@ COPY ./build/demo-launcher/src/launcher/f7t-api-config.demo-env.yaml  ./config/a
 ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 
 
-# Copy the UI code
-COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app ./web-ui
+# Copy the UI code and install yarn to run the UI
+COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app /usr/server/app
 RUN npm install --global yarn
-
-
-ENV APP_VERSION='local'
-ENV ENVIRONMENT='development'
-ENV SERVICE_NAME='firecrest-web-ui'
-ENV COMPANY_NAME='CSCS'
-
-ENV LOGGING_LEVEL='debug'
-ENV SESSION_SECRET='s3cr3t'
-ENV SESSION_FILE_SECRET='s3cr3tfile'
-ENV SESSION_FILE_DIR_PATH='./sessions'
-ENV REDIS_ACTIVE=false
-ENV SENTRY_ACTIVE=false
-
-ENV KEYCLOAK_DOMAIN='localhost:8080/auth'
-ENV KEYCLOAK_REALM='kcrealm'
-ENV KEYCLOAK_CLIENT_ID='firecrest-web-ui'
-ENV KEYCLOAK_CLIENT_SECRET='secret'
-ENV KEYCLOAK_CALLBACK_URL='http://localhost:3000/auth/callback'
-ENV KEYCLOAK_LOGOUT_REDIRECT_URL='http://localhost:3000/'
-ENV KEYCLOAK_USE_SSL=false
-
-ENV FIRECREST_API_BASE_URL='http://localhost:5000'
-ENV UI_HOSTNAME='localhost:3000'
-ENV SUPPORT_URL='<support-url>'
-
 
 ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]
