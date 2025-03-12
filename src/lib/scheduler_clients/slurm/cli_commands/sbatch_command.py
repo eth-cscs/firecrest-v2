@@ -18,9 +18,9 @@ class SbatchCommand(BaseCommand):
 
     def get_command(self) -> str:
         cmd = ["sbatch"]
-        env = ",".join(
-            f"{key}={value}" for key, value in self.job_description.environment.items()
-        )
+        env = ",".join(f"{key}={value}"
+                       for key, value
+                       in self.job_description.environment.items())
         cmd += [f"--export='ALL,{env}'"]
         cmd += [f"--chdir='{self.job_description.current_working_directory}'"]
         if self.job_description.name:
