@@ -4,6 +4,8 @@ FROM python:3.12-slim
 ARG ENVIRONMENT
 
 EXPOSE 8080
+EXPOSE 3000
+EXPOSE 5000
 
 
 # Keeps Python from generating .pyc files in the container
@@ -55,31 +57,23 @@ COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app /usr/server/app
 RUN npm install --global yarn
 
 
-
 ENV APP_VERSION='local'
 ENV ENVIRONMENT='development'
 ENV SERVICE_NAME='firecrest-web-ui'
 ENV LOGGING_LEVEL='info'
-# Session
 ENV SESSION_SECRET='s3cr3t'
 ENV SESSION_FILE_SECRET='s3cr3t2'
 ENV SESSION_FILE_DIR_PATH='./sessions'
-# Sentry
 ENV SENTRY_ACTIVE=false
-# Keycloak
 ENV KEYCLOAK_DOMAIN='localhost:8080/auth'
-ENV KEYCLOAK_REALM='kcrealm'
+ENV KEYCLOAK_REALM='default'
 ENV KEYCLOAK_CLIENT_ID='firecrest-web-ui'
 ENV KEYCLOAK_CLIENT_SECRET='secret'
 ENV KEYCLOAK_USE_SSL=false
 ENV KEYCLOAK_CALLBACK_URL='http://localhost:3000/auth/callback'
 ENV KEYCLOAK_LOGOUT_REDIRECT_URL='http://localhost:3000/'
-
-# FirecREST (f7t)
 ENV FIRECREST_API_BASE_URL='http://localhost:5000'
-# UI
 ENV UI_HOSTNAME='localhost:3000'
-
 ENV REDIS_ACTIVE=false
 
 ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]

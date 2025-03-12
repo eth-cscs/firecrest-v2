@@ -175,26 +175,15 @@ async def sshClient(username, sshkey_private, sshkey_cert_public):
     return SSHClient(conn)
 
 
+@app.get("/auth/realms/default/protocol/openid-connect/auth")
+def auth(state: str, redirect_uri: str):
+    redirect_url = f"{redirect_uri}?state={state}&code=secret-code"
+    return RedirectResponse(redirect_url, status_code=status.HTTP_302_FOUND)
+
+
+@app.post("/auth/realms/default/protocol/openid-connect/token")
 @app.post("/token")
 def get_token(
-    credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
-    grant_type: Optional[str] = Form(default=None),
-    client_id: Optional[str] = Form(default=None),
-    client_secret: Optional[str] = Form(default=None),
-):
-    username: str = None
-    if client_id:
-        username = client_id
-    if credentials and credentials.username:
-        username = credentials.username
-
-    token = generate_token(username)
-
-    return {"access_token": token, "token_type": "bearer"}
-
-
-@app.post("/auth/realms/kcrealm/protocol/openid-connect/token")
-def get_token_ui(
     credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
     grant_type: Optional[str] = Form(default=None),
     client_id: Optional[str] = Form(default=None),
@@ -211,32 +200,14 @@ def get_token_ui(
     return {
         "access_token": token,
         "token_type": "bearer",
-        "expires_in": 3600,
-        "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+        "expires_in": 31556952,
+        "refresh_token": token,
     }
 
 
 @app.get("/certs")
 def download_certificate():
     return {"keys": [get_jwk()]}
-
-
-@app.get("/auth/realms/kcrealm/protocol/openid-connect/auth")
-def auth(state: str):
-
-    # 1 https://auth-tds.cscs.ch/auth/realms/cscs/protocol/openid-connect/auth?scope=openid+profile+email&response_type=code&client_id=firecrest-web-ui-v2-tds&redirect_uri=https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback&state=09e9d3b1-8331-478b-9cac-7856c6d0ebc9
-    # 2 https://auth-tds.cscs.ch/auth/realms/cscs/login-actions/authenticate?session_code=LB7-kU-rwkcYQYdCqYYeRULW9mLqvjDh4UfwkWYwmQo&execution=33b67c08-d21d-4d1d-9a00-1f574069d7f6&client_id=firecrest-web-ui-v2-tds&tab_id=A-oZrlT1WHw
-    # 3 https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback?state=09e9d3b1-8331-478b-9cac-7856c6d0ebc9&session_state=8b9ca80c-825c-4290-88c7-3507657f6094&iss=https://auth-tds.cscs.ch/auth/realms/cscs&code=f239fba7-ca21-4ac5-a39f-1612acbea8e7.8b9ca80c-825c-4290-88c7-3507657f6094.f41d2904-9ba3-4506-a46b-9089a8e90cf4
-
-    #
-    # https://auth-tds.cscs.ch/auth/realms/cscs/login-actions/authenticate?session_code=HPEMesZI4d86UQBirVZPLRMQLYJhBrJxGreSCILEHnk&execution=33b67c08-d21d-4d1d-9a00-1f574069d7f6&client_id=firecrest-web-ui-v2-tds&tab_id=JP4BaiH44cQ
-    # https://firecrest-web-ui-v2.tds.cscs.ch/auth/callback?
-
-    redirect_url = f"http://localhost:3000/auth/callback?state={state}&iss=http://localhost:8080/realms/kcrealm&code=8349988e-8cbf-45d6-a77e-1c74265446cc.cbad517e-9d56-42a5-8242-b53d17655747.f41d2904-9ba3-4506-a46b-9089a8e90cf4"
-
-    # token = generate_token("palmee")
-    # redirect_url = f"http://localhost:3000/auth/callback#id_token={token}&token_type=Bearer&expires_in=3600&state={state}"
-    return RedirectResponse(redirect_url, status_code=status.HTTP_302_FOUND)
 
 
 class Scheduler(BaseModel):
@@ -275,15 +246,16 @@ async def boot(scheduler: Scheduler):
     server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
     state = server.supervisor.getProcessInfo("firecrest")
-
     if state["statename"] == "RUNNING":
         server.supervisor.stopProcess("firecrest")
-
     server.supervisor.startProcess("firecrest")
 
-    token = generate_token(username)
+    state = server.supervisor.getProcessInfo("firecrest-ui")
+    if state["statename"] == "RUNNING":
+        server.supervisor.stopProcess("firecrest-ui")
+    server.supervisor.startProcess("firecrest-ui")
 
-    # TODO: check for slurm version and throw an error if it's to old. <22
+    token = generate_token(username)
 
     return {
         "message": "Firecrest v2 started successfully.",
@@ -309,6 +281,9 @@ async def credentials(credentials: Credentials):
 
     if not credentials.username:
         raise HTTPException(status_code=400, detail="Provide a valid username")
+
+    # Set OIDC client for web-ui
+    os.environ["KEYCLOAK_CLIENT_ID"] = credentials.username
 
     demo_cluster = settings.clusters[0]
     sshkey_cert_public = ()
