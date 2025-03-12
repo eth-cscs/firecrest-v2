@@ -194,7 +194,7 @@ def get_token(
 
 
 @app.post("/auth/realms/kcrealm/protocol/openid-connect/token")
-def get_token(
+def get_token_ui(
     credentials: Annotated[Optional[HTTPBasicCredentials], Depends(security)],
     grant_type: Optional[str] = Form(default=None),
     client_id: Optional[str] = Form(default=None),
@@ -208,7 +208,12 @@ def get_token(
 
     token = generate_token(username)
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": 3600,
+        "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+    }
 
 
 @app.get("/certs")
@@ -229,7 +234,9 @@ def auth(state: str):
 
     redirect_url = f"http://localhost:3000/auth/callback?state={state}&iss=http://localhost:8080/realms/kcrealm&code=8349988e-8cbf-45d6-a77e-1c74265446cc.cbad517e-9d56-42a5-8242-b53d17655747.f41d2904-9ba3-4506-a46b-9089a8e90cf4"
 
-    return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    # token = generate_token("palmee")
+    # redirect_url = f"http://localhost:3000/auth/callback#id_token={token}&token_type=Bearer&expires_in=3600&state={state}"
+    return RedirectResponse(redirect_url, status_code=status.HTTP_302_FOUND)
 
 
 class Scheduler(BaseModel):
