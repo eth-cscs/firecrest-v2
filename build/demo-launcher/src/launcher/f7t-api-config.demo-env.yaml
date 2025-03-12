@@ -1,13 +1,13 @@
 apis_root_path: ""
 doc_servers:
-  - url: "http://localhost:5000"
+  - url: "http://localhost:5025"
     description: "Local environment"
 auth:
   authentication:
     scopes:  {}
-    tokenUrl:  "http://localhost:8080/token"
+    tokenUrl:  "http://localhost:8025/token"
     publicCerts:
-        - "http://localhost:8080/certs"
+        - "http://localhost:8025/certs"
 ssh_credentials:
   tempuser:
     private_key: "tempuser"

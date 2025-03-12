@@ -3,9 +3,9 @@ FROM python:3.12-slim
 
 ARG ENVIRONMENT
 
-EXPOSE 8080
+EXPOSE 8025
+EXPOSE 5025
 EXPOSE 3000
-EXPOSE 5000
 
 
 # Keeps Python from generating .pyc files in the container
@@ -60,20 +60,20 @@ RUN npm install --global yarn
 ENV APP_VERSION='local'
 ENV ENVIRONMENT='development'
 ENV SERVICE_NAME='firecrest-web-ui'
-ENV LOGGING_LEVEL='info'
+ENV LOGGING_LEVEL='error'
 ENV SESSION_SECRET='s3cr3t'
 ENV SESSION_FILE_SECRET='s3cr3t2'
 ENV SESSION_FILE_DIR_PATH='./sessions'
 ENV SENTRY_ACTIVE=false
-ENV KEYCLOAK_DOMAIN='localhost:8080/auth'
+ENV KEYCLOAK_DOMAIN='localhost:8025/auth'
 ENV KEYCLOAK_REALM='default'
 ENV KEYCLOAK_CLIENT_ID='firecrest-web-ui'
 ENV KEYCLOAK_CLIENT_SECRET='secret'
 ENV KEYCLOAK_USE_SSL=false
 ENV KEYCLOAK_CALLBACK_URL='http://localhost:3000/auth/callback'
 ENV KEYCLOAK_LOGOUT_REDIRECT_URL='http://localhost:3000/'
-ENV FIRECREST_API_BASE_URL='http://localhost:5000'
-ENV UI_HOSTNAME='localhost:3000'
+ENV FIRECREST_API_BASE_URL='http://localhost:5025'
+ENV UI_HOSTNAME='localhost:3025'
 ENV REDIS_ACTIVE=false
 
 ENTRYPOINT ["supervisord","-c","/etc/supervisord.conf"]

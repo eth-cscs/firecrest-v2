@@ -56,12 +56,12 @@
 						"hostPort": 3000
 				  },
 				  {
-					"containerPort": 8080,
-					"hostPort": 8080
+					"containerPort": 8025,
+					"hostPort": 8025
 				  },
 				  {
-					"containerPort": 5000,
-					"hostPort": 5000
+					"containerPort": 5025,
+					"hostPort": 5025
 				  },
 				  {
 					"containerPort": 5678,

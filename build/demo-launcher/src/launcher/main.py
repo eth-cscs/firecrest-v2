@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
     """
     )
 
-    print("Navigate to http://localhost:8080/ to get started!\n\n")
+    print("Navigate to http://localhost:8025/ to get started!\n\n")
 
     yield
 
@@ -94,8 +94,8 @@ app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:8000",
+    "http://localhost:8025",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -332,7 +332,7 @@ async def credentials(credentials: Credentials):
             credentials.username, sshkey_private, sshkey_cert_public
         )
         pwd = PwdCommand()
-        user_home = await client.execute(pwd)
+        user_home = (await client.execute(pwd)).removesuffix("/" + credentials.username)
 
         file_system = FileSystem(
             **{
