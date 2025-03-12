@@ -51,15 +51,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
-# FirecREST debug logger
-from lib.loggers.f7t_log import f7tlogger, init_f7tlog_string
-
 # FirecREST tracing JSON logger
-from lib.loggers.tracing_log import set_tracing_data, tracing_log_middleware
-
-# Initialize loggers
-init_f7tlog_string(settings.logs.f7tlog_level)
-# init_tracing_log(settings.logs.enable_tracing_log)
+from lib.loggers.tracing_log import tracing_log_middleware
 
 # Uvicorn logger
 logger = logging.getLogger(__name__)
@@ -113,7 +106,7 @@ async def lifespan(app: FastAPI):
 
 
 async def schedule_tasks(scheduler: AsyncScheduler):
-    for cluster in settings.clusters:
+    for cluster in plugin_settings.clusters:
         await scheduler.add_schedule(
             SchedulerHealthChecker(cluster).check,
             IntervalTrigger(seconds=cluster.probing.interval),
@@ -141,8 +134,6 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
-            # Store logging information data set
-            # set_tracing_data(request)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
