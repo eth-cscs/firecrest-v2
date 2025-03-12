@@ -16,8 +16,8 @@ from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
 
 # configs
-from firecrest.config import Settings
-from firecrest.plugins import settings
+from firecrest import config
+from firecrest.plugins import settings as plugin_settings
 
 # request vars
 from lib import request_vars
@@ -49,7 +49,7 @@ from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
 # FirecREST debug logger
-from lib.loggers.f7tlog import f7tlogger, init_f7tlog_string
+from lib.loggers.f7t_log import f7tlogger, init_f7tlog_string
 
 # FirecREST tracing JSON logger
 from lib.loggers.tracing_log import tracing_log_middleware
@@ -154,7 +154,7 @@ def register_middlewares(app: FastAPI):
             raise e
 
 
-def register_routes(app: FastAPI, settings: Settings):
+def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
     app.include_router(status_liveness_router)

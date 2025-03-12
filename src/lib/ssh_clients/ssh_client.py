@@ -69,6 +69,7 @@ class SSHClient:
 
     async def execute(self, command: BaseCommand, stdin: str = None):
         try:
+            # set_tracing_data("exit_status", "YEEEE")
             async with asyncio.timeout(self.execute_timeout):
                 process = await self.conn.create_process(command.get_command())
 
