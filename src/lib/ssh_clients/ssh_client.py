@@ -16,6 +16,8 @@ from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
+from lib.loggers.tracing_log import log_exit_status
+
 
 class BaseCommand(ABC):
 
@@ -66,8 +68,8 @@ class SSHClient:
             return exc.partial
 
     async def execute(self, command: BaseCommand, stdin: str = None):
-
         try:
+            # set_tracing_data("exit_status", "YEEEE")
             async with asyncio.timeout(self.execute_timeout):
                 process = await self.conn.create_process(command.get_command())
 
@@ -88,6 +90,7 @@ class SSHClient:
 
                 process.close()
                 await process.wait_closed()
+                log_exit_status(process.exit_status)
                 return command.parse_output(
                     stdout_data, stdout_error, process.exit_status
                 )

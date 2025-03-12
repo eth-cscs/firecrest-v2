@@ -39,6 +39,7 @@ from lib.helpers.router_helper import create_router
 
 # clients
 from lib.ssh_clients.ssh_client import SSHClientPool
+from lib.loggers.tracing_log import set_tracing_data
 
 # commands
 from firecrest.filesystem.ops.commands.ls_command import LsCommand

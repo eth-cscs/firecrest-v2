@@ -15,10 +15,13 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette_context import context, plugins
+from starlette.middleware import Middleware
+from starlette_context.middleware import RawContextMiddleware
 
 # configs
-from firecrest.config import Settings
-from firecrest.plugins import settings
+from firecrest import config
+from firecrest.plugins import settings as plugin_settings
 
 # request vars
 from lib import request_vars
@@ -49,41 +52,18 @@ from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
 # FirecREST debug logger
-from lib.loggers.f7tlog import f7tlogger, init_f7tlog_string
+from lib.loggers.f7t_log import f7tlogger, init_f7tlog_string
 
 # FirecREST tracing JSON logger
-from lib.loggers.tracing_logs import (
-    init_tracing_log,
-    get_log_traceid,
-    tracing_log_middleware,
-    set_tracing_data,
-)
-
+from lib.loggers.tracing_log import set_tracing_data, tracing_log_middleware
 
 # Initialize loggers
 init_f7tlog_string(settings.logs.f7tlog_level)
-init_tracing_log(settings.logs.enable_tracing_log)
+# init_tracing_log(settings.logs.enable_tracing_log)
 
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
-from lib.loggers.tracing_logs import (
-    get_log_traceid,
-    tracing_log_middleware,
-    set_tracing_data,
-)
-
-from lib.loggers.tracing_logs import (
-    get_log_traceid,
-    tracing_log_middleware,
-    set_tracing_data,
-)
-
-from lib.loggers.tracing_logs import (
-    get_log_traceid,
-    tracing_log_middleware,
-    set_tracing_data,
-)
 
 def create_app(settings: config.Settings) -> FastAPI:
 
@@ -104,6 +84,10 @@ def create_app(settings: config.Settings) -> FastAPI:
     # Register exception handlers
     register_exception_handlers(app=app)
 
+    app.add_middleware(
+        RawContextMiddleware,
+        plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
+    )
     return app
 
 
@@ -158,38 +142,13 @@ def register_middlewares(app: FastAPI):
     async def log_middleware(request: Request, call_next):
         try:
             # Store logging information data set
-            set_tracing_data(request)
+            # set_tracing_data(request)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
-
-"""
-            system_name = None
-            # /filesystem/{system_name}/.*
-            # /compute/{system_name}/.*
-            # /status/{system_name}
-            if match := re.search(
-                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
-                request.url.path,
-                re.IGNORECASE,
-            ):
-                system_name = match.group(1)
-
-            logger.info(
-                {
-                    "username": username,
-                    "system": system_name,
-                    "endpoint": request.url.path,
-                    "satus_code": response.status_code,
-                }
-            )
-"""
-
-            # Append log trace ID to the request
-            response.headers["f7t-tracing-log-id"] = get_log_traceid()
             # Logging from Middleware
-            tracing_log_middleware(username, response.status_code)
+            tracing_log_middleware(request, username, response.status_code)
             return response
         except Exception as e:
             logger.error(
@@ -201,7 +160,7 @@ def register_middlewares(app: FastAPI):
             raise e
 
 
-def register_routes(app: FastAPI, settings: Settings):
+def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
     app.include_router(compute_router)
