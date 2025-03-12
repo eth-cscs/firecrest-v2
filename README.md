@@ -26,12 +26,12 @@ This setup is for *illustrative and evaluation purposes only* and is *not intend
 Ensure that [Docker](https://www.docker.com/) is installed and running on your machine, then execute the following command to start the FirecREST v2 demo container:
 
 ```console
-docker run -p 8080:8080 -p 5000:5000 --pull always ghcr.io/eth-cscs/firecrest-v2-demo:latest
+docker run -p 8025:8025 -p 5025:5025  -p 3000:3000 --pull always ghcr.io/eth-cscs/firecrest-v2-demo:latest
 ```
 
 Once the container is running, open your browser and navigate to:
 
-➡️ **[http://localhost:8080/](http://localhost:8080/)**
+➡️ **[http://localhost:8025/](http://localhost:8025/)**
 
 
 
