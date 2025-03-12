@@ -21,9 +21,6 @@ class SrunCommand(BaseCommand):
         self.overlap = overlap
         self.command = command
 
-    def get_log(self) -> str:
-        return "srun"
-
     def get_command(self) -> str:
         cmd = ["srun"]
         if self.job_id:

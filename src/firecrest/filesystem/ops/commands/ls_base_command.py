@@ -39,9 +39,6 @@ class LsBaseCommand(BaseCommandWithTimeout):
                 detail="Either the recursion or the no-recursion option can be set",
             )
 
-    def get_log(self) -> str:
-        return "ls"
-
     def get_command(self) -> str:
         options = "-l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' "
 

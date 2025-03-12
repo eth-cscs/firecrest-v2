@@ -17,9 +17,6 @@ class RmCommand(BaseCommandWithTimeout):
         super().__init__()
         self.target_path = target_path
 
-    def get_log(self) -> str:
-        return "rm"
-
     def get_command(self) -> str:
         return (
             f"{super().get_command()} rm -r --interactive=never -- '{self.target_path}'"

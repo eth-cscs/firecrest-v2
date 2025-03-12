@@ -17,9 +17,6 @@ class ChmodCommand(BaseCommandWithTimeout):
         self.mode = mode
         self.ls_command = LsBaseCommand(target_path, no_recursion=True)
 
-    def get_log(self) -> str:
-        return "chmod"
-
     def get_command(self) -> str:
         return f"{super().get_command()} chmod -v '{self.mode}' -- '{self.target_path}' && {self.ls_command.get_command()}"
 

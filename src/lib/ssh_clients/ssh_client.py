@@ -31,10 +31,6 @@ class BaseCommand(ABC):
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         pass
 
-    @abstractmethod
-    def get_log() -> str:
-        return "cmd"
-
 
 class OutputLimitExceeded(Exception):
     pass
@@ -53,7 +49,6 @@ class SSHClient:
     def __init__(
         self,
         conn: SSHClientConnection,
-        username: str,
         idle_timeout: int = 60,
         execute_timeout: int = 5,
         keep_alive: int = 5,
@@ -61,7 +56,6 @@ class SSHClient:
     ):
         self.idle_timeout = idle_timeout
         self.conn = conn
-        self.username = username
         self.conn.set_keepalive(interval=keep_alive, count_max=3)
         self.execute_timeout = execute_timeout
         self.buffer_limit = buffer_limit

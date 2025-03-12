@@ -17,9 +17,6 @@ class TrueCommand(BaseCommand, BaseCommandErrorHandling):
     ) -> None:
         pass
 
-    def get_log(self) -> str:
-        return "true"
-
     def get_command(self) -> str:
         return "true"
 

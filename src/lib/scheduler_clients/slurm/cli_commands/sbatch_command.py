@@ -16,9 +16,6 @@ class SbatchCommand(BaseCommand):
         super().__init__()
         self.job_description = job_description
 
-    def get_log(self) -> str:
-        return "sbatch"
-
     def get_command(self) -> str:
         cmd = ["sbatch"]
         env = ",".join(

@@ -18,9 +18,6 @@ class IdCommand(BaseCommandWithTimeout):
     ) -> None:
         super().__init__()
 
-    def get_log(self) -> str:
-        return "id"
-
     def get_command(
         self,
     ) -> str:

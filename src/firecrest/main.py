@@ -59,8 +59,6 @@ logger = logging.getLogger(__name__)
 
 
 def create_app(settings: Settings) -> FastAPI:
-    # Debug log level notification
-    f7tlogger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",

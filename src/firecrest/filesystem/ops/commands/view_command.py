@@ -20,9 +20,6 @@ class ViewCommand(BaseCommandWithTimeout):
         super().__init__()
         self.target_path = target_path
 
-    def get_log(self) -> str:
-        return "view"
-
     def get_command(self) -> str:
         return (
             f"{super().get_command()} head --bytes {SIZE_LIMIT} -- '{self.target_path}'"

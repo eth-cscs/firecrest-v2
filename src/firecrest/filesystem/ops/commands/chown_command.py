@@ -20,9 +20,6 @@ class ChownCommand(BaseCommandWithTimeout):
         self.group = group
         self.ls_command = LsBaseCommand(target_path, no_recursion=True)
 
-    def get_log(self) -> str:
-        return "chown"
-
     def get_command(self) -> str:
 
         return f"{super().get_command()} chown -v '{self.owner}':'{self.group}' -- '{self.target_path}' && {self.ls_command.get_command()}"

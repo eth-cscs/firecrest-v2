@@ -19,9 +19,6 @@ class MkdirCommand(BaseCommandWithTimeout):
         self.parent = parent
         self.ls_command = LsBaseCommand(target_path, no_recursion=True)
 
-    def get_log(self) -> str:
-        return "mkdir"
-
     def get_command(self) -> str:
         options = ""
         if self.parent:

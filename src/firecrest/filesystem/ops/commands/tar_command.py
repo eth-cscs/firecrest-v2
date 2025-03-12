@@ -32,9 +32,6 @@ class TarCommand(BaseCommandWithTimeout):
         self.dereference = dereference
         self.operation = operation
 
-    def get_log(self) -> str:
-        return "tar"
-
     def get_command(
         self,
     ) -> str:
@@ -57,6 +54,7 @@ class TarCommand(BaseCommandWithTimeout):
             return f"{super().get_command()} bash -c \"cd {source_dir}; {super().get_command()} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
 
         return f"{super().get_command()} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
+
 
     def get_extract_command(self) -> str:
 
