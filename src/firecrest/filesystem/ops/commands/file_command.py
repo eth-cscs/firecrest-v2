@@ -21,9 +21,6 @@ class FileCommand(BaseCommand, BaseCommandErrorHandling):
         super().__init__()
         self.target_path = target_path
 
-    def get_log(self) -> str:
-        return "file"
-
     def get_command(self) -> str:
         return f"timeout {UTILITIES_TIMEOUT} file -b -- '{self.target_path}'"
 

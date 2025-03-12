@@ -16,9 +16,6 @@ class ScancelCommand(BaseCommand):
         self.username = username
         self.job_ids = job_ids
 
-    def get_log(self) -> str:
-        return "scancel"
-
     def get_command(self) -> str:
         cmd = ["scancel"]
         # TODO: investigate why this option is causing issues with the scancel command

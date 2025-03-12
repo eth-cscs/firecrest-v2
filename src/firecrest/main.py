@@ -65,8 +65,6 @@ logger = logging.getLogger(__name__)
 
 
 def create_app(settings: Settings) -> FastAPI:
-    # Debug log level notification
-    f7tlogger.info("Debug log messages active")
     # Instance app
     app = FastAPI(
         title="FirecREST",
@@ -143,6 +141,29 @@ def register_middlewares(app: FastAPI):
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
+
+"""
+            system_name = None
+            # /filesystem/{system_name}/.*
+            # /compute/{system_name}/.*
+            # /status/{system_name}
+            if match := re.search(
+                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
+                request.url.path,
+                re.IGNORECASE,
+            ):
+                system_name = match.group(1)
+
+            logger.info(
+                {
+                    "username": username,
+                    "system": system_name,
+                    "endpoint": request.url.path,
+                    "satus_code": response.status_code,
+                }
+            )
+"""
+
             # Append log trace ID to the request
             response.headers["f7t-tracing-log-id"] = get_log_traceid()
             # Logging from Middleware

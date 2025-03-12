@@ -18,9 +18,6 @@ class RmCommand(BaseCommand, BaseCommandErrorHandling):
         super().__init__()
         self.target_path = target_path
 
-    def get_log(self) -> str:
-        return "rm"
-
     def get_command(self) -> str:
         return f"timeout {UTILITIES_TIMEOUT} rm -r --interactive=never -- '{self.target_path}'"
 

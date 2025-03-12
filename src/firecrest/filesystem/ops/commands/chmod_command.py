@@ -19,9 +19,6 @@ class ChmodCommand(LsBaseCommand, BaseCommandErrorHandling):
         self.target_path = target_path
         self.mode = mode
 
-    def get_log(self) -> str:
-        return "chmod"
-
     def get_command(self) -> str:
         ls_command = super().get_command()
         return f"timeout {UTILITIES_TIMEOUT} chmod -v '{self.mode}' -- '{self.target_path}' && {ls_command}"

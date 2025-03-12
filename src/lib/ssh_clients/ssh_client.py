@@ -29,10 +29,6 @@ class BaseCommand(ABC):
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         pass
 
-    @abstractmethod
-    def get_log() -> str:
-        return "cmd"
-
 
 class OutputLimitExceeded(Exception):
     pass
@@ -51,7 +47,6 @@ class SSHClient:
     def __init__(
         self,
         conn: SSHClientConnection,
-        username: str,
         idle_timeout: int = 60,
         execute_timeout: int = 5,
         keep_alive: int = 5,
@@ -59,7 +54,6 @@ class SSHClient:
     ):
         self.idle_timeout = idle_timeout
         self.conn = conn
-        self.username = username
         self.conn.set_keepalive(interval=keep_alive, count_max=3)
         self.execute_timeout = execute_timeout
         self.buffer_limit = buffer_limit
@@ -77,8 +71,7 @@ class SSHClient:
 
         try:
             async with asyncio.timeout(self.execute_timeout):
-                action = command.get_command()
-                process = await self.conn.create_process(action)
+                process = await self.conn.create_process(command.get_command())
 
                 if stdin:
                     process.stdin.write(stdin)
@@ -96,13 +89,13 @@ class SSHClient:
                     raise OutputLimitExceeded("Command output exceeded buffer limit.")
                 process.close()
                 await process.wait_closed()
-                # Logging command execution
-                tracing_log_command(
-                    username=self.username,
-                    command_action=action,
-                    exit_status=process.exit_status,
-                    command=command.get_log(),
-                )
+#                # Logging command execution
+#                tracing_log_command(
+#                    username=self.username,
+#                    command_action=action,
+#                    exit_status=process.exit_status,
+#                    command=command.get_log(),
+#                )
                 return command.parse_output(
                     stdout_data, stdout_error, process.exit_status
                 )

@@ -16,9 +16,6 @@ class SacctCommandBase(BaseCommand):
         self.username = username
         self.job_ids = job_ids
 
-    def get_log(self) -> str:
-        return "sacct"
-
     def get_command(self) -> str:
         cmd = ["sacct"]
         cmd += [f"--user={self.username}"]

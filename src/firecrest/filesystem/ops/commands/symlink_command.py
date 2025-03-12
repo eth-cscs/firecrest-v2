@@ -19,9 +19,6 @@ class SymlinkCommand(LsBaseCommand, BaseCommandErrorHandling):
         self.target_path = target_path
         self.link_path = link_path
 
-    def get_log(self) -> str:
-        return "ln"
-
     def get_command(self) -> str:
         ls_command = super().get_command()
         return f"timeout {UTILITIES_TIMEOUT} ln -s -- '{self.target_path}' '{self.link_path}' && {ls_command}"

@@ -13,9 +13,6 @@ class ScontrolBase(BaseCommand):
         cmd = ["scontrol"]
         return " ".join(cmd)
 
-    def get_log(self) -> str:
-        return "scontrol"
-
     @abstractmethod
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         pass

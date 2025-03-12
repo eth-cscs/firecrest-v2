@@ -20,9 +20,6 @@ class MkdirCommand(LsBaseCommand, BaseCommandErrorHandling):
         self.target_path = target_path
         self.parent = parent
 
-    def get_log(self) -> str:
-        return "mkdir"
-
     def get_command(self) -> str:
         ls_command = super().get_command()
         options = ""

@@ -29,9 +29,6 @@ class SinfoCommand(BaseCommand):
         cmd += ["--format='%z|%c|%O|%e|%f|%N|%o|%n|%T|%R|%w|%v|%m|%C'"]
         return " ".join(cmd)
 
-    def get_log(self) -> str:
-        return "sinfo"
-
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:
             raise SlurmError(

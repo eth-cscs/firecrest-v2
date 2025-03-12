@@ -22,9 +22,6 @@ class ChownCommand(LsBaseCommand, BaseCommandErrorHandling):
         self.owner = owner
         self.group = group
 
-    def get_log(self) -> str:
-        return "chown"
-
     def get_command(self) -> str:
         ls_command = super().get_command()
         return f"timeout {UTILITIES_TIMEOUT} chown -v '{self.owner}':'{self.group}' -- '{self.target_path}' && {ls_command}"

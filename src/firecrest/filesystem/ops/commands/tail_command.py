@@ -27,9 +27,6 @@ class TailCommand(BaseCommand, BaseCommandErrorHandling):
         self.lines = lines
         self.skip_heading = skip_heading
 
-    def get_log(self) -> str:
-        return "tail"
-
     def get_command(
         self,
     ) -> str:
