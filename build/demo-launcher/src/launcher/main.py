@@ -213,7 +213,9 @@ def get_token(
 def userinfo_endpoint(token: Annotated[str, Depends(oauth2_scheme)]):
 
     payload = jwt.decode(token, keys["public_key"], algorithms=["RS256"])
-    username = payload.get("sub")
+    username = payload.get("name")
+    if "username" in payload:
+        username = payload.get("username")
     return {
         "id": username,
         "username": username,
@@ -302,7 +304,8 @@ async def credentials(credentials: Credentials):
         raise HTTPException(status_code=400, detail="Provide a valid username")
 
     # Set OIDC client for web-ui
-    os.environ["KEYCLOAK_CLIENT_ID"] = credentials.username
+    with open("/app/config/webui-client", "a") as f:
+        f.write(credentials.username)
 
     demo_cluster = settings.clusters[0]
     sshkey_cert_public = ()
@@ -361,7 +364,6 @@ class SSHConnection(BaseModel):
 
 @app.post("/sshconnection")
 async def ssh_connection(ssh_connection: SSHConnection):
-
     try:
 
         if ssh_connection.proxyhost:
