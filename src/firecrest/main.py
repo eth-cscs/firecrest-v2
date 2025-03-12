@@ -48,9 +48,6 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
-# FirecREST debug logger
-from lib.loggers.f7t_log import f7tlogger, init_f7tlog_string
-
 # FirecREST tracing JSON logger
 from lib.loggers.tracing_log import tracing_log_middleware
 
@@ -134,8 +131,6 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
         try:
-            # Push logging data set
-            set_tracing_data(request.url.path)
             response = await call_next(request)
             username = None
             if hasattr(request.state, "username"):
