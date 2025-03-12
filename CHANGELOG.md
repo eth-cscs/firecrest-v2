@@ -24,19 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Templates for upload and download using `filesystems/transfer` endpoint.
 - Return error code 408 when basic commands timeout on the cluster.
 
-## [2.2.2] - OPEN
+## [2.2.1] - OPEN
 
 ### Added
 - FirecREST Web UI has been added to the demo image.
-
-### Changed
-
-### Fixed
-
-
-## [2.2.1]
-
-### Added
 
 ### Changed
 
