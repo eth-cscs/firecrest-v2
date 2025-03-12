@@ -4,14 +4,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
-import contextvars
 from time import time
 from typing import Any, Dict
 import asyncssh
 from asyncssh import ChannelOpenError, ConnectionLost, SSHClientConnection
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
-import logging
 
 # clients
 from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
@@ -72,7 +70,6 @@ class SSHClient:
     async def execute(self, command: BaseCommand, stdin: str = None):
         try:
             async with asyncio.timeout(self.execute_timeout):
-                self.conn
                 process = await self.conn.create_process(command.get_command())
 
                 if stdin:
@@ -89,6 +86,7 @@ class SSHClient:
                     or len(stdout_error) >= self.buffer_limit
                 ):
                     raise OutputLimitExceeded("Command output exceeded buffer limit.")
+
                 process.close()
                 await process.wait_closed()
                 log_exit_status(process.exit_status)
@@ -237,7 +235,6 @@ class SSHClientPool:
 
                     client = SSHClient(
                         conn,
-                        username=username,
                         idle_timeout=self.idle_timeout,
                         execute_timeout=self.execute_timeout,
                         buffer_limit=self.buffer_limit,
