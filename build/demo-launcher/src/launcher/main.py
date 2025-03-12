@@ -8,7 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import asyncssh
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
+
+
 import jwt
 from datetime import datetime, timedelta
 from typing import Annotated, Any, Optional
@@ -54,7 +56,7 @@ async def lifespan(app: FastAPI):
     )
     public_key = private_key.public_key()
     public_numbers = public_key.public_numbers()
-
+    keys["public_key"] = public_key
     keys["public_numbers"] = public_numbers
     keys["kid"] = "42"  # unique key identifier
 
@@ -89,6 +91,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 origins = [
     "http://localhost",
     "http://localhost:8080",
@@ -104,6 +107,7 @@ app.add_middleware(
 )
 
 security = HTTPBasic(auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 settings = UnsafeSettings()
 
 
@@ -202,6 +206,21 @@ def get_token(
         "token_type": "bearer",
         "expires_in": 31556952,
         "refresh_token": token,
+    }
+
+
+@app.get("/auth/realms/default/protocol/openid-connect/userinfo")
+def userinfo_endpoint(token: Annotated[str, Depends(oauth2_scheme)]):
+
+    payload = jwt.decode(token, keys["public_key"], algorithms=["RS256"])
+    username = payload.get("sub")
+    return {
+        "id": username,
+        "username": username,
+        "preferred_username": username,
+        "firstName": username,
+        "lastName": "client",
+        "email": username,
     }
 
 
