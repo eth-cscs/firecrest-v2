@@ -26,16 +26,16 @@ jobs:
         mv src/lib lib
         mv src/firecrest firecrest
         touch f7t-api-config.local-env-empty.yaml
-        echo apis_root_path:"" >> f7t-api-config.local-env-empty.yaml
+        echo apis_root_path: \"\" >> f7t-api-config.local-env-empty.yaml
         echo doc_servers: >> f7t-api-config.local-env-empty.yaml
-        echo   - url: "http://localhost:8000" >> f7t-api-config.local-env-empty.yaml
-        echo    description: "Local environment" >> f7t-api-config.local-env-empty.yaml
+        echo   - url: \"http://localhost:8000\" >> f7t-api-config.local-env-empty.yaml
+        echo    description: \"Local environment\" >> f7t-api-config.local-env-empty.yaml
         echo auth: >> f7t-api-config.local-env-empty.yaml
         echo   authentication: >> f7t-api-config.local-env-empty.yaml
         echo     scopes:  {} >> f7t-api-config.local-env-empty.yaml
-        echo     tokenUrl:  "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token" >> f7t-api-config.local-env-empty.yaml
+        echo     tokenUrl:  \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token\" >> f7t-api-config.local-env-empty.yaml
         echo     publicCerts: >> f7t-api-config.local-env-empty.yaml
-        echo         - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs" >> f7t-api-config.local-env-empty.yaml
+        echo         - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\" >> f7t-api-config.local-env-empty.yaml
         echo ssh_credentials: {} >> f7t-api-config.local-env-empty.yaml
         echo clusters: [] >> f7t-api-config.local-env-empty.yaml
 
