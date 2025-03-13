@@ -70,6 +70,6 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* .
 
-        git add openapi.yaml openapirc.json
+        git add openapi.yaml
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
