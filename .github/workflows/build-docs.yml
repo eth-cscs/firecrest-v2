@@ -25,7 +25,6 @@ jobs:
       run: |
         mv src/lib lib
         mv src/firecrest firecrest
-        export YAML_CONFIG_FILE=$GITHUB_WORKSPACE'f7t-api-config.local-env-empty.yaml' 
     - name: Configure Git User
       run: |
         echo "Configured user to '$GITHUB_ACTOR'"
@@ -41,6 +40,7 @@ jobs:
         fileName: main
         appName: app
         fastapiVersioning: v1
+        yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
 
     - name: Move OpenAPI file
       run: |
