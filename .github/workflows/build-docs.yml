@@ -31,7 +31,7 @@ jobs:
     - name: Generate OpenAPI file
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
       with:
-        moduleDir: src/firecrest
+        moduleDir: src.firecrest
         fileName: main.py
         appName: firecrest
         fastapiVersioning: v1
