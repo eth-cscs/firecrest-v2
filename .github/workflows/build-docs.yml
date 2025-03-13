@@ -1,0 +1,42 @@
+name: Build Docs
+
+on:
+  push:
+    branches: [ "IRAM-306-build-doc" ]
+  pull_request:
+    branches: [ "IRAM-306-build-doc" ]
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+
+    # Checks out the entire repo.
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+
+    # Generates a openapi.yaml file based on the FastAPI project.
+    - name: Generate OpenAPI file
+      uses: column-st/fastapi-openapi-specs-action@v1.0.2
+      with:
+        moduleDir: src/firecrest
+        fileName: main.py
+        appName: firecrest
+        fastapiVersioning: v1
+
+    - name: Move OpenAPI file
+      run: |
+        mkdir openapi_
+        mv openapi.yaml openapi_/
+        mv openapirc.json openapi_/
+
+    - name: Push to gh-pages branch
+      run: |
+        
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi_/* .
+
+        git add openapi.yaml openapirc.json
+        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
