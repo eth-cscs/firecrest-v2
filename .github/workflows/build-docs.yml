@@ -5,6 +5,8 @@ on:
     branches: [ "IRAM-306-build-doc" ]
   pull_request:
     branches: [ "IRAM-306-build-doc" ]
+  release:
+    types: [released]
 
 jobs:
   client:
@@ -19,7 +21,14 @@ jobs:
     steps:
     - name: Checks out repo
       uses: actions/checkout@v4
-
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Move folder
       run: |
         mv src/lib lib
@@ -38,12 +47,6 @@ jobs:
         echo "ssh_credentials: {}" >> f7t-api-config.local-env-empty.yaml
         echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
 
-    - name: Configure Git User
-      run: |
-        echo "Configured user to '$GITHUB_ACTOR'"
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
     # Generates a openapi.yaml file based on the FastAPI project.
     - name: Generate OpenAPI file
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
@@ -60,7 +63,7 @@ jobs:
     - name: Move OpenAPI file
       run: |
         mkdir openapi_
-        mv openapi.yaml openapi_/
+        mv openapi.yaml openapi_/openapi-${{ steps.get_version.outputs.VERSION }}.yaml
 
     - name: Push to gh-pages branch
       run: |
@@ -69,6 +72,6 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* .
 
-        git add openapi.yaml
+        git add openapi-${{ steps.get_version.outputs.VERSION }}.yaml
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
