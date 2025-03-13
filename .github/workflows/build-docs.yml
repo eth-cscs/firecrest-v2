@@ -31,9 +31,10 @@ jobs:
     - name: Generate OpenAPI file
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
       with:
+        installDependencies: pip install -r requirements.txt
         moduleDir: src
-        fileName: firecrest.main.py
-        appName: firecrest
+        fileName: firecrest.main
+        appName: app
         fastapiVersioning: v1
 
     - name: Move OpenAPI file
