@@ -21,6 +21,11 @@ jobs:
     - name: Checks out repo
       uses: actions/checkout@v1
 
+    - name: Move folder
+      run: |
+        mv src/lib lib
+        mv src/firecrest firecrest
+        export YAML_CONFIG_FILE=$GITHUB_WORKSPACE'f7t-api-config.local-env-empty.yaml' 
     - name: Configure Git User
       run: |
         echo "Configured user to '$GITHUB_ACTOR'"
@@ -32,8 +37,8 @@ jobs:
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
       with:
         installDependencies: pip install -r requirements.txt
-        moduleDir: src
-        fileName: firecrest.main
+        moduleDir: firecrest
+        fileName: main
         appName: app
         fastapiVersioning: v1
 
