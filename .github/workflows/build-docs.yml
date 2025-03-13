@@ -29,7 +29,7 @@ jobs:
         echo "apis_root_path: \"\"" >> f7t-api-config.local-env-empty.yaml
         echo "doc_servers:" >> f7t-api-config.local-env-empty.yaml
         echo "  - url: \"http://localhost:8000\"" >> f7t-api-config.local-env-empty.yaml
-        echo "   description: \"Local environment\"" >> f7t-api-config.local-env-empty.yaml
+        echo "    description: \"Local environment\"" >> f7t-api-config.local-env-empty.yaml
         echo "auth:" >> f7t-api-config.local-env-empty.yaml
         echo "  authentication:" >> f7t-api-config.local-env-empty.yaml
         echo "    scopes:  {}" >> f7t-api-config.local-env-empty.yaml
