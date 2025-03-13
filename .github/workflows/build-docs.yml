@@ -3,8 +3,6 @@ name: Build Docs
 on:
   push:
     branches: [ "IRAM-306-build-doc" ]
-  pull_request:
-    branches: [ "IRAM-306-build-doc" ]
   release:
     types: [released]
 
@@ -23,7 +21,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Get the version
       id: get_version
-      run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     - name: Configure Git User
       run: |
         echo "Configured user to '$GITHUB_ACTOR'"
@@ -63,7 +61,7 @@ jobs:
     - name: Move OpenAPI file
       run: |
         mkdir openapi_
-        mv openapi.yaml openapi_/openapi-${{ steps.get_version.outputs.VERSION }}.yaml
+        mv openapi.yaml openapi_/openapi-${{ env.RELEASE_VERSION }}.yaml
 
     - name: Push to gh-pages branch
       run: |
@@ -72,6 +70,6 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* .
 
-        git add openapi-${{ steps.get_version.outputs.VERSION }}.yaml
+        git add openapi-${{ env.RELEASE_VERSION }}.yaml
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
