@@ -58,17 +58,20 @@ jobs:
         outputExtension: yaml
         yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
 
-    - name: Move OpenAPI file
+    - name: Move OpenAPI file and clean up
       run: |
         mkdir openapi_
         mv openapi.yaml openapi_/openapi-${{ env.RELEASE_VERSION }}.yaml
+        rm f7t-api-config.local-env-empty.yaml
+        rm -r firecrest/
+        rm -r lib/
 
     - name: Push to gh-pages branch
       run: |
         
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
-        mv openapi_/* .
+        mv openapi_/* ./openapi/
 
         git add openapi-${{ env.RELEASE_VERSION }}.yaml
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
