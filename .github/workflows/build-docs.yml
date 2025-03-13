@@ -58,9 +58,10 @@ jobs:
         outputExtension: yaml
         yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
 
-    - name: Move OpenAPI file and clean up
+    - name: Move OpenAPI file
       run: |
         mkdir openapi_
+        cp openapi.yaml openapi_/openapi-latest.yaml
         mv openapi.yaml openapi_/openapi-${{ env.RELEASE_VERSION }}.yaml
 
     - name: Push to gh-pages branch
@@ -70,7 +71,9 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* ./openapi/
 
-        git add ./openapi/openapi-${{ env.RELEASE_VERSION }}.yaml
+        sed -i -e 's/\/\/add-newones-here/\/\/add-newones-here\n{url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-v2.2.0.yaml", name: "v2.2.0"},/g' ./openapi/dist/swagger-initializer.js
+
+        git add ./openapi/openapi-latest.yaml ./openapi/openapi-${{ env.RELEASE_VERSION }}.yaml
         git status -uno
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
