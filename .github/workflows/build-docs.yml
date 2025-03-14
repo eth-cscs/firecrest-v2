@@ -19,6 +19,10 @@ jobs:
     steps:
     - name: Checks out repo
       uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+          python-version: 3.x
     - name: Get the version
       id: get_version
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
@@ -73,7 +77,20 @@ jobs:
 
         sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_VERSION }}.yaml", name: "${{ env.RELEASE_VERSION }}"},|g' openapi/dist/swagger-initializer.js
 
-        git add ./openapi/openapi-latest.yaml ./openapi/openapi-${{ env.RELEASE_VERSION }}.yaml openapi/dist/swagger-initializer.js
+        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_VERSION }}.yaml openapi/dist/swagger-initializer.js
         git status -uno
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
+    - name: Publish MkDocs  
+      run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+    - uses: actions/cache@v3
+      with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+    - run: pip install --upgrade pip
+    - run: |
+        pip install -r ./docs/requirements.txt
+    - run: rm -rf site
+    - run: mkdocs gh-deploy --dirty
