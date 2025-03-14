@@ -78,15 +78,21 @@ client: firecrest-test-client
 secret: wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk
 ```
 
-To optain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloack's Oauth2 token end-point:  http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token
-
+To obtain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloack's Oauth2 token end-point:
+```bash
+CLIENT_ID="<client>"
+CLIENT_SECRET="<secret>"
+curl -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token \
+     -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
+     -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: */*"
+```
 
 # Development
 
 The repository comes with VS Code settings (.vscode) to facilitate running and debugging a local instance of FirecREST v2.
 All necessary VS Code extensions will be listed as recommended and are defined in .vscode/extensions.json.
 
-## Set-up Python Virtual environement
+## Set-up Python Virtual environment
 
 Install python3.12 on your machine.
 
