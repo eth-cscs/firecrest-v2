@@ -52,8 +52,8 @@ jobs:
         rm -rf .site
         mv .openapi openapi
         mv .charts charts
+        ls
         git add *
-        git status -uno
         git commit -m "New documentation release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
 
