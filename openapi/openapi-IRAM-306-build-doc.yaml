@@ -1472,7 +1472,7 @@ components:
       type: http
 info:
   title: FirecREST
-  version: 2.x.x
+  version: IRAM-306-build-doc
 openapi: 3.1.0
 paths:
   /compute/{system_name}/jobs:
