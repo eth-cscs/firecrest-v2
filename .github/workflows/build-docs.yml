@@ -1,8 +1,6 @@
 name: Build Docs
 
 on:
-  push:
-    branches: [ "IRAM-306-build-doc" ]
   release:
     types: [released]
 
