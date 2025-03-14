@@ -71,9 +71,9 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* ./openapi/
 
-        sed -i -e 's/\/\/add-newones-here/\/\/add-newones-here\n{url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-v2.2.0.yaml", name: "v2.2.0"},/g' ./openapi/dist/swagger-initializer.js
+        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_VERSION }}.yaml", name: "${{ env.RELEASE_VERSION }}"},|g' openapi/dist/swagger-initializer.js
 
-        git add ./openapi/openapi-latest.yaml ./openapi/openapi-${{ env.RELEASE_VERSION }}.yaml
+        git add ./openapi/openapi-latest.yaml ./openapi/openapi-${{ env.RELEASE_VERSION }}.yaml openapi/dist/swagger-initializer.js
         git status -uno
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
