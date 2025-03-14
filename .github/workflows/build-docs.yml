@@ -7,7 +7,7 @@ on:
     types: [released]
 
 jobs:
-  client:
+  publish-documentation:
     runs-on: ubuntu-latest
     env:
         GH_PAGES_BRANCH: gh-pages
