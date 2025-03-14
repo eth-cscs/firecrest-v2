@@ -23,6 +23,11 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
+      - name: Configure Git User
+        run: |
+          echo "Configured user to '$GITHUB_ACTOR'"
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - run: pip install --upgrade pip
       - run: |
           pip install -r ./docs/requirements.txt

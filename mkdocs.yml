@@ -6,7 +6,7 @@ repo_url: https://github.com/eth-cscs/firecrest-v2/
 edit_uri: edit/main/docs/
 
 nav:
-  - Welcome: index.md
+  - Welcome: README.md
   - 'API Reference':
     - api/README.md
   - 'Configuration':
