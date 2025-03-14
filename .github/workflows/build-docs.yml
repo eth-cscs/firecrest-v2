@@ -44,14 +44,14 @@ jobs:
       run: |
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
-        mv openapi _openapi
-        mv charts _charts
-        mv site _site
-        find . -mindepth 1 -maxdepth 1 ! -name '_*' -exec rm -rf {} \;
-        mv  ./_site/* ./
-        rm -rf _site
-        mv _openapi openapi
-        mv _charts charts
+        mv openapi .openapi
+        mv charts .charts
+        mv site .site
+        find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
+        mv  ./.site/* ./
+        rm -rf .site
+        mv .openapi openapi
+        mv .charts charts
         git add *
         git status -uno
         git commit -m "New documentation release (${{ github.ref_name }})"
