@@ -40,7 +40,7 @@ jobs:
         pip install -r ./docs/requirements.txt
     - run: rm -rf site
     - run: mkdocs build
-    - name: Push to gh-pages branch
+    - name: Commit to gh-pages branch
       run: |
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
@@ -55,6 +55,13 @@ jobs:
         ls
         git add *
         git commit -m "New documentation release (${{ github.ref_name }})"
+    - name: Check if there are any changes
+      id: verify_diff
+      run: |
+        git diff --quiet . || echo "changed=true" >> $GITHUB_OUTPUT
+    - name: Push commit
+      if: ${{ github.changed }} == 'true'
+      run: |
         git push -u origin $GH_PAGES_BRANCH
 
   publish-openapi-swager:
