@@ -78,7 +78,7 @@ client: firecrest-test-client
 secret: wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk
 ```
 
-To optain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloack's Oauth2 token end-point:
+To obtain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloack's Oauth2 token end-point:
 ```bash
 CLIENT_ID="<client>"
 CLIENT_SECRET="<secret>"
