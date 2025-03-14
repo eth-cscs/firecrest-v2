@@ -6,14 +6,14 @@
 from enum import Enum
 import os
 from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+    BaseCommandWithTimeoutErrorHandling,
 )
 from lib.ssh_clients.ssh_client import BaseCommand
 
 UTILITIES_TIMEOUT = 5
 
 
-class TarCommand(BaseCommand, BaseCommandErrorHandling):
+class TarCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     class Operation(str, Enum):
         compress = "compress"
@@ -56,7 +56,6 @@ class TarCommand(BaseCommand, BaseCommandErrorHandling):
             return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
 
         return f"timeout {UTILITIES_TIMEOUT} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
-
 
     def get_extract_command(self) -> str:
 
