@@ -17,6 +17,7 @@ window.onload = function() {
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-IRAM-306-build-doc.yaml", name: "IRAM-306-build-doc"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-IRAM-306-build-doc.yaml", name: "IRAM-306-build-doc"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-IRAM-306-build-doc.yaml", name: "IRAM-306-build-doc"},
+      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-IRAM-306-build-doc.yaml", name: "IRAM-306-build-doc"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-v2.2.0.yaml", name: "v2.2.0"}
       
     ],
