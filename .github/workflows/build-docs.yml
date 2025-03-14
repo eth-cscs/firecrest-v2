@@ -9,13 +9,9 @@ on:
 jobs:
   publish-documentation:
     runs-on: ubuntu-latest
-    env:
-        GH_PAGES_BRANCH: gh-pages
     permissions:
       contents: write
       pages: write
-
-    # Checks out the entire repo.
     steps:
     - name: Checks out repo
       uses: actions/checkout@v4
@@ -23,6 +19,29 @@ jobs:
       uses: actions/setup-python@v4
       with:
           python-version: 3.x
+    - name: Publish MkDocs  
+      run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+    - uses: actions/cache@v3
+      with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+    - run: pip install --upgrade pip
+    - run: |
+        pip install -r ./docs/requirements.txt
+    - run: rm -rf site
+    - run: mkdocs gh-deploy --dirty
+  publish-openapi-swager:
+    runs-on: ubuntu-latest
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
     - name: Get the version
       id: get_version
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
@@ -31,7 +50,7 @@ jobs:
         echo "Configured user to '$GITHUB_ACTOR'"
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-    - name: Move folder
+    - name: Setup files and folders
       run: |
         mv src/lib lib
         mv src/firecrest firecrest
@@ -48,8 +67,6 @@ jobs:
         echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
         echo "ssh_credentials: {}" >> f7t-api-config.local-env-empty.yaml
         echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
-
-    # Generates a openapi.yaml file based on the FastAPI project.
     - name: Generate OpenAPI file
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
       with:
@@ -61,13 +78,11 @@ jobs:
         outputName: openapi
         outputExtension: yaml
         yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
-
     - name: Move OpenAPI file
       run: |
         mkdir openapi_
         cp openapi.yaml openapi_/openapi-latest.yaml
         mv openapi.yaml openapi_/openapi-${{ env.RELEASE_VERSION }}.yaml
-
     - name: Push to gh-pages branch
       run: |
         
@@ -81,16 +96,3 @@ jobs:
         git status -uno
         git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
-    - name: Publish MkDocs  
-      run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-    - uses: actions/cache@v3
-      with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-    - run: pip install --upgrade pip
-    - run: |
-        pip install -r ./docs/requirements.txt
-    - run: rm -rf site
-    - run: mkdocs gh-deploy --dirty
