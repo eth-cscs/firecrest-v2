@@ -1,0 +1,108 @@
+site_name: FirecREST v2 Documentation 
+
+# provide a link to the docs in top RHS corner
+repo_url: https://github.com/eth-cscs/firecrest-v2/
+# provide a link to "edit this page" to each page
+edit_uri: edit/main/docs/
+
+nav:
+  - Welcome: index.md
+  - 'API Reference':
+    - api/README.md
+  - 'Configuration':
+    - conf/README.md
+  - 'Deployment':
+    - deploy/README.md
+  - 'Usage':
+    - use/README.md
+   
+theme:
+  name: material
+  language: en
+  #custom_dir: docs/.overrides
+  features:
+    - content.code.copy
+    # add an "edit this page" icon on each page
+    - content.action.edit
+    - navigation.indexes
+    - search.share
+    - navigation.instant
+    - navigation.tracking
+    - navigation.path
+    - navigation.top
+  icon:
+    # set the icon for "edit this page"
+    edit: material/pencil
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: white
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  logo: assets/cscs-logo.png
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search:
+      pipeline:
+        - trimmer
+  - autorefs
+
+markdown_extensions:
+  - admonition
+  - def_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - footnotes
+  - pymdownx.arithmatex:
+      generic: true
+  # for captioning images
+  - pymdownx.blocks.caption
+
+# disable mathjax until the "GET /javascripts/mathjax.js HTTP/1.1" code 404 errors are fixed
+#extra_javascript:
+#  - javascripts/mathjax.js
+#  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+extra_css:
+  - stylesheets/extra.css
