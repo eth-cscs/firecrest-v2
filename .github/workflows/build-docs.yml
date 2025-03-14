@@ -9,6 +9,9 @@ on:
 jobs:
   publish-documentation:
     runs-on: ubuntu-latest
+    needs: publish-openapi-swager
+    env:
+        GH_PAGES_BRANCH: gh-pages
     permissions:
       contents: write
       pages: write
@@ -36,7 +39,23 @@ jobs:
     - run: |
         pip install -r ./docs/requirements.txt
     - run: rm -rf site
-    - run: mkdocs gh-deploy --dirty
+    - run: mkdocs build
+    - name: Push to gh-pages branch
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi _openapi
+        mv charts _charts
+        find . -mindepth 1 -maxdepth 1 ! -name '_*' -ok rm -rf {} +
+        mv  ./site/* ./
+        rm -rf site
+        mv _openapi openapi
+        mv _charts charts
+        git add *
+        git status -uno
+        git commit -m "New documentation release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
+
   publish-openapi-swager:
     runs-on: ubuntu-latest
     env:
