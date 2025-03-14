@@ -11,8 +11,7 @@ env:
 
 
 jobs:
-  release:
-
+  publish-docker-images:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false

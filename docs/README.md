@@ -11,4 +11,3 @@ Topics that will be covered in this section:
 - [Usage (with examples)](./use/README.md)
 - [SDKs](https://pyfirecrest.readthedocs.io/en/stable/index.html)
 - [API Reference](./api/README.md)
-

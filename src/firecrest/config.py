@@ -256,6 +256,8 @@ class Settings(BaseSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
         yaml_file = os.getenv("YAML_CONFIG_FILE", None)
+        if yaml_file is None:
+            yaml_file = os.getenv("INPUT_YAML_CONFIG_FILE", None)
         if yaml_file is None or yaml_file == "":
             raise EnvironmentError("Missing YAML_CONFIG_FILE environment variable")
         return (

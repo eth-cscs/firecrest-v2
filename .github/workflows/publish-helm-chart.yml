@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  release:
+  publish-helm-charts:
     runs-on: ubuntu-latest
     env:
         CHART_DIR: build/helm
