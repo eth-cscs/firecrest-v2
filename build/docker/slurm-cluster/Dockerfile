@@ -16,7 +16,8 @@ RUN apt update -y \
     wget \
     curl \
     python3 \
-    supervisor
+    supervisor \
+    dos2unix
 
 # Install Slurm
 RUN apt install -y slurmd slurmdbd slurmctld slurmrestd mpich
@@ -34,6 +35,7 @@ RUN chmod 644 /etc/slurm/*.conf && chmod 600 /etc/slurm/slurmdbd.conf  && chown 
 # Setup services
 ADD ./build/docker/slurm-cluster/supervisord.conf /etc/supervisord.conf
 RUN chmod 755 /*.sh
+RUN dos2unix /*.sh
 
 # Setup users
 RUN useradd -m -s /bin/bash --no-user-group --gid users  fireuser  && echo 'fireuser:fireuser'       | chpasswd
