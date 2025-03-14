@@ -34,6 +34,11 @@ Once the container is running, open your browser and navigate to:
 ➡️ **[http://localhost:8025/](http://localhost:8025/)**
 
 
+# Documentation
+
+### API Reference: [OpenAPI Swagger](https://eth-cscs.github.io/firecrest-v2/openapi/)
+### K8s Deployment: [Helm Charts](https://eth-cscs.github.io/firecrest-v2/)
+
 
 # Running FirecREST v2 with Docker-Compose
 
