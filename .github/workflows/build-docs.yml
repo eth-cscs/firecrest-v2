@@ -46,9 +46,10 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv openapi _openapi
         mv charts _charts
+        mv site _site
         find . -mindepth 1 -maxdepth 1 ! -name '_*' -exec rm -rf {} \;
-        mv  ./site/* ./
-        rm -rf site
+        mv  ./_site/* ./
+        rm -rf _site
         mv _openapi openapi
         mv _charts charts
         git add *
