@@ -58,7 +58,7 @@ jobs:
       run: |
         git diff --quiet || echo "CHANGES=true" >> $GITHUB_ENV
     - name: Push changes
-      if: env.CHANGES == 'true'
+      if: ${{ env.CHANGES == 'true' }}
       run: |
         git commit -m "New documentation release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
