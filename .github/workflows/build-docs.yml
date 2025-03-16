@@ -53,7 +53,7 @@ jobs:
         mv .openapi openapi
         mv .charts charts
         ls
-        git add *
+        git add .
     - name: Check for changes
       run: |
         git diff

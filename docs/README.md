@@ -12,4 +12,4 @@ Topics that will be covered in this section:
 - [SDKs](https://pyfirecrest.readthedocs.io/en/stable/index.html)
 - [API Reference](./api/README.md)
 
-debug
+debug 2
