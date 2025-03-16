@@ -38,15 +38,16 @@ jobs:
     - run: pip install --upgrade pip
     - run: |
         pip install -r ./docs/requirements.txt
-    - run: rm -rf site
+    - run: rm -rf site .site
     - run: mkdocs build
+    - run: mv site .site
     - name: Merge site to gh-pages
       run: |
+        
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv openapi .openapi
         mv charts .charts
-        mv site .site
         find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
         mv  ./.site/* ./
         rm -rf .site
