@@ -54,7 +54,7 @@ jobs:
         git add *
     - name: Check for changes
       run: |
-        git diff --quiet . || echo "CHANGES=true" >> $GITHUB_OUTPUT
+        git diff --quiet || echo "CHANGES=true" >> $GITHUB_ENV
     - name: Push changes
       if: env.CHANGES == 'true'
       run: |
