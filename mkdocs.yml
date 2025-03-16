@@ -56,7 +56,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-  logo: assets/cscs-logo.png
+  logo: assets/firecrest-logo.gif
   font:
     text: Roboto
     code: Roboto Mono
