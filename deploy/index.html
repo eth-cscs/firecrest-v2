@@ -92,7 +92,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="FirecREST v2 Documentation" class="md-header__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
       
-  <img src="../assets/cscs-logo.png" alt="logo">
+  <img src="../assets/firecrest-logo.gif" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -239,7 +239,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="FirecREST v2 Documentation" class="md-nav__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
       
-  <img src="../assets/cscs-logo.png" alt="logo">
+  <img src="../assets/firecrest-logo.gif" alt="logo">
 
     </a>
     FirecREST v2 Documentation
@@ -518,6 +518,38 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#firecrest-v2-helm-charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      FirecREST-v2 Helm Charts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FirecREST-v2 Helm Charts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetching-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetching the repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -541,6 +573,18 @@
 
 
 <h1 id="firecrest-v2-deployment">FirecREST-v2 Deployment<a class="headerlink" href="#firecrest-v2-deployment" title="Permanent link">&para;</a></h1>
+<h2 id="firecrest-v2-helm-charts">FirecREST-v2 Helm Charts<a class="headerlink" href="#firecrest-v2-helm-charts" title="Permanent link">&para;</a></h2>
+<p>This repository includes a Helm chart to deploy FirecREST version 2.</p>
+<h3 id="fetching-the-repository">Fetching the repository<a class="headerlink" href="#fetching-the-repository" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>helm repo add firecrest-v2 https://eth-cscs.github.io/firecrest-v2/charts/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>helm repo update
+</span></code></pre></div>
+<p>The available versions can be listed with
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>helm search repo firecrest-v2/firecrest-api --versions
+</span></code></pre></div></p>
+<p>Deploying the chart
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm install --create-namespace &lt;deployment-name&gt; -n &lt;namespace&gt; firecrest-v2/firecrest-api --values values.yaml
+</span></code></pre></div></p>
 
 
 
