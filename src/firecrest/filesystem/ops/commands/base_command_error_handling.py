@@ -68,7 +68,7 @@ class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
         if len(stderr) > 0:
             error_mess += f" and error message:{stderr.strip()}"
 
-        if self.timeout_prepended and exit_status == 124:
+        if exit_status == 124:
             raise HTTPException(
                 status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
             )
