@@ -1,7 +1,7 @@
 # FirecREST-v2 Deployment
 
 
-## FirecREST-v2 Helm Charts
+## Helm Charts
 This repository includes a Helm chart to deploy FirecREST version 2.
 
 ### Fetching the repository
