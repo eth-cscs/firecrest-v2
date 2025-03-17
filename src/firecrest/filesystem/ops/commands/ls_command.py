@@ -4,13 +4,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+from firecrest.filesystem.ops.commands.base_command_error_handling import (
+    BaseCommandWithTimeoutErrorHandling,
+)
 from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 
 
 UTILITIES_TIMEOUT = 5
 
 
-class LsCommand(LsBaseCommand):
+class LsCommand(LsBaseCommand, BaseCommandWithTimeoutErrorHandling):
 
     def __init__(
         self,
