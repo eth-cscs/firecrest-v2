@@ -43,13 +43,14 @@ jobs:
         mv charts .charts
         find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
         ls -l -a
+        echo "--- diff ---"
+        git diff
         echo "--- merge ---"
         mv  ./.site/* ./
         rm -rf .site
         mv .openapi openapi
         mv .charts charts
         ls
-        git add .
     - name: Check for changes
       run: |
         git diff
@@ -57,6 +58,7 @@ jobs:
     - name: Push changes
       if: ${{ env.CHANGES == 'true' }}
       run: |
+        git add .
         git commit -m "New documentation release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
 
