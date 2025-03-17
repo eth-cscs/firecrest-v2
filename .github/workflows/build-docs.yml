@@ -27,35 +27,28 @@ jobs:
         echo "Configured user to '$GITHUB_ACTOR'"
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-    - name: Publish MkDocs  
+    - name: Build MkDocs  
       run: |
         pip install --upgrade pip
         pip install -r ./docs/requirements.txt
         rm -rf site .site
         mkdocs build
         mv site .site
-        ls -l -a
-    - name: Merge site to gh-pages
+    - name: Merge site with gh-pages branch
       run: |
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv openapi .openapi
         mv charts .charts
         find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
-        ls -l -a
-        echo "--- diff ---"
-        git diff
-        echo "--- merge ---"
         mv  ./.site/* ./
         rm -rf .site
         mv .openapi openapi
         mv .charts charts
-        ls
     - name: Check for changes
       run: |
-        git diff
         git diff --quiet || echo "CHANGES=true" >> $GITHUB_ENV
-    - name: Push changes
+    - name: Publish MkDocs
       if: ${{ env.CHANGES == 'true' }}
       run: |
         git add .
