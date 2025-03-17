@@ -27,18 +27,12 @@ class CommandExecutionError(HTTPException):
 
 
 class BaseCommandErrorHandling:
-    timeout_prepended = False
 
     def error_handling(self, stderr: str, exit_status: int):
 
         error_mess = f"Remote process failed with exit status:{exit_status}"
         if len(stderr) > 0:
             error_mess += f" and error message:{stderr.strip()}"
-
-        if self.timeout_prepended and exit_status == 124:
-            raise HTTPException(
-                status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
-            )
 
         if "No such file or directory" in stderr:
             raise HTTPException(
@@ -67,4 +61,16 @@ class BaseCommandErrorHandling:
 
 
 class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
-    timeout_prepended = True
+
+    def error_handling(self, stderr: str, exit_status: int):
+
+        error_mess = f"Remote process failed with exit status:{exit_status}"
+        if len(stderr) > 0:
+            error_mess += f" and error message:{stderr.strip()}"
+
+        if self.timeout_prepended and exit_status == 124:
+            raise HTTPException(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
+            )
+
+        super().error_handling(stderr, exit_status)
