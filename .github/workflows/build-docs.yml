@@ -28,27 +28,22 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Publish MkDocs  
-      run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-    - uses: actions/cache@v3
-      with:
-          key: mkdocs-material-${{ env.cache_id }}
-          path: .cache
-          restore-keys: |
-            mkdocs-material-
-    - run: pip install --upgrade pip
-    - run: |
+      run: |
+        pip install --upgrade pip
         pip install -r ./docs/requirements.txt
-    - run: rm -rf site .site
-    - run: mkdocs build
-    - run: mv site .site
+        rm -rf site .site
+        mkdocs build
+        mv site .site
+        ls -l -a
     - name: Merge site to gh-pages
       run: |
-        
         git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv openapi .openapi
         mv charts .charts
         find . -mindepth 1 -maxdepth 1 ! -name '.*' -exec rm -rf {} \;
+        ls -l -a
+        echo "--- merge ---"
         mv  ./.site/* ./
         rm -rf .site
         mv .openapi openapi
