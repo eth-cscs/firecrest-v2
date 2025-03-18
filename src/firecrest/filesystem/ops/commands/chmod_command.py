@@ -25,4 +25,4 @@ class ChmodCommand(BaseCommandWithTimeout):
         if exit_status != 0:
             super().error_handling(stderr, exit_status)
 
-        return self.ls_command().parse_output(stdout, stderr, exit_status)
+        return self.ls_command.parse_output(stdout, stderr, exit_status)
