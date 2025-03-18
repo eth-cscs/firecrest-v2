@@ -102,7 +102,7 @@ function job_upload() {
     echo "[INFO] Uploading part $part_id..."
 
     # Upload data with curl and extract ETag
-    if ! data=$(curl -s -D - --upload-file "$part_file" "$part_url" | grep "ETag");
+    if ! data=$(curl -s -D - --upload-file "$part_file" "$part_url" | grep -i "^ETag: ");
     then
         # Non-blocking error notification
         # (.result file not generated and evaluated later, part file still in transfer directory)
