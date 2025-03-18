@@ -4,15 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandWithTimeoutErrorHandling,
+
+
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
-from lib.ssh_clients.ssh_client import BaseCommand
-
-UTILITIES_TIMEOUT = 5
 
 
-class FileCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
+class FileCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
@@ -22,7 +21,7 @@ class FileCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
         self.target_path = target_path
 
     def get_command(self) -> str:
-        return f"timeout {UTILITIES_TIMEOUT} file -b -- '{self.target_path}'"
+        return f"{super().get_command()} file -b -- '{self.target_path}'"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
 

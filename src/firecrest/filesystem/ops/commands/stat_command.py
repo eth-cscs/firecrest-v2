@@ -4,16 +4,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandWithTimeoutErrorHandling,
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
-from lib.ssh_clients.ssh_client import BaseCommand
+
 
 ID = 0
-UTILITIES_TIMEOUT = 5
 
 
-class StatCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
+class StatCommand(BaseCommandWithTimeout):
 
     def __init__(self, target_path: str = None, dereference: bool = False) -> None:
         super().__init__()
@@ -26,7 +25,7 @@ class StatCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
         deref = ""
         if self.dereference:
             deref = "--dereference"
-        return f"timeout {UTILITIES_TIMEOUT} stat {deref} -c '%f %i %d %h %u %g %s %X %Y %Z' -- '{self.target_path}'"
+        return f"{super().get_command()} stat {deref} -c '%f %i %d %h %u %g %s %X %Y %Z' -- '{self.target_path}'"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:

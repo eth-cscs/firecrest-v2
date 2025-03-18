@@ -3,16 +3,15 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandWithTimeoutErrorHandling,
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
-from lib.ssh_clients.ssh_client import BaseCommand
 
-UTILITIES_TIMEOUT = 5
+
 UTILITIES_MAX_FILE = 5 * 1024 * 1024  # 5MB
 
 
-class IdCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
+class IdCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
@@ -22,7 +21,7 @@ class IdCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
     def get_command(
         self,
     ) -> str:
-        return f"timeout {UTILITIES_TIMEOUT} id"
+        return f"{super().get_command()} id"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:

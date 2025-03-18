@@ -5,13 +5,12 @@
 
 # commands
 from fastapi import status, HTTPException
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandWithTimeoutErrorHandling,
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
-from lib.ssh_clients.ssh_client import BaseCommand
+
 
 ID = 0
-UTILITIES_TIMEOUT = 5
 
 # Available checksum commands
 available_algorithms = {
@@ -22,7 +21,7 @@ available_algorithms = {
 }
 
 
-class ChecksumCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
+class ChecksumCommand(BaseCommandWithTimeout):
 
     def __init__(self, target_path: str = None, algorithm: str = "SHA256") -> None:
         super().__init__()
@@ -30,7 +29,7 @@ class ChecksumCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
         self.target_path = target_path
 
     def get_command(self) -> str:
-        return f"timeout {UTILITIES_TIMEOUT} {available_algorithms[self.selected_algorithm]} -- '{self.target_path}'"
+        return f"{super().get_command()} {available_algorithms[self.selected_algorithm]} -- '{self.target_path}'"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         # Example of sha256sum output

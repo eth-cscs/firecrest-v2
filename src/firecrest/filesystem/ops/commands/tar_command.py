@@ -5,15 +5,13 @@
 
 from enum import Enum
 import os
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandWithTimeoutErrorHandling,
+
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
-from lib.ssh_clients.ssh_client import BaseCommand
-
-UTILITIES_TIMEOUT = 5
 
 
-class TarCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
+class TarCommand(BaseCommandWithTimeout):
 
     class Operation(str, Enum):
         compress = "compress"
@@ -53,13 +51,13 @@ class TarCommand(BaseCommand, BaseCommandWithTimeoutErrorHandling):
         source_file = os.path.basename(self.source_path)
 
         if self.match_pattern:
-            return f"timeout {UTILITIES_TIMEOUT} bash -c \"cd {source_dir}; timeout {UTILITIES_TIMEOUT} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
+            return f"{super().get_command()} bash -c \"cd {source_dir}; {super().get_command()} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
 
-        return f"timeout {UTILITIES_TIMEOUT} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
+        return f"{super().get_command()} tar {options} -czvf '{self.target_path}' -C '{source_dir}' '{source_file}'"
 
     def get_extract_command(self) -> str:
 
-        return f"timeout {UTILITIES_TIMEOUT} tar -xzf '{self.source_path}' -C '{self.target_path}'"
+        return f"{super().get_command()} tar -xzf '{self.source_path}' -C '{self.target_path}'"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:

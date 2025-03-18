@@ -58,19 +58,3 @@ class BaseCommandErrorHandling:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_mess
         )
-
-
-class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
-
-    def error_handling(self, stderr: str, exit_status: int):
-
-        error_mess = f"Remote process failed with exit status:{exit_status}"
-        if len(stderr) > 0:
-            error_mess += f" and error message:{stderr.strip()}"
-
-        if exit_status == 124:
-            raise HTTPException(
-                status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
-            )
-
-        super().error_handling(stderr, exit_status)

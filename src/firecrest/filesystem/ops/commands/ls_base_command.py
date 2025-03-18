@@ -8,17 +8,13 @@ import shlex
 from fastapi import HTTPException, status
 
 # commands
-from firecrest.filesystem.ops.commands.base_command_error_handling import (
-    BaseCommandErrorHandling,
+from firecrest.filesystem.ops.commands.base_command_with_timeout import (
+    BaseCommandWithTimeout,
 )
 from firecrest.filesystem.ops.models import File
-from lib.ssh_clients.ssh_client import BaseCommand
 
 
-UTILITIES_TIMEOUT = 5
-
-
-class LsBaseCommand(BaseCommand, BaseCommandErrorHandling):
+class LsBaseCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
@@ -59,7 +55,7 @@ class LsBaseCommand(BaseCommand, BaseCommandErrorHandling):
         if self.dereference:
             options += "-L "
 
-        return f"ls " f"{options}" f"-- '{self.target_path}'"
+        return f"{super().get_command()} ls " f"{options}" f"-- '{self.target_path}'"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         # Example of ls output
