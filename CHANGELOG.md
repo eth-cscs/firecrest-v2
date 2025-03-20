@@ -5,26 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.1]
+## [2.2.2] - OPEN
 
 ### Added
 
-- Added log tracing of SSH commands, filesystem and scheduler interactions with standard JSON format.
-- Added f7tlog for debugging and general usage.
-
-
-## [2.2.1]
-
-### Added
 
 ### Changed
 
 ### Fixed
 
-- Templates for upload and download using `filesystems/transfer` endpoint.
-- Return error code 408 when basic commands timeout on the cluster.
+- Demo launcher ssh loging node checks socket connection instead executing a ping
+- Removed deprecated keycloak configuration from docker dev environment
 
-## [2.2.1] - OPEN
+## [2.2.1]
 
 ### Added
 - FirecREST Web UI has been added to the demo image.
