@@ -1,27 +1,11 @@
-# FirecREST v2
+# Getting started
 
-A lightweight REST API for accessing HPC resources.
-
-FirecREST is a high performance proxy providing a standardized interface to access HPC infrastructures from the web, with authentication and authorization, supporting multiple schedulers, storages, and filesystems types.
-
-## Features
-
--	🔐 Authentication and authorization layer integrating [OAuth v2](https://oauth.net/2/) and [OpenFGA](https://openfga.dev/)
-- ⚡ High-performance RESTful API powered by [asyncIO](https://docs.python.org/3/library/asyncio.html)
--	✨ Abstracts underlying HPC technology (schedulers, filesystems, storage, etc.)
--	📡 Async SSH connection pool enabling high-throughput regime
--	🩺 Integrated HPC cluster health checker
--	💠 Modular architecture with a lightweight and modern stack
-
-
-<!-- 
-
-# FirecREST v2 Demo
+## Quick start
 
 The FirecREST demo allows you to run FirecREST on your machine and connect to your local HPC cluster using your personal credentials.
 This setup is for *illustrative and evaluation purposes only* and is *not intended for production use*.
 
-## Running the FirecREST v2 Demo  
+### Running the FirecREST v2 Demo Launcher
 
 Ensure that [Docker](https://www.docker.com/) is installed and running on your machine, then execute the following command to start the FirecREST v2 demo container:
 
@@ -34,7 +18,7 @@ Once the container is running, open your browser and navigate to:
 ➡️ **[http://localhost:8025/](http://localhost:8025/)**
 
 
-# Running FirecREST v2 with Docker-Compose
+## Trying FirecREST in a full docker environment
 
 To test and debug FirecREST locally we provide a local Docker environment that already contain all required dependencies (Slurm cluster, identity provider, storage, etc.). Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
 
@@ -44,12 +28,12 @@ Alternatively, use the command line:
 ```console
 docker compose -f docker-compose.yml up
 ```
-## Local Environment
+### Local Environment
 
 The environment comes with an identity provider (Keycloack) for authentication, a dummy hpc cluster (with Slurm) and a storage service.
 
 
-### Users
+#### Users
 
 The environment comes with two predefined users:
 
@@ -57,7 +41,7 @@ The environment comes with two predefined users:
 - **firesrv** this account represents a service account 
 
 
-## Accessing Firecrest
+#### Accessing Firecrest
 
 - The Firecrest endpoints are accessible at: http://localhost:8000/
 - The Firecrest API swagger: http://localhost:8000/docs and http://localhost:8000/redoc
@@ -79,5 +63,10 @@ CLIENT_SECRET="<secret>"
 curl -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token \
      -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
      -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: */*"
-``` -->
+```
+
+### Example
+
+- List filesystem
+- Run a job
 
