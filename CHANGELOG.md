@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Demo launcher ssh loging node checks socket connection instead executing a ping
+- Demo launcher ssh login node checks socket connection instead executing a ping
 - Removed deprecated keycloak configuration from docker dev environment
 
 ## [2.2.1]
