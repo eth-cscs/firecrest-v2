@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import os
 import sys
+import socket
 from packaging.version import Version
 from fastapi import Depends, FastAPI, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -148,9 +149,18 @@ def generate_token(username: str):
     return token
 
 
-def ping(host):
-    command = ["ping", "-c", "1", host]
-    return subprocess.call(command) == 0
+def check_ssh_socket(hostname, port=22):
+    try:
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_socket.connect((hostname, port))
+    except Exception as ex:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unable to establish connection with {hostname} on port {port}",
+        ) from ex
+    else:
+        test_socket.close()
+    return True
 
 
 async def sshClient(username, sshkey_private, sshkey_cert_public):
@@ -367,15 +377,9 @@ async def ssh_connection(ssh_connection: SSHConnection):
     try:
 
         if ssh_connection.proxyhost:
-            if not ping(ssh_connection.proxyhost):
-                raise HTTPException(
-                    status_code=400, detail="Unable to ping ssh proxy hostname"
-                )
+            check_ssh_socket(ssh_connection.proxyhost, ssh_connection.proxyport)
         else:
-            if not ping(ssh_connection.hostname):
-                raise HTTPException(
-                    status_code=400, detail="Unable to ping login node hostname"
-                )
+            check_ssh_socket(ssh_connection.hostname, ssh_connection.hostport)
 
         demo_cluster = settings.clusters[0]
         ssh_client_pool = UnsafeSSHClientPool(
