@@ -1,83 +1,27 @@
 # FirecREST v2
 
-A lightweight REST API for accessing HPC resources.
+FirecREST is an open-source, lightweight REST API for accessing HPC resources developed by the Swiss National Supercomputing Centre ([CSCS](https://www.cscs.ch/)).
 
-FirecREST is a high performance proxy providing a standardized interface to access HPC infrastructures from the web, with authentication and authorization, supporting multiple schedulers, storages, and filesystems types.
+FirecREST presents a high performance proxy providing a standardized interface to access HPC infrastructures from the web, with authentication and authorization, supporting multiple schedulers, storages, and filesystems types.
+
+Using FirecREST, users and web developers can **automate** access to HPC resources and create client applications, pipelines, and workflow managers on the top of HPC with a standard and secure interface.
 
 ## Features
 
--	🔐 Authentication and authorization layer integrating [OAuth v2](https://oauth.net/2/) and [OpenFGA](https://openfga.dev/)
+-	🔐 Authentication and authorization layer integrating [Open ID Connect (OIDC)](https://openid.net/developers/how-connect-works/)/[OAuth2](https://oauth.net/2/) and [OpenFGA](https://openfga.dev/)
 - ⚡ High-performance RESTful API powered by [asyncIO](https://docs.python.org/3/library/asyncio.html)
--	✨ Abstracts underlying HPC technology (schedulers, filesystems, storage, etc.)
+-	✨ Abstracts underlying HPC technology (schedulers, filesystems, storage, etc.) relying in [REST API](https://restfulapi.net/) concept and [OpenAPI](https://www.openapis.org/) specification
 -	📡 Async SSH connection pool enabling high-throughput regime
 -	🩺 Integrated HPC cluster health checker
 -	💠 Modular architecture with a lightweight and modern stack
+- 💻 Easy to integrate with your code using [pyFirecREST](https://pyfirecrest.readthedocs.io/en/stable/) Python library
 
+## Get involved
 
-<!-- 
+- Check out our [GitHub repository](https://github.com/eth-cscs/firecrest-v2), clone the repo, try the Demo environment, create issues, contribute, and more!
 
-# FirecREST v2 Demo
+- Join the [FirecREST Slack community](https://firecrest-community.slack.com/) or contact us via [email](mailto:firecrest@cscs.ch)
 
-The FirecREST demo allows you to run FirecREST on your machine and connect to your local HPC cluster using your personal credentials.
-This setup is for *illustrative and evaluation purposes only* and is *not intended for production use*.
+## Start using FirecREST
 
-## Running the FirecREST v2 Demo  
-
-Ensure that [Docker](https://www.docker.com/) is installed and running on your machine, then execute the following command to start the FirecREST v2 demo container:
-
-```console
-docker run -p 8025:8025 -p 5025:5025  -p 3000:3000 --pull always ghcr.io/eth-cscs/firecrest-v2-demo:latest
-```
-
-Once the container is running, open your browser and navigate to:
-
-➡️ **[http://localhost:8025/](http://localhost:8025/)**
-
-
-# Running FirecREST v2 with Docker-Compose
-
-To test and debug FirecREST locally we provide a local Docker environment that already contain all required dependencies (Slurm cluster, identity provider, storage, etc.). Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
-
-To start a local Firecrest environment in VS Code right click the selected environment (e.g."docker-compose.yml") and select "Compose up"
-
-Alternatively, use the command line:
-```console
-docker compose -f docker-compose.yml up
-```
-## Local Environment
-
-The environment comes with an identity provider (Keycloack) for authentication, a dummy hpc cluster (with Slurm) and a storage service.
-
-
-### Users
-
-The environment comes with two predefined users:
-
-- **fireuser** this account represents an actual user
-- **firesrv** this account represents a service account 
-
-
-## Accessing Firecrest
-
-- The Firecrest endpoints are accessible at: http://localhost:8000/
-- The Firecrest API swagger: http://localhost:8000/docs and http://localhost:8000/redoc
-
-To access most of the end-points you need an authorization token. Firecrest authorization is based on the standard [Oauth2 Client Credentials Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/client-credentials-flow)
-
-
-All local environments come with pre-configured test credentials:
-
-```credentials
-client: firecrest-test-client
-secret: wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk
-```
-
-To obtain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloack's Oauth2 token end-point:
-```bash
-CLIENT_ID="<client>"
-CLIENT_SECRET="<secret>"
-curl -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token \
-     -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
-     -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: */*"
-``` -->
-
+- Follow the [Getting Started](getting_started/README.md) documentation and start exploring the features of FirecREST first hand
