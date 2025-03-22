@@ -47,7 +47,7 @@ jobs:
         git checkout $GH_PAGES_BRANCH
         mv gh_/*tgz ./charts/
 
-        helm repo index ./charts --url https://eth-cscs.github.io/firecrest-v2 --merge ./charts/index.yaml
+        helm repo index ./charts --url https://eth-cscs.github.io/firecrest-v2/charts --merge ./charts/index.yaml
 
         git add ./charts/*.tgz ./charts/index.yaml
         git commit -m "New firecrest-api helm chart release (${{ github.ref_name }})"
