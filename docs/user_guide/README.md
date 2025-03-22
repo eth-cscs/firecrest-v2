@@ -1,10 +1,7 @@
 # User Guide
 
-
-- Explain how the Staging area works for External Transfers
 - Difference between blocking and non-blocking data transfer
-- Usage of API
-  - Link to the API Ref
+- Explain how the Staging area works for External Transfers
 - Usage of SDK
   - Link to pyFirecREST Ref
 
@@ -50,4 +47,73 @@ curl --request POST \
 This grant is intended for web applications. The user's browser is redirected (HTTP 302) to the authorization server, which handles authentication (e.g., via username/password, two-factor authentication, etc.).
 
 After successful authentication, the authorization server redirects the browser back to a pre-registered endpoint in the web application, passing an authorization code. The web application then uses its own credentials (`client_id` and `client_secret`) along with the authorization code to request an access token from the authorization server.
+
+
+## API Reference
+
+### Accessing HTTP RESTful Resources
+
+The FirecREST API follows RESTful design principles, allowing access to the underlying resources through standard HTTP requests.
+
+Each request consists of:
+
+- **Endpoint (URL):** The address of the resource being accessed.
+- **Method:** One of `GET`, `POST`, `PUT`, or `DELETE`, depending on the action.
+- **Headers:** Metadata necessary for authorisation.
+- **Body:** The request payload in JSON format.
+
+Below is a quick overview of the methods:
+
+| Method  | Description  |
+|---------|-------------|
+| `GET`   | Retrieves resources |
+| `POST`  | Creates resources  |
+| `PUT`   | Updates resources  |
+| `DELETE`| Deletes resources  |
+
+The request body format is specific to each call, the full list of available API calls and requests can be found here: **[API reference](./openapi)**.
+
+
+### Response Structure
+
+Each FirecREST API response consists of:
+
+- **Status Code:** Indicates the outcome of the request.
+- **Headers:** Metadata related to the response.
+- **Body:** The response data in JSON format.
+
+Below is an overview of HTTP status codes and their meanings:
+
+| Code  | Category        | Description  |
+|-------|---------------|-------------|
+| 1xx   | Informational  | Communicates protocol-level information |
+| 2xx   | Success        | Indicates the request was successfully processed |
+| 3xx   | Redirection    | Instructs the client to take additional action |
+| 4xx   | Client Error   | Indicates an issue with the request sent by the client |
+| 5xx   | Server Error   | Indicates an issue on the server's side |
+
+### Resource Groups
+
+FirecREST API endpoints are categorized into three groups:
+
+| Group       | URL Prefix       | Description |
+|------------|-----------------|-------------|
+| **Status**   | `/status/...`    | Provides status information about FirecREST and underlying resources |
+| **Compute**  | `/compute/...`   | Grants access to the job scheduler |
+| **Filesystem** | `/filesystem/...` | Provides access to the filesystem |
+
+### Targeting Systems
+
+A single FirecREST instance can manage multiple HPC systems. Most endpoints require specifying which system to access by including the system name in the endpoint path. 
+
+For example:
+```plaintext
+/compute/{system_name}/jobs
+```
+The `{system_name}` should correspond to the cluster name provided in the FirecREST configuration.  Refer to the [configuration](./setup/conf) section for details.
+
+
+### Full API Endpoints List
+
+The complete list of FirecREST API endpoints is available here:  **[API reference](./openapi)**
 
