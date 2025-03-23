@@ -1,12 +1,5 @@
 # User Guide
 
-- Difference between blocking and non-blocking data transfer
-- Explain how the Staging area works for External Transfers
-- Usage of SDK
-  - Link to pyFirecREST Ref
-
-
-
 ## Authentication
 FirecREST authentication follows the [OpenID Connect (OIDC)](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol) standard.
 
@@ -117,3 +110,49 @@ The `{system_name}` should correspond to the cluster name provided in the FirecR
 
 The complete list of FirecREST API endpoints is available here:  **[API reference](./openapi)**
 
+## Synchronous and Asynchronous Calls
+
+Most FirecREST endpoints operate synchronously, meaning that the invoked operation is completed before a response is provided. All synchronous responses have a fixed timeout of 5 seconds. If the operation cannot be completed within this time limit, an error is returned.
+
+A limited set of filesystem-specific operations are executed asynchronously. These calls are non-blocking, and a jobId is returned. It is the user’s responsibility to track the status of the remote job and retrieve the result upon completion.
+
+
+All asynchronous endpoints are located under  `/transfer` and follow this path structure:
+
+```
+/filesystem/{system_name}/transfer/...
+```
+
+## File transfer 
+
+FirecREST provides two methods for transferring files:
+- Small files (up to 5MB) can be uploaded or downloaded directly.
+- Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
+
+Small file transfer endpoints:
+ - `/filesystem/{system_name}/ops/download`
+ - `/filesystem/{system_name}/ops/upload`
+
+ Large file transfer endpoints:
+ - `/filesystem/{system_name}/transfer/download`
+ - `/filesystem/{system_name}/transfer/upload`
+
+### Downloading Large Files
+
+When requesting a large file download, FirecREST returns a download URL and a jobId. Once the remote job is completed, the user can retrieve the file using the provided URL.
+
+### Uploading Large Files
+For large file uploads, FirecREST provides multi part upload URLs, the number of URLs depends on the file size. The user must split the file accordingly and upload each part to the assigned URL.
+
+Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.
+
+## FirecREST SDK
+
+[PyFirecREST](https://github.com/eth-cscs/pyfirecrest) is a Python library designed to simplify the implementation of FirecREST clients.
+
+### Installation
+To install PyFirecREST, run:
+```
+python3 -m pip install pyfirecrest
+```
+For more details, visit the [official documentation page](pyfirecrest.readthedocs.io).
