@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, Path, status
 from typing import Annotated, Any
 
@@ -26,6 +27,7 @@ from firecrest.dependencies import (
 # models
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from firecrest.status.models import (
+    GetLiveness,
     GetPartitionsResponse,
     GetReservationsResponse,
     GetSystemsResponse,
@@ -44,6 +46,11 @@ router_on_systen = create_router(
     prefix="/status/{system_name}",
     tags=["status"],
     dependencies=[Depends(APIAuthDependency(authorize=True))],
+)
+
+router_liveness = create_router(
+    prefix="/status/liveness",
+    tags=["status"],
 )
 
 
@@ -162,3 +169,29 @@ async def get_userinfo(
     async with ssh_client.get_client(username, access_token) as (client):
         output = await client.execute(id)
         return output
+
+
+@router_liveness.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=GetLiveness,
+    response_description="Query liveness",
+)
+async def get_liveness() -> Any:
+
+    oldest_check = -1
+    healthcheck_runs = {}
+
+    # if not clusters are configured the health checker is not running
+    if len(settings.clusters) == 0:
+        oldest_check = 0
+
+    for cluster in settings.clusters:
+        if cluster.servicesHealth and len(cluster.servicesHealth) > 0:
+            timestamp = cluster.servicesHealth[0].last_checked
+            time_difference = (datetime.now(timezone.utc) - timestamp).seconds
+            if time_difference > oldest_check:
+                oldest_check = time_difference
+            healthcheck_runs[cluster.name] = cluster.servicesHealth[0].last_checked
+
+    return {"healthcheck_runs": healthcheck_runs, "last_update": oldest_check}

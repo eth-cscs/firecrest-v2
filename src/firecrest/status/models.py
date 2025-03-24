@@ -3,7 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import List
+from datetime import datetime
+from typing import Dict, List
 
 # configs
 from firecrest.config import HPCCluster
@@ -15,6 +16,11 @@ from lib.scheduler_clients.slurm.models import (
     SlurmPartitions,
     SlurmReservations,
 )
+
+
+class GetLiveness(CamelModel):
+    healthcheck_runs: Dict[str, datetime] = None
+    last_update: int = None
 
 
 class GetSystemsResponse(CamelModel):
