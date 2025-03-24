@@ -32,6 +32,7 @@ RUN if [ "$ENVIRONMENT" = "development" ] ; then pip install --no-cache-dir --up
 # Copy the code
 COPY ./src/lib ./lib
 COPY ./src/firecrest ./firecrest
+COPY ./build/docker/firecrest-api/check_liveness.py ./
 
 COPY ./build/docker/firecrest-api/default-config ./default-config
 
