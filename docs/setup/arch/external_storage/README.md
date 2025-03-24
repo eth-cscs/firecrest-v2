@@ -57,9 +57,12 @@ The diagram below illustrates the sequence of calls required to correctly proces
 4. The transfer job creates the S3 object and transfers the data from the specified source into it
 5. Once the transfer is complete, the user can access the S3 object in the bucket until the expiration period ends
 
+Although single-file download is an option, S3 supports [HTTP Range Request](https://www.rfc-editor.org/rfc/rfc9110.html#name-range-requests), which can be used to parallelly download chunks of a file stored in the S3 bucket.
 
-## API endpoints
 
-### Upload
+## AWS S3 References
 
-### Download
+* [(AWS) Uploading and copying objects using multipart upload](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html)
+* [(AWS) Multipart upload limits](https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html)
+* [HTTP Range Request](https://www.rfc-editor.org/rfc/rfc9110.html#name-range-requests)
+
