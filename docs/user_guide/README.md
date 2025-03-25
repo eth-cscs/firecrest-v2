@@ -152,7 +152,7 @@ Once all parts have been uploaded, the user must call the provided complete uplo
 
 #### Multi part upload example
 
-Split your large file into as many parts as provided partsUploadUrls by the `/filesystem/{{system}}/transfer/upload` end-point:
+Split your large file into as many parts as provided partsUploadUrls by the `/filesystem/{system}/transfer/upload` end-point:
 
 ```
 split -n 7 -d large-file.zip large-file-part-
