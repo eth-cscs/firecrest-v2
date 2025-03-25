@@ -33,7 +33,11 @@ curl --request POST \
   --data client_secret=wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk
 ```
 
-**Note:** The above `curl` command is configured to work with the provided Docker Compose environment.
+**Note:** The above `curl` command is configured to work with the provided Docker Compose environment. Expected output example:
+```
+{"access_token":"<token>","expires_in":300,"token_type":"Bearer","scope":"firecrest-v2 profile email"} 
+```
+
 
 ### Authorization Code Grant
 
@@ -126,7 +130,7 @@ All asynchronous endpoints are located under  `/transfer` and follow this path s
 ## File transfer 
 
 FirecREST provides two methods for transferring files:
-- Small files (up to 5MB) can be uploaded or downloaded directly.
+- Small files (up to 5MB by [default](./setup/conf)) can be uploaded or downloaded directly.
 - Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
 
 Small file transfer endpoints:
@@ -146,6 +150,26 @@ For large file uploads, FirecREST provides multi part upload URLs, the number of
 
 Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.
 
+#### Multi part upload example
+
+Split your large file into as many parts as provided partsUploadUrls by the `/filesystem/{{system}}/transfer/upload` end-point:
+
+```
+split -n 7 -d large-file.zip large-file-part-
+```
+
+Upload each individual part following the correct part order:
+
+```
+curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&partNumber=1&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400' --upload-file large-file-part-00
+```
+
+Complete the upload by calling the completeUploadUrl:
+
+```
+curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400'
+```
+
 ## FirecREST SDK
 
 [PyFirecREST](https://github.com/eth-cscs/pyfirecrest) is a Python library designed to simplify the implementation of FirecREST clients.
@@ -156,3 +180,21 @@ To install PyFirecREST, run:
 python3 -m pip install pyfirecrest
 ```
 For more details, visit the [official documentation page](pyfirecrest.readthedocs.io).
+
+#### List files example
+
+```python
+import firecrest as fc
+
+class MyAuthorizationClass:
+    def get_access_token(self):
+        return <TOKEN>
+
+client = fc.v2.Firecrest(firecrest_url=<firecrest_url>, authorization=MyAuthorizationClass())
+
+files = client.list_files("cluster", "/home/test_user")
+print(files)
+
+```
+
+More examples are available at: [pyfirecrest.readthedocs.io](pyfirecrest.readthedocs.io)
