@@ -111,6 +111,7 @@ class HealthCheckType(str, Enum):
     filesystem = "filesystem"
     ssh = "ssh"
     s3 = "s3"
+    exception = "exception"
 
 
 class BaseServiceHealth(CamelModel):
@@ -136,6 +137,10 @@ class SSHServiceHealth(BaseServiceHealth):
 
 
 class S3ServiceHealth(BaseServiceHealth):
+    pass
+
+
+class HealthCheckException(BaseServiceHealth):
     pass
 
 
@@ -180,6 +185,7 @@ class HPCCluster(CamelModel):
             | FilesystemServiceHealth
             | SSHServiceHealth
             | S3ServiceHealth
+            | HealthCheckException
         ]
     ] = None
     probing: Optional[ClusterProbing] = None

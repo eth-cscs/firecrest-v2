@@ -41,6 +41,7 @@ from firecrest.status.health_check.health_checker import (
 from firecrest.status.router import (
     router as status_router,
     router_on_systen as status_system_router,
+    router_liveness as status_liveness_router,
 )
 from firecrest.compute.router import router as compute_router
 from firecrest.filesystem.router import router as filesystem_router
@@ -165,6 +166,7 @@ def register_middlewares(app: FastAPI):
 def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(status_router)
     app.include_router(status_system_router)
+    app.include_router(status_liveness_router)
     app.include_router(compute_router)
     app.include_router(filesystem_router)
 

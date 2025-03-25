@@ -20,7 +20,6 @@ spec:
       {{- range $key, $value := .Values.template.annotations }}
         {{ $key }}: {{ $value | quote}}
       {{- end }}
-
     spec:
       containers:
         - name: firecrest-api
@@ -63,6 +62,14 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
+      livenessProbe:
+        exec:
+          command:
+            - python3
+            - /app/check_liveness.py
+        initialDelaySeconds: 30
+        periodSeconds: 60
+        failureThreshold: 3
 
             
 ---
