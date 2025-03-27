@@ -43,7 +43,7 @@ RUN groupadd service-accounts
 RUN useradd -m -s /bin/bash --no-user-group --gid service-accounts firesrv    && echo 'firesrv:sfiresrv'      | chpasswd
 
 ADD --chown=fireuser:users ./build/environment/keys/fireuser.pub /home/fireuser/.ssh/authorized_keys
-ADD --chown=firesrv:users ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
+ADD --chown=firesrv:service-accounts ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
 
 # Setup SSH keys
 RUN chmod 0755 /var/run/sshd
