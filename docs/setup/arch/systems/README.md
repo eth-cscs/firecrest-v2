@@ -2,7 +2,7 @@
 
 ## The simplistic approach
 
-The goal of FirecREST is to provide an HTTP interface to HPC, this means that the interface FirecREST presents to the users and applications must handle HTTP requests with parameters, verbs, etc.
+The goal of FirecREST is to provide an HTTP interface to HPC, this means that the interface FirecREST presents to the users and applications must handle HTTP requests with according parameters, verbs, etc.
 
 FirecREST receives these requests and translates them into HPC logic, and after the operations are done (ie, commands executed, data uploaded, etc) it returns an HTTP response that complies with the protocol used.
 
@@ -10,7 +10,7 @@ FirecREST receives these requests and translates them into HPC logic, and after 
 
 ## Going deeper
 
-The command execution from FirecREST API server to the HPC cluster is done **via SSH connection using HPC cluster users' credentials**.
+The command execution from FirecREST API server to the HPC cluster is done **via SSH connection using HPC system users' credentials**.
 
 This means that FirecREST can be installed in any platform or infrastructure (cloud provider, VM, local system) with SSH access to the target system(s) configured. It doesn't need to be installed in the same VPN or VLAN of the system.
 
