@@ -100,6 +100,9 @@ Subsystem       sftp    /usr/libexec/openssh/sftp-server
 
 PubkeyAcceptedKeyTypes ssh-rsa,ssh-rsa-cert-v01@openssh.com,ssh-ed25519-cert-v01@openssh.com,ssh-ed25519
 PermitRootLogin  yes
+
+# Trusted CA key during image build (see Dockerfile)
+TrustedUserCAKeys /etc/ssh/ca-key.pub
 #DenyGroups root bin admin sys
 
 MaxAuthTries 1000
