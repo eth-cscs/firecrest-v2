@@ -1,17 +1,26 @@
 # Architecture of FirecREST
 
-FirecREST is presented as a simple interface to access HPC resources with an HTTP enabled API.
+FirecREST is presented as a simple interface to access HPC resources with an HTTP enabled API. 
 
 In this chapter it is shown how FirecREST is configured from the architectural point of view to provide this integration with HPC clusters, workload manager and schedulers, authentication, data transfer, etc.
 
-## HPC Systems and workload manager and schedulers
+## The full picture
 
-[System Docs](systems/README.md)
+In the figure below it can be seen the different components of the ecosystem of FirecREST. The API doesn't provide these components, instead, it uses known standards in the industry while providing abstractions to support multiple techonologies.
 
-## Authentication/Authorization
+![f7t_arch_complete](../../assets/img/arch_complete_infra.svg)
 
-## Health Checks and liveness probes
+The dashed lines represents components that are optional, while the solid lines are mandatory for a proper use of FirecREST.
 
-## Data Transfers
+
+### (1) HPC Systems and workload manager and schedulers
+
+Check out [here](./systems/README.md) how does FirecREST connect to the systems to execute commands and interact with the scheduler and filesystems.
+
+### (2) Authentication/Authorization
+
+### (3) Data Transfers
 
 FirecREST handles data transfer up to 5 TB. See how this is done [here](./external_storage/README.md)
+
+### (4) Health checks
