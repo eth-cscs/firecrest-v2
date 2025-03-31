@@ -21,22 +21,22 @@ This means that FirecREST can be installed in any platform or infrastructure (cl
 
 To answer to the question on "how the SSH credentials are obtained or created", FirecREST provides an integration with JSON Web Tokens used to authenticate agains the API.
 
-FirecREST uses the `username` or `preferred_username` claim from the JWT access token created by the Identity Provider when the user or application [authenticated to use the API](../auth/README.md).
+FirecREST uses the `username` or `preferred_username` claim from the JWT access token created by the Identity Provider (IdP) when the user or application [authenticated to use the API](../auth/README.md).
 
 > [!IMPORTANT]
-> This `username` value on the token must be the same username (`UID`) of the user on the HPC system. Otherwise the SSH credential created on its behalf won't be allowed in the system
+> This `username` value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.
 
 The JWT is decoded by FirecREST using the IdP public key (checking that the token is valid in time and is from a trusted source), the `username` is extracted and the SSH key is created for the user and then sent to the cluster in the SSH connection.
 
 ### Obtaining SSH credentials on behalf of the user
 
-FirecREST provides an abstraction to allow different ways of getting SSH credentials for the user. On the official FirecREST releases, these are the 2 options available:
+FirecREST provides an abstraction to allow different ways of getting SSH credentials for the user. Currently, there are the 2 options available:
 
 [](){#f7t-ssh-service}
 
 1. Using an "SSH Service"
 
-    If the HPC center enabling FirecREST provides an API or web service that translates a JWT into an SSH credential, you can connect FirecREST to this service
+    If the HPC center has an API or web service that translates a JWT into an SSH credential, you can connect FirecREST to this service.
 
     ![f7t_ssh_service](../../../assets/img/command_exec_sshservice.svg)
 
