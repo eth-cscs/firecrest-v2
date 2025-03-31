@@ -26,7 +26,7 @@ FirecREST uses the `username` or `preferred_username` claim from the JWT access 
 > [!IMPORTANT]
 > This `username` value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.
 
-The JWT is decoded by FirecREST using the IdP public key (checking that the token is valid in time and is from a trusted source), the `username` is extracted and the SSH key is created for the user and then sent to the cluster in the SSH connection.
+The JWT signature is verified using the Identity Provider (IdP) public key, and then the token time validity is checked. If both are successful, the `username` is extracted and a SSH key is created for the user if there isn't an active connection to the cluster.
 
 ### Obtaining SSH credentials on behalf of the user
 
@@ -40,7 +40,7 @@ FirecREST provides an abstraction to allow different ways of getting SSH credent
 
     ![f7t_ssh_service](../../../assets/img/command_exec_sshservice.svg)
 
-    In this case, FirecREST uses the service providing the JWT used to authenticate with FirecREST, therefore the SSH Service must trust on the IdP of FirecREST.
+    In this case, the user sends the JWT to FirecREST and it is forwarded to the SSH Service. Therefore, the IdP that generates JWT must be trusted by both FirecREST and the SSH Service.
 
     Once the SSH credential is created, FirecREST uses the SSH credential to execute commands.
 
@@ -59,7 +59,7 @@ FirecREST provides an abstraction to allow different ways of getting SSH credent
 > [!IMPORTANT]
 > All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high througput regime via API
 
-It is recommended that FirecREST command execution has a specific `Match` section on the [Open SSH Configuration](https://man.openbsd.org/OpenBSD-current/man5/ssh_config.5#Match) of the target system:
+It is recommended to set a specific `Match` section on the [Open SSHD configuration](https://man.openbsd.org/OpenBSD-current/man5/sshd_config.5#Match) for requests from FirecREST:
 
 ```bash
 $ cat /etc/ssh/sshd_config
