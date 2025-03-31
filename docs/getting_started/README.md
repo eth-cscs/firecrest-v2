@@ -64,8 +64,8 @@ secret: wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk
 To obtain an access token you can either use the Authorize button in the [swagger documentation](http://localhost:8000/docs) or directly access Keycloak's OAuth2 token end-point:
 
 ```bash
-$ CLIENT_ID="<client>"
-$ CLIENT_SECRET="<secret>"
+$ CLIENT_ID="firecrest-test-client"
+$ CLIENT_SECRET="wZVHVIEd9dkJDh9hMKc6DTvkqXxnDttk"
 $ access_token$(curl -s -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token \
   -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
   -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: */*" | jq --raw-output ."access_token")
@@ -74,13 +74,13 @@ eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ1Xz.......
 
 ```
 
-### Examples
+### API call examples
 
 > [!NOTE]
 > We use for these examples [curl](https://curl.se/) and [jq](https://jqlang.org/) commands
 
 > [!NOTE]
-> In this dev environment there are 2 clusters for testing: `cluster-slurm-ssh` and `cluster-slurm-api`. We will use the first in this example
+> In this dev environment there are 2 clusters for testing: `cluster-slurm-ssh` and `cluster-slurm-api`. We will use the first one in this example
 
 
 
