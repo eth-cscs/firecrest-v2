@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import asyncssh
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
 
@@ -163,11 +163,12 @@ def check_ssh_socket(hostname, port=22):
     return True
 
 
-async def sshClient(username, sshkey_private, sshkey_cert_public):
+async def sshClient(username, sshkey_private, passphrase, sshkey_cert_public):
     demo_cluster = settings.clusters[0]
     options = asyncssh.SSHClientConnectionOptions(
         username=username,
         client_keys=[sshkey_private],
+        passphrase=passphrase,
         client_certs=[sshkey_cert_public],
         known_hosts=None,
     )
@@ -264,10 +265,13 @@ async def boot(scheduler: Scheduler):
         sshkey_private = asyncssh.import_private_key(
             credentials.private_key, passphrase=credentials.passphrase
         )
+        sshkey_cert_public = ()
         if credentials.public_cert:
             sshkey_cert_public = asyncssh.import_certificate(credentials.public_cert)
 
-        client = await sshClient(username, sshkey_private, sshkey_cert_public)
+        client = await sshClient(
+            username, sshkey_private, credentials.passphrase, sshkey_cert_public
+        )
         sinfo = SinfoVersionCommand()
         version = await client.execute(sinfo)
         scheduler_campatible = Version(version) > Version("22.05")
@@ -306,6 +310,11 @@ class Credentials(BaseModel):
     public_cert: Optional[str] = None
     passphrase: Optional[str] = None
 
+    @field_validator("*")
+    @classmethod
+    def empty_as_none(cls, v):
+        return v or None if isinstance(v, (str,)) else v
+
 
 @app.post("/credentials")
 async def credentials(credentials: Credentials):
@@ -339,7 +348,10 @@ async def credentials(credentials: Credentials):
         settings.ssh_credentials[credentials.username] = ssh_credential
 
         client = await sshClient(
-            credentials.username, sshkey_private, sshkey_cert_public
+            credentials.username,
+            sshkey_private,
+            credentials.passphrase,
+            sshkey_cert_public,
         )
         pwd = PwdCommand()
         user_home = (await client.execute(pwd)).removesuffix("/" + credentials.username)
