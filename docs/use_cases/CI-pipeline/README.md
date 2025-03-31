@@ -15,7 +15,7 @@ Even if you have experience with another programming language, you'll likely fin
 1. **Create an OIDC client, if you haven't already.**
 
 1. **Create a GitHub repository**
-    - Copy all the files of this folder in the root folder of your repo.
+    - Copy all the files of the folder [docs/use_cases/CI-pipeline](https://github.com/eth-cscs/firecrest-v2/tree/master/docs/use_cases/CI-pipeline) in the root folder of your repository.
     - The workflows may be disabled by default in your repo so go ahead and enable them in the "Actions" tab of your repository.
 
 1. **Inspect the code that will be tested:**
