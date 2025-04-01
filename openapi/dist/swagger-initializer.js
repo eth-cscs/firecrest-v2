@@ -6,8 +6,6 @@ window.onload = function() {
     urls: [
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-latest.yaml", name: "Latest"},
       //add-newones-here
-      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-master.yaml", name: "master"},
-      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-2.2.3.yaml", name: "2.2.3"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-2.2.3.yaml", name: "2.2.3"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-2.2.2.yaml", name: "2.2.2"},
       {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-2.2.1.yaml", name: "2.2.1"},
