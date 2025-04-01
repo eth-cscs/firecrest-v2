@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Improved health checker reliability
+- Fixed Demo launcher when no public certificate is provided
 
 ## [2.2.2] - OPEN
 
