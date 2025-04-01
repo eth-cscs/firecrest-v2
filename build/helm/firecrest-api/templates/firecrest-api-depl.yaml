@@ -40,6 +40,14 @@ spec:
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
             readOnly: true
+          livenessProbe:
+            exec:
+              command:
+                - python3
+                - /app/check_liveness.py
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            failureThreshold: 3
       volumes:
         {{- range .Values.volumes }}
         - name: {{ .name }}
@@ -62,14 +70,6 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-      livenessProbe:
-        exec:
-          command:
-            - python3
-            - /app/check_liveness.py
-        initialDelaySeconds: 30
-        periodSeconds: 60
-        failureThreshold: 3
 
             
 ---
