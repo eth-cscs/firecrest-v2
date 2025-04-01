@@ -1,4 +1,4 @@
-site_name: FirecREST v2 Documentation 
+site_name: FirecREST v2 Documentation
 
 # provide a link to the docs in top RHS corner
 repo_url: https://github.com/eth-cscs/firecrest-v2/
@@ -14,8 +14,8 @@ nav:
   - 'Deployment':
     - deploy/README.md
   - 'Usage':
-    - use/README.md
-   
+    - use_cases/README.md
+
 theme:
   name: material
   language: en
