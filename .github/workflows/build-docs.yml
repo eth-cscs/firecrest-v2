@@ -55,6 +55,7 @@ jobs:
         git push -u origin $GH_PAGES_BRANCH
 
   publish-openapi-swager:
+    if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     env:
         GH_PAGES_BRANCH: gh-pages
