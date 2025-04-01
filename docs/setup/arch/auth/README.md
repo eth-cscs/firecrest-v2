@@ -1,6 +1,6 @@
 # Authentication and Authorization on FirecREST
 
-FirecREST relies on well-known standards for authentication ([AuthN](https://auth0.com/docs/authenticate)) and authorization ([AuthZ](https://auth0.com/intro-to-iam/what-is-authorization)) with the idea of providing seamless integration with the most extended industry standards for resource access and permissions.
+FirecREST relies on industry standards for authentication ([AuthN](https://auth0.com/docs/authenticate)) and authorization ([AuthZ](https://auth0.com/intro-to-iam/what-is-authorization)), providing easy integration third party auth solutions.
 
 > [!NOTE]
 > You can refer to this [document](https://auth0.com/docs/get-started/identity-fundamentals/authentication-and-authorization) to better understand the difference between AuthN and AuthZ.
