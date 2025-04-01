@@ -2,8 +2,8 @@
 
 FirecREST relies on industry standards for authentication ([AuthN](https://auth0.com/docs/authenticate)) and authorization ([AuthZ](https://auth0.com/intro-to-iam/what-is-authorization)), providing easy integration third party auth solutions.
 
-> [!NOTE]
-> You can refer to this [document](https://auth0.com/docs/get-started/identity-fundamentals/authentication-and-authorization) to better understand the difference between AuthN and AuthZ.
+!!! Note
+    You can refer to this [document](https://auth0.com/docs/get-started/identity-fundamentals/authentication-and-authorization) to better understand the difference between AuthN and AuthZ.
 
 ## Authentication
 
@@ -17,16 +17,16 @@ This means that the HPC center using FirecREST must be supplied with an Identity
 
 As IdPs that supports OIDC/OAuth2 we can find [Keycloak](https://www.keycloak.org/), [ShibbolethIDP5](https://wiki.shibboleth.net/confluence/display/IDPPLUGINS/OIDC+OP), [Auth0](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol), [WSO2 Identity Server](https://wso2.com/identity-and-access-management), among others.
 
-> [!NOTE]
-> Note that in order to provide HPC user information in the IdP, this must be somehow synchronized with the user database of the HPC center (ie, LDAP). For instance, in ShibbolethIDP5 it is mandatory to provide a functional LDAP server to start the IdP service.
+!!! Note
+    Note that in order to provide HPC user information in the IdP, this must be somehow synchronized with the user database of the HPC center (ie, LDAP). For instance, in ShibbolethIDP5 it is mandatory to provide a functional LDAP server to start the IdP service.
 
 
 ### Token validation
 
 The public key of the IdP must be set on FirecREST configuration to decode the JWT and check the access token [has not expired](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4) and has been [issued by a trusted IdP](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1). This **offline validation** of the access token can also be complemented by evaluating specific **[scopes](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3)** and **[roles](https://datatracker.ietf.org/doc/html/rfc6749#section-1.1)** in the token.
 
-> [!NOTE]
-> Access token format depends on how the IdP is configured to issue access tokens. FirecREST allows different settings to decrypt and decode the JWT.
+!!! Note
+    Access token format depends on how the IdP is configured to issue access tokens. FirecREST allows different settings to decrypt and decode the JWT.
 
 ![f7t_authn_basic](../../../assets/img/authn_basics.svg)
 
@@ -51,8 +51,8 @@ This integration between users and clients must be done on the HPC center side. 
 
 ## Authorization
 
-> [!NOTE]
-> The authorization layer is optional on FirecREST. By default no extra authorization more than validating the access token is done.
+!!! Note
+    The authorization layer is optional on FirecREST. By default no extra authorization more than validating the access token is done.
 
 FirecREST supports fine-grained authorization allowing the community to easily integrate different paradigms within the API.
 
@@ -72,6 +72,6 @@ The OpenFGA adapter presented on the FirecREST-v2 package works as a client for 
 
 ![f7t_authn_basic](../../../assets/img/authz_openfga.svg)
 
-> [!NOTE]
-> FirecREST is flexible enough to allow the community to create adapters that support different approaches and technologies for AuthZ like ReBAC, [ABAC](https://en.wikipedia.org/wiki/Attribute-based_access_control), [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control), etc.
-> We encourage the deployers and users to create pull requests on this repository to extend the usage of the API.
+!!! Note
+    FirecREST is flexible enough to allow the community to create adapters that support different approaches and technologies for AuthZ like ReBAC, [ABAC](https://en.wikipedia.org/wiki/Attribute-based_access_control), [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control), etc.
+    We encourage the deployers and users to create pull requests on this repository to extend the usage of the API.

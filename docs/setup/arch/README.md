@@ -12,15 +12,16 @@ In the figure below it can be seen the different components of the ecosystem of 
 
 The dashed lines represents components that are optional, while the solid lines are mandatory for a proper use of FirecREST.
 
-
 ### (1) HPC Systems and workload manager and schedulers
 
 Check out [here](./systems/README.md) how does FirecREST connect to the systems to execute commands and interact with the scheduler and filesystems.
 
 ### (2) Authentication/Authorization
 
+Review how FirecREST enables access and fine-grained permissions [here](./auth/README.md).
+
 ### (3) Data Transfers
 
-FirecREST handles data transfer up to 5 TB. See how this is done [here](./external_storage/README.md)
+FirecREST handles data transfer up to 5 TB. See how this is done [here](./external_storage/README.md).
 
 ### (4) Health checks

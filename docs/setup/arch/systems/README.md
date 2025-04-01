@@ -14,8 +14,8 @@ The command execution from FirecREST API server to the HPC cluster is done **via
 
 This means that FirecREST can be installed in any platform or infrastructure (cloud provider, VM, local system) with SSH access to the target system(s) configured. It doesn't need to be installed in the same VPN or VLAN of the system.
 
-> [!IMPORTANT]
-> FirecREST doesn't execute commands as `root` user or using `sudo` commands. All commands are executed on behalf of the users using the users' credential.
+!!! info
+    FirecREST doesn't execute commands as `root` user or using `sudo` commands. All commands are executed on behalf of the users using the users' credential.
 
 ## JWT to SSH Delegation
 
@@ -23,8 +23,8 @@ To answer to the question on "how the SSH credentials are obtained or created", 
 
 FirecREST uses the `username` or `preferred_username` claim from the JWT access token created by the Identity Provider (IdP) when the user or application [authenticated to use the API](../auth/README.md).
 
-> [!IMPORTANT]
-> This `username` value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.
+!!! info
+    This `username` value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.
 
 The JWT signature is verified using the Identity Provider (IdP) public key, and then the token time validity is checked. If both are successful, the `username` is extracted and a SSH key is created for the user if there isn't an active connection to the cluster.
 
@@ -56,28 +56,29 @@ FirecREST provides an abstraction to allow different ways of getting SSH credent
 
 ## SSH Configuration in target systems
 
-> [!IMPORTANT]
-> All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high througput regime via API
+!!! info
+    All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high througput regime via API
 
 It is recommended to set a specific `Match` section on the [Open SSHD configuration](https://man.openbsd.org/OpenBSD-current/man5/sshd_config.5#Match) for requests from FirecREST:
 
-```bash
-$ cat /etc/ssh/sshd_config
-(...)
-# To accept FirecREST host
-Match Address {IP_ADDR_or_RANGE}
-    TrustedUserCAKeys /path/to/ssh/key.pub
-    PermitRootLogin no
-    DenyGroups root bin admin sys
-    MaxAuthTries 1
-    AllowTcpForwarding no
-    MaxSessions 2500
-```
+!!! example "Login node SSHd Config"
+    ```bash
+    $ cat /etc/ssh/sshd_config
+    (...)
+    # To accept FirecREST host
+    Match Address {IP_ADDR_or_RANGE}
+        TrustedUserCAKeys /path/to/ssh/key.pub
+        PermitRootLogin no
+        DenyGroups root bin admin sys
+        MaxAuthTries 1
+        AllowTcpForwarding no
+        MaxSessions 2500
+    ```
 
 ### SSH Configuration details
 
-> [!NOTE]
-> You can follow this [link](https://man7.org/linux/man-pages/man5/sshd_config.5.html) to have a more complete understanding on SSH configuration used below
+!!! Note
+    You can follow this [link](https://man7.org/linux/man-pages/man5/sshd_config.5.html) to have a more complete understanding on SSH configuration used below
 
 - `Match Address`: points the IP address (or range) from where FirecREST server connects to the cluster. This way, this `Match` block only process SSH connections from FirecREST.
 
@@ -98,5 +99,5 @@ Each connection in the pool is closed after a time of inactivity, leaving it ava
 
 ![f7t_ssh_pool](../../../assets/img/command_exec_sshpool.svg)
 
-> [!NOTE]
-> Using this setup, stress testing has proven that 500 clients can produce ~195 request per second with a latency of 900 ms, and an error rate of 0.04%​ (always depending of the infrastructure, filesystems, network latency, etc)
+!!! Note
+    Using this setup, stress testing has proven that 500 clients can produce ~195 request per second with a latency of 900 ms, and an error rate of 0.04%​ (always depending of the infrastructure, filesystems, network latency, etc)

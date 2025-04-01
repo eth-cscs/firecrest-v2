@@ -26,4 +26,4 @@ Using FirecREST, users and web developers can **automate** access to HPC resourc
 
 - Follow the [Getting Started](getting_started/README.md) documentation to quickly start exploring the features of FirecREST first hand
 - Browse the [Use Cases](use_cases/README.md), which brings cases of success applying FirecREST on different tools
-- Check out the [OpenAPI specification](api/README.md) for the complete set of FirecREST endpoints
+- Check out the [OpenAPI specification](https://eth-cscs.github.io/firecrest-v2/openapi/) for the complete set of FirecREST endpoints

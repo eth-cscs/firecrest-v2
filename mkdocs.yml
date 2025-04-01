@@ -7,15 +7,25 @@ edit_uri: edit/master/docs/
 
 nav:
   - Welcome: README.md
-  - 'API Reference':
-    - api/README.md
-  - 'Configuration':
-    - conf/README.md
-  - 'Deployment':
-    - deploy/README.md
-  - 'Usage':
+  - 'Getting started':
+    - getting_started/README.md
+  - Setup: 
+    - 'Architecture':
+      - setup/arch/README.md
+      - 'Systems':
+        - setup/arch/systems/README.md
+      - 'Authentication and authorization':
+        - setup/arch/auth/README.md
+    - 'Configuration':
+      - setup/conf/README.md
+    - 'Deployment':
+      - setup/deploy/README.md 
+  - 'User guide':
+    - user_guide/README.md
+  - 'Use cases':
     - use_cases/README.md
-
+  - 'API Reference': https://eth-cscs.github.io/firecrest-v2/openapi/
+   
 theme:
   name: material
   language: en
