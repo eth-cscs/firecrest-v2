@@ -16,7 +16,7 @@ from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette_context import context, plugins
-from starlette.middleware import Middleware
+#from starlette.middleware import Middleware
 from starlette_context.middleware import RawContextMiddleware
 
 # configs
