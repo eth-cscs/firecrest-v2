@@ -25,3 +25,5 @@ Review how FirecREST enables access and fine-grained permissions [here](./auth/R
 FirecREST handles data transfer up to 5 TB. See how this is done [here](./external_storage/README.md).
 
 ### (4) Health checks
+
+Periodically FirecREST will [check](./health_checks/README.md) that the underlying infrastructure works as expected.

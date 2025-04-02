@@ -16,6 +16,8 @@ nav:
         - setup/arch/systems/README.md
       - 'Authentication and authorization':
         - setup/arch/auth/README.md
+      - 'Health checks':
+        - setup/arch/health_checks/README.md
     - 'Configuration':
       - setup/conf/README.md
     - 'Deployment':
