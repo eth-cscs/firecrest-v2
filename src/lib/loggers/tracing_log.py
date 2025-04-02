@@ -12,11 +12,7 @@ from starlette_context import context
 
 
 # The actual tracing logger
-tracing_logger_name = "f7t_v2_tracing_log"
-if tracing_logger_name in logging.root.manager.loggerDict:
-    tracing_logger = logging.getLogger(tracing_logger_name)
-else:
-    tracing_logger = None
+tracing_logger = logging.getLogger("f7t_v2_tracing_log")
 
 
 def tracing_log_method(func):
@@ -28,15 +24,18 @@ def tracing_log_method(func):
             func(*args, **kwargs)
     return wrapper
 
+# Put key-vale pair into context data map
 def set_tracing_data(key: str, value: str) -> None:
     if context.exists():
         context[key] = value
 
+# Retrieve value from context data map, return empty string if key does not exist
 def get_tracing_data(key: str) -> str:
     if key in context:
         return context[key]
     return ""
 
+# Set command exit status into context data map
 def log_exit_status(exit_status: int) -> None:
     set_tracing_data("exit_status", str(exit_status))
 
@@ -47,7 +46,7 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     # Get URL
     url_path = request.scope["path"]
     root_path = request.scope["root_path"]
-    # Normalize endpoint
+    # Normalize endpoint: remove prefix from root path, added by any API gateway
     endpoint = url_path.removeprefix(root_path) if root_path != "" else url_path
     # Initialize logging data
     group = ""
@@ -62,7 +61,7 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     ):
         resource = match.group(1)
         system_name = match.group(2)
-        # get group and command
+        # Get group and command
         tmp = match.group(3)
         if match_cmd := re.search(r"^([^\/\s]+)\/(.*)$", tmp, re.IGNORECASE):
             group = match_cmd.group(1)
@@ -77,7 +76,7 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
         re.IGNORECASE):
         resource = match.group(1)
         command = match.group(2)
-
+    # Compose logging data packet
     log_data = {}
     log_data["username"] = username
     log_data["system_name"] = system_name
@@ -89,5 +88,5 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     log_data["command"] = command
     log_data["url_path"] = url_path
     log_data["user_agent"] = request.headers["user-agent"]
-
+    # Write log
     tracing_logger.info(log_data)

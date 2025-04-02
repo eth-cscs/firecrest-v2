@@ -139,7 +139,8 @@ def register_middlewares(app: FastAPI):
             if hasattr(request.state, "username"):
                 username = request.state.username
             # Logging from Middleware
-            tracing_log_middleware(request, username, response.status_code)
+            if settings.logger.enable_tracing_log:
+                tracing_log_middleware(request, username, response.status_code)
             return response
         except Exception as e:
             logger.error(

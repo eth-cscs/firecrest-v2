@@ -202,6 +202,8 @@ class Auth(CamelModel):
     authentication: Oidc = None
     authorization: Optional[OpenFGA] = None
 
+class Logger(CamelModel):
+    enable_tracing_log: Optional[bool] = False
 
 class Settings(BaseSettings):
     # FastAPI App variables
@@ -217,6 +219,8 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = []
     # HPC Storage definition
     storage: Optional[Storage] = None
+    # Logger configuration
+    logger: Optional[Logger] = Logger()
 
     model_config = SettingsConfigDict(
         env_file=".env",
