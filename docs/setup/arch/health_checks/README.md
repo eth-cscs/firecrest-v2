@@ -1,6 +1,6 @@
 # Health checks
 
-Internally, FirecREST performs a periodic **health check** of all the pieces of infrastructure that needs to work correctly.
+Internally, FirecREST performs a periodic **health check** of all underlying services that needs to work correctly.
 
 These periodic tests not only provide the users with updated information about the current status of the HPC Center infra, but help FirecREST to run faster and more efficiently.
 
@@ -9,7 +9,7 @@ These periodic tests not only provide the users with updated information about t
 As you can see in the figure above, when enabled the periodic health check will update the status of
 
 1. HPC cluster connectivity (via SSH)
-2. Workload manager and scheduler (via SSH or API, depending the service)
+2. Workload manager and scheduler (via SSH or API calls, depending the service)
 3. Filesystem availability (read only)
 4. Object storage availabitity (S3 interface is reachable or not)
 
