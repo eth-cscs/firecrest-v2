@@ -18,6 +18,8 @@ nav:
         - setup/arch/auth/README.md
       - 'Health checks':
         - setup/arch/health_checks/README.md
+      - 'Data transfer':
+        - setup/arch/external_storage/README.md
     - 'Configuration':
       - setup/conf/README.md
     - 'Deployment':
