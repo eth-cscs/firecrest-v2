@@ -17,6 +17,22 @@ from lib.scheduler_clients.slurm.models import (
 
 class PostJobSubmitRequest(JobSubmitRequestModel):
     job: SlurmJobDescription
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "job": {
+                        "name": "Count to 100",
+                        "working_directory": "{{home_path}}",
+                        "standard_input": "/dev/null",
+                        "standard_output": "count_to_100.out",
+                        "standard_error": "count_to_100.err",
+                        "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
+                    }
+                }
+            ]
+        }
+    }
 
 
 class GetJobResponse(CamelModel):
