@@ -9,6 +9,7 @@ jobs:
   publish-documentation:
     runs-on: ubuntu-latest
     needs: publish-openapi-swager
+    if: ${{ always() }}
     env:
         GH_PAGES_BRANCH: gh-pages
     permissions:
