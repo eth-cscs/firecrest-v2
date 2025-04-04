@@ -606,7 +606,7 @@
                             <div class="relative">
                                 <div class="overflow-x-auto">
                                     <code id="submit-code" 
-                                            class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:5000/compute/<span class="system-name"></span>/jobs"
+                                            class="text-gray-300">curl -X POST --header "Content-Type: application/json" --header "Authorization: Bearer <span class="demo-token"></span>" -d '{ "job": {"name": "Count to 100", "working_directory": "<span class="user-home"></span>", "script": "#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone"}}' "http://localhost:5025/compute/<span class="system-name"></span>/jobs"
                                     </code>
                                 </div>
                             </div>
@@ -634,7 +634,7 @@
                             </div>
                             <div class="overflow-x-auto">
                                 <code id="listjob-code"
-                                        class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/compute/<span class="system-name"></span>/jobs"</code>
+                                        class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5025/compute/<span class="system-name"></span>/jobs"</code>
                             </div>                            
                         </div>
                     </div>
@@ -661,7 +661,7 @@
                             </div>
                             <div class="overflow-x-auto">
                                     <code id="listdir-code"
-                                          class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5000/filesystem/<span class="system-name"></span>/ops/ls?path=<span class="user-home"></span>"</code>
+                                          class="text-gray-300">curl --header "Authorization: Bearer <span class="demo-token"></span>" "http://localhost:5025/filesystem/<span class="system-name"></span>/ops/ls?path=<span class="user-home"></span>"</code>
                             </div>
                             
                         </div>
