@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 from pydantic import AliasChoices, Field, RootModel
 
 # models
+from lib.models.base_model import CamelModel
 from lib.scheduler_clients.models import (
     JobMetadataModel,
     JobModel,
@@ -162,6 +163,15 @@ class SlurmNode(NodeModel):
     alloc_memory: Optional[int] = None
     alloc_cpus: Optional[int] = None
     idle_cpus: Optional[int] = None
+
+
+class SlurmPing(CamelModel):
+    hostname: Optional[str] = None
+    pinged: Optional[str] = None
+    responding: bool
+    latency: Optional[int] = None
+    primary: bool
+    mode: Optional[str] = None
 
 
 class SlurmPartition(RootModel):

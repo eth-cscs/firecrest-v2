@@ -19,7 +19,6 @@ class HealthCheckBase(ABC):
         start_time = time.time()
         try:
             health = await self.execute_check()
-            health.healthy = True
         except Exception as ex:
             health = await self.handle_error(ex)
 

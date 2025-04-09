@@ -22,6 +22,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmJobMetadata,
     SlurmNode,
     SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
@@ -238,3 +239,19 @@ class SlurmRestClient(SlurmBaseClient):
             if len(partition_result["partitions"]) == 0:
                 return []
         return partition_result["partitions"]
+
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+        client = await self.get_aiohttp_client()
+        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        headers = _slurm_headers(username, jwt_token)
+        async with client.get(
+            url=f"{self.api_url}/slurm/v{self.api_version}/ping",
+            headers=headers,
+            timeout=timeout,
+        ) as response:
+            if response.status != status.HTTP_200_OK:
+                await _slurm_unexpected_response(response)
+            partition_result = await response.json()
+            if len(partition_result["pings"]) == 0:
+                return []
+        return partition_result["pings"]

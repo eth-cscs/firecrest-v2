@@ -26,6 +26,7 @@ from lib.scheduler_clients.slurm.cli_commands.scontrol_job_command import (
 from lib.scheduler_clients.slurm.cli_commands.scontrol_partitions_command import (
     ScontrolPartitionCommand,
 )
+from lib.scheduler_clients.slurm.cli_commands.scontrol_ping import ScontrolPingCommand
 from lib.scheduler_clients.slurm.cli_commands.scontrol_reservations_command import (
     ScontrolReservationCommand,
 )
@@ -37,6 +38,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmNode,
     SlurmJobDescription,
     SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
 )
 
@@ -160,3 +162,7 @@ class SlurmCliClient(SlurmBaseClient):
     ) -> List[SlurmPartitions] | None:
         scontrolpartition = ScontrolPartitionCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
+
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+        scontrolping = ScontrolPingCommand()
+        return await self.__executed_ssh_cmd(username, jwt_token, scontrolping)

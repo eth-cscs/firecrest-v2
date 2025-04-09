@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from abc import abstractmethod
-import asyncio
 from typing import List
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.scheduler_clients.slurm.models import (
@@ -13,6 +12,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmJobMetadata,
     SlurmNode,
     SlurmPartitions,
+    SlurmPing,
     SlurmReservations,
 )
 
@@ -75,20 +75,6 @@ class SlurmBaseClient(SchedulerBaseClient):
     ) -> List[SlurmPartitions] | None:
         pass
 
-    async def health_check(
-        self, username: str, jwt_token: str, timeout: int = 30
-    ) -> bool:
-        async with asyncio.timeout(timeout):
-            nodes: List[SlurmNode] = await self.get_nodes(username, jwt_token)
-
-            available_nodes = 0
-            for node in nodes:
-                state = node["state"]
-                if isinstance(state, str):
-                    if state in ["mixed", "idle", "MIXED", "IDLE"]:
-                        available_nodes += 1
-                else:
-                    if any(s in ["mixed", "idle", "MIXED", "IDLE"] for s in state):
-                        available_nodes += 1
-
-            return available_nodes, len(nodes)
+    @abstractmethod
+    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+        pass
