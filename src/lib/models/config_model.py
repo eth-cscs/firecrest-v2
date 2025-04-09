@@ -21,7 +21,7 @@ class LoadFileSecretStr(SecretStr):
     def __init__(self, secret_value: str) -> None:
         if secret_value.startswith("secret_file:"):
             secrets_path = Path(secret_value[12:]).expanduser()
-            if not secrets_path.exists() or not secrets_path.is_file:
+            if not secrets_path.exists() or not secrets_path.is_file():
                 raise FileNotFoundError(f"Secret file: {secrets_path} not found!")
             secret_value = secrets_path.read_text("utf-8").strip()
         super().__init__(secret_value)
