@@ -3,9 +3,11 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from firecrest.config import ClusterNodesHealth, HPCCluster, SchedulerServiceHealth
+from typing import List
+from firecrest.config import HPCCluster, SchedulerServiceHealth
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
+from lib.scheduler_clients.slurm.models import SlurmPing
 
 
 class SchedulerHealthCheck(HealthCheckBase):
@@ -23,12 +25,11 @@ class SchedulerHealthCheck(HealthCheckBase):
         )
 
         health = SchedulerServiceHealth(service_type="scheduler")
-        health.healthy = True
-        available, total = await self.scheduler_client.health_check(
-            self.auth.username, self.token["access_token"], timeout=self.timeout
+        pings: List[SlurmPing] = await self.scheduler_client.ping(
+            self.auth.username, self.token["access_token"]
         )
-        health.nodes = ClusterNodesHealth(available=available, total=total)
-
+        health.healthy = all(ping["responding"] for ping in pings)
+        health.message = str(pings)
         return health
 
     async def handle_error(self, ex: Exception) -> SchedulerServiceHealth:

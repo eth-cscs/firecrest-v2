@@ -75,7 +75,3 @@ class SchedulerBaseClient(ABC):
         self, username: str, jwt_token: str
     ) -> List[PartitionModel] | None:
         pass
-
-    @abstractmethod
-    async def health_check(self, username: str, jwt_token: str) -> bool:
-        pass

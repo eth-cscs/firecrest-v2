@@ -101,11 +101,6 @@ class ServiceAccount(CamelModel):
     secret: LoadFileSecretStr
 
 
-class ClusterNodesHealth(CamelModel):
-    available: int = 0
-    total: int = 0
-
-
 class HealthCheckType(str, Enum):
     scheduler = "scheduler"
     filesystem = "filesystem"
@@ -125,7 +120,7 @@ class BaseServiceHealth(CamelModel):
 
 
 class SchedulerServiceHealth(BaseServiceHealth):
-    nodes: Optional[ClusterNodesHealth] = None
+    pass
 
 
 class FilesystemServiceHealth(BaseServiceHealth):
