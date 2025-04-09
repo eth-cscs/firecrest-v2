@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Slurm health check now uses "scontrol ping"
+
 ### Fixed
 
 - Github pages changed to allow mkdocs syntax for notes and code samples
