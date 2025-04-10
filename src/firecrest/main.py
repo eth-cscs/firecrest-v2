@@ -108,11 +108,12 @@ async def lifespan(app: FastAPI):
 
 async def schedule_tasks(scheduler: AsyncScheduler):
     for cluster in plugin_settings.clusters:
-        await scheduler.add_schedule(
-            SchedulerHealthChecker(cluster).check,
-            IntervalTrigger(seconds=cluster.probing.interval),
-            id=f"check-cluster-{cluster.name}",
-        )
+        if cluster.probing:
+            await scheduler.add_schedule(
+                SchedulerHealthChecker(cluster).check,
+                IntervalTrigger(seconds=cluster.probing.interval),
+                id=f"check-cluster-{cluster.name}",
+            )
     await scheduler.add_schedule(
         SSHClientDependency.prune_client_pools,
         IntervalTrigger(seconds=5),

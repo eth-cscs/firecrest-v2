@@ -93,7 +93,6 @@ class ServiceAvailabilityDependency:
 
     def __file_system_health(self, system: HPCCluster, request: Request):
         path: str = request.query_params.get("path")
-
         # if path is not defined as a query param extract it from the request body
         if path is None:
             try:
@@ -107,19 +106,20 @@ class ServiceAvailabilityDependency:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="All filesystem requests require a path or source_path parameter.",
             )
-
-        service = next(
-            filter(
-                lambda service: service.service_type == self.service_type
-                and path.startswith(service.path),
-                system.servicesHealth,
-            ),
-            None,
-        )
+        service = None
+        if system.servicesHealth:
+            service = next(
+                filter(
+                    lambda service: service.service_type == self.service_type
+                    and path.startswith(service.path),
+                    system.servicesHealth,
+                ),
+                None,
+            )
         if service is None:
             raise HTTPException(
                 status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No filesystem service serving the request path was found on {system.name}.",
+                detail=f"No filesystem health checker serving the request path was found on {system.name}.",
             )
         if not service.healthy:
             raise HTTPException(
@@ -128,17 +128,19 @@ class ServiceAvailabilityDependency:
             )
 
     def __scheduler_health(self, system: HPCCluster):
-        service = next(
-            filter(
-                lambda service: service.service_type == self.service_type,
-                system.servicesHealth,
-            ),
-            None,
-        )
+        service = None
+        if system.servicesHealth:
+            service = next(
+                filter(
+                    lambda service: service.service_type == self.service_type,
+                    system.servicesHealth,
+                ),
+                None,
+            )
         if service is None:
             raise HTTPException(
                 status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No scheduler service for the requested system ({system.name}) was found.",
+                detail=f"No scheduler health checker for the requested system ({system.name}) was found.",
             )
         if not service.healthy:
             raise HTTPException(
@@ -147,17 +149,19 @@ class ServiceAvailabilityDependency:
             )
 
     def __ssh_health(self, system: HPCCluster):
-        service = next(
-            filter(
-                lambda service: service.service_type == self.service_type,
-                system.servicesHealth,
-            ),
-            None,
-        )
+        service = None
+        if system.servicesHealth:
+            service = next(
+                filter(
+                    lambda service: service.service_type == self.service_type,
+                    system.servicesHealth,
+                ),
+                None,
+            )
         if service is None:
             raise HTTPException(
                 status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No ssh service for the requested system ({system.name}) was found.",
+                detail=f"No ssh health checker for the requested system ({system.name}) was found.",
             )
         if not service.healthy:
             raise HTTPException(
@@ -175,7 +179,7 @@ class ServiceAvailabilityDependency:
                 filter(lambda cluster: cluster.name == system_name, settings.clusters)
             )
             # Check health of requested system
-            if not self.ignore_health:
+            if not self.ignore_health and system.probing:
                 if self.service_type == HealthCheckType.filesystem:
                     self.__file_system_health(system, request)
                 if self.service_type == HealthCheckType.scheduler:
