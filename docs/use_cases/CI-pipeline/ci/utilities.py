@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2019-2024, ETH Zurich. All rights reserved.
+#  Copyright (c) 2025, ETH Zurich. All rights reserved.
 #
 #  Please, refer to the LICENSE file in the root directory.
 #  SPDX-License-Identifier: BSD-3-Clause
@@ -25,7 +25,7 @@ def create_batch_script(
 
     script += f"""
 
-# CLone command will fail if the directory already exists
+# Clone command will fail if the directory already exists
 # Remove this first if you are using the same working directory
 # every time
 # rm -rf firecrest-ci

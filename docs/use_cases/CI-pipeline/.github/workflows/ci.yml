@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2019-2024, ETH Zurich. All rights reserved.
+#  Copyright (c) 2025, ETH Zurich. All rights reserved.
 #
 #  Please, refer to the LICENSE file in the root directory.
 #  SPDX-License-Identifier: BSD-3-Clause
@@ -19,13 +19,13 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "test_CSCS"
-  test_CSCS:
+  # This workflow contains a single job called "test_cluster"
+  test_cluster:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system_name: ["daint"]
+        system_name: ["cluster-name"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

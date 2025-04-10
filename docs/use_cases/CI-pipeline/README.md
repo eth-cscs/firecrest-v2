@@ -1,12 +1,11 @@
 # CI/CD pipeline with FirecREST
 
-The goal of this tutorial is to create a CI/CD pipeline that will run in Piz Daint through FirecREST.
+The goal of this tutorial is to create a CI/CD pipeline that will run in an HPC system through FirecREST.
 
 ## Prerequisites
 
 - **Basic python and git knowledge**: The task involves very basic Python.
 Even if you have experience with another programming language, you'll likely find the task manageable.
-- **CSCS user account**: The pipeline is alredy configured for access to Piz Daint but it requires minimal changes to customize for a different machine.
 - **Github account**: The CI will utilize resources from your GitHub account, so make sure you have one.
 - **Basic CI/CD understanding**: Familiarity with basic concepts of Continuous Integration and Continuous Deployment processes is recommended.
 
@@ -38,7 +37,7 @@ Even if you have experience with another programming language, you'll likely fin
 
 ## Additional Resources
 
-- [Client portal](https://developer.cscs.ch)
+- [CSCS Developer Portal (only for CSCS users)](https://developer.cscs.ch)
 - [pyFirecrest documentation](https://pyfirecrest.readthedocs.io)
 - [How to set up secrets in Github Actions](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
 - [FirecREST v2](https://github.com/eth-cscs/firecrest-v2)
