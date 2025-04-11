@@ -23,7 +23,7 @@ def _ssh_service_headers(jwt_token: str):
 
 class SSHKeygenClient(SSHKeysProvider):
     aiohttp_client: Optional[aiohttp.ClientSession] = None
-    max_connections: int = None
+    max_connections: int = 0
 
     @classmethod
     async def get_aiohttp_client(cls) -> aiohttp.ClientSession:

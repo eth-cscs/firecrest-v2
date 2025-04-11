@@ -20,7 +20,7 @@ class OpenFGAClient(AuthorizationService):
             return f"Bearer {self.token}"
 
     def __init__(
-        self, url: str = None, timeout: int = None, max_connections: int = None
+        self, url: str = None, timeout: int = None, max_connections: int = 0
     ) -> None:
         self.url = url
         self.timeout = timeout
@@ -34,7 +34,7 @@ class OpenFGAClient(AuthorizationService):
         auth_token = OpenFGAClient.BearerAuth(access_token)
 
         try:
-            timeout = aiohttp.ClientTimeout(self.timeout)
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
             connector = aiohttp.TCPConnector(
                 family=AF_INET, limit_per_host=self.max_connections
             )

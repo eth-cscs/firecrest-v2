@@ -6,17 +6,42 @@
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import SecretStr
+from pydantic import SecretStr, Field
 from lib.models.base_model import CamelModel
 
 
 class Oidc(CamelModel):
-    scopes: Optional[dict] = {}
-    token_url: str
-    public_certs: List[str] = []
+    """
+    OpenID Connect (OIDC) authentication configuration.
+    """
+
+    scopes: Optional[dict] = Field(
+        default_factory=dict, description="Map of OIDC scopes and their purposes."
+    )
+    token_url: str = Field(
+        ...,
+        description=(
+            "Token endpoint URL for the OIDC provider. This is used to "
+            "obtain access tokens for the service account that will do the "
+            "health checks."
+        ),
+    )
+    public_certs: List[str] = Field(
+        default_factory=list,
+        description=(
+            "List of URLs for retrieving public certificates. These are used "
+            "to verify the OIDC token."
+        ),
+    )
 
 
 class LoadFileSecretStr(SecretStr):
+    """
+    Extended SecretStr that supports loading secrets from a file using the 'secret_file:' prefix.
+
+    Example:
+        LoadFileSecretStr("secret_file:/path/to/secret.txt") will read the secret from the file.
+    """
 
     def __init__(self, secret_value: str) -> None:
         if secret_value.startswith("secret_file:"):
@@ -28,6 +53,24 @@ class LoadFileSecretStr(SecretStr):
 
 
 class SSHUserKeys(CamelModel):
-    private_key: LoadFileSecretStr
-    public_cert: Optional[str] = None
-    passphrase: Optional[LoadFileSecretStr] = None
+    """
+    SSH key pair configuration for authenticating to remote systems.
+    """
+
+    private_key: LoadFileSecretStr = Field(
+        ...,
+        description=(
+            "SSH private key. You can give directly the content or the file "
+            "path using `'secret_file:/path/to/file'`."
+        ),
+    )
+    public_cert: Optional[str] = Field(
+        None, description="Optional SSH public certificate."
+    )
+    passphrase: Optional[LoadFileSecretStr] = Field(
+        None,
+        description=(
+            "Optional passphrase for the private key. You can give "
+            "directly the content or the file path using `'secret_file:/path/to/file'`."
+        ),
+    )
