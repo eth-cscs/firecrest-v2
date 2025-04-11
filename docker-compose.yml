@@ -47,7 +47,7 @@ services:
       [
         "sh",
         "-c",
-        "python3 -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 -m uvicorn firecrest.main:app --host 0.0.0.0 --port 5000 --reload --reload-dir /app/firecrest --reload-dir /app/lib",
+        "python3 -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 -m uvicorn firecrest.main:app --host 0.0.0.0 --port 5000 --log-config=/app/default-config/log-config.yaml --reload --reload-dir /app/firecrest --reload-dir /app/lib",
       ]
     volumes:
       - ./src/firecrest:/app/firecrest

@@ -11,13 +11,14 @@ from firecrest.plugins import settings
 
 
 import logging
-import re
 import types
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette_context import plugins
+from starlette_context.middleware import RawContextMiddleware
 
 # configs
 from firecrest import config
@@ -52,7 +53,10 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+# FirecREST tracing JSON logger
+from lib.loggers.tracing_log import tracing_log_middleware
 
+# Uvicorn logger
 logger = logging.getLogger(__name__)
 
 
@@ -75,6 +79,10 @@ def create_app(settings: config.Settings) -> FastAPI:
     # Register exception handlers
     register_exception_handlers(app=app)
 
+    app.add_middleware(
+        RawContextMiddleware,
+        plugins=(plugins.RequestIdPlugin(), plugins.CorrelationIdPlugin()),
+    )
     return app
 
 
@@ -133,26 +141,9 @@ def register_middlewares(app: FastAPI):
             username = None
             if hasattr(request.state, "username"):
                 username = request.state.username
-
-            system_name = None
-            # /filesystem/{system_name}/.*
-            # /compute/{system_name}/.*
-            # /status/{system_name}
-            if match := re.search(
-                r"^\/(?:compute|filesystem|status)\/([^\/\s]+)\/.*$",
-                request.url.path,
-                re.IGNORECASE,
-            ):
-                system_name = match.group(1)
-
-            logger.info(
-                {
-                    "username": username,
-                    "system": system_name,
-                    "endpoint": request.url.path,
-                    "satus_code": response.status_code,
-                }
-            )
+            # Logging from Middleware
+            if settings.logger.enable_tracing_log:
+                tracing_log_middleware(request, username, response.status_code)
             return response
         except Exception as e:
             logger.error(

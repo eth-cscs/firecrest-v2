@@ -92,3 +92,5 @@ storage:
   max_ops_file_size: 1048576 # 1M
   probing:
     timeout: 10
+logger:
+  enable_tracing_log: false

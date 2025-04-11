@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2.5] - OPEN
 
 ### Added
+- Log for request and command execution tracing
 
 ### Changed
 
@@ -74,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new FirecREST demo image.
 - Added support for private key passphrase.
 ### Changed
-- Images are now built for multiple platforms: inux/amd64, linux/arm64
+- Images are now built for multiple platforms: linux/amd64, linux/arm64
 
 ### Fixed
 
