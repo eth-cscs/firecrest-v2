@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix health check for older versions of Slurm REST API (< v0.0.42)
+
 ## [2.2.4]
 
 ### Added
