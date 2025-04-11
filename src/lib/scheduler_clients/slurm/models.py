@@ -168,9 +168,7 @@ class SlurmNode(NodeModel):
 class SlurmPing(CamelModel):
     hostname: Optional[str] = None
     pinged: Optional[str] = None
-    responding: bool
     latency: Optional[int] = None
-    primary: bool
     mode: Optional[str] = None
 
 

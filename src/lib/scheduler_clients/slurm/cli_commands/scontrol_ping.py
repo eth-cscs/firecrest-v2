@@ -29,9 +29,9 @@ class ScontrolPingCommand(ScontrolBase):
             ping = {}
             attr_match = re.search(r"Slurmctld\((\S+)\) at (\S+) is (\S+)", ping_str)
             if attr_match:
-                ping["primary"] = attr_match.group(1).startswith("primary")
+                ping["mode"] = attr_match.group(1)
                 ping["hostname"] = attr_match.group(2)
-                ping["responding"] = attr_match.group(3).startswith("UP")
+                ping["pinged"] = attr_match.group(3)
             else:
                 raise ValueError("Could not parse ping output")
 

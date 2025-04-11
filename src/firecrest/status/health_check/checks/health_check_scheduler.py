@@ -28,7 +28,7 @@ class SchedulerHealthCheck(HealthCheckBase):
         pings: List[SlurmPing] = await self.scheduler_client.ping(
             self.auth.username, self.token["access_token"]
         )
-        health.healthy = all(ping["responding"] for ping in pings)
+        health.healthy = all(ping["pinged"].lower() == "up" for ping in pings)
         health.message = str(pings)
         return health
 
