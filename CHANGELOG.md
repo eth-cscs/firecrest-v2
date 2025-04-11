@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Disabled cluster health checks won't cause errors
 - Github pages changed to allow mkdocs syntax for notes and code samples
 
 ## [2.2.3]
