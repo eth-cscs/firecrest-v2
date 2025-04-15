@@ -174,3 +174,10 @@ tmp
 
 /build/minio
 
+# Docs
+## Use Cases
+### JupyterHub
+
+/docs/use_cases/jupyterhub/jupyterhub_cookie_secret
+/docs/use_cases/jupyterhub/jupyterhub-proxy.pid
+/docs/use_cases/jupyterhub/jupyterhub.sqlite

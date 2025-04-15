@@ -28,6 +28,8 @@ nav:
     - user_guide/README.md
   - 'Use cases':
     - use_cases/README.md
+    - 'JupyterHub':
+      - use_cases/jupyterhub/README.md
   - 'API Reference': https://eth-cscs.github.io/firecrest-v2/openapi/
 
 theme:

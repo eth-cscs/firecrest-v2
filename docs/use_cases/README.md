@@ -2,5 +2,5 @@
 
 - [CI/CD pipeline](CI-pipeline/README.md)
 - Workflow orchestrators
-- JupyterHub
+- [JupyterHub](jupyterhub/README.md)
 - More...
