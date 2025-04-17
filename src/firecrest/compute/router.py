@@ -38,9 +38,10 @@ router = create_router(
 
 @router.post(
     "",
+    description="Submit a new job",
     status_code=status.HTTP_201_CREATED,
     response_model=PostJobSubmissionResponse,
-    response_description="Submit a new job",
+    response_description="Job submitted correctly",
 )
 async def post_job_submit(
     job_request: PostJobSubmitRequest,
@@ -67,9 +68,10 @@ async def post_job_submit(
 
 @router.get(
     "",
+    description="Get status of all jobs",
     status_code=status.HTTP_200_OK,
     response_model=GetJobResponse,
-    response_description="Get a job",
+    response_description="Jobs status returned successfully",
 )
 async def get_jobs(
     scheduler_client: Annotated[
@@ -86,9 +88,10 @@ async def get_jobs(
 
 @router.get(
     "/{job_id}",
+    description="Get status of a job by `{job_id}`",
     status_code=status.HTTP_200_OK,
     response_model=GetJobResponse,
-    response_description="Get a job",
+    response_description="Jobs status returned successfully",
 )
 async def get_job(
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],
@@ -112,9 +115,10 @@ async def get_job(
 
 @router.get(
     "/{job_id}/metadata",
+    description="Get metadata of a job by `{job_id}`",
     status_code=status.HTTP_200_OK,
     response_model=GetJobMetadataResponse,
-    response_description="Get a job metadata",
+    response_description="Jobs metadata returned successfully",
 )
 async def get_job_metadata(
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],
@@ -138,8 +142,9 @@ async def get_job_metadata(
 
 @router.put(
     "/{job_id}/attach",
+    description="Attach a procces to a job by `{job_id}`",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_description="Attach a procces to a job",
+    response_description="Process attached succesfully",
 )
 async def attach(
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],
@@ -163,8 +168,9 @@ async def attach(
 
 @router.delete(
     "/{job_id}",
+    description="Cancel a job",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_description="Cancel the job",
+    response_description="Job cancelled successfully",
 )
 async def delete_job_cancel(
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],

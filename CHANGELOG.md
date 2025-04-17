@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentation for logging architecture
+- POST and PUT bodies request examples
 
 ### Changed
 
 - Images for documentation
+- Description of API definition
 
 ### Fixed
 
