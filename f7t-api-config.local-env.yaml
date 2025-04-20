@@ -86,7 +86,7 @@ storage:
   ttl: 604800
   multipart:
     use_split: false
-    max_part_size: 2147483648 # 2G
+    max_part_size: 1073741824 # 1G
     parallel_runs: 3
     tmp_folder: "tmp"
   max_ops_file_size: 1048576 # 1M
