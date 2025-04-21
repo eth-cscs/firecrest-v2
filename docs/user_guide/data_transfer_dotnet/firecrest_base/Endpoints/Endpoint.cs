@@ -77,12 +77,12 @@ namespace firecrest_base.Endpoints
             return await response.Content.ReadAsStringAsync();
         }
 
-        protected async Task<string> RequestPost(string resource, MultipartFormDataContent form)
+        protected async Task<string> RequestPost(string resource, MultipartFormDataContent formData)
         {
             HttpClient client = await InitClient();
             string url = $"{FirecRESTurl}/{resource}";
 
-            HttpResponseMessage response = await client.PostAsync(url, form);
+            HttpResponseMessage response = await client.PostAsync(url, formData);
             response.EnsureSuccessStatusCode();
 
             // Decode response

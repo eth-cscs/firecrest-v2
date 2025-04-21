@@ -8,33 +8,23 @@
 using firecrest_base.Types;
 using firecrest_base.Endpoints;
 using System.Security.Cryptography;
-using System.Text.Json;
 
 namespace large_files_transfer
 {
     internal class Program
     {
-        static void PrettyPrintJson(JsonElement json)
-        {
-            JsonSerializerOptions serializerOptions = new JsonSerializerOptions { WriteIndented = true };
-            string formattedJson = JsonSerializer.Serialize(json, serializerOptions);
-            Console.WriteLine(formattedJson);
-        }
-
         static void CreatePayload(string payloadFile, long payloadFileSizeMB)
         {
-            using (FileStream pld = File.OpenWrite(payloadFile))
+            using FileStream pld = File.OpenWrite(payloadFile);
+            // Write file
+            Random random = new Random();
+            var buffer1MB = new byte[1024 * 1024];
+            for (long i = 0; i < payloadFileSizeMB; i++)
             {
-                // Write file
-                Random random = new Random();
-                var buffer1MB = new byte[1024 * 1024];
-                for (long i = 0; i < payloadFileSizeMB; i++)
-                {
-                    random.NextBytes(buffer1MB);
-                    pld.Write(buffer1MB);
-                }
-                pld.Close();
+                random.NextBytes(buffer1MB);
+                pld.Write(buffer1MB);
             }
+            pld.Close();
         }
 
         static byte[] ComputePayloadHash(string payloadFile) {
@@ -59,7 +49,7 @@ namespace large_files_transfer
                 Console.WriteLine("Large files transfer example");
 
                 // Generate file to transfer
-                CreatePayload(payloadFile, 10); // size in MB
+                CreatePayload(payloadFile, 2400); // size in MB
                 var hash = ComputePayloadHash(payloadFile);
                 string uploadHash = Convert.ToHexString(hash);
                 Console.WriteLine($"Upload Hash {uploadHash}");
@@ -87,6 +77,7 @@ namespace large_files_transfer
                 string downloadHash = Convert.ToHexString(hash);
                 Console.WriteLine($"Download Hash {downloadHash}");
 
+                // Validate checksum
                 if (uploadHash == downloadHash)
                     Console.WriteLine("SUCCESS");
                 else

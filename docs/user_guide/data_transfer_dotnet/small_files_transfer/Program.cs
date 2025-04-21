@@ -5,36 +5,25 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-using firecrest_base.Types;
 using firecrest_base.Endpoints;
 using System.Security.Cryptography;
-using System.Text.Json;
 
 namespace small_files_transfer
 {
     internal class Program
     {
-        static void PrettyPrintJson(JsonElement json)
-        {
-            JsonSerializerOptions serializerOptions = new JsonSerializerOptions { WriteIndented = true };
-            string formattedJson = JsonSerializer.Serialize(json, serializerOptions);
-            Console.WriteLine(formattedJson);
-        }
-
         static void CreatePayload(string payloadFile, long payloadFileSizeKB)
         {
-            using (FileStream pld = File.OpenWrite(payloadFile))
+            using FileStream pld = File.OpenWrite(payloadFile);
+            // Write file
+            Random random = new Random();
+            var buffer1KB = new byte[1024];
+            for (long i = 0; i < payloadFileSizeKB; i++)
             {
-                // Write file
-                Random random = new Random();
-                var buffer1KB = new byte[1024];
-                for (long i = 0; i < payloadFileSizeKB; i++)
-                {
-                    random.NextBytes(buffer1KB);
-                    pld.Write(buffer1KB);
-                }
-                pld.Close();
+                random.NextBytes(buffer1KB);
+                pld.Write(buffer1KB);
             }
+            pld.Close();
         }
 
         static byte[] ComputePayloadHash(string payloadFile)
@@ -80,6 +69,7 @@ namespace small_files_transfer
                 string downloadHash = Convert.ToHexString(hash);
                 Console.WriteLine($"Download Hash {downloadHash}");
 
+                // Validate checksum
                 if (uploadHash == downloadHash)
                     Console.WriteLine("SUCCESS");
                 else
