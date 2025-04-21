@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿/*
+ * Copyright (c) 2025, ETH Zurich. All rights reserved.
+ *
+ * Please, refer to the LICENSE file in the root directory.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 using System.Net.Http.Headers;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace firecrest_base.Endpoints
 {
