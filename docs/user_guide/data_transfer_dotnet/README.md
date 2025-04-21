@@ -1,12 +1,11 @@
-# FirecREST usage in C#
+# FirecREST Usage with C# .NET
 ## General description
 This .NET solution provides examples demonstrating how to connect to FirecREST and transfer files using C# via different API endpoints. The implementation follows a fully `async` approach.
 
 The Examples do not requires parameters. You may be able to build them and run the generated executable. All of them, by default, target the [Docker-Compose demo environment](../../../README.md).
 
 ## Environment and packages
-The examples are written in C# for .NET 8.0.
-
+The examples are written in C# for .NET 8.0. 
 To compile and run the examples an extra package is requested: <i>Microsoft.IdentityModel.JsonWebTokens version 8.8.0</i>
 
 You can install it using your preferred method or one of the following commands:
@@ -78,40 +77,40 @@ classDiagram
 
 ## Examples
 ### Example 1: base authentication 
-The [Program.cs](data_transfer_dotnet/firecrest_base/Program.cs) in the [firecrest_base](data_transfer_dotnet/firecrest_base/) project demonstrates the simplest connection to FirecREST. It initializes the [EndpointStatus](data_transfer_dotnet/firecrest_base/Endpoints/EndpointStatus.cs) class and retrieves the Systems API result.
+The [Program.cs](firecrest_base/Program.cs) in the [firecrest_base](firecrest_base/) project demonstrates the simplest connection to FirecREST. It initializes the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class and retrieves the Systems API result.
 ```
     // FirecREST call to endpoint status/systems
     var es = new EndpointStatus(firecrestURL);
     // Show result
     JsonElement r = await es.Systems();
 ```
-The [EndpointStatus](data_transfer_dotnet/firecrest_base/Endpoints/EndpointStatus.cs) object authenticates access using the `AccessTokenRequest` object, which is managed by the abstract class [Endpoint](data_transfer_dotnet/firecrest_base/Endpoints.cs).
+The [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) object authenticates access using the `AccessTokenRequest` object, which is managed by the abstract class [Endpoint](firecrest_base/Endpoints.cs).
 
 <b>Note that the</b> `AccessTokenRequest` <b>class requires a</b> `.credentials` <b>file to be located in the same directory as the executable.</b>
 
-An example [.credentials_demo](data_transfer_dotnet/.credentials_demo) file, configured for accessing the Docker demo environment, is available in the examples' main directory under the endpoint status folder. The file contains the following JSON structure:
+An example [.credentials_demo](.credentials_demo) file, configured for accessing the Docker demo environment, is available in the examples' main directory under the endpoint status folder. The file contains the following JSON structure:
 ```
 {
-    "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token",
-	"ClientID": "firecrest-test-client",
-    "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
+  "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+  "ClientID": "firecrest-test-client",
+  "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
 }
 ```
 <b>Tip</b>: if you are running the solution using Visual Studio on Windows, post-build events have been configured to automatically copy the `.credentials_demo` file to the build directory of each project as `.credentials`.
 
 ### Example 2: large files transfer
-The [Program.cs](data_transfer_dotnet/large_files_transfer/Program.cs) in the [large_files_transfer](data_transfer_dotnet/large_files_transfer) project generates a random content file with an arbitrary customizable by the function:
+The [Program.cs](large_files_transfer/Program.cs) in the [large_files_transfer](large_files_transfer) project generates a random content file with an arbitrary customizable by the function:
 ```
 CreatePayload(payloadFile, 2400); // size in MB
 ```
-After generating the file, the example uploads it using the [EndpointFilesystemTransfer](data_transfer_dotnet/firecrest_base/Endpoints/EndpointFilesystemTransfer.cs) class, which implements the [AWS multipart upload protocol](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html). It then waits for the scheduled transfer job to complete by utilizing the `WaitForJobCompletion` method from the [EndpointStatus](data_transfer_dotnet/firecrest_base/Endpoints/EndpointStatus.cs) class.
+After generating the file, the example uploads it using the [EndpointFilesystemTransfer](firecrest_base/Endpoints/EndpointFilesystemTransfer.cs) class, which implements the [AWS multipart upload protocol](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html). It then waits for the scheduled transfer job to complete by utilizing the `WaitForJobCompletion` method from the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class.
 
 Once the upload is finished, the example downloads the same file, saving it locally under a new name. To ensure the data transfer was successful, checksums of the original and downloaded files are calculated and compared.
 
 ### Example 3: small files transfer
-The [Program.cs](data_transfer_dotnet/small_files_transfer/Program.cs) in the [small_files_transfer] (data_transfer_dotnet/small_files_transfer) project generates a random content file with an arbitrary customizable size using a similar function as implemented in Example 2. In this case, the size is expressed in kilobytes (KB). Please note that the maximum file size allowed for direct upload and download using the `ops` endpoint is 1MB. For larger files, the `transfer` endpoint, discussed in example 2, must be used.
+The [Program.cs](small_files_transfer/Program.cs) in the [small_files_transfer] (small_files_transfer) project generates a random content file with an arbitrary customizable size using a similar function as implemented in Example 2. In this case, the size is expressed in kilobytes (KB). Please note that the maximum file size allowed for direct upload and download using the `ops` endpoint is 1MB. For larger files, the `transfer` endpoint, discussed in example 2, must be used.
 
-The example utilizes the [EndpointFilesystemOps](data_transfer_dotnet/firecrest_base/Endpoints/EndpointFilesystemOps.cs) class to upload a file on the specified path.
+The example utilizes the [EndpointFilesystemOps](firecrest_base/Endpoints/EndpointFilesystemOps.cs) class to upload a file on the specified path.
 
 Once the upload is finished, the example downloads the same file, saving it locally under a new name. To ensure the data transfer was successful, checksums of the original and downloaded files are calculated and compared.
 
