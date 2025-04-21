@@ -49,7 +49,7 @@ namespace large_files_transfer
                 Console.WriteLine("Large files transfer example");
 
                 // Generate file to transfer
-                CreatePayload(payloadFile, 2400); // size in MB
+                CreatePayload(payloadFile, 1400); // size in MB
                 var hash = ComputePayloadHash(payloadFile);
                 string uploadHash = Convert.ToHexString(hash);
                 Console.WriteLine($"Upload Hash {uploadHash}");
