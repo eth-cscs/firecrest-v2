@@ -37,6 +37,7 @@ classDiagram
     EndpointFileSystem <|-- EndpointFileSystemOps
     EndpointFileSystem <|-- EndpointFileSystemTransfer
     <<Abstract>>Endpoint
+    direction LR
     class Endpoint{
         #FirecRESTurl
         #AccessToken
