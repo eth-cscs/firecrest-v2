@@ -37,7 +37,6 @@ classDiagram
     EndpointFileSystem <|-- EndpointFileSystemOps
     EndpointFileSystem <|-- EndpointFileSystemTransfer
     <<Abstract>>Endpoint
-    direction LR
     class Endpoint{
         #FirecRESTurl
         #AccessToken
@@ -109,7 +108,9 @@ Once the upload is finished, the example downloads the same file, saving it loca
 
 ### Example 3: small files transfer
 The [Program.cs](small_files_transfer/Program.cs) in the [small_files_transfer] (small_files_transfer) project generates a random content file with an arbitrary customizable size using a similar function as implemented in Example 2. In this case, the size is expressed in kilobytes (KB). Please note that the maximum file size allowed for direct upload and download using the `ops` endpoint is 1MB. For larger files, the `transfer` endpoint, discussed in example 2, must be used.
-
+```
+CreatePayload(payloadFile, 5); // size in KB
+```
 The example utilizes the [EndpointFilesystemOps](firecrest_base/Endpoints/EndpointFilesystemOps.cs) class to upload a file on the specified path.
 
 Once the upload is finished, the example downloads the same file, saving it locally under a new name. To ensure the data transfer was successful, checksums of the original and downloaded files are calculated and compared.
