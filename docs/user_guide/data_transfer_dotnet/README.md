@@ -14,6 +14,12 @@ You can install it using your preferred method or one of the following commands:
 
 `NuGet\Install-Package Microsoft.IdentityModel.JsonWebTokens -Version 8.8.0`
 
+## Unix build script
+This script is designed to automatically adapt the project files, build the source code, and place the resulting executables into the examples_bin directory. Additionally, it copies the .credentials_demo file, as outlined in Example 1 below.
+
+If you are working with .NET on a Unix-like system (Linux or MacOS) just run the `unix_build.sh` script.
+It is designed to automatically adapt the project files, build the source code, and place the resulting executables into the examples_bin directory. Additionally, it copies the `.credentials_demo` file, as outlined in [Example 1](#example-1-base-authentication) below.
+
 ## Solution structure
 The solution contains three projects. The `firecrest_base` project includes all the necessary classes for accessing FirecREST, managing authentication, and transferring files.
 
