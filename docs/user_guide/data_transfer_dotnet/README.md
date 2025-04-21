@@ -21,7 +21,7 @@ Note that the projects `large_files_transfer` and `small_file_transfer` depends 
 
 The `firecrest_base` project is divided into the following directories.
 ### Access
-This directory contains classes for handling authentication, such as `AccessToken` and `AccessTokenRequest`.
+This directory contains classes for handling authentication, such as [AccessToken](firecrest_base/Access/AccessToken.cs) and [AccessTokenRequest](firecrest_base/Access/AccessTokenRequest.cs).
 ### Types
 This directory includes a collection of classes representing structured data types, used for serializing and deserializing requests and responses exchanged with FirecREST.
 ### Endpoints
@@ -91,9 +91,9 @@ The [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) object authenti
 An example [.credentials_demo](.credentials_demo) file, configured for accessing the Docker demo environment, is available in the examples' main directory under the endpoint status folder. The file contains the following JSON structure:
 ```
 {
-  "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
-  "ClientID": "firecrest-test-client",
-  "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
+    "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+    "ClientID": "firecrest-test-client",
+    "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
 }
 ```
 <b>Tip</b>: if you are running the solution using Visual Studio on Windows, post-build events have been configured to automatically copy the `.credentials_demo` file to the build directory of each project as `.credentials`.
