@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="copy $(SolutionDir)\.credentials_demo $(TargetDir)" />
+    <Exec Command="copy $(SolutionDir)\.credentials_demo $(TargetDir)\.credentials" />
   </Target>
 
 </Project>

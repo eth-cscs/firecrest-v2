@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-namespace firecrest_base
+namespace firecrest_base.Endpoints
 {
     public class EndpointFilesystem(string firecRESTurl, string system_name) : Endpoint(firecRESTurl) 
     {

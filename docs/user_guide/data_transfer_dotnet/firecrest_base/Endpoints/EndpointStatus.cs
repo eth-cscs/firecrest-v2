@@ -7,7 +7,7 @@
 
 using System.Text.Json;
 
-namespace firecrest_base
+namespace firecrest_base.Endpoints
 {
     public class EndpointStatus(string firecRESTurl) : Endpoint(firecRESTurl) 
     {

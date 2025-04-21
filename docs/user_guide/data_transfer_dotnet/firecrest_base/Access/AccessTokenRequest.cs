@@ -8,7 +8,7 @@
 using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace firecrest_base
+namespace firecrest_base.Access
 {
     public class AccessTokenRequest(string credentialsFile = ".credentials")
     {

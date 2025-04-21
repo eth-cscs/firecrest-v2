@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+using firecrest_base.Endpoints;
 using System.Text.Json;
 
 namespace firecrest_base

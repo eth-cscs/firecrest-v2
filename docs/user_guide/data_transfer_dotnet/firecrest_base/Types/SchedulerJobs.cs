@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace firecrest_base
+namespace firecrest_base.Types
 {
     public class SchedulerJobs
     {

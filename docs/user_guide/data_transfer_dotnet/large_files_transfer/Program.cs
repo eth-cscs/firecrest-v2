@@ -5,11 +5,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-using firecrest_base;
+using firecrest_base.Types;
+using firecrest_base.Endpoints;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Xml.Schema;
 
 namespace large_files_transfer
 {
@@ -52,7 +51,7 @@ namespace large_files_transfer
             string firecrestURL = "http://localhost:8000";
             string system_name = "cluster-slurm-api";
             string payloadFile = "payload.dat";
-            string uploadFile = "/home/fireuser/test_upload.data";
+            string uploadFile = "/home/fireuser/test-upload.dat";
             string downloadFile = "payload-download.dat";
 
             try

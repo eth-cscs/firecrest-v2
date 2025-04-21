@@ -8,8 +8,9 @@
 using System.Text;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using firecrest_base.Access;
 
-namespace firecrest_base
+namespace firecrest_base.Endpoints
 {
     public abstract class Endpoint (string firecRESTurl)
     {
@@ -53,6 +54,15 @@ namespace firecrest_base
             return JsonDocument.Parse(body).RootElement;
         }
 
+        protected async Task<Stream> RequestGetStream(string resource)
+        {
+            HttpClient client = await InitClient();
+            var url = $"{FirecRESTurl}/{resource}";
+
+            // Get stream
+            return await client.GetStreamAsync(url);
+        }
+
         protected async Task<string> RequestPost(string resource, Dictionary<string, string> formData)
         {
             HttpClient client = await InitClient();
@@ -61,6 +71,18 @@ namespace firecrest_base
             var jsonPayload = JsonSerializer.Serialize(formData);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url, content);
+            response.EnsureSuccessStatusCode();
+
+            // Decode response
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        protected async Task<string> RequestPost(string resource, MultipartFormDataContent form)
+        {
+            HttpClient client = await InitClient();
+            string url = $"{FirecRESTurl}/{resource}";
+
+            HttpResponseMessage response = await client.PostAsync(url, form);
             response.EnsureSuccessStatusCode();
 
             // Decode response

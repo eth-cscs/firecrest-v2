@@ -5,18 +5,18 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-using firecrest_base;
+using firecrest_base.Types;
 using System.Text;
 using System.Text.Json;
 using System.Xml;
 
-namespace large_files_transfer
+namespace firecrest_base.Endpoints
 {
     public class EndpointFilesystemTransfer : EndpointFilesystem
     {
         protected string URL { get; private set; }
 
-        // Characters caps shall match with response fields
+        // Class attributes names are case sensitive and shall match with response fields
         protected class MultipartUploadData
         {
             public string []? partsUploadUrls { get; set; }
@@ -25,6 +25,7 @@ namespace large_files_transfer
             public TransferJob? transferJob { get; set; }
         };
 
+        // Class attributes names are case sensitive and shall match with response fields
         protected class DownloadData
         {
             public string? downloadUrl { get; set; }
@@ -41,12 +42,12 @@ namespace large_files_transfer
         public async Task<TransferJob?> Upload(string sourceFile, string destinationFile, string account="csstaff")
         {
             // Set endpoint address 
-            string url = $"{this.URL}/upload";
+            string url = $"{URL}/upload";
             // Destination file settings
             string destinationFileName = destinationFile.Split('/').Last();
             string destinationPath = destinationFile[..(destinationFile.Length - destinationFileName.Length - 1)];
             // Get file size
-            long fileSize = new System.IO.FileInfo(sourceFile).Length;
+            long fileSize = new FileInfo(sourceFile).Length;
             Console.WriteLine($"Uploading file size: {fileSize}");
 
             // Prepare request
@@ -120,7 +121,7 @@ namespace large_files_transfer
             // Get ETag
             s3response.Headers.GetValues("ETag");
             if (s3response.Headers.TryGetValues("ETag", out IEnumerable<string>? etag))
-                eTags.Add(partIndex, etag.First<string>());
+                eTags.Add(partIndex, etag.First());
         }
 
         private static async Task CompleteMultipartUpload(string url, HttpClient client, Dictionary<int, string> eTags)
@@ -155,7 +156,7 @@ namespace large_files_transfer
 
         public async Task Download(string sourceFile, string destinationFile, string account = "csstaff")
         {
-            string url = $"{this.URL}/download";
+            string url = $"{URL}/download";
 
             // Prepare request data
             Dictionary<string, string> formData = new()

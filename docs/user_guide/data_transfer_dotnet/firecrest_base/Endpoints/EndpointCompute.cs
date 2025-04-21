@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+using firecrest_base.Types;
 using System.Text.Json;
 
-namespace firecrest_base
+namespace firecrest_base.Endpoints
 {
     public class EndpointCompute (string firecRESTurl, string system_name) : Endpoint (firecRESTurl)
     {
@@ -17,7 +18,7 @@ namespace firecrest_base
         public async Task<SchedulerJob> GetJob(int jobId)
         {
             var response = await RequestGet($"{EndpointURL}/jobs/{jobId}");
-            SchedulerJobs? tmp = JsonSerializer.Deserialize<SchedulerJobs>(response);
+            SchedulerJobs? tmp = response.Deserialize<SchedulerJobs>();
 
             if (tmp is null || tmp.jobs.Length == 0)
                 throw new Exception("job not found");
