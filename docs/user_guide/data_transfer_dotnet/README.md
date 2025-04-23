@@ -32,92 +32,96 @@ This directory contains classes for handling authentication, such as [AccessToke
 This directory includes a collection of classes representing structured data types, used for serializing and deserializing requests and responses exchanged with FirecREST.
 ### Endpoints
 This directory holds all the classes required to interact with FirecREST API endpoints, designed following an inheritance-based architecture. The following class diagram represents the structure of them.
-```mermaid
----
-title:
----
-classDiagram
-    Endpoint <|-- EndpointStatus
-    Endpoint <|-- EndpointCompute
-    Endpoint <|-- EndpointFileSystem
-    EndpointFileSystem <|-- EndpointFileSystemOps
-    EndpointFileSystem <|-- EndpointFileSystemTransfer
-    <<Abstract>>Endpoint
-    direction LR
-    class Endpoint{
-        #FirecRESTurl
-        #AccessToken
-        #AccessTokenRequest
-        +RefreshToken()
-        +IsTokenExpired()
-        #RequestGet(string resource)
-        #RequestGetStream(string resource)
-        #RequestPost(string resource, Dictionary<string, string> formData)
-        #RequestPost(string resource, MultipartFormDataContent formData)
-    }
-    class EndpointCompute{
-        +GetJob(int jobId)
-        +WaitForJobCompletion(int jobId)
-    }
-    class EndpointStatus{
-        +Systems()
-    }
-    class EndpointFileSystem{
-        #EndpointURL
-        #SystemName
-    }
-    class EndpointFileSystemOps{
-        #URL
-        +Upload(string sourceFile, string destinationFile)
-        +Download(string sourceFile, string destinationFile)
-    }
-    class EndpointFileSystemTransfer{
-        #URL
-        -UploadPart()
-        -CompleteMultipartUpload()
-        +Upload(string sourceFile, string destinationFile, string account)
-        +Download(string sourceFile, string destinationFile, string account)
-    }
-
-```
+!!! example "Endpoints class diagram"
+    ```mermaid
+    ---
+    title:
+    ---
+    classDiagram
+        Endpoint <|-- EndpointStatus
+        Endpoint <|-- EndpointCompute
+        Endpoint <|-- EndpointFileSystem
+        EndpointFileSystem <|-- EndpointFileSystemOps
+        EndpointFileSystem <|-- EndpointFileSystemTransfer
+        <<Abstract>>Endpoint
+        direction LR
+        class Endpoint{
+            #FirecRESTurl
+            #AccessToken
+            #AccessTokenRequest
+            +RefreshToken()
+            +IsTokenExpired()
+            #RequestGet(string resource)
+            #RequestGetStream(string resource)
+            #RequestPost(string resource, Dictionary<string, string> formData)
+            #RequestPost(string resource, MultipartFormDataContent formData)
+        }
+        class EndpointCompute{
+            +GetJob(int jobId)
+            +WaitForJobCompletion(int jobId)
+        }
+        class EndpointStatus{
+            +Systems()
+        }
+        class EndpointFileSystem{
+            #EndpointURL
+            #SystemName
+        }
+        class EndpointFileSystemOps{
+            #URL
+            +Upload(string sourceFile, string destinationFile)
+            +Download(string sourceFile, string destinationFile)
+        }
+        class EndpointFileSystemTransfer{
+            #URL
+            -UploadPart()
+            -CompleteMultipartUpload()
+            +Upload(string sourceFile, string destinationFile, string account)
+            +Download(string sourceFile, string destinationFile, string account)
+        }
+    ```
 
 ## Examples
 ### Example 1: base authentication 
 The [Program.cs](firecrest_base/Program.cs) in the [firecrest_base](firecrest_base/) project demonstrates the simplest connection to FirecREST. It initializes the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class and retrieves the Systems API result.
-```
-    // FirecREST call to endpoint status/systems
-    var es = new EndpointStatus(firecrestURL);
-    // Show result
-    JsonElement r = await es.Systems();
-```
+!!! example "`EndpointStatus` class example call."
+    ```cs
+        // FirecREST call to endpoint status/systems
+        var es = new EndpointStatus(firecrestURL);
+        // Show result
+        JsonElement r = await es.Systems();
+    ```
 The [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) object authenticates access using the `AccessTokenRequest` object, which is managed by the abstract class [Endpoint](firecrest_base/Endpoints.cs).
 
 <b>Note that the</b> `AccessTokenRequest` <b>class requires a</b> `.credentials` <b>file to be located in the same directory as the executable.</b>
 
 An example [.credentials_demo](.credentials_demo) file, configured for accessing the Docker demo environment, is available in the examples' main directory under the endpoint status folder. The file contains the following JSON structure:
-```
-{
-    "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
-    "ClientID": "firecrest-test-client",
-    "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
-}
-```
+!!! example "Inner structure of `.credentials` file."
+    ```json
+    {
+        "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+        "ClientID": "firecrest-test-client",
+        "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
+    }
+    ```
 <b>Tip</b>: if you are running the solution using Visual Studio on Windows, post-build events have been configured to automatically copy the `.credentials_demo` file to the build directory of each project as `.credentials`.
 
 ### Example 2: large files transfer
 The [Program.cs](large_files_transfer/Program.cs) in the [large_files_transfer](large_files_transfer) project generates a random content file with an arbitrary customizable by the function:
-```
-CreatePayload(payloadFile, 2400); // size in MB
-```
+!!! example "Payload file creation."
+    ```cs
+    CreatePayload(payloadFile, 2400); // size in MB
+    ```
 After generating the file, the example uploads it using the [EndpointFilesystemTransfer](firecrest_base/Endpoints/EndpointFilesystemTransfer.cs) class, which implements the [AWS multipart upload protocol](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html). It then waits for the scheduled transfer job to complete by utilizing the `WaitForJobCompletion` method from the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class.
 
 Once the upload is finished, the example downloads the same file, saving it locally under a new name. To ensure the data transfer was successful, checksums of the original and downloaded files are calculated and compared.
 
 ### Example 3: small files transfer
 The [Program.cs](small_files_transfer/Program.cs) in the [small_files_transfer] (small_files_transfer) project generates a random content file with an arbitrary customizable size using a similar function as implemented in Example 2. In this case, the size is expressed in kilobytes (KB). Please note that the maximum file size allowed for direct upload and download using the `ops` endpoint is 1MB. For larger files, the `transfer` endpoint, discussed in example 2, must be used.
-```
-CreatePayload(payloadFile, 5); // size in KB
-```
+!!! example "Payload file creation."
+    ```cs
+    CreatePayload(payloadFile, 5); // size in KB
+    ```
 The example utilizes the [EndpointFilesystemOps](firecrest_base/Endpoints/EndpointFilesystemOps.cs) class to upload a file on the specified path.
 
 Once the upload is finished, the example downloads the same file, saving it locally under a new name. To ensure the data transfer was successful, checksums of the original and downloaded files are calculated and compared.
