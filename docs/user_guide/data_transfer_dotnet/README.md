@@ -32,64 +32,19 @@ This directory contains classes for handling authentication, such as [AccessToke
 This directory includes a collection of classes representing structured data types, used for serializing and deserializing requests and responses exchanged with FirecREST.
 ### Endpoints
 This directory holds all the classes required to interact with FirecREST API endpoints, designed following an inheritance-based architecture. The following class diagram represents the structure of them.
-```mermaid
----
-title:
----
-classDiagram
-    Endpoint <|-- EndpointStatus
-    Endpoint <|-- EndpointCompute
-    Endpoint <|-- EndpointFileSystem
-    EndpointFileSystem <|-- EndpointFileSystemOps
-    EndpointFileSystem <|-- EndpointFileSystemTransfer
-    <<Abstract>>Endpoint
-    direction LR
-    class Endpoint{
-        #FirecRESTurl
-        #AccessToken
-        #AccessTokenRequest
-        +RefreshToken()
-        +IsTokenExpired()
-        #RequestGet(string resource)
-        #RequestGetStream(string resource)
-        #RequestPost(string resource, Dictionary<string, string> formData)
-        #RequestPost(string resource, MultipartFormDataContent formData)
-    }
-    class EndpointCompute{
-        +GetJob(int jobId)
-        +WaitForJobCompletion(int jobId)
-    }
-    class EndpointStatus{
-        +Systems()
-    }
-    class EndpointFileSystem{
-        #EndpointURL
-        #SystemName
-    }
-    class EndpointFileSystemOps{
-        #URL
-        +Upload(string sourceFile, string destinationFile)
-        +Download(string sourceFile, string destinationFile)
-    }
-    class EndpointFileSystemTransfer{
-        #URL
-        -UploadPart()
-        -CompleteMultipartUpload()
-        +Upload(string sourceFile, string destinationFile, string account)
-        +Download(string sourceFile, string destinationFile, string account)
-    }
-```
+
+![f7t_authn_basic](../../../assets/img/dot_net_class_diagram.svg)
 
 ## Examples
 ### Example 1: base authentication 
 The [Program.cs](firecrest_base/Program.cs) in the [firecrest_base](firecrest_base/) project demonstrates the simplest connection to FirecREST. It initializes the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class and retrieves the Systems API result.
 
 !!! example "`EndpointStatus` class example call."
-    ```c#
-        // FirecREST call to endpoint status/systems
-        var es = new EndpointStatus(firecrestURL);
-        // Show result
-        JsonElement r = await es.Systems();
+    ```cs c
+    // FirecREST call to endpoint status/systems
+    var es = new EndpointStatus(firecrestURL);
+    // Show result
+    JsonElement r = await es.Systems();
     ```
 
 The [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) object authenticates access using the `AccessTokenRequest` object, which is managed by the abstract class [Endpoint](firecrest_base/Endpoints.cs).
