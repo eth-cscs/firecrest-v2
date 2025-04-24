@@ -9,6 +9,7 @@ from typing import Optional
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
 from lib.models import CamelModel
+from pydantic import Field
 
 
 class ContentUnit(str, Enum):
@@ -84,7 +85,7 @@ class GetFileChecksumResponse(CamelModel):
 
 
 class GetFileTypeResponse(CamelModel):
-    output: Optional[str]
+    output: Optional[str] = Field(example="directory")
 
 
 class GetFileStatResponse(CamelModel):
@@ -95,9 +96,18 @@ class PatchFileMetadataResponse(CamelModel):
     output: Optional[PatchFile]
 
 
-class PutFileChmodRequest(CamelModel):
-    path: str
-    mode: str
+class PutFileChmodRequest(FilesystemRequestBase):
+    mode: str = Field(..., description="Mode in octal permission format")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir/file.out",
+                    "mode": "777"
+                }
+            ]
+        }
+    }
 
 
 class PutFileChmodResponse(CamelModel):
@@ -105,8 +115,19 @@ class PutFileChmodResponse(CamelModel):
 
 
 class PutFileChownRequest(FilesystemRequestBase):
-    owner: Optional[str] = ""
-    group: Optional[str] = ""
+    owner: Optional[str] = Field(default="", description="User name of the new user owner of the file")
+    group: Optional[str] = Field(default="", description="Group name of the new group owner of the file")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir/file.out",
+                    "owner": "user",
+                    "group": "my-group"
+                }
+            ]
+        }
+    }
 
 
 class PutFileChownResponse(CamelModel):
@@ -114,11 +135,31 @@ class PutFileChownResponse(CamelModel):
 
 
 class PostMakeDirRequest(FilesystemRequestBase):
-    parent: Optional[bool] = False
+    parent: Optional[bool] = Field(default=False, description="If set to `true` creates all its parent directories if they do not already exist")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir/newdir",
+                    "parent": "true"
+                }
+            ]
+        }
+    }
 
 
 class PostFileSymlinkRequest(FilesystemRequestBase):
-    link_path: str
+    link_path: str = Field(..., description="Path to the new symlink")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir",
+                    "link_path": "/home/user/newlink"
+                }
+            ]
+        }
+    }
 
 
 class PostFileSymlinkResponse(CamelModel):
@@ -134,10 +175,32 @@ class PostMkdirResponse(CamelModel):
 
 
 class PostCompressRequest(FilesystemRequestBase):
-    target_path: str
-    match_pattern: Optional[str] = None
-    dereference: Optional[bool] = False
+    target_path: str = Field(..., description="Path to the compressed file")
+    match_pattern: Optional[str] = Field(default=None, description="Regex pattern to filter files to compress")
+    dereference: Optional[bool] = Field(default=False, description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir",
+                    "target_path": "/home/user/file.tar.gz",
+                    "match_pattern": "*./[ab].*\\.txt",
+                    "dereference": "true"
+                }
+            ]
+        }
+    }
 
 
 class PostExtractRequest(FilesystemRequestBase):
-    target_path: str
+    target_path: str = Field(..., description="Path to the directory where to extract the compressed file")
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "path": "/home/user/dir/file.tar.gz",
+                    "target_path": "/home/user/dir"
+                }
+            ]
+        }
+    }

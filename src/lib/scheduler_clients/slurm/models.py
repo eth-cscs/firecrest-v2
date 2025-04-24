@@ -35,16 +35,16 @@ class SlurmInt(RootModel):
 
 
 class SlurmJobDescription(JobDescriptionModel):
-    name: Optional[str] = None
-    current_working_directory: str = Field(alias="working_directory")
-    standard_input: Optional[str] = None
-    standard_output: Optional[str] = None
-    standard_error: Optional[str] = None
+    name: Optional[str] = Field(default=None, description="Name for the job")
+    current_working_directory: str = Field(alias="working_directory", description="Job working directory")
+    standard_input: Optional[str] = Field(default=None, description="Standard input file name")
+    standard_output: Optional[str] = Field(default=None, description="Standard output file name")
+    standard_error: Optional[str] = Field(default=None, description="Standard error file name")
     environment: Optional[Dict[str, str] | List[str]] = Field(
-        alias="env", default={"F7T_version": "v2.0.0"}
+        alias="env", default={"F7T_version": "v2.0.0"}, description="Dictionary of environment variables to set in the job context"
     )
-    constraints: Optional[str] = None
-    script: str
+    constraints: Optional[str] = Field(default=None, description="Job constraints")
+    script: str = Field(description="Script for the job")
 
 
 class SlurmJobMetadata(JobMetadataModel):

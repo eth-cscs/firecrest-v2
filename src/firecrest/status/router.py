@@ -56,9 +56,10 @@ router_liveness = create_router(
 
 @router.get(
     "/systems",
+    description="Get the list of systems and health status",
     status_code=status.HTTP_200_OK,
     response_model=GetSystemsResponse,
-    response_description="Get the list of systems",
+    response_description="System list returned successfully",
 )
 async def get_systems() -> Any:
     return {"systems": settings.clusters}
@@ -66,9 +67,10 @@ async def get_systems() -> Any:
 
 @router_on_systen.get(
     "/nodes",
+    description="Get the list of nodes of a `{system_name}`",
     status_code=status.HTTP_200_OK,
     response_model=GetNodesResponse,
-    response_description="Get all nodes",
+    response_description="Nodes list returned successfully",
 )
 async def get_system_nodes(
     scheduler_client: Annotated[
@@ -96,9 +98,10 @@ async def get_system_nodes(
 
 @router_on_systen.get(
     "/reservations",
+    description="Get the list of reservations of a `{system_name}`",
     status_code=status.HTTP_200_OK,
     response_model=GetReservationsResponse,
-    response_description="Get all reservations",
+    response_description="Reservations list returned successfully",
 )
 async def get_system_reservations(
     scheduler_client: Annotated[
@@ -122,9 +125,10 @@ async def get_system_reservations(
 
 @router_on_systen.get(
     "/partitions",
+    description="Get the list of partitions of a `{system_name}`",
     status_code=status.HTTP_200_OK,
     response_model=GetPartitionsResponse,
-    response_description="Get all partitions",
+    response_description="Partitions list returned successfully",
 )
 async def get_system_partitions(
     scheduler_client: Annotated[
@@ -148,9 +152,10 @@ async def get_system_partitions(
 
 @router_on_systen.get(
     "/userinfo",
+    description="Get current user information on a `{system_name}`",
     status_code=status.HTTP_200_OK,
     response_model=UserInfoResponse,
-    response_description="Get user and groups information",
+    response_description="User information returned successfully",
 )
 async def get_userinfo(
     ssh_client: Annotated[
@@ -173,9 +178,10 @@ async def get_userinfo(
 
 @router_liveness.get(
     "/",
+    description="Get liveness status of FirecREST",
     status_code=status.HTTP_200_OK,
     response_model=GetLiveness,
-    response_description="Query liveness",
+    response_description="Liveness status returned successfully",
 )
 async def get_liveness() -> Any:
 

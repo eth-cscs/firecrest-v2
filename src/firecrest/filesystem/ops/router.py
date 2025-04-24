@@ -83,9 +83,10 @@ router = create_router(
 
 @router.put(
     "/chmod",
+    description="Change the permission mode of a file(`chmod`)",
     status_code=status.HTTP_200_OK,
     response_model=PutFileChmodResponse,
-    response_description="Change the file mod bits of a given file according to the specified mode (chmod)",
+    response_description="File permissions changed successfully",
 )
 async def put_chmod(
     request_model: PutFileChmodRequest,
@@ -111,9 +112,10 @@ async def put_chmod(
 
 @router.put(
     "/chown",
+    description="Change the ownership of a given file (`chown`)",
     status_code=status.HTTP_200_OK,
     response_model=PutFileChownResponse,
-    response_description="Changes the user and/or group ownership of a given file (chown)",
+    response_description="File ownership changed successfully",
 )
 async def put_chown(
     request_model: PutFileChownRequest,
@@ -144,9 +146,10 @@ async def put_chown(
 
 @router.get(
     "/ls",
+    description="List the contents of the given directory (`ls`)",
     status_code=status.HTTP_200_OK,
     response_model=GetDirectoryLsResponse,
-    response_description="List the contents of the given directory (ls)",
+    response_description="Directory listed successfully",
 )
 async def get_ls(
     path: Annotated[str, Query(description="The path to list")],
@@ -186,9 +189,10 @@ async def get_ls(
 
 @router.get(
     "/head",
+    description="Output the first part of file/s (`head`)",
     status_code=status.HTTP_200_OK,
     response_model=GetFileHeadResponse,
-    response_description="Output the first part of file/s (head)",
+    response_description="Head operation finished successfully",
 )
 async def get_head(
     path: Annotated[str, Query(description="File path")],
@@ -261,9 +265,10 @@ async def get_head(
 
 @router.get(
     "/view",
+    description=f"View full file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes files)",
     status_code=status.HTTP_200_OK,
     response_model=GetViewFileResponse,
-    response_description="View full file content (up to 5MB files)",
+    response_description="View operation finished successfully",
 )
 async def get_view(
     path: Annotated[str, Query(description="File path")],
@@ -287,9 +292,10 @@ async def get_view(
 
 @router.get(
     "/tail",
+    description="Output the last part of a file (`tail`)",
     status_code=status.HTTP_200_OK,
     response_model=GetFileTailResponse,
-    response_description="Output the last part of a file (tail)",
+    response_description="`tail` operation finished successfully",
 )
 async def get_tail(
     path: Annotated[str, Query(description="File path")],
@@ -357,9 +363,10 @@ async def get_tail(
 
 @router.get(
     "/checksum",
+    description="Output the checksum of a file (using SHA-256 algotithm)",
     status_code=status.HTTP_200_OK,
     response_model=GetFileChecksumResponse,
-    response_description="Output the checksum of a file (sha256sum)",
+    response_description="Checksum returned successfully",
 )
 async def get_checksum(
     ssh_client: Annotated[
@@ -384,9 +391,10 @@ async def get_checksum(
 
 @router.get(
     "/file",
+    description="Output the type of a file or directory",
     status_code=status.HTTP_200_OK,
     response_model=GetFileTypeResponse,
-    response_description="Output the type of a file",
+    response_description="Type returned successfully",
 )
 async def get_file(
     ssh_client: Annotated[
@@ -410,9 +418,10 @@ async def get_file(
 
 @router.get(
     "/stat",
+    description="Output the `stat` of a file",
     status_code=status.HTTP_200_OK,
     response_model=GetFileStatResponse,
-    response_description="Output the stat of a file",
+    response_description="Stat returned successfully",
 )
 async def get_stat(
     ssh_client: Annotated[
@@ -437,8 +446,9 @@ async def get_stat(
 
 @router.delete(
     "/rm",
+    description="Delete file or directory operation (`rm`)",
     status_code=status.HTTP_204_NO_CONTENT,
-    response_description="Delete file or directory operation (rm)",
+    response_description="File or directory deleted successfully",
 )
 async def delete_rm(
     path: Annotated[str, Query(description="The path to delete")],
@@ -462,9 +472,10 @@ async def delete_rm(
 
 @router.post(
     "/mkdir",
+    description="Create directory operation (`mkdir`)",
     status_code=status.HTTP_201_CREATED,
     response_model=PostMkdirResponse,
-    response_description="Create directory operation (mkdir)",
+    response_description="Directory created successfully",
 )
 async def post_mkdir(
     request_model: PostMakeDirRequest,
@@ -489,9 +500,10 @@ async def post_mkdir(
 
 @router.post(
     "/symlink",
+    description="Create symlink operation (`ln`)",
     status_code=status.HTTP_201_CREATED,
     response_model=PostFileSymlinkResponse,
-    response_description="Create symlink operation (ln)",
+    response_description="Symlink created successfully",
 )
 async def post_symlink(
     request_model: PostFileSymlinkRequest,
@@ -515,9 +527,10 @@ async def post_symlink(
 
 @router.get(
     "/download",
+    description=f"Download a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_200_OK,
     response_model=None,
-    response_description=f"Download a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    response_description="File downloaded successfully"
 )
 async def get_download(
     ssh_client: Annotated[
@@ -543,9 +556,10 @@ async def get_download(
 
 @router.post(
     "/upload",
+    description=f"Upload a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    response_description=f"Upload a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    response_description="File uploaded successfully"
 )
 async def post_upload(
     ssh_client: Annotated[
@@ -556,7 +570,7 @@ async def post_upload(
     path: Annotated[
         str, Query(description="Specify path where file should be uploaded.")
     ],
-    file: UploadFile = File(...),
+    file: UploadFile = File(description="File to be uploaded as `multipart/form-data`"),
     system: HPCCluster = Depends(
         ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
         use_cache=False,
@@ -587,9 +601,10 @@ async def post_upload(
 
 @router.post(
     "/compress",
+    description="Compress files and directories using `tar` command",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    response_description="Compress file and folders",
+    response_description="File and/or directories compressed successfully",
 )
 async def post_compress(
     request_model: PostCompressRequest,
@@ -616,9 +631,10 @@ async def post_compress(
 
 @router.post(
     "/extract",
+    description="Extract `tar` `gzip` archives",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    response_description="Extract tar gzip archives",
+    response_description="File extracted successfully",
 )
 async def post_extract(
     request_model: PostExtractRequest,
