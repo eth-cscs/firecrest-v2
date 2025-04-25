@@ -1,4 +1,4 @@
-# FirecREST Usage with C# .NET
+# FirecREST File Transfer with C# .NET
 ## General description
 This .NET solution provides examples demonstrating how to connect to FirecREST and transfer files using C# via different API endpoints. The implementation follows a fully `async` approach.
 
