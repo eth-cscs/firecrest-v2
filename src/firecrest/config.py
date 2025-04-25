@@ -445,7 +445,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def check_cluters_dir(self) -> "Settings":
-        if self.clusters_dir != "":
+        if isinstance(self.clusters_dir, str) and self.clusters_dir != "":
             path = Path(self.clusters_dir).expanduser()
             if not path.exists():
                 raise FileNotFoundError(f"Clusters directory: {path} not found!")
