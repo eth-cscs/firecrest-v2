@@ -4,7 +4,7 @@ FirecREST runs on the [Uvicorn](https://www.uvicorn.org/) web server from which 
 
 By default, the FirecREST logger is disabled and the standard Uvicorn logging is applied. To enable it, and accept customized types of loggers and formatters, a configuration YAML file must be mounted into the firecrest-v2 container and the environment variable [UVICORN_LOG_CONFIG](https://www.uvicorn.org/settings/#logging) shall be set pointing to it.
 
-To enable the log in FirecREST configuration, set to `true` the [logger.enable_tracing_log](../../conf/#logger) configuration variable.
+To enable the log in FirecREST configuration, set to `true` the [logger.enable_tracing_log](../../conf/README.md#logger) configuration variable.
 
 ## Logging config file
 

@@ -184,7 +184,7 @@ Complete the upload by calling the completeUploadUrl:
     ```
 
 ## File Transfer with .NET
-[Detailed example.](data_transfer_dotnet/README.md)
+[Detailed example.](file_transfer_dotnet/README.md)
 
 ## FirecREST SDK
 
