@@ -12,22 +12,20 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../auth/">
       
-      
-      <link rel="icon" href="../../../assets/img/favicon.ico">
+      <link rel="icon" href="../../assets/img/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
-        <title>FirecREST command execution - FirecREST v2 Documentation</title>
+        <title>Web UI with Client Credentials - FirecREST v2 Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -46,9 +44,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#firecrest-command-execution" class="md-skip">
+        <a href="#web-ui-with-client-credentials" class="md-skip">
           Skip to content
         </a>
       
@@ -90,9 +88,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="FirecREST v2 Documentation" class="md-header__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
+    <a href="../.." title="FirecREST v2 Documentation" class="md-header__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
       
-  <img src="../../../assets/img/firecrest-logo.gif" alt="logo">
+  <img src="../../assets/img/firecrest-logo.gif" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -109,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FirecREST command execution
+              Web UI with Client Credentials
             
           </span>
         </div>
@@ -240,9 +238,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="FirecREST v2 Documentation" class="md-nav__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
+    <a href="../.." title="FirecREST v2 Documentation" class="md-nav__button md-logo" aria-label="FirecREST v2 Documentation" data-md-component="logo">
       
-  <img src="../../../assets/img/firecrest-logo.gif" alt="logo">
+  <img src="../../assets/img/firecrest-logo.gif" alt="logo">
 
     </a>
     FirecREST v2 Documentation
@@ -269,7 +267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -309,7 +307,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../getting_started/" class="md-nav__link ">
+            <a href="../../getting_started/" class="md-nav__link ">
               
   
   
@@ -343,10 +341,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -360,11 +356,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -380,7 +376,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Setup
@@ -391,8 +387,6 @@
                 
   
   
-    
-  
   
   
     
@@ -416,15 +410,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../setup/arch/" class="md-nav__link ">
               
   
   
@@ -443,7 +437,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_1">
             <span class="md-nav__icon md-icon"></span>
             Architecture
@@ -456,8 +450,6 @@
                 
   
   
-    
-  
   
   
     
@@ -471,15 +463,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1_2" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../../setup/arch/systems/" class="md-nav__link ">
               
   
   
@@ -493,7 +485,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_1_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_1_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_1_2">
             <span class="md-nav__icon md-icon"></span>
             Systems
@@ -535,7 +527,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../auth/" class="md-nav__link ">
+            <a href="../../setup/arch/auth/" class="md-nav__link ">
               
   
   
@@ -591,7 +583,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../external_storage/" class="md-nav__link ">
+            <a href="../../setup/arch/external_storage/" class="md-nav__link ">
               
   
   
@@ -647,7 +639,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../health_checks/" class="md-nav__link ">
+            <a href="../../setup/arch/health_checks/" class="md-nav__link ">
               
   
   
@@ -703,7 +695,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../logging/" class="md-nav__link ">
+            <a href="../../setup/arch/logging/" class="md-nav__link ">
               
   
   
@@ -767,7 +759,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../conf/" class="md-nav__link ">
+            <a href="../../setup/conf/" class="md-nav__link ">
               
   
   
@@ -823,7 +815,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../deploy/" class="md-nav__link ">
+            <a href="../../setup/deploy/" class="md-nav__link ">
               
   
   
@@ -886,7 +878,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../user_guide/" class="md-nav__link ">
+            <a href="../../user_guide/" class="md-nav__link ">
               
   
   
@@ -920,6 +912,8 @@
       
   
   
+    
+  
   
   
     
@@ -935,15 +929,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../use_cases/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -962,7 +956,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Use cases
@@ -975,6 +969,8 @@
                 
   
   
+    
+  
   
   
     
@@ -988,15 +984,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../use_cases/UI-client-credentials/" class="md-nav__link ">
+            <a href="./" class="md-nav__link md-nav__link--active">
               
   
   
@@ -1010,7 +1006,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_2">
             <span class="md-nav__icon md-icon"></span>
             Web UI Application
@@ -1083,75 +1079,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-simplistic-approach" class="md-nav__link">
+  <a href="#introduction" class="md-nav__link">
     <span class="md-ellipsis">
-      The simplistic approach
+      Introduction
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#going-deeper" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Going deeper
+      Prerequisites
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#jwt-to-ssh-delegation" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      JWT to SSH Delegation
+      Configuration
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="JWT to SSH Delegation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#obtaining-ssh-credentials-on-behalf-of-the-user" class="md-nav__link">
-    <span class="md-ellipsis">
-      Obtaining SSH credentials on behalf of the user
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#ssh-configuration-in-target-systems" class="md-nav__link">
+  <a href="#build-and-run" class="md-nav__link">
     <span class="md-ellipsis">
-      SSH Configuration in target systems
+      Build and run
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="SSH Configuration in target systems">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ssh-configuration-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSH Configuration details
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-enable-high-throughput-regime-via-firecrest" class="md-nav__link">
+  <a href="#how-does-it-work-for-the-user" class="md-nav__link">
     <span class="md-ellipsis">
-      How to enable High Throughput Regime via FirecREST
+      How does it work for the user
     </span>
   </a>
   
@@ -1173,7 +1139,7 @@
 
 
   
-    <a href="https://github.com/eth-cscs/firecrest-v2/edit/master/docs/setup/arch/systems/README.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/eth-cscs/firecrest-v2/edit/master/docs/use_cases/UI-client-credentials/README.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -1181,94 +1147,83 @@
   
 
 
-<h1 id="firecrest-command-execution">FirecREST command execution<a class="headerlink" href="#firecrest-command-execution" title="Permanent link">&para;</a></h1>
-<h2 id="the-simplistic-approach">The simplistic approach<a class="headerlink" href="#the-simplistic-approach" title="Permanent link">&para;</a></h2>
-<p>The goal of FirecREST is to provide an HTTP interface to HPC, this means that the interface FirecREST presents to the users and applications must handle HTTP requests with according parameters, verbs, etc.</p>
-<p>FirecREST receives these requests and translates them into HPC logic, and after the operations are done (ie, commands executed, data uploaded, etc) it returns an HTTP response that complies with the protocol used.</p>
-<p><img alt="f7t_simple" src="../../../assets/img/command_exec_simple.svg" /></p>
-<h2 id="going-deeper">Going deeper<a class="headerlink" href="#going-deeper" title="Permanent link">&para;</a></h2>
-<p>The command execution from FirecREST API server to the HPC cluster is done <strong>via SSH connection using HPC system users' credentials</strong>.</p>
-<p>This means that FirecREST can be installed in any platform or infrastructure (cloud provider, VM, local system) with SSH access to the target system(s) configured. It doesn't need to be installed in the same VPN or VLAN of the system.</p>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>FirecREST doesn't execute commands as <code>root</code> user or using <code>sudo</code> commands. All commands are executed on behalf of the users using the users' credential.</p>
-</div>
-<h2 id="jwt-to-ssh-delegation">JWT to SSH Delegation<a class="headerlink" href="#jwt-to-ssh-delegation" title="Permanent link">&para;</a></h2>
-<p>To answer to the question on "how the SSH credentials are obtained or created", FirecREST provides an integration with JSON Web Tokens used to authenticate agains the API.</p>
-<p>FirecREST uses the <code>username</code> or <code>preferred_username</code> claim from the JWT access token created by the Identity Provider (IdP) when the user or application <a href="../auth/">authenticated to use the API</a>.</p>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>This <code>username</code> value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.</p>
-</div>
-<p>The JWT signature is verified using the Identity Provider (IdP) public key, and then the token time validity is checked. If both are successful, the <code>username</code> is extracted and a SSH key is created for the user if there isn't an active connection to the cluster.</p>
-<h3 id="obtaining-ssh-credentials-on-behalf-of-the-user">Obtaining SSH credentials on behalf of the user<a class="headerlink" href="#obtaining-ssh-credentials-on-behalf-of-the-user" title="Permanent link">&para;</a></h3>
-<p>FirecREST provides an abstraction to allow different ways of getting SSH credentials for the user. Currently, there are the 2 options available:</p>
-<p><a href="" id="f7t-ssh-service"></a></p>
+<h1 id="web-ui-with-client-credentials">Web UI with Client Credentials<a class="headerlink" href="#web-ui-with-client-credentials" title="Permanent link">&para;</a></h1>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<p>Example of Web GUI (Graphic User Interface) application on Python (<a href="https://flask.palletsprojects.com/en/stable/">Flask</a>) to interface HCP services using <a href="https://pyfirecrest.readthedocs.io/en/stable/">pyFirecREST</a>.</p>
+<p>This example uses Authentication with an Identity Provider (IdP) with the <a href="https://oauth.net/2/grant-types/client-credentials/">Client Credential Workflow</a>.</p>
+<p>Follow the Configuration guide to adapt your client credentials to the app.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Docker installed</li>
+<li>Knowledge of Python</li>
+</ul>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Using an "SSH Service"</p>
-<p>If the HPC center has an API or web service that translates a JWT into an SSH credential, you can connect FirecREST to this service.</p>
-<p><img alt="f7t_ssh_service" src="../../../assets/img/command_exec_sshservice.svg" /></p>
-<p>In this case, the user sends the JWT to FirecREST and it is forwarded to the SSH Service. Therefore, the IdP that generates JWT must be trusted by both FirecREST and the SSH Service.</p>
-<p>Once the SSH credential is created, FirecREST uses the SSH credential to execute commands.</p>
-<p>The benefit of this approach is that SSH credentials creation and validation is managed within the specific groups.</p>
-</li>
-<li>
-<p>Using static SSH credentials</p>
-<p>Additionally, FirecREST provides a way to map user identities in the JWT with SSH credentials by using the <a href="../../conf/">firecrest-config.yaml</a>.</p>
-<p><img alt="f7t_ssh_service" src="../../../assets/img/command_exec_nosshsvc.svg" /></p>
-<p>SSH credentials or the users should be managed as secrets and should be updated by the administrator of the FirecREST deployment if they change.</p>
-</li>
-</ol>
-<h2 id="ssh-configuration-in-target-systems">SSH Configuration in target systems<a class="headerlink" href="#ssh-configuration-in-target-systems" title="Permanent link">&para;</a></h2>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high througput regime via API</p>
-</div>
-<p>It is recommended to set a specific <code>Match</code> section on the <a href="https://man.openbsd.org/OpenBSD-current/man5/sshd_config.5#Match">Open SSHD configuration</a> for requests from FirecREST:</p>
+<p>Copy the configuration file (<code>src/config.py.orig</code>) and rename it as <code>src/config.py</code></p>
 <div class="admonition example">
-<p class="admonition-title">Login node SSHd Config</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span>cat<span class="w"> </span>/etc/ssh/sshd_config
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="o">(</span>...<span class="o">)</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># To accept FirecREST host</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Match<span class="w"> </span>Address<span class="w"> </span><span class="o">{</span>IP_ADDR_or_RANGE<span class="o">}</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>TrustedUserCAKeys<span class="w"> </span>/path/to/ssh/key.pub
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>PermitRootLogin<span class="w"> </span>no
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span>DenyGroups<span class="w"> </span>root<span class="w"> </span>bin<span class="w"> </span>admin<span class="w"> </span>sys
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span>MaxAuthTries<span class="w"> </span><span class="m">1</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>AllowTcpForwarding<span class="w"> </span>no
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span>MaxSessions<span class="w"> </span><span class="m">2500</span>
+<p class="admonition-title">Copy empty configuration file</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>src
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>$<span class="w"> </span>cp<span class="w"> </span>config.py.orig<span class="w"> </span>config.py
 </span></code></pre></div>
 </div>
-<h3 id="ssh-configuration-details">SSH Configuration details<a class="headerlink" href="#ssh-configuration-details" title="Permanent link">&para;</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You can follow this <a href="https://man7.org/linux/man-pages/man5/sshd_config.5.html">link</a> to have a more complete understanding on SSH configuration used below</p>
+</li>
+<li>
+<p>Replace the following values with the specifics for this tutorial</p>
+<div class="admonition example">
+<p class="admonition-title">Complete configuration file</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">...</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">DevConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">OIDC_CLIENT_ID</span> <span class="o">=</span> <span class="s2">&quot;&lt;CLIENT_ID&gt;&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">OIDC_CLIENT_SECRET</span> <span class="o">=</span> <span class="s2">&quot;&lt;CLIENT_SECRET&gt;&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">USER_GROUP</span><span class="o">=</span><span class="s2">&quot;&lt;Unix Group of the User associated with your Client Credential client&gt;&quot;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">OIDC_AUTH_BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;&lt;IdP Auth Endpoint&gt;&quot;</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">OIDC_AUTH_REALM</span> <span class="o">=</span> <span class="s2">&quot;&lt;IdP Auth Realm&gt;&quot;</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">FIRECREST_URL</span><span class="o">=</span><span class="s2">&quot;&lt;FirecREST URL&gt;&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">SYSTEM_NAME</span><span class="o">=</span><span class="s2">&quot;&lt;Name of the system to interface&gt;&quot;</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span></code></pre></div>
 </div>
+</li>
+<li>
+<p>For <strong>debugging</strong> purposes, leave the default values in the variables <code>SBATCH_TEMPLATE</code>, <code>PROBLEM_INI_FILE</code>, <code>PROBLEM_MSH_FILE</code>, and <code>POST_TEMPLATE</code>.</p>
+</li>
+<li>
+<p>For <strong>testing a "real"</strong> case, use:</p>
+<div class="admonition example">
+<p class="admonition-title">Configuration file: problem setup</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">...</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">DevConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">PROBLEM_INI_FILE</span> <span class="o">=</span> <span class="s1">&#39;inc-cylinder.ini&#39;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">PROBLEM_MSH_FILE</span> <span class="o">=</span> <span class="s1">&#39;inc-cylinder.msh&#39;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">SBATCH_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;cylinder.sh.tmpl&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">POST_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;post_proc.sh.tmpl&quot;</span>
+</span></code></pre></div>
+</div>
+</li>
+</ol>
+<p><em>In this case, you would need to use <a href="https://products.cscs.ch/sarus/">Sarus</a></em></p>
+<h2 id="build-and-run">Build and run<a class="headerlink" href="#build-and-run" title="Permanent link">&para;</a></h2>
+<div class="admonition example">
+<p class="admonition-title">Build app and run</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>build
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>make<span class="w"> </span>run
+</span></code></pre></div>
+</div>
+<p>You can check the logs in <code>log/client.log</code></p>
+<div class="admonition example">
+<p class="admonition-title">Check the logs</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$<span class="w"> </span>tail<span class="w"> </span>-f<span class="w"> </span>log/client.log
+</span></code></pre></div>
+</div>
+<h2 id="how-does-it-work-for-the-user">How does it work for the user<a class="headerlink" href="#how-does-it-work-for-the-user" title="Permanent link">&para;</a></h2>
 <ul>
-<li>
-<p><code>Match Address</code>: points the IP address (or range) from where FirecREST server connects to the cluster. This way, this <code>Match</code> block only process SSH connections from FirecREST.</p>
-</li>
-<li>
-<p><code>TrustedUserCAKeys</code>: in case of using an <a class="autorefs autorefs-internal" title="Obtaining SSH credentials on behalf of the user" href="#f7t-ssh-service">SSH Service</a> this option points to the path where the public key of the Certificate Authority that signs SSH credentials is stored.</p>
-</li>
-<li>
-<p><code>DenyGroups</code>: to avoid these special permission groups from executing commands via FirecREST</p>
-</li>
-<li>
-<p><code>MaxSessions</code>: sessions are a result of (SSH connections x Commands executed). The default value is <code>10</code>, but to allow <a class="autorefs autorefs-internal" title="How to enable High Throughput Regime via FirecREST" href="#how-to-enable-high-throughput-regime-via-firecrest">high throughput regime</a> on commands execution via FirecREST, set this value to a higher number (recommended <code>9999</code> which is the max allowed value).</p>
-</li>
+<li>Open a browser, and enter <a href="http://localhost:9091">http://localhost:9091</a></li>
+<li>Set the parameters of the problem (number of steps, nodes, job name, etc)</li>
+<li>Click <code>Submit Jobs</code> to run the simulation (you should see the jobs created in the list, and new result files in <code>Working directory</code>)</li>
+<li>Click on <code>Start Postprocessing</code> to launch a job and after completion see the animated gif result image</li>
 </ul>
-<p><a href="" id="f7t-ssh-pool"></a></p>
-<h2 id="how-to-enable-high-throughput-regime-via-firecrest">How to enable High Throughput Regime via FirecREST<a class="headerlink" href="#how-to-enable-high-throughput-regime-via-firecrest" title="Permanent link">&para;</a></h2>
-<p>To enable high throughput operations on HPC via an API, the FirecREST team has set the <strong>SSH connection pool</strong>.</p>
-<p>Instead of using one SSH connection+channel per command, this approach re-uses an SSH connection to execute several commands on a row.​</p>
-<p>Each connection in the pool is closed after a time of inactivity, leaving it available for the next user.</p>
-<p><img alt="f7t_ssh_pool" src="../../../assets/img/command_exec_sshpool.svg" /></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Using this setup, stress testing has proven that 500 clients can produce ~195 request per second with a latency of 900 ms, and an error rate of 0.04%​ (always depending of the infrastructure, filesystems, network latency, etc)</p>
-</div>
 
 
 
@@ -1323,10 +1278,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
       
     
   </body>

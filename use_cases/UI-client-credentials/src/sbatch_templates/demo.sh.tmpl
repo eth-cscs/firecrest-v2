@@ -1,0 +1,39 @@
+#!/bin/bash
+##
+##  Copyright (c) 2025, ETH Zurich. All rights reserved.
+##
+##  Please, refer to the LICENSE file in the root directory.
+##  SPDX-License-Identifier: BSD-3-Clause
+##
+
+#SBATCH --job-name={{ jobName }}
+#SBATCH --error=job-%j.err
+#SBATCH --output=job-%j.out
+
+# optional parameters
+#SBATCH --account={{ account }}
+{% if partition is not none %}
+#SBATCH --partition={{ partition }}
+{% endif %}
+{% if constraint is not none %}
+#SBATCH --constraint={{ constraint }}
+{% endif %}
+{% if reservation is not none %}
+#SBATCH --reservation={{ reservation }}
+{% endif %}
+
+{% if step != 1 %}
+{# if step is 1, then no dependency should be added #}
+#SBATCH --dependency=afterok:{{ lastJobId }}
+{% endif %}
+
+#SBATCH --ntasks={{ ntasks }}
+#SBATCH --tasks-per-node=1
+
+step={{ step }}
+cd {{ jobDir }}
+
+echo -e "$SLURM_JOB_NAME started on $(date)"
+sleep 30s
+echo "Solution $step" > out_${step}0.00.pyfrs
+echo -e "$SLURM_JOB_NAME finished on $(date)"

@@ -1,0 +1,11 @@
+pip == 25.0.1
+Flask==3.1.0
+markupsafe==3.0.2
+requests-oauthlib==2.0.0
+Bootstrap-Flask==2.4.2
+Flask-Session==0.8.0
+Flask-SocketIO==5.5.1
+flask_sslify == 0.1.5
+PyJWT[crypto] == 2.10.1
+pyfirecrest == 3.0.1
+Jinja2 == 3.1.6
