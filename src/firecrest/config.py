@@ -412,7 +412,7 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
     )
-    clusters_dir: str = Field(
+    clusters_dir: Optional[str] = Field(
         "",
         description="Optional directory with cluster definitions",
     )
