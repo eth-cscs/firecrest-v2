@@ -13,6 +13,7 @@ from pydantic import (
     ConfigDict,
     Field,
     field_validator,
+    model_validator,
 )
 from pydantic_settings import (
     BaseSettings,
@@ -411,6 +412,10 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
     )
+    clusters_dir: str = Field(
+        "",
+        description="Optional directory with cluster definitions",
+    )
     storage: Optional[Storage] = Field(
         None,
         description=(
@@ -430,25 +435,32 @@ class Settings(BaseSettings):
     @field_validator("clusters", mode="before")
     @classmethod
     def ensure_list(cls, value: Any) -> Any:
-        if isinstance(value, str) and value.startswith("path:"):
-            path = Path(value[5:]).expanduser()
-            if not path.exists():
-                raise FileNotFoundError(f"Clusters config path: {path} not found!")
-            if not path.is_dir:
-                raise FileNotFoundError(
-                    f"Clusters config path: {path} is not a folder!"
-                )
-            clusters = []
-            for dirpath, _dirs, files in os.walk(path):
-                for file in files:
-                    if file.endswith(".yaml"):
-                        with open(os.path.join(dirpath, file)) as stream:
-                            clusters.append(
-                                HPCCluster.model_validate(yaml.safe_load(stream))
-                            )
-            return clusters
-        else:
+        return value
+
+    @field_validator("clusters_dir", mode="before")
+    @classmethod
+    def validate_cluster_dir(cls, value: Any) -> Any:
+        if isinstance(value, str) and value != "":
             return value
+
+    @model_validator(mode="after")
+    def check_cluters_dir(self) -> "Settings":
+        if self.clusters_dir != "":
+            path = Path(self.clusters_dir).expanduser()
+            if not path.exists():
+                raise FileNotFoundError(f"Clusters directory: {path} not found!")
+            if not path.is_dir:
+                raise FileNotFoundError(f"Clusters directory: {path} is not a folder!")
+            yaml_files = list(path.glob("**/*.yml")) + list(path.glob("**/*.yaml"))
+            for file in yaml_files:
+                with open(file) as stream:
+                    yaml_data = yaml.safe_load(stream)
+                    if "clusters" in yaml_data and isinstance(
+                        yaml_data["clusters"], list
+                    ):
+                        for cluster in yaml_data["clusters"]:
+                            self.clusters.append(HPCCluster.model_validate(cluster))
+        return self
 
     @classmethod
     def settings_customise_sources(
