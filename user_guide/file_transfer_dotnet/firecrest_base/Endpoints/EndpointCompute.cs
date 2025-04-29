@@ -7,6 +7,7 @@
 
 using firecrest_base.Types;
 using System.Text.Json;
+using System.Net;
 
 namespace firecrest_base.Endpoints
 {
@@ -25,29 +26,41 @@ namespace firecrest_base.Endpoints
             return tmp.jobs[0];
         }
 
-        public async Task<string> WaitForJobCompletion(int jobId)
+        public async Task<string> WaitForJobCompletion(int jobId, int timeout=60)
         {
             // Wait for transfer job to complete the file copy on S3
-            SchedulerJob? job;
-            do
+            string end_state="";
+            int counter=timeout;
+            while(end_state == "")
             {
-                // Since transfer takes time, the access token can expire in the meanwhile.
-                if (IsTokenExpired())
-                    await RefreshToken();
-                job = await GetJob(jobId);
-                //Console.WriteLine($"Scheduler job: {job.jobId} {job.status.state}");
-                Console.Write(".");
-                if (job is null)
-                    throw new Exception("Transfer job not started.");
-                if (job.status is null)
-                    throw new Exception("Transfer job status not readable.");
+                SchedulerJob? job;
+                try {
+                    // Since transfer takes time, the access token can expire in the meanwhile.
+                    if (IsTokenExpired())
+                        await RefreshToken();
+                    job = await GetJob(jobId);
+                    //Console.WriteLine($"Scheduler job: {job.jobId} {job.status.state}");
+                    Console.Write(".");
+                    if (job is null)
+                        throw new Exception("Transfer job not started.");
+                    if (job.status is null)
+                        throw new Exception("Transfer job status not readable.");
+
+                    if (job.status.state != "RUNNING" && job.status.state != "PENDING")
+                        end_state = job.status.state ?? "";
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    if (--counter == 0)
+                        throw;
+                }
                 await Task.Delay(1000);
             }
-            while (job.status.state == "RUNNING" || job.status.state == "PENDING");
+
             // Job completed
-            if (job.status.state != "COMPLETED")
-                throw new Exception($"Transfer job failed with sttus {job.status.state}");
-            return job.status.state;
+            if (end_state != "COMPLETED")
+                throw new Exception($"Transfer job failed with status {end_state}");
+            return end_state;
         }
     }
 }
