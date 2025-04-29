@@ -34,14 +34,14 @@ services:
       SSH_KEYGEN_URL: http://192.168.240.20:5000
       YAML_CONFIG_FILE: "/app/config/app-config.yaml"
     depends_on:
-      keycloak:
-        condition: service_healthy
-      slurm:
-        condition: service_healthy
+        keycloak:
+          condition: service_healthy
+        slurm:
+          condition: service_healthy
     build:
       context: ./
       args:
-        ENVIRONMENT: development
+          ENVIRONMENT: development
       dockerfile: ./build/docker/firecrest-api/Dockerfile
     command:
       [
@@ -83,6 +83,36 @@ services:
         - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
     healthcheck:
         test: ["CMD", "scontrol", "ping"]
+        interval: 1s
+        timeout: 2s
+        retries: 30
+
+  pbs:
+    image: pbs
+    privileged: true
+    environment:
+      OIDC_CERT_URLS: '["http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'
+      PBS_START_MOM: "1"
+    build:
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      context: ./
+      dockerfile: ./build/docker/pbs-cluster/Dockerfile
+    hostname: pbs
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.4
+    ports:
+      - 15001:15001   # PBS Server Port
+      - 15002:15002   # PBS Scheduler Port
+      - 15003:15003   # PBS Communication Manager
+      - 2223:22       # SSH Access
+    volumes:
+        # ssh config
+        - ./build/docker/pbs-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
+    healthcheck:
+        test: ["CMD", "pbsnodes", "-a"]
         interval: 1s
         timeout: 2s
         retries: 30
