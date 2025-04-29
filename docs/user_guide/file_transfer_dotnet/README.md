@@ -40,7 +40,7 @@ This directory holds all the classes required to interact with FirecREST API end
 The [Program.cs](firecrest_base/Program.cs) in the `firecrest_base` project demonstrates the simplest connection to FirecREST. It initializes the [EndpointStatus](firecrest_base/Endpoints/EndpointStatus.cs) class and retrieves the Systems API result.
 
 !!! example "`EndpointStatus` class example call."
-    ```cs c
+    ```cs
     // FirecREST call to endpoint status/systems
     var es = new EndpointStatus(firecrestURL);
     // Show result
