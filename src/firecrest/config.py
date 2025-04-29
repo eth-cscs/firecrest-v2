@@ -54,7 +54,7 @@ class MultipartUpload(BaseModel):
     )
 
 
-class BucketLifestyleConfiguration(BaseModel):
+class BucketLifecycleConfiguration(BaseModel):
     """Configuration for automatic object lifecycle in storage buckets."""
 
     days: int = Field(
@@ -110,8 +110,8 @@ class Storage(BaseModel):
         default_factory=MultipartUpload,
         description="Settings for multipart upload, including chunk size and concurrency.",
     )
-    bucket_lifecycle_configuration: BucketLifestyleConfiguration = Field(
-        default_factory=BucketLifestyleConfiguration,
+    bucket_lifecycle_configuration: BucketLifecycleConfiguration = Field(
+        default_factory=BucketLifecycleConfiguration,
         description="Lifecycle policy settings for auto-deleting files after a given number of days.",
     )
     max_ops_file_size: int = Field(
