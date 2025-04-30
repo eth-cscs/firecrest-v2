@@ -1,0 +1,11 @@
+{{- if .Values.volumes.configmap.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-extra
+data:
+  {{- range $path, $file := .Files.Glob "files/*" }}
+  {{ base $path }}: |
+    {{ $.Files.Get $path | nindent 4  }}
+  {{- end }}
+{{- end }}

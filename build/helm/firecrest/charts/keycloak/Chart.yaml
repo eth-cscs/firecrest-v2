@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 26.0.7
+description: "A Helm chart for deploying a Keycloak identity and access management service in a FirecREST demo environment"
+name: keycloak
+type: application
+version: 1.0.0

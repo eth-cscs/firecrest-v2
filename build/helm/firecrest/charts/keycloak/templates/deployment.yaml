@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:26.0.7
+        args:
+          - "start-dev"
+          - "--http-relative-path=/auth"
+          - "--import-realm"
+          - "--health-enabled=true"
+          - "--metrics-enabled=true"
+        envFrom:
+          - configMapRef:
+              name: keycloak-env
+          - secretRef:
+              name: keycloak-secret
+        ports:
+          - name: http
+            containerPort: 8080
+          - name: metrics
+            containerPort: 9000
+        readinessProbe:
+          httpGet:
+            path: /auth/health/ready
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 2
+        volumeMounts:
+          - name: keycloak-config
+            mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: keycloak-config
+          configMap:
+            name: keycloak-config
+            items:
+              - key: keycloak-config
+                path: config.json
