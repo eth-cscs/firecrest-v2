@@ -64,7 +64,7 @@ An example `.credentials_demo` file, configured for accessing the Docker demo en
 !!! example "Inner structure of `.credentials` file."
     ```json
     {
-        "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+        "Url": "http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token",
         "ClientID": "firecrest-test-client",
         "ClientSecret": "wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk"
     }
