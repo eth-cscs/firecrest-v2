@@ -1280,6 +1280,13 @@
 
 <h1 id="firecrest-file-transfer-with-c-net">FirecREST File Transfer with C# .NET<a class="headerlink" href="#firecrest-file-transfer-with-c-net" title="Permanent link">&para;</a></h1>
 <h2 id="general-description">General description<a class="headerlink" href="#general-description" title="Permanent link">&para;</a></h2>
+<p>The .NET solution file (<code>data_transfer_dotnet.sln</code>) is available by cloning this repository and accessing to the path <a href=".">docs/user_guide/file_transfer_dotnet</a>.</p>
+<div class="admonition example">
+<p class="admonition-title">Getting the .NET solution.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone https://github.com/eth-cscs/firecrest-v2.git
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cd firecrest-v2/docs/user_guide/file_transfer_dotnet
+</span></code></pre></div>
+</div>
 <p>This .NET solution provides examples demonstrating how to connect to FirecREST and transfer files using C# via different API endpoints. The implementation follows a fully <code>async</code> approach.</p>
 <p>The Examples do not requires parameters. You may be able to build them and run the generated executable. All of them, by default, target the <a href="../../getting_started/#trying-firecrest-in-a-containerised-environment">Docker-Compose demo environment</a>.</p>
 <h2 id="environment-and-packages">Environment and packages<a class="headerlink" href="#environment-and-packages" title="Permanent link">&para;</a></h2>
@@ -1308,10 +1315,10 @@ It is designed to automatically adapt the project files, build the source code, 
 <p>The <a href="firecrest_base/Program.cs">Program.cs</a> in the <code>firecrest_base</code> project demonstrates the simplest connection to FirecREST. It initializes the <a href="firecrest_base/Endpoints/EndpointStatus.cs">EndpointStatus</a> class and retrieves the Systems API result.</p>
 <div class="admonition example">
 <p class="admonition-title"><code>EndpointStatus</code> class example call.</p>
-<div class="language-cs highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// FirecREST call to endpoint status/systems</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">es</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EndpointStatus</span><span class="p">(</span><span class="n">firecrestURL</span><span class="p">);</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// Show result</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">JsonElement</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">es</span><span class="p">.</span><span class="n">Systems</span><span class="p">();</span>
+<div class="language-cs highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// FirecREST call to endpoint status/systems</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kt">var</span><span class="w"> </span><span class="n">es</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EndpointStatus</span><span class="p">(</span><span class="n">firecrestURL</span><span class="p">);</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">// Show result</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">JsonElement</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="n">es</span><span class="p">.</span><span class="n">Systems</span><span class="p">();</span>
 </span></code></pre></div>
 </div>
 <p>The <a href="firecrest_base/Endpoints/EndpointStatus.cs">EndpointStatus</a> object authenticates access using the <code>AccessTokenRequest</code> object, which is managed by the abstract class <a href="firecrest_base/Endpoints/Endpoint.cs">Endpoint</a>.</p>
@@ -1319,11 +1326,11 @@ It is designed to automatically adapt the project files, build the source code, 
 <p>An example <code>.credentials_demo</code> file, configured for accessing the Docker demo environment, is available in the examples' main directory under the endpoint status folder. The file contains the following JSON structure:</p>
 <div class="admonition example">
 <p class="admonition-title">Inner structure of <code>.credentials</code> file.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;Url&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token&quot;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;ClientID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firecrest-test-client&quot;</span><span class="p">,</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;ClientSecret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk&quot;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;Url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/token&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;ClientID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firecrest-test-client&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;ClientSecret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
 </span></code></pre></div>
 </div>
 <p><b>Tip</b>: if you are running the solution using Visual Studio on Windows, post-build events have been configured to automatically copy the <code>.credentials_demo</code> file to the build directory of each project as <code>.credentials</code>.</p>
@@ -1331,7 +1338,7 @@ It is designed to automatically adapt the project files, build the source code, 
 <p>The <a href="large_files_transfer/Program.cs">Program.cs</a> in the <code>large_files_transfer</code>) project generates a random content file with an arbitrary customizable by the function:</p>
 <div class="admonition example">
 <p class="admonition-title">Payload file creation.</p>
-<div class="language-cs highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">CreatePayload</span><span class="p">(</span><span class="n">payloadFile</span><span class="p">,</span><span class="w"> </span><span class="mi">2400</span><span class="p">);</span><span class="w"> </span><span class="c1">// size in MB</span>
+<div class="language-cs highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">CreatePayload</span><span class="p">(</span><span class="n">payloadFile</span><span class="p">,</span><span class="w"> </span><span class="mi">2400</span><span class="p">);</span><span class="w"> </span><span class="c1">// size in MB</span>
 </span></code></pre></div>
 </div>
 <p>After generating the file, the example uploads it using the <a href="firecrest_base/Endpoints/EndpointFilesystemTransfer.cs">EndpointFilesystemTransfer</a> class, which implements the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html">AWS multipart upload protocol</a>. It then waits for the scheduled transfer job to complete by utilizing the <code>WaitForJobCompletion</code> method from the <a href="firecrest_base/Endpoints/EndpointStatus.cs">EndpointStatus</a> class.</p>
@@ -1340,7 +1347,7 @@ It is designed to automatically adapt the project files, build the source code, 
 <p>The <a href="small_files_transfer/Program.cs">Program.cs</a> in the <code>small_files_transfer</code> project generates a random content file with an arbitrary customizable size using a similar function as implemented in Example 2. In this case, the size is expressed in kilobytes (KB). Please note that the maximum file size allowed for direct upload and download using the <code>ops</code> endpoint is 1MB. For larger files, the <code>transfer</code> endpoint, discussed in example 2, must be used.</p>
 <div class="admonition example">
 <p class="admonition-title">Payload file creation.</p>
-<div class="language-cs highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">CreatePayload</span><span class="p">(</span><span class="n">payloadFile</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// size in KB</span>
+<div class="language-cs highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">CreatePayload</span><span class="p">(</span><span class="n">payloadFile</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// size in KB</span>
 </span></code></pre></div>
 </div>
 <p>The example utilizes the <a href="firecrest_base/Endpoints/EndpointFilesystemOps.cs">EndpointFilesystemOps</a> class to upload a file on the specified path.</p>
