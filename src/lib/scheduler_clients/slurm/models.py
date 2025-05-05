@@ -44,7 +44,8 @@ class SlurmJobDescription(JobDescriptionModel):
         alias="env", default={"F7T_version": "v2.0.0"}, description="Dictionary of environment variables to set in the job context"
     )
     constraints: Optional[str] = Field(default=None, description="Job constraints")
-    script: str = Field(description="Script for the job")
+    script: str = Field(default=None, description="Script for the job")
+    script_path: str = Field(default=None, description="Path to the job in target system")
 
 
 class SlurmJobMetadata(JobMetadataModel):

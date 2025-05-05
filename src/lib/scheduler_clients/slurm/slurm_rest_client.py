@@ -89,6 +89,12 @@ class SlurmRestClient(SlurmBaseClient):
         username: str,
         jwt_token: str,
     ) -> int | None:
+
+        # if `script_path`` is set and `script` is not provided,
+        # then this cannot be submitted with SLURM API
+        if job_description.script_path and not job_description.script:
+            return None
+
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
