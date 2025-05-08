@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  selector:
+    app: minio  # Make sure your Deployment has the label app: minio
+  ports:
+    - name: s3-api-port   # Name for the S3 API port
+      protocol: TCP
+      port: 9000          # Exposes port 9000 for MinIO's S3 API
+      targetPort: 9000     # Forwards to port 9000 inside the container
+    - name: console-port   # Name for the console port
+      protocol: TCP
+      port: 9001          # Exposes port 9001 for the MinIO console
+      targetPort: 9001     # Forwards to port 9001 inside the container
+  type: ClusterIP

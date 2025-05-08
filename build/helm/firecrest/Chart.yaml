@@ -1,0 +1,23 @@
+apiVersion: v2
+name: firecrest
+description: A Helm chart for deploying Firecrest
+type: application
+version: "2.2.1"
+appVersion: "2.2.1"
+
+dependencies:
+  - name: firecrest
+    version: "2.2.1"
+    repository: "file://charts/firecrest"
+  - name: keycloak
+    version: "1.0.0"
+    repository: "file://charts/keycloak"
+  - name: minio
+    version: "1.0.0"
+    repository: "file://charts/minio"
+  - name: slurm
+    version: "1.0.0"
+    repository: "file://charts/slurm"
+  - name: secrets
+    version: "1.0.0"
+    repository: "file://charts/secrets"
