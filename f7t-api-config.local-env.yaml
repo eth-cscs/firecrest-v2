@@ -47,6 +47,36 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+- name: "cluster-pbs"
+  ssh:
+    host: "192.168.240.4"
+    port: 22
+    max_clients: 500
+    timeout:
+      connection: 5
+      login: 5
+      command_execution: 5
+      idle_timeout: 60
+      keep_alive: 5
+  scheduler:
+    type: "slurm"
+    version: "24.11.0"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-health-check"
+    secret: "secret_file:/run/secrets/service_account_client_secret"
+  probing:
+    interval: 120
+    timeout: 5
+  datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    - "#SBATCH --account={account}"
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
+
 - name: "cluster-slurm-ssh"
   ssh:
     host: "192.168.240.2"

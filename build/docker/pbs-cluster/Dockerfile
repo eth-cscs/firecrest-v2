@@ -90,6 +90,23 @@ RUN chmod +x /usr/local/bin/init_sequence.sh
 
 COPY ./build/docker/pbs-cluster/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+
+# Setup users
+RUN useradd -m -s /bin/bash --no-user-group --gid users  fireuser  && echo 'fireuser:fireuser'       | chpasswd
+RUN groupadd service-accounts
+RUN useradd -m -s /bin/bash --no-user-group --gid service-accounts firesrv    && echo 'firesrv:sfiresrv'      | chpasswd
+
+ADD --chown=fireuser:users ./build/environment/keys/fireuser.pub /home/fireuser/.ssh/authorized_keys
+ADD --chown=firesrv:service-accounts ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
+
+# Setup SSH keys
+RUN chmod 0755 /var/run/sshd
+# use the fireuser.pub key also as a trusted ca (used for cscs keygen solution)
+ADD ./build/environment/keys/fireuser.pub  /etc/ssh/ca-key.pub
+RUN chmod -R 400 /etc/ssh/  && chown -R root:root /etc/ssh/
+RUN /usr/bin/ssh-keygen -A
+
+
 EXPOSE 22 5432
 
 CMD ["/usr/bin/supervisord"]
