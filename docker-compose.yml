@@ -88,7 +88,7 @@ services:
         retries: 30
 
   pbs:
-    image: pbs
+    image: openpbs:23.06.06-ek
     privileged: true
     environment:
       OIDC_CERT_URLS: '["http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'

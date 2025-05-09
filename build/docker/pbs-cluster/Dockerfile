@@ -67,7 +67,7 @@ RUN mkdir /var/run/sshd && \
     sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 
 # Post-install setup and entrypoint
-COPY entrypoint.sh /entrypoint.sh
+COPY ./build/docker/pbs-cluster/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN useradd -ms /bin/bash pbsuser
@@ -85,10 +85,10 @@ RUN apt-get update && apt-get install -y sshpass && rm -rf /var/lib/apt/lists/*
 
 # CMD ["/entrypoint.sh"]
 
-COPY init_sequence.sh /usr/local/bin/init_sequence.sh
+COPY ./build/docker/pbs-cluster/init_sequence.sh /usr/local/bin/init_sequence.sh
 RUN chmod +x /usr/local/bin/init_sequence.sh
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./build/docker/pbs-cluster/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 22 5432
 
