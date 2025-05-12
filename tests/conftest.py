@@ -67,7 +67,7 @@ async def s3_client():
         region_name=settings.storage.region,
         aws_secret_access_key=settings.storage.secret_access_key,
         aws_access_key_id=settings.storage.access_key_id,
-        endpoint_url=settings.storage.private_url,
+        endpoint_url=settings.storage.private_url.get_secret_value(),
         config=AioConfig(signature_version="s3v4"),
     ) as client:
         global_s3_client = client

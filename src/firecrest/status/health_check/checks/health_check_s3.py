@@ -16,8 +16,8 @@ from firecrest.status.health_check.checks.health_check_base import HealthCheckBa
 
 class S3HealthCheck(HealthCheckBase):
 
-    def __init__(self, system: HPCCluster, timeout: int):
-        super().__init__(system)
+    def __init__(self, timeout: int):
+        super().__init__(None)
         self.timeout = timeout
 
     async def execute_check(self) -> S3ServiceHealth:

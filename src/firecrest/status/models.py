@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # configs
-from firecrest.config import HPCCluster
+from firecrest.config import HPCCluster, Storage
 
 # models
 from lib.models import CamelModel
@@ -25,6 +25,7 @@ class GetLiveness(CamelModel):
 
 class GetSystemsResponse(CamelModel):
     systems: List[HPCCluster]
+    storage: Optional[Storage] = None
 
 
 class GetNodesResponse(CamelModel):

@@ -25,7 +25,7 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 from firecrest.plugins import settings
 
 
-class SchedulerHealthChecker:
+class ClusterHealthChecker:
 
     scheduler_client: SchedulerBaseClient = None
     cluster: HPCCluster = None
@@ -78,20 +78,12 @@ class SchedulerHealthChecker:
                 )
                 checks += [filesystemCheck.check()]
 
-            if settings.storage and settings.storage.probing:
-                s3Check = S3HealthCheck(
-                    system=self.cluster, timeout=settings.storage.probing.timeout
-                )
-                checks += [s3Check.check()]
-
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
         except Exception as ex:
-            error_message = (
-                f"HealthChecker execution failed with error: {ex.__class__.__name__}"
-            )
+            error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
-                error_message = f"HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
+                error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
             exception = HealthCheckException(service_type="exception")
             exception.healthy = False
             exception.last_checked = time.time()

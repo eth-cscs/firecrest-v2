@@ -9,7 +9,7 @@ import json
 import pytest
 from aioresponses import aioresponses
 from pytest_httpx import HTTPXMock
-from firecrest.status.health_check.health_checker import SchedulerHealthChecker
+from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
 from tests import mocked_api_responses
@@ -67,7 +67,7 @@ async def test_health_check(
             body=json.dumps(mocked_nodes_get_response),
         )
 
-        health_checker = SchedulerHealthChecker(
+        health_checker = ClusterHealthChecker(
             slurm_cluster_with_api_config, token_decoder=TokenDecoderMock()
         )
         await health_checker.check()

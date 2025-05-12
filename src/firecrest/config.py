@@ -12,6 +12,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    SecretStr,
     field_validator,
 )
 from pydantic_settings import (
@@ -73,57 +74,6 @@ class BucketLifecycleConfiguration(BaseModel):
                 }
             ]
         }
-
-
-class StorageProbing(CamelModel):
-    """Probing configuration to check availability of the storage system."""
-
-    timeout: int = Field(
-        ..., description="Timeout for storage health probing in seconds."
-    )
-
-
-class Storage(BaseModel):
-    """Object storage configuration, including credentials, endpoints, and upload behavior."""
-
-    name: str = Field(..., description="Name identifier for the storage.")
-    private_url: str = Field(
-        ..., description="Private/internal endpoint URL for the storage."
-    )
-    public_url: str = Field(..., description="Public/external URL for the storage.")
-    access_key_id: str = Field(
-        ..., description="Access key ID for S3-compatible storage."
-    )
-    secret_access_key: LoadFileSecretStr = Field(
-        ...,
-        description=(
-            "Secret access key for storage. You can give directly the "
-            "content or the file path using `'secret_file:/path/to/file'`."
-        ),
-    )
-    region: str = Field(..., description="Region of the storage bucket.")
-    ttl: int = Field(..., description="Time-to-live (in seconds) for generated URLs.")
-    tenant: Optional[str] = Field(
-        None, description="Optional tenant identifier for multi-tenant setups."
-    )
-    multipart: MultipartUpload = Field(
-        default_factory=MultipartUpload,
-        description="Settings for multipart upload, including chunk size and concurrency.",
-    )
-    bucket_lifecycle_configuration: BucketLifecycleConfiguration = Field(
-        default_factory=BucketLifecycleConfiguration,
-        description="Lifecycle policy settings for auto-deleting files after a given number of days.",
-    )
-    max_ops_file_size: int = Field(
-        5 * 1024 * 1024,
-        description=(
-            "Maximum file size (in bytes) allowed for direct upload and "
-            "download. Larger files will go through the staging area."
-        ),
-    )
-    probing: Optional[StorageProbing] = Field(
-        None, description="Configuration for probing storage availability."
-    )
 
 
 class SchedulerType(str, Enum):
@@ -230,13 +180,60 @@ class HealthCheckException(BaseServiceHealth):
     pass
 
 
-class ClusterProbing(CamelModel):
+class Probing(CamelModel):
     """Cluster monitoring attributes."""
 
     interval: int = Field(
         ..., description="Interval in seconds between cluster checks."
     )
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
+
+
+class Storage(BaseModel):
+    """Object storage configuration, including credentials, endpoints, and upload behavior."""
+
+    name: str = Field(..., description="Name identifier for the storage.")
+    private_url: SecretStr = Field(
+        ..., description="Private/internal endpoint URL for the storage."
+    )
+    public_url: str = Field(..., description="Public/external URL for the storage.")
+    access_key_id: str = Field(
+        ..., description="Access key ID for S3-compatible storage."
+    )
+    secret_access_key: LoadFileSecretStr = Field(
+        ...,
+        description=(
+            "Secret access key for storage. You can give directly the "
+            "content or the file path using `'secret_file:/path/to/file'`."
+        ),
+    )
+    region: str = Field(..., description="Region of the storage bucket.")
+    ttl: int = Field(..., description="Time-to-live (in seconds) for generated URLs.")
+    tenant: Optional[str] = Field(
+        None, description="Optional tenant identifier for multi-tenant setups."
+    )
+    multipart: MultipartUpload = Field(
+        default_factory=MultipartUpload,
+        description="Settings for multipart upload, including chunk size and concurrency.",
+    )
+    bucket_lifecycle_configuration: BucketLifecycleConfiguration = Field(
+        default_factory=BucketLifecycleConfiguration,
+        description="Lifecycle policy settings for auto-deleting files after a given number of days.",
+    )
+    max_ops_file_size: int = Field(
+        5 * 1024 * 1024,
+        description=(
+            "Maximum file size (in bytes) allowed for direct upload and "
+            "download. Larger files will go through the staging area."
+        ),
+    )
+    probing: Optional[Probing] = Field(
+        None, description="Configuration for probing storage availability."
+    )
+    servicesHealth: Optional[List[S3ServiceHealth]] = Field(
+        None,
+        description="Optional health information for different services in the cluster.",
+    )
 
 
 class FileSystem(CamelModel):
@@ -306,14 +303,13 @@ class HPCCluster(CamelModel):
             SchedulerServiceHealth
             | FilesystemServiceHealth
             | SSHServiceHealth
-            | S3ServiceHealth
             | HealthCheckException
         ]
     ] = Field(
         None,
         description="Optional health information for different services in the cluster.",
     )
-    probing: ClusterProbing = Field(
+    probing: Probing = Field(
         ..., description="Probing configuration for monitoring the cluster."
     )
     file_systems: List[FileSystem] = Field(

@@ -91,4 +91,5 @@ storage:
     tmp_folder: "tmp"
   max_ops_file_size: 1048576 # 1M
   probing:
+    interval: 60
     timeout: 10

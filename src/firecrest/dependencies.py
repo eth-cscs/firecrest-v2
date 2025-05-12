@@ -327,7 +327,7 @@ class S3ClientDependency:
         if settings.storage:
             self.url = settings.storage.public_url
             if connection == S3ClientConnectionType.private:
-                self.url = settings.storage.private_url
+                self.url = settings.storage.private_url.get_secret_value()
 
     async def __call__(self):
         async with get_session().create_client(
