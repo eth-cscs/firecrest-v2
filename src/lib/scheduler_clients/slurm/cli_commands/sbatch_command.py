@@ -23,6 +23,8 @@ class SbatchCommand(BaseCommand):
                        in self.job_description.environment.items())
         cmd += [f"--export='ALL,{env}'"]
         cmd += [f"--chdir='{self.job_description.current_working_directory}'"]
+        if self.job_description.account:
+            cmd.append(f"--account='{self.job_description.account}'")
         if self.job_description.name:
             cmd.append(f"--job-name='{self.job_description.name}'")
         if self.job_description.standard_error:
