@@ -1,0 +1,17 @@
+{{- range $issuer, $config := .Values.certificates }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $.Release.Name }}-cert-{{ $issuer }}
+spec:
+  commonName: {{ index $config.urls 0 }}
+  dnsNames:
+  {{- range $config.urls }}
+  - {{ . }}
+  {{- end }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ $issuer }}
+  secretName: {{ $.Release.Name }}-cert-{{ $issuer }}-secret
+---
+{{- end }}

@@ -1,0 +1,206 @@
+{{- if .Values.config}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: firecrest-config
+data:
+  firecrest-config: |
+    # Base path prefix for exposing the APIs
+    apis_root_path: {{ .Values.config.apisRootPath | quote }}
+
+    # Optional documentation servers. For completedocumentation see the `servers` parameter
+    # in the [FastAPI docs](https://fastapi.tiangolo.com/reference/fastapi/#fastapi.FastAPI--example)
+    doc_servers:
+      {{- range .Values.docServers }}
+      - url: {{ tpl .url $ | quote }}
+        description: {{ .description | quote }}
+      {{- end }}
+
+    # OIDC authentication settings
+    auth:
+      # Authentication and authorization configuration
+      authentication:
+
+        # Map of OIDC scopes and their purposes
+        scopes: {{ toYaml .Values.config.auth.authentication.scopes | nindent 10 }}
+
+        # Token endpoint URL for the OIDC provider
+        # This is used to obtain access tokens for the service account that will do the health checks
+        token_url: {{ .Values.config.auth.authentication.tokenUrl | quote }}
+
+        # List of URLs for retrieving public certificates. These are used to verify the OIDC token
+        public_certs:
+        {{- range .Values.config.auth.authentication.publicCerts }}
+          - {{ . | quote }}
+        {{- end }}
+
+    # SSH keys service or manually defined user keys. More details in [this
+    # section](../arch/systems/README.md#obtaining-ssh-credentials-on-behalf-of-the-user)
+    ssh_credentials:
+    {{- range $key, $val := .Values.config.sshCredentials }}
+      {{ $key }}:
+        # SSH private key.
+        # You can give directly the content or the file path using `'secret_file:/path/to/file'`
+        private_key: {{ $val.privateKey | quote }}
+        {{- if $val.passphrase }}
+
+        # Optional passphrase for the private key
+        # You can give directly the content or the file path using `'secret_file:/path/to/file'`
+        passphrase: {{ $val.passphrase | quote }}
+        {{- end }}
+    {{- end }}
+
+    # List of configured HPC clusters
+    clusters:
+    {{- range .Values.config.clusters }}
+        # Unique name for the cluster
+      - name: {{ .name | quote }}
+
+        # SSH target hostname
+        ssh:
+          # SSH target hostname
+          host: {{ .ssh.host | quote }}
+
+          # SSH port
+          port: {{ .ssh.port }}
+
+          # Maximum number of concurrent SSH clients
+          max_clients: {{ .ssh.maxClients }}
+
+          # SSH connection pool configuration for remote execution
+          timeout:
+
+            # Timeout (seconds) for initial SSH connection
+            connection: {{ .ssh.timeout.connection }}
+
+            # Timeout (seconds) for SSH login/auth
+            login: {{ .ssh.timeout.login }}
+
+            # Timeout (seconds) for executing commands over SSH
+            command_execution: {{ .ssh.timeout.commandExecution }}
+
+            # Max idle time (seconds) before disconnecting
+            idle_timeout: {{ .ssh.timeout.idleTimeout }}
+
+            # Interval (seconds) for sending keep-alive messages
+            keep_alive: {{ .ssh.timeout.keepAlive }}
+
+        # Definition of an HPC cluster, including SSH access, scheduling, and filesystem layout
+        scheduler:
+
+          # Scheduler type
+          type: {{ .scheduler.type | quote }}
+
+          # Scheduler version
+          version: {{ .scheduler.version | quote }}
+
+          # REST API endpoint for scheduler
+          {{- if .scheduler.apiUrl }}
+          api_url: {{ .scheduler.api_url | quote }}
+          {{- end }}
+          {{- if .scheduler.apiVersion }}
+
+          # Scheduler API version
+          api_version: {{ .scheduler.apiVersion | quote }}
+          {{- end }}
+
+          # Timeout in seconds for scheduler communication with the API.
+          timeout: {{ .scheduler.timeout }}
+
+        # Definition of an HPC cluster, including SSH access, scheduling, and filesystem layout
+        service_account:
+
+          # Service account client ID
+          client_id: {{ .serviceAccount.clientId | quote }}
+
+          # Service account secret token. You can give directly the content or the file
+          # path using `'secret_file:/path/to/file'`.
+          secret: {{ .serviceAccount.secret | quote }}
+
+        # Definition of an HPC cluster, including SSH access, scheduling, and filesystem layout
+        probing:
+
+          # Interval in seconds between cluster checks
+          interval: {{ .probing.interval }}
+
+          # Maximum time in seconds allowed per check
+          timeout: {{ .probing.timeout }}
+          {{- if .probing.startupGracePeriod }}
+
+         # Not on the config docs
+         #  startup_grace_period: {{ .probing.startup_grace_period }}
+         #  {{- end }}
+
+        # Custom scheduler flags passed to data transfer jobs
+        # (e.g. `-pxfer` for a dedicated partition)
+        datatransfer_jobs_directives:
+        {{- range .datatransferJobsDirectives }}
+          - {{ . | quote }}
+        {{- end }}
+
+        # Definition of an HPC cluster, including SSH access, scheduling, and filesystem layout
+        file_systems:
+        {{- range .fileSystems }}
+            # Mount path for the file system
+          - path: {{ .path | quote }}
+
+            # File system purpose/type
+            # Available data types are `users`, `store`, `archive`, `apps`, `scratch`, `project`
+            data_type: {{ .dataType | quote }}
+
+            # Mark this as the default working directory
+            default_work_dir: {{ .defaultWorkDir }}
+        {{- end }}
+    {{- end }}
+
+    # FirecREST configuration. Loaded from a YAML file
+    storage:
+
+      # Name identifier for the storage
+      name: {{ .Values.config.storage.name | quote }}
+
+      # Private/internal endpoint URL for the storage.
+      private_url: {{ .Values.config.storage.privateUrl | quote }}
+
+      # Public/external URL for the storage
+      public_url: {{ .Values.config.storage.publicUrl | quote }}
+
+      # Access key ID for S3-compatible storage
+      access_key_id: {{ .Values.config.storage.accessKeyId | quote }}
+
+      # Secret access key for storage. You can give directly the content or the file
+      # path using `'secret_file:/path/to/file'`
+      secret_access_key: {{ .Values.config.storage.secretAccessKey | quote }}
+
+      # Region of the storage bucket
+      region: {{ .Values.config.storage.region | quote }}
+
+      # Time-to-live (in seconds) for generated URLs
+      ttl: {{ .Values.config.storage.ttl }}
+
+      # Settings for multipart upload, including chunk size and concurrency
+      multipart:
+
+        # Enable or disable splitting large files into parts when uploading the file
+        # to the staging area
+        use_split: {{ .Values.config.storage.multipart.useSplit }}
+
+        # Maximum size (in bytes) for multipart data transfers
+        # Default is 2 GB
+        max_part_size: {{ .Values.config.storage.multipart.maxPartSize }}
+
+        # Number of parts to upload in parallel to the staging area
+        parallel_runs: {{ .Values.config.storage.multipart.parallelRuns }}
+
+        # Temporary folder used for storing split parts during upload
+        tmp_folder: {{ .Values.config.storage.multipart.tmpFolder | quote }}
+
+      # Maximum file size (in bytes) allowed for direct upload and download
+      # Larger files will go through the staging area
+      max_ops_file_size: {{ .Values.config.storage.maxOpsFileSize }}
+
+      # Configuration for probing storage availability
+      probing:
+        # Timeout for storage health probing in seconds.
+        timeout: {{ .Values.config.storage.probing.timeout }}
+{{- end }}

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slurm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slurm
+  template:
+    metadata:
+      labels:
+        app: slurm
+    spec:
+      containers:
+        - name: slurm
+          image: rsarm/slurm:demov2
+          imagePullPolicy: Always
+          env:
+            - name: OIDC_CERT_URLS
+              value: '["http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'
+          ports:
+            - name: slurm-port
+              containerPort: 6820
+            - name: ssh-port
+              containerPort: 22
+          volumeMounts:
+            - name: ssh-config
+              mountPath: /etc/ssh/sshd_config
+              subPath: sshd_config_base
+          securityContext:
+            privileged: true
+          livenessProbe:
+            exec:
+              command:
+                - "scontrol"
+                - "ping"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: ssh-config
+          configMap:
+            name: slurm-ssh-config
