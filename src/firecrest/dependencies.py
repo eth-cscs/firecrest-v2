@@ -30,8 +30,7 @@ from lib.dependencies import AuthDependency
 # clients
 from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.helpers.api_auth_helper import ApiAuthHelper
-from lib.scheduler_clients.slurm.slurm_cli_client import SlurmCliClient
-from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
+from lib.scheduler_clients.slurm.slurm_client import SlurmClient
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
@@ -269,9 +268,8 @@ class SSHClientDependency:
 
 
 class SchedulerClientDependency:
-    def __init__(self, ignore_health: bool = False, force_cli_client: bool = False):
+    def __init__(self, ignore_health: bool = False):
         self.ignore_health = ignore_health
-        self.force_cli_client = force_cli_client
 
     # Note: this fuction allows for unit test client injection override
     async def _get_ssh_client(self, system_name):
@@ -288,16 +286,12 @@ class SchedulerClientDependency:
         )(system_name=system_name)
         match system.scheduler.type:
             case SchedulerType.slurm:
-                if system.scheduler.api_url is None or self.force_cli_client:
-                    return SlurmCliClient(
-                        await self._get_ssh_client(system_name),
-                        system.scheduler.version,
-                    )
-                return SlurmRestClient(
-                    system.scheduler.api_url,
+                return SlurmClient(
+                    await self._get_ssh_client(system_name),
+                    system.scheduler.version,
                     system.scheduler.api_version,
-                    system.scheduler.timeout,
-                )
+                    system.scheduler.api_url,
+                    system.scheduler.timeout)
             case _:
                 raise HTTPException(
                     status_code=status.HTTP_501_NOT_IMPLEMENTED,
