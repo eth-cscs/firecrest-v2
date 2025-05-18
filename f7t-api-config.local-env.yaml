@@ -59,8 +59,8 @@ clusters:
       idle_timeout: 60
       keep_alive: 5
   scheduler:
-    type: "slurm"
-    version: "24.11.0"
+    type: "pbs"
+    version: "23.06.06"
     timeout: 10
   service_account:
     client_id: "firecrest-health-check"
@@ -68,10 +68,6 @@ clusters:
   probing:
     interval: 120
     timeout: 5
-  datatransfer_jobs_directives:
-    - "#SBATCH --nodes=1"
-    - "#SBATCH --time=0-00:15:00"
-    - "#SBATCH --account={account}"
   file_systems:
     - path: '/home'
       data_type: 'users'
@@ -122,3 +118,6 @@ storage:
   max_ops_file_size: 1048576 # 1M
   probing:
     timeout: 10
+
+# logging:
+#   enable_tracing_log: true

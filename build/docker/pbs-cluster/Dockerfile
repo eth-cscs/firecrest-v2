@@ -66,9 +66,6 @@ RUN mkdir /var/run/sshd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 
-# Post-install setup and entrypoint
-COPY ./build/docker/pbs-cluster/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 RUN useradd -ms /bin/bash pbsuser
 

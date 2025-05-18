@@ -130,6 +130,7 @@ class SchedulerType(str, Enum):
     """Supported job scheduler types."""
 
     slurm = "slurm"
+    pbs = "pbs"
 
 
 class FileSystemDataType(str, Enum):

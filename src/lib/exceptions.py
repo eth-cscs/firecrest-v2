@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+
 class SchedulerError(Exception):
     error_msg: str
 
@@ -24,4 +25,8 @@ class SSHServiceError(Exception):
 
 
 class SSHCredentials(Exception):
+    pass
+
+
+class PbsError(SchedulerError):
     pass
