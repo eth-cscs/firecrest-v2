@@ -37,8 +37,8 @@ class QsubCommand(BaseCommand):
             cmd.append(f"-e '{self.job_description.standard_error}'")
         if self.job_description.standard_output:
             cmd.append(f"-o '{self.job_description.standard_output}'")
-        if self.job_description.standard_input:
-            cmd.append(f"-i '{self.job_description.standard_input}'")
+        # if self.job_description.standard_input:
+        #     cmd.append(f"-i '{self.job_description.standard_input}'")
 
         # if self.job_description.constraints:
         #     cmd.append(f"-l {self.job_description.constraints}")

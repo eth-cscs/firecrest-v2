@@ -152,15 +152,15 @@ class PbsPartition(PartitionModel):
 
 
 class PbsReservation(ReservationModel):
-    name: str = Field(validation_alias=AliasChoices("resvName", "reservationName"))
-    queue: Optional[str] = Field(default=None, alias=AliasChoices("queueName", "queue"))
-    nodes: Optional[str] = Field(default=None, alias=AliasChoices("nodes"))
-    start_time: Optional[int] = Field(
+    resv_id: str = Field(default=None, alias=AliasChoices("resvId", "reservationId"))
+    name: str = Field(validation_alias=AliasChoices("resvName", "ReservationName"))
+    owner: str
+    state: str
+    # queue: Optional[str] = Field(default=None, alias=AliasChoices("queueName", "queue"))
+    node_list: str = Field(validation_alias=AliasChoices("nodes", "Nodes", "nodeList"))
+    start_time: Optional[str] = Field(
         default=None, alias=AliasChoices("startTime", "start_time")
     )
-    end_time: Optional[int] = Field(
+    end_time: Optional[str] = Field(
         default=None, alias=AliasChoices("endTime", "end_time")
-    )
-    users: Optional[List[str]] = Field(
-        default=None, alias=AliasChoices("users", "userList")
     )

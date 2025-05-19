@@ -23,9 +23,10 @@ from lib.scheduler_clients.pbs.cli_commands.qstat_job_metadata_command import (
 from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
 from lib.scheduler_clients.pbs.cli_commands.pbsnodes_command import PbsnodesCommand
 
-# from lib.scheduler_clients.pbs.cli_commands.qstat_reservations_command import (
-#     QstatReservationsCommand,
-# )
+from lib.scheduler_clients.pbs.cli_commands.qstat_reservations_command import (
+    QstatReservationsCommand,
+)
+
 # from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
 #     PbsPartitionsCommand,
 # )
@@ -104,33 +105,6 @@ class PbsCliClient(SchedulerBaseClient):
         # Fetch metadata with qstat and job script with tracejob
         qstat_meta = QstatJobMetadataCommand(username, [job_id])
         return await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
-        # trace_script = TracejobScriptCommand(job_id)
-        # commands = [
-        #     self.__executed_ssh_cmd(username, jwt_token, qstat_meta),
-        #     self.__executed_ssh_cmd(username, jwt_token, trace_script),
-        # ]
-
-        # results = await asyncio.gather(*commands, return_exceptions=True)
-        # stat_res, script_res = results
-
-        # # job not found
-        # if not stat_res:
-        #     return None
-        # if isinstance(stat_res, Exception):
-        #     return stat_res
-
-        # # combine metadata and script
-        # jobs: List[PbsJobMetadata] = []
-        # for i in range(len(stat_res)):
-        #     meta = stat_res[i]
-        #     script = (
-        #         script_res[i]
-        #         if script_res and not isinstance(script_res, Exception)
-        #         else {}
-        #     )
-        #     jobs.append(PbsJobMetadata(**{**meta, **script}))
-
-        # return jobs
 
     async def get_jobs(self, username: str, jwt_token: str) -> List[PbsJob] | None:
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)
