@@ -13,16 +13,16 @@ from lib.ssh_clients.ssh_client import BaseCommand
 from lib.scheduler_clients.pbs.cli_commands.qsub_command import QsubCommand
 from lib.scheduler_clients.pbs.cli_commands.qstat_command import QstatCommand
 
-# from lib.scheduler_clients.pbs.cli_commands.qstat_job_metadata_command import (
-#     QstatJobMetadataCommand,
-# )
+from lib.scheduler_clients.pbs.cli_commands.qstat_job_metadata_command import (
+    QstatJobMetadataCommand,
+)
+
 # from lib.scheduler_clients.pbs.cli_commands.tracejob_script_command import (
 #     TracejobScriptCommand,
 # )
 from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
 from lib.scheduler_clients.pbs.cli_commands.pbsnodes_command import PbsnodesCommand
 
-# from lib.scheduler_clients.pbs.cli_commands.queue_list_command import QueueListCommand
 # from lib.scheduler_clients.pbs.cli_commands.qstat_reservations_command import (
 #     QstatReservationsCommand,
 # )
@@ -103,33 +103,34 @@ class PbsCliClient(SchedulerBaseClient):
 
         # Fetch metadata with qstat and job script with tracejob
         qstat_meta = QstatJobMetadataCommand(username, [job_id])
-        trace_script = TracejobScriptCommand(job_id)
-        commands = [
-            self.__executed_ssh_cmd(username, jwt_token, qstat_meta),
-            self.__executed_ssh_cmd(username, jwt_token, trace_script),
-        ]
+        return await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
+        # trace_script = TracejobScriptCommand(job_id)
+        # commands = [
+        #     self.__executed_ssh_cmd(username, jwt_token, qstat_meta),
+        #     self.__executed_ssh_cmd(username, jwt_token, trace_script),
+        # ]
 
-        results = await asyncio.gather(*commands, return_exceptions=True)
-        stat_res, script_res = results
+        # results = await asyncio.gather(*commands, return_exceptions=True)
+        # stat_res, script_res = results
 
-        # job not found
-        if not stat_res:
-            return None
-        if isinstance(stat_res, Exception):
-            return stat_res
+        # # job not found
+        # if not stat_res:
+        #     return None
+        # if isinstance(stat_res, Exception):
+        #     return stat_res
 
-        # combine metadata and script
-        jobs: List[PbsJobMetadata] = []
-        for i in range(len(stat_res)):
-            meta = stat_res[i]
-            script = (
-                script_res[i]
-                if script_res and not isinstance(script_res, Exception)
-                else {}
-            )
-            jobs.append(PbsJobMetadata(**{**meta, **script}))
+        # # combine metadata and script
+        # jobs: List[PbsJobMetadata] = []
+        # for i in range(len(stat_res)):
+        #     meta = stat_res[i]
+        #     script = (
+        #         script_res[i]
+        #         if script_res and not isinstance(script_res, Exception)
+        #         else {}
+        #     )
+        #     jobs.append(PbsJobMetadata(**{**meta, **script}))
 
-        return jobs
+        # return jobs
 
     async def get_jobs(self, username: str, jwt_token: str) -> List[PbsJob] | None:
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)

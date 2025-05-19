@@ -56,8 +56,8 @@ class PbsJobDescription(JobDescriptionModel):
 
 class PbsJobMetadata(JobMetadataModel):
     job_id: str = Field(alias=AliasChoices("jobId", "job_id"))
-    script: Optional[str] = None
-    standard_input: Optional[str] = Field(
+    script: None = None
+    standard_input: None = Field(
         validation_alias=AliasChoices("StdIn", "standardInput"), default=None
     )
     standard_output: Optional[str] = Field(
