@@ -9,6 +9,11 @@ from lib.scheduler_clients.slurm.models import (
     SlurmJob,
     SlurmNode,
 )
+from lib.scheduler_clients.pbs.models import (
+    PbsJob,
+    PbsJobDescription,
+    PbsNode,
+)
 
 # clients
 from lib.scheduler_clients.slurm.slurm_rest_client import (
@@ -16,4 +21,12 @@ from lib.scheduler_clients.slurm.slurm_rest_client import (
 )
 
 
-__all__ = ["SlurmJobDescription", "SlurmJob", "SlurmNode", "SlurmRestClient"]
+__all__ = [
+    "PbsJob",
+    "PbsJobDescription",
+    "PbsNode",
+    "SlurmJob",
+    "SlurmJobDescription",
+    "SlurmNode",
+    "SlurmRestClient",
+]

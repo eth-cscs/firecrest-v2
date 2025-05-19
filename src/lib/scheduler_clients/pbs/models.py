@@ -49,6 +49,9 @@ class PbsJobDescription(JobDescriptionModel):
         description="Resource requirements (e.g. nodes, ppn, mem, walltime)",
     )
     script: str = Field(description="Script for the job")
+    script_path: str = Field(
+        default=None, description="Path to the job in target system"
+    )
 
 
 class PbsJobMetadata(JobMetadataModel):

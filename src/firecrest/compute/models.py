@@ -49,7 +49,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                         "standard_error": "count_to_100.err",
                         "env": {
                             "LD_LIBRARY_PATH": "/path/to/library",
-                            "PATH": "/path/to/bin"
+                            "PATH": "/path/to/bin",
                         },
                         "script_path": "/path/to/batch_file.sh",
                     }

@@ -16,7 +16,7 @@ class QsubCommand(BaseCommand):
         self.job_description = job_description
 
     def get_command(self) -> str:
-        cmd = ["qsub"]
+        cmd = ["/opt/pbs/bin/qsub"]
 
         # Export environment variables (-v) or all (-V)
         if self.job_description.environment:
@@ -28,8 +28,9 @@ class QsubCommand(BaseCommand):
         else:
             cmd.append("-V")
 
-        if self.job_description.current_working_directory:
-            cmd.append(f"-d '{self.job_description.current_working_directory}'")
+        # FIXME: This is not working for the openpbs containers
+        # if self.job_description.current_working_directory:
+        #     cmd.append(f"-d '{self.job_description.current_working_directory}'")
         if self.job_description.name:
             cmd.append(f"-N '{self.job_description.name}'")
         if self.job_description.standard_error:
@@ -39,8 +40,8 @@ class QsubCommand(BaseCommand):
         if self.job_description.standard_input:
             cmd.append(f"-i '{self.job_description.standard_input}'")
 
-        if self.job_description.constraints:
-            cmd.append(f"-l {self.job_description.constraints}")
+        # if self.job_description.constraints:
+        #     cmd.append(f"-l {self.job_description.constraints}")
 
         return " ".join(cmd)
 
