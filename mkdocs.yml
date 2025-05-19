@@ -22,15 +22,22 @@ nav:
         - setup/arch/health_checks/README.md
       - 'Logging':
         - setup/arch/logging/README.md
-      
     - 'Configuration':
       - setup/conf/README.md
     - 'Deployment':
       - setup/deploy/README.md
   - 'User guide':
     - user_guide/README.md
+    - 'File Transfer with .NET':
+      - user_guide/file_transfer_dotnet/README.md
   - 'Use cases':
     - use_cases/README.md
+    - 'CI pipelines':
+      - use_cases/CI-pipeline/README.md
+    - 'Workflow orchestrator':
+      - use_cases/workflow-orchestrator/README.md
+    - 'JupyterHub':
+      - use_cases/jupyterhub/README.md
     - 'Web UI Application':
       - use_cases/UI-client-credentials/README.md
   - 'API Reference': https://eth-cscs.github.io/firecrest-v2/openapi/

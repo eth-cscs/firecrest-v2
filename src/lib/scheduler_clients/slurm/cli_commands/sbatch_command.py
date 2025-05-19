@@ -33,6 +33,8 @@ class SbatchCommand(BaseCommand):
             cmd += [f"--input='{self.job_description.standard_input}'"]
         if self.job_description.constraints:
             cmd.append(f"--constraint='{self.job_description.constraints}'")
+        if self.job_description.script_path:
+            cmd.append(f" -- {self.job_description.script_path}")
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

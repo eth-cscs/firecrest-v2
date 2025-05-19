@@ -87,11 +87,16 @@ class SchedulerHealthChecker:
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
         except Exception as ex:
-            error_message = f"{ex.__class__.__name__}"
+            error_message = (
+                f"HealthChecker execution failed with error: {ex.__class__.__name__}"
+            )
             if len(str(ex)) > 0:
-                error_message = f"{ex.__class__.__name__}: {str(ex)}"
+                error_message = f"HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
             exception = HealthCheckException(service_type="exception")
             exception.healthy = False
             exception.last_checked = time.time()
             exception.message = error_message
             self.cluster.servicesHealth = [exception]
+            # Note: raising the exception might not be handled well by apscheduler.
+            # Instead consider printing the exceotion with: traceback.print_exception(ex)
+            raise ex

@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Path parameter for submitting jobs from a remote file
+- JupyterHub example
 - Documentation for logging architecture
+- Workflow orchestrator example
 - UI browser app example
 - POST and PUT bodies request examples
+- Documentation and examples in C# .NET
 
 ### Changed
 
+- Documentation for logging architecture
 - Images for documentation
 - Description of API definition
 

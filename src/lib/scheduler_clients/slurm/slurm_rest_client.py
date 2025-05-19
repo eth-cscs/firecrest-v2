@@ -89,6 +89,7 @@ class SlurmRestClient(SlurmBaseClient):
         username: str,
         jwt_token: str,
     ) -> int | None:
+
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)

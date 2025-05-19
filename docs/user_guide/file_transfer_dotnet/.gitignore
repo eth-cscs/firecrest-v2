@@ -1,0 +1,11 @@
+.vs/
+packages/
+*/bin/
+*/obj/
+*/packages/
+
+# Unix build directories
+examples_bin/
+firecrest_base/firecrest_base/
+large_files_transfer/large_files_transfer/
+small_files_transfer/small_files_transfer/

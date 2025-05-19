@@ -48,7 +48,7 @@ async def post_job_submit(
     scheduler_client: Annotated[
         SchedulerBaseClient,
         Path(alias="system_name", description="Target system"),
-        Depends(SchedulerClientDependency()),
+        Depends(SchedulerClientDependency(force_cli_client=True)),
     ],
 ) -> Any:
     username = ApiAuthHelper.get_auth().username

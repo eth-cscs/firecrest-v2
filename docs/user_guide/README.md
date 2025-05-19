@@ -183,6 +183,9 @@ Complete the upload by calling the completeUploadUrl:
     $ curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400'
     ```
 
+## File Transfer with .NET
+[Detailed example.](file_transfer_dotnet/README.md)
+
 ## FirecREST SDK
 
 [PyFirecREST](https://github.com/eth-cscs/pyfirecrest) is a Python library designed to simplify the implementation of FirecREST clients.

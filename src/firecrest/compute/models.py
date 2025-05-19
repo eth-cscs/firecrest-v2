@@ -28,7 +28,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
             "examples": [
                 {
                     "job": {
-                        "name": "Count to 100",
+                        "name": "Example with inline script",
                         "working_directory": "{{home_path}}",
                         "standard_input": "/dev/null",
                         "standard_output": "count_to_100.out",
@@ -39,7 +39,21 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                         },
                         "script": "#!/bin/bash\n--partition=part01\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
                     }
-                }
+                },
+                {
+                    "job": {
+                        "name": "Example with script path",
+                        "working_directory": "{{home_path}}",
+                        "standard_input": "/dev/null",
+                        "standard_output": "count_to_100.out",
+                        "standard_error": "count_to_100.err",
+                        "env": {
+                            "LD_LIBRARY_PATH": "/path/to/library",
+                            "PATH": "/path/to/bin"
+                        },
+                        "script_path": "/path/to/batch_file.sh",
+                    }
+                },
             ]
         }
     }
