@@ -8,7 +8,6 @@ from lib.exceptions import PbsError
 from typing import List
 
 
-# from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatCommandBase
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
@@ -20,7 +19,6 @@ class QstatCommand(BaseCommand):
         self.job_ids = job_ids
 
     def get_command(self) -> str:
-        # "qstat -f" for full job info
         cmd = ["/opt/pbs/bin/qstat", "-f"]
         return " ".join(cmd)
 
@@ -31,12 +29,10 @@ class QstatCommand(BaseCommand):
             )
 
         blocks = re.split(r"\n(?=Job Id:)", stdout.strip())
-        # raise PbsError(
-        #     f"RADADAA: blocks: {blocks}"
-        #     # f"RADADAA: exit_code: {exit_status} stdout: -{stdout}- stderr: -{stderr}- blocks: {blocks}"
-        # )
         jobs = []
 
+        # Clean up empty blocks
+        blocks = [b for b in blocks if b]
         for block in blocks:
             info = {}
             status = {
