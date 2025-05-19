@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1417,9 +1417,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#clusterprobing" class="md-nav__link">
+  <a href="#probing" class="md-nav__link">
     <span class="md-ellipsis">
-      ClusterProbing
+      Probing
     </span>
   </a>
   
@@ -1456,15 +1456,6 @@
   <a href="#bucketlifecycleconfiguration" class="md-nav__link">
     <span class="md-ellipsis">
       BucketLifecycleConfiguration
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#storageprobing" class="md-nav__link">
-    <span class="md-ellipsis">
-      StorageProbing
     </span>
   </a>
   
@@ -1603,7 +1594,8 @@
 </span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91" href="#__codelineno-0-91"></a><span class="w">    </span><span class="nt">tmp_folder</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tmp&quot;</span>
 </span><span id="__span-0-92"><a id="__codelineno-0-92" name="__codelineno-0-92" href="#__codelineno-0-92"></a><span class="w">  </span><span class="nt">max_ops_file_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1048576</span><span class="w"> </span><span class="c1"># 1M</span>
 </span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93" href="#__codelineno-0-93"></a><span class="w">  </span><span class="nt">probing</span><span class="p">:</span>
-</span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94" href="#__codelineno-0-94"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94" href="#__codelineno-0-94"></a><span class="w">    </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+</span><span id="__span-0-95"><a id="__codelineno-0-95" name="__codelineno-0-95" href="#__codelineno-0-95"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 </span></code></pre></div>
 </details>
 <p>In the following tables, you can find all the supported configuration options, along with their types, descriptions, and default values:</p>
@@ -1880,7 +1872,7 @@
 </tr>
 <tr>
 <td><code>probing</code></td>
-<td><a href="#clusterprobing">ClusterProbing</a></td>
+<td><a href="#probing">Probing</a></td>
 <td>Probing configuration for monitoring the cluster.</td>
 <td><code>(required)</code></td>
 </tr>
@@ -2075,8 +2067,8 @@
 </table>
 </details>
 <details class="note">
-<summary>Details of <code>probing</code> (ClusterProbing)</summary>
-<h3 id="clusterprobing"><code>ClusterProbing</code><a class="headerlink" href="#clusterprobing" title="Permanent link">&para;</a></h3>
+<summary>Details of <code>probing</code> (Probing)</summary>
+<h3 id="probing"><code>Probing</code><a class="headerlink" href="#probing" title="Permanent link">&para;</a></h3>
 <p>Cluster monitoring attributes.</p>
 <table>
 <thead>
@@ -2161,7 +2153,7 @@
 </tr>
 <tr>
 <td><code>private_url</code></td>
-<td><code>str</code></td>
+<td><code>SecretStr</code></td>
 <td>Private/internal endpoint URL for the storage.</td>
 <td><code>(required)</code></td>
 </tr>
@@ -2173,7 +2165,7 @@
 </tr>
 <tr>
 <td><code>access_key_id</code></td>
-<td><code>str</code></td>
+<td><code>SecretStr</code></td>
 <td>Access key ID for S3-compatible storage.</td>
 <td><code>(required)</code></td>
 </tr>
@@ -2221,7 +2213,7 @@
 </tr>
 <tr>
 <td><code>probing</code></td>
-<td><a href="#storageprobing">StorageProbing</a> <code>|</code> <code>None</code></td>
+<td><a href="#probing">Probing</a> <code>|</code> <code>None</code></td>
 <td>Configuration for probing storage availability.</td>
 <td><code>None</code></td>
 </tr>
@@ -2292,27 +2284,7 @@
 </table>
 </details>
 <details class="note">
-<summary>Details of <code>probing</code> (StorageProbing)</summary>
-<h3 id="storageprobing"><code>StorageProbing</code><a class="headerlink" href="#storageprobing" title="Permanent link">&para;</a></h3>
-<p>Probing configuration to check availability of the storage system.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>timeout</code></td>
-<td><code>int</code></td>
-<td>Timeout for storage health probing in seconds.</td>
-<td><code>(required)</code></td>
-</tr>
-</tbody>
-</table>
+<summary>Details of <code>probing</code> (Probing)</summary>
 </details>
 </details>
 <details class="note">
@@ -2391,10 +2363,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
       
     
   </body>
