@@ -19,7 +19,7 @@ from lib.scheduler_clients.pbs.cli_commands.qstat_command import QstatCommand
 # from lib.scheduler_clients.pbs.cli_commands.tracejob_script_command import (
 #     TracejobScriptCommand,
 # )
-# from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
+from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
 from lib.scheduler_clients.pbs.cli_commands.pbsnodes_command import PbsnodesCommand
 
 # from lib.scheduler_clients.pbs.cli_commands.queue_list_command import QueueListCommand
@@ -135,7 +135,7 @@ class PbsCliClient(SchedulerBaseClient):
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
-        qdel = QdelCommand(job_id)
+        qdel = QdelCommand(username=username, job_id=job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, qdel)
 
     async def get_nodes(self, username: str, jwt_token: str) -> List[PbsNode] | None:

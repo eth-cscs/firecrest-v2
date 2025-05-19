@@ -66,6 +66,9 @@ class PbsJobMetadata(JobMetadataModel):
 
 
 class JobTimePbs(JobTime):
+    # Start and elapsed appear after the job is started
+    start: Optional[int] = None
+    elapsed: Optional[int] = None
     end: None = None
     suspended: None = None
 
@@ -90,7 +93,6 @@ class JobTimePbs(JobTime):
         If it's already an int (or None), just pass it through.
         """
         if isinstance(v, str):
-            # adjust the format string if your PBS uses a slightly different layout
             dt = datetime.strptime(v, "%a %b %d %H:%M:%S %Y")
             return int(dt.timestamp())
         return v
@@ -104,12 +106,14 @@ class PbsJob(JobModel):
     account: str
     allocation_nodes: int
     cluster: str
+    # TODO: not sure what this is in Slurm
     # group: str
     nodes: str
     partition: str
     priority: int
     user: str
-    working_directory: str
+    # Working directory is set after the job is started
+    working_directory: Optional[str] = None
 
 
 class PbsNode(NodeModel):
