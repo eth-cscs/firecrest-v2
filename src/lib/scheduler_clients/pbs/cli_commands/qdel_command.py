@@ -15,7 +15,7 @@ class QdelCommand(BaseCommand):
         self.job_id = job_id
 
     def get_command(self) -> str:
-        cmd = ["/opt/pbs/bin/qdel"]
+        cmd = ["qdel"]
         cmd += [self.job_id]
         return " ".join(cmd)
 

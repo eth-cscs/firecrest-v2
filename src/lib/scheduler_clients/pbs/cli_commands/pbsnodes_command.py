@@ -19,7 +19,7 @@ class PbsnodesCommand(BaseCommand):
         self.show_all = show_all
 
     def get_command(self) -> str:
-        cmd = ["/opt/pbs/bin/pbsnodes"]
+        cmd = ["pbsnodes"]
         if self.show_all:
             cmd.append("-a")
         return " ".join(cmd)

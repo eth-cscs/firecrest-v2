@@ -19,7 +19,7 @@ class QstatCommand(BaseCommand):
         self.job_ids = job_ids
 
     def get_command(self) -> str:
-        cmd = ["/opt/pbs/bin/qstat", "-f"]
+        cmd = ["qstat", "-f"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

@@ -45,16 +45,16 @@ RUN wget -O pbspro.tar.gz https://github.com/openpbs/openpbs/archive/refs/tags/v
     && tar -xzf pbspro.tar.gz \
     && cd openpbs-23.06.06 \
     && ./autogen.sh \
-    && ./configure --prefix=/opt/pbs \
+    && ./configure --prefix=/usr \
     && make -j$(nproc) \
     && make install \
     && rm -rf /opt/openpbs-23.06.06 /opt/pbspro.tar.gz
 
 
 # Set up PBS environment
-ENV PATH="/opt/pbs/bin:/opt/pbs/sbin:$PATH"
+# ENV PATH="/opt/pbs/bin:/opt/pbs/sbin:$PATH"
 ENV PBS_HOME="/var/spool/pbs"
-ENV LD_LIBRARY_PATH="/opt/pbs/lib:$LD_LIBRARY_PATH"
+# ENV LD_LIBRARY_PATH="/opt/pbs/lib:$LD_LIBRARY_PATH"
 ENV PBS_SERVER="localhost"
 
 # Expose required ports

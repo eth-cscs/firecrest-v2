@@ -12,7 +12,7 @@ class PbsPingCommand(BaseCommand):
 
     def get_command(self) -> str:
         # Request full server status, which includes 'Server:' header and attribute lines
-        return "/opt/pbs/bin/qstat -Bf"
+        return "qstat -Bf"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:

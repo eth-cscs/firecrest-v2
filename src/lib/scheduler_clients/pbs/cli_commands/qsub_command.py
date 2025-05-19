@@ -16,7 +16,7 @@ class QsubCommand(BaseCommand):
         self.job_description = job_description
 
     def get_command(self) -> str:
-        cmd = ["/opt/pbs/bin/qsub"]
+        cmd = ["qsub"]
 
         # Export environment variables (-v) or all (-V)
         if self.job_description.environment:
