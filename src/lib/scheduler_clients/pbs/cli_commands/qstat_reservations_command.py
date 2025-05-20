@@ -22,7 +22,7 @@ class QstatReservationsCommand(BaseCommand):
 
     def get_command(self) -> str:
         ids = self.res_ids if self.res_ids else []
-        cmd = ["/opt/pbs/bin/pbs_rstat", "-Sf"] + ids
+        cmd = ["pbs_rstat", "-Sf"] + ids
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

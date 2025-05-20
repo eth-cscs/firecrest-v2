@@ -17,7 +17,7 @@ class PbsPartitionsCommand(ScontrolBase):
         self.part_ids = part_ids if part_ids else []
 
     def get_command(self) -> str:
-        cmd = ["/opt/pbs/bin/qstat", "-F", "json", "-f", "-Q"] + self.part_ids
+        cmd = ["qstat", "-F", "json", "-f", "-Q"] + self.part_ids
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
