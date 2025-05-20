@@ -31,6 +31,8 @@ sshpass -p 'root' ssh -T -o StrictHostKeyChecking=no localhost << 'EOF'
   /usr/bin/qmgr -c "create node $HOSTNAME"
   /usr/bin/qmgr -c "set node $HOSTNAME resources_available.ncpus = 1"
   /usr/bin/qmgr -c "set node $HOSTNAME resources_available.mem = 1024mb"
+  /usr/bin/qmgr -c "set server job_history_enable = True"
+  /usr/bin/qmgr -c "set server job_history_duration = 24:00:00"
   /etc/init.d/pbs restart
 
   sleep 5
