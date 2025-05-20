@@ -140,15 +140,8 @@ class PbsPing(CamelModel):
 
 class PbsPartition(PartitionModel):
     name: str = Field(validation_alias=AliasChoices("queueName", "QueueName", "queue"))
-    total_jobs: Optional[int] = Field(
-        default=None, alias=AliasChoices("totalJobs", "jobs")
-    )
-    default: Optional[bool] = Field(
-        default=None, alias=AliasChoices("default", "isDefault")
-    )
-    enabled: Optional[bool] = Field(
-        default=None, alias=AliasChoices("enabled", "isEnabled")
-    )
+    state: str
+    type: str
 
 
 class PbsReservation(ReservationModel):

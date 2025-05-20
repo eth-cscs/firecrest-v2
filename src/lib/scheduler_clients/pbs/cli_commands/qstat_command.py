@@ -16,7 +16,7 @@ class QstatCommand(BaseCommand):
     def __init__(self, username: str = None, job_ids: List[str] = None) -> None:
         super().__init__()
         self.username = username
-        self.job_ids = job_ids
+        self.job_ids = job_ids if job_ids else []
 
     def get_command(self) -> str:
         cmd = ["/opt/pbs/bin/qstat", "-f"] + self.job_ids

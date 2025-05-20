@@ -27,9 +27,9 @@ from lib.scheduler_clients.pbs.cli_commands.qstat_reservations_command import (
     QstatReservationsCommand,
 )
 
-# from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
-#     PbsPartitionsCommand,
-# )
+from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
+    PbsPartitionsCommand,
+)
 from lib.scheduler_clients.pbs.cli_commands.ping_command import PbsPingCommand
 
 # models
@@ -126,7 +126,7 @@ class PbsCliClient(SchedulerBaseClient):
     async def get_partitions(
         self, username: str, jwt_token: str
     ) -> List[PbsPartition] | None:
-        queues = QueueListCommand()
+        queues = PbsPartitionsCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, queues)
 
     async def ping(self, username: str, jwt_token: str) -> List[PbsPing] | None:
