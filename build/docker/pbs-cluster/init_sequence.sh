@@ -23,21 +23,21 @@ sleep 5
 # sshpass -p 'root' ssh -o StrictHostKeyChecking=no localhost
 
 sshpass -p 'root' ssh -T -o StrictHostKeyChecking=no localhost << 'EOF'
-  /opt/pbs/libexec/pbs_postinstall
+  /usr/libexec/pbs_postinstall
   sleep 5
   /etc/init.d/pbs start
 
   export HOSTNAME=$(hostname)
-  /opt/pbs/bin/qmgr -c "create node $HOSTNAME"
-  /opt/pbs/bin/qmgr -c "set node $HOSTNAME resources_available.ncpus = 1"
-  /opt/pbs/bin/qmgr -c "set node $HOSTNAME resources_available.mem = 1024mb"
+  /usr/bin/qmgr -c "create node $HOSTNAME"
+  /usr/bin/qmgr -c "set node $HOSTNAME resources_available.ncpus = 1"
+  /usr/bin/qmgr -c "set node $HOSTNAME resources_available.mem = 1024mb"
   /etc/init.d/pbs restart
 
   sleep 5
 
   mom_pid=$(ps aux | grep pbs_mom | grep -v grep | awk '{print $2}')
   kill -9 $mom_pid
-  /opt/pbs/sbin/pbs_mom
+  /usr/sbin/pbs_mom
 EOF
 
 
