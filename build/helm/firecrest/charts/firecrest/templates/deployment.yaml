@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firecrest-api-depl
+  annotations:
+  {{- range $key, $value := .Values.deploymentAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: firecrest-api
+  template:
+    metadata:
+      labels:
+        app: firecrest-api
+      annotations:
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+        - name: firecrest-api
+          image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
+          # command: [ "sh", "-c", "tail -f /dev/null" ]
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.environment }}
+            - name: YAML_CONFIG_FILE
+              value: "/app/config/app-config.yaml"
+            - name: APP_VERSION
+              value: {{ .Chart.AppVersion }}
+            - name: LOGGING_LEVEL
+              value: {{ .Values.loggingLevel }}
+          volumeMounts:
+          {{- if .Values.config }}
+          - name: firecrest-config-volume
+            mountPath: /app/config/
+            readOnly: true
+          {{- end }}
+          {{- if .Values.volumes.configmap.enabled }}
+          - name: firecrest-config-extra
+            mountPath: /app/config/extra
+            readOnly: true
+          {{- end }}
+          - name: firecrest-secrets-volume
+            mountPath: /app/secrets/
+            readOnly: true
+          livenessProbe:
+            exec:
+              command:
+                - python3
+                - /app/check_liveness.py
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            failureThreshold: 3
+      volumes:
+        {{- if .Values.config }}
+        - name: firecrest-config-volume
+          configMap:
+            name: firecrest-config
+            items:
+              - key: firecrest-config
+                path: app-config.yaml
+        {{- end }}
+        {{- if .Values.volumes.configmap.enabled }}
+        - name: firecrest-config-extra
+          configMap:
+            name: {{ .Values.volumes.configmap.name }}
+            items:
+              {{- range .items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+              {{- end }}
+        {{- end }}
+        - name: firecrest-secrets-volume
+          secret:
+            secretName: {{ .Values.volumes.secret.name }}
+            items:
+              {{- range .items }}
+              - key: {{ .key }}
+                path: {{ .path }}
+              {{- end }}
