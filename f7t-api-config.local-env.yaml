@@ -67,7 +67,12 @@ clusters:
     secret: "secret_file:/run/secrets/service_account_client_secret"
   probing:
     interval: 120
-    timeout: 5
+    timeout: 10
+    startup_grace_period: 300
+    datatransfer_jobs_directives:
+      - "#PBS -l nodes=1:ppn=1"
+      - "#PBS -l walltime=00:15:00"
+      - "#PBS -V"
   file_systems:
     - path: '/home'
       data_type: 'users'

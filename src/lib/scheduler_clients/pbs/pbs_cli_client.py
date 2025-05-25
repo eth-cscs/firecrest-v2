@@ -23,8 +23,8 @@ from lib.scheduler_clients.pbs.cli_commands.qstat_job_metadata_command import (
 from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
 from lib.scheduler_clients.pbs.cli_commands.pbsnodes_command import PbsnodesCommand
 
-from lib.scheduler_clients.pbs.cli_commands.qstat_reservations_command import (
-    QstatReservationsCommand,
+from lib.scheduler_clients.pbs.cli_commands.rstat_reservations_command import (
+    RstatReservationsCommand,
 )
 
 from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
@@ -120,7 +120,7 @@ class PbsCliClient(SchedulerBaseClient):
     async def get_reservations(
         self, username: str, jwt_token: str
     ) -> List[PbsReservation] | None:
-        reservations = QstatReservationsCommand()
+        reservations = RstatReservationsCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, reservations)
 
     async def get_partitions(

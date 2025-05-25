@@ -20,7 +20,7 @@ class JobTime(CamelModel):
     start: Optional[int]
     end: Optional[int]
     suspended: Optional[int]
-    limit: int
+    limit: Optional[int]
 
 
 class JobTask(CamelModel):

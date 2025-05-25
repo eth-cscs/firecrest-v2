@@ -37,4 +37,6 @@ class QstatJobMetadataCommand(QstatBaseCommand):
             info["standardOutput"] = job_data.get("Output_Path", "")
             info["standardError"] = job_data.get("Error_Path", "")
 
+            jobs.append(info)
+
         return jobs

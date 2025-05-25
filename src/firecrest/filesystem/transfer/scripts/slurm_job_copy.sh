@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # Copyright (c) 2025, ETH Zurich. All rights reserved.
 #
 # Please, refer to the LICENSE file in the root directory.
@@ -7,15 +7,15 @@
 
 {{ sbatch_directives }}
 
-echo $(date -u) "Copy Files Job (id:${SLURM_JOB_ID})"
+echo "$(date -u) Copy Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID}})"
 
 status=$(cp  -- '{{ source_path }}' '{{ target_path }}')
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully copied."
-    exit 0 
-else 
+    exit 0
+else
     echo $(date -u) "Unable to copy files exit code:${?} error: ${status}" >&2
-    exit $? 
+    exit $?
 fi
 

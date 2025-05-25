@@ -47,7 +47,9 @@ class QstatCommand(QstatBaseCommand):
                 "nodect", None
             )
             info["priority"] = job_data.get("Priority", None)
-            info["working_directory"] = job_data.get("jobdir", "")
+            info["working_directory"] = job_data.get("Variable_List", {}).get(
+                "PBS_O_WORKDIR", ""
+            )
 
             status = {}
             status["state"] = job_data.get("job_state", "")

@@ -11,7 +11,7 @@ from typing import List, Optional
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
-class QstatReservationsCommand(BaseCommand):
+class RstatReservationsCommand(BaseCommand):
 
     def __init__(
         self, username: str = None, res_ids: Optional[List[str]] = None
