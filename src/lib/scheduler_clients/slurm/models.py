@@ -36,6 +36,9 @@ class SlurmInt(RootModel):
 
 class SlurmJobDescription(JobDescriptionModel):
     name: Optional[str] = Field(default=None, description="Name for the job")
+    account: Optional[str] = Field(
+        default=None, description="Charge job resources to specified account"
+    )
     current_working_directory: str = Field(
         alias="working_directory", description="Job working directory"
     )
@@ -55,7 +58,9 @@ class SlurmJobDescription(JobDescriptionModel):
     )
     constraints: Optional[str] = Field(default=None, description="Job constraints")
     script: str = Field(default=None, description="Script for the job")
-    script_path: str = Field(default=None, description="Path to the job in target system")
+    script_path: str = Field(
+        default=None, description="Path to the job in target system"
+    )
 
 
 class SlurmJobMetadata(JobMetadataModel):

@@ -17,6 +17,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
+from firecrest.status.health_check.health_checker_storage import StorageHealthChecker
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
 
@@ -34,9 +36,6 @@ from lib.handlers.api_response_handler import (
 )
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from firecrest.dependencies import SSHClientDependency
-from firecrest.status.health_check.health_checker import (
-    SchedulerHealthChecker,
-)
 
 # routers
 from firecrest.status.router import (
@@ -111,10 +110,16 @@ async def schedule_tasks(scheduler: AsyncScheduler):
     for cluster in plugin_settings.clusters:
         if cluster.probing:
             await scheduler.add_schedule(
-                SchedulerHealthChecker(cluster).check,
+                ClusterHealthChecker(cluster).check,
                 IntervalTrigger(seconds=cluster.probing.interval),
                 id=f"check-cluster-{cluster.name}",
             )
+    if settings.storage and settings.storage.probing:
+        await scheduler.add_schedule(
+            StorageHealthChecker(settings.storage).check,
+            IntervalTrigger(seconds=settings.storage.probing.interval),
+            id="check-storage",
+        )
     await scheduler.add_schedule(
         SSHClientDependency.prune_client_pools,
         IntervalTrigger(seconds=5),

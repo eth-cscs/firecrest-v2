@@ -11,7 +11,7 @@ from firecrest.config import BaseServiceHealth, HPCCluster
 
 class HealthCheckBase(ABC):
 
-    def __init__(self, system: HPCCluster):
+    def __init__(self, system: HPCCluster = None):
         self.system = system
 
     async def check(self) -> BaseServiceHealth:

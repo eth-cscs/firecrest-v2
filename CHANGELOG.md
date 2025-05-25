@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.6] - OPEN
+## [2.2.7] - OPEN
 
 ### Added
 
-- Path parameter for submitting jobs from a remote file
+- Environment variable `UVICORN_LOG_CONFIG` to enable [Uvicorn log configuration](https://www.uvicorn.org/settings/#logging) file path (analog to `--log-config`)
+
+### Changed
+
+### Fixed
+
+## [2.2.6]
+
+### Added
+
+- `account` optional parameter to job submission request
+- `script_path` optional parameter for submitting jobs from a remote file
 - JupyterHub example
 - Documentation for logging architecture
 - Workflow orchestrator example

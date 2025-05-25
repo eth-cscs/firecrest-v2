@@ -29,6 +29,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                 {
                     "job": {
                         "name": "Example with inline script",
+                        "account": "myproject",
                         "working_directory": "{{home_path}}",
                         "standard_input": "/dev/null",
                         "standard_output": "count_to_100.out",
@@ -43,6 +44,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                 {
                     "job": {
                         "name": "Example with script path",
+                        "account": "myproject",
                         "working_directory": "{{home_path}}",
                         "standard_input": "/dev/null",
                         "standard_output": "count_to_100.out",

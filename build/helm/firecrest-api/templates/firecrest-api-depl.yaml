@@ -33,6 +33,10 @@ spec:
               value: {{ .Chart.AppVersion }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel }}
+            {{- if .Values.logConfig }}
+            - name: UVICORN_LOG_CONFIG
+              values: .Values.logConfig
+            {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
             mountPath: /app/configs/
