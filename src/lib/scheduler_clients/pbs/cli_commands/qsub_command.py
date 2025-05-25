@@ -18,7 +18,6 @@ class QsubCommand(BaseCommand):
     def get_command(self) -> str:
         cmd = ["qsub"]
 
-        # Export environment variables (-v) or all (-V)
         if self.job_description.environment:
             env_list = [
                 f"{key}={value}"
@@ -30,12 +29,16 @@ class QsubCommand(BaseCommand):
 
         if self.job_description.name:
             cmd.append(f"-N '{self.job_description.name}'")
+        if self.job_description.account:
+            cmd.append(f"-P '{self.job_description.account}'")
         if self.job_description.standard_error:
             cmd.append(f"-e '{self.job_description.standard_error}'")
         if self.job_description.standard_output:
             cmd.append(f"-o '{self.job_description.standard_output}'")
-        # if self.job_description.standard_input:
-        #     cmd.append(f"-i '{self.job_description.standard_input}'")
+
+        # The last argument is the script to run
+        if self.job_description.script_path:
+            cmd.append(f" -- {self.job_description.script_path}")
 
         submit_cmd = " ".join(cmd)
         if self.job_description.current_working_directory:
