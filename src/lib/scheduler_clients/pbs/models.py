@@ -122,13 +122,8 @@ class PbsJob(JobModel):
 class PbsNode(NodeModel):
     name: str
     state: str
-    np: Optional[int] = Field(default=None, alias=AliasChoices("np", "numP"))
-    properties: Optional[str] = Field(default=None, alias=AliasChoices("properties"))
-    gin: Optional[str] = Field(default=None, alias=AliasChoices("gpus", "gpuInfo"))
-    memory: Optional[int] = Field(
-        default=None, alias=AliasChoices("physMemory", "memory")
-    )
-    swap: Optional[int] = Field(default=None, alias=AliasChoices("swapMemory", "swap"))
+    cpus: int
+    memory: str
 
 
 class PbsPing(CamelModel):

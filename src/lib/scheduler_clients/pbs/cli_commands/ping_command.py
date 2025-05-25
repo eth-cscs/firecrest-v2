@@ -3,16 +3,16 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import re
+import json
 from lib.exceptions import PbsError
-from lib.ssh_clients.ssh_client import BaseCommand
+from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
 
 
-class PbsPingCommand(BaseCommand):
+class PbsPingCommand(QstatBaseCommand):
 
-    def get_command(self) -> str:
-        # Request full server status, which includes 'Server:' header and attribute lines
-        return "qstat -Bf"
+    def get_command(self):
+        cmd = super().get_command() + " -B"
+        return cmd
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:
@@ -20,31 +20,26 @@ class PbsPingCommand(BaseCommand):
                 f"Unexpected PBS command response. exit_status:{exit_status} std_err:{stderr}"
             )
 
-        pings = []
-        current = {}
+        try:
+            payload = json.loads(stdout)
+        except json.JSONDecodeError as e:
+            raise PbsError(
+                f"Failed to parse JSON from qstat output: {e}\nOutput was:\n{stdout!r}"
+            )
 
-        for line in stdout.splitlines():
-            # Header with server name
-            host_match = re.match(r"Server:\s+(\S+)", line)
-            if host_match:
-                # start a new ping record
-                if current:
-                    pings.append(current)
-                    current = {}
-                current["hostname"] = host_match.group(1)
-                continue
+        servers = []
 
-            # Server state attribute
-            state_match = re.match(r"\s*server_state\s*=\s*(\S+)", line)
-            if state_match and current is not None:
-                if state_match.group(1) == "Active":
-                    current["pinged"] = "UP"
-                else:
-                    current["pinged"] = "DOWN"
-                continue
+        servers_data = payload.get("Server")
+        for server_name, server_data in servers_data.items():
+            server_info = {
+                "hostname": server_name,
+            }
+            state = server_data.get("server_state")
+            if state == "Active":
+                server_info["pinged"] = "UP"
+            else:
+                server_info["pinged"] = "DOWN"
 
-        # append last record
-        if current:
-            pings.append(current)
+            servers.append(server_info)
 
-        return pings if pings else None
+        return servers

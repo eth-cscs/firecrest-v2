@@ -4,21 +4,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from lib.exceptions import PbsError
-from lib.scheduler_clients.slurm.cli_commands.scontrol_base import ScontrolBase
-from typing import List
+from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
 import json
 
 
-class PbsPartitionsCommand(ScontrolBase):
+class PbsPartitionsCommand(QstatBaseCommand):
 
-    def __init__(self, username: str = None, part_ids: List[str] = None) -> None:
-        super().__init__()
-        self.username = username
-        self.part_ids = part_ids if part_ids else []
-
-    def get_command(self) -> str:
-        cmd = ["qstat", "-F", "json", "-f", "-Q"] + self.part_ids
-        return " ".join(cmd)
+    def get_command(self):
+        cmd = super().get_command() + " -Q"
+        return cmd
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:

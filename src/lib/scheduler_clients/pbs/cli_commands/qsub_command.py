@@ -28,9 +28,6 @@ class QsubCommand(BaseCommand):
         else:
             cmd.append("-V")
 
-        # FIXME: This is not working for the openpbs containers
-        # if self.job_description.current_working_directory:
-        #     cmd.append(f"-d '{self.job_description.current_working_directory}'")
         if self.job_description.name:
             cmd.append(f"-N '{self.job_description.name}'")
         if self.job_description.standard_error:
@@ -40,15 +37,19 @@ class QsubCommand(BaseCommand):
         # if self.job_description.standard_input:
         #     cmd.append(f"-i '{self.job_description.standard_input}'")
 
-        # if self.job_description.constraints:
-        #     cmd.append(f"-l {self.job_description.constraints}")
+        submit_cmd = " ".join(cmd)
+        if self.job_description.current_working_directory:
+            submit_cmd = (
+                f"cd {self.job_description.current_working_directory} && "
+                f"{submit_cmd}"
+            )
 
-        return " ".join(cmd)
+        return submit_cmd
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:
             raise PbsError(
-                f"Unexpected PBS command response. exit_status:{exit_status} std_err:{stderr}"
+                f"Unexpected PBS command response. exit_status:{exit_status} std_err:{stderr} stdout:{stdout}"
             )
         match = re.match(r"^(\d+)", stdout.strip())
         if match:
