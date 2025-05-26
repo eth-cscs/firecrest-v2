@@ -35,11 +35,15 @@ class PbsPartitionsCommand(QstatBaseCommand):
         for name, attrs in queues_data.items():
             info = {}
             info["name"] = name
-            info["type"] = attrs.get("queue_type")
-            state = "enabled" if attrs.get("enabled") else "disabled"
-            state += "&"
-            state += "started" if attrs.get("started") else "stopped"
-            info["state"] = state
+            info["total_nodes"] = attrs.get("resources_assigned", {}).get("nodect", 0)
+            info["cpus"] = attrs.get("resources_assigned", {}).get("ncpus", 0)
+            # Trying to adjust to Slurm output format
+            if attrs.get("enabled") and attrs.get("started"):
+                state = "UP"
+            else:
+                state = "DOWN"
+
+            info["partition"] = state
 
             result.append(info)
 

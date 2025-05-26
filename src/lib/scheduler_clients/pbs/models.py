@@ -137,9 +137,10 @@ class PbsPing(CamelModel):
 
 
 class PbsPartition(PartitionModel):
-    name: str = Field(validation_alias=AliasChoices("queueName", "QueueName", "queue"))
-    state: str
-    type: str
+    name: str
+    cpus: int
+    total_nodes: int
+    partition: str = Field(validation_alias=AliasChoices("state", "State"))
 
 
 class PbsReservation(ReservationModel):
