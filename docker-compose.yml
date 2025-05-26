@@ -34,14 +34,14 @@ services:
       SSH_KEYGEN_URL: http://192.168.240.20:5000
       YAML_CONFIG_FILE: "/app/config/app-config.yaml"
     depends_on:
-        keycloak:
-          condition: service_healthy
-        slurm:
-          condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      slurm:
+        condition: service_healthy
     build:
       context: ./
       args:
-          ENVIRONMENT: development
+        ENVIRONMENT: development
       dockerfile: ./build/docker/firecrest-api/Dockerfile
     command:
       [
@@ -67,7 +67,7 @@ services:
       OIDC_CERT_URLS: '["http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'
     build:
       platforms:
-        # - linux/amd64
+        - linux/amd64
         - linux/arm64
       context: ./
       dockerfile: ./build/docker/slurm-cluster/Dockerfile
@@ -141,8 +141,8 @@ services:
   keycloak-create-user:
      image: "quay.io/keycloak/keycloak:26.0.7"
      depends_on:
-         keycloak:
-           condition: service_healthy
+        keycloak:
+          condition: service_healthy
      restart: "no"
      networks:
       firecrest-internal-v2:
