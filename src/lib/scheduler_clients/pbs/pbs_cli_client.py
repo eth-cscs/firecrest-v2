@@ -3,13 +3,9 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import asyncio
 from typing import List, Optional
-from packaging.version import Version
-
 from lib.ssh_clients.ssh_client import BaseCommand
 
-# pbs CLI commands
 from lib.scheduler_clients.pbs.cli_commands.qsub_command import QsubCommand
 from lib.scheduler_clients.pbs.cli_commands.qstat_command import QstatCommand
 
@@ -17,9 +13,6 @@ from lib.scheduler_clients.pbs.cli_commands.qstat_job_metadata_command import (
     QstatJobMetadataCommand,
 )
 
-# from lib.scheduler_clients.pbs.cli_commands.tracejob_script_command import (
-#     TracejobScriptCommand,
-# )
 from lib.scheduler_clients.pbs.cli_commands.qdel_command import QdelCommand
 from lib.scheduler_clients.pbs.cli_commands.pbsnodes_command import PbsnodesCommand
 
@@ -44,7 +37,6 @@ from lib.scheduler_clients.pbs.models import (
 )
 
 # base client
-# from lib.scheduler_clients.pbs.pbs_base_client import PbsBaseClient
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -101,8 +93,6 @@ class PbsCliClient(SchedulerBaseClient):
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
     ) -> List[PbsJobMetadata] | Exception | None:
-
-        # Fetch metadata with qstat and job script with tracejob
         qstat_meta = QstatJobMetadataCommand(username, [job_id])
         return await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
 

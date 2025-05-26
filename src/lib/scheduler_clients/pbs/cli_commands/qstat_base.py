@@ -3,11 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import re
-from lib.exceptions import PbsError
 from typing import List, Optional
-
-
 from lib.ssh_clients.ssh_client import BaseCommand
 
 

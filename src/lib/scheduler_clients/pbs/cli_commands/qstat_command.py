@@ -26,7 +26,7 @@ class QstatCommand(QstatBaseCommand):
             payload = json.loads(stdout)
         except json.JSONDecodeError as e:
             raise PbsError(
-                f"Failed to parse JSON from qstat output: {e}\nOutput was:\n{stdout!r}"
+                f"Failed to parse JSON from qstat output: {e!s}\nOutput was:\n{stdout!r}"
             )
 
         res = payload.get("Jobs", {})

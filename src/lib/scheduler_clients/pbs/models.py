@@ -3,9 +3,9 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
-from pydantic import AliasChoices, Field, RootModel, validator
+from pydantic import AliasChoices, Field, validator
 
 # models
 from lib.models.base_model import CamelModel
@@ -13,15 +13,13 @@ from lib.scheduler_clients.models import (
     JobMetadataModel,
     JobModel,
     JobDescriptionModel,
-    JobStatus,
-    JobTask,
     JobTime,
     NodeModel,
     PartitionModel,
     ReservationModel,
 )
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 class PbsJobDescription(JobDescriptionModel):

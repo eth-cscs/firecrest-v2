@@ -66,7 +66,7 @@ class GetJobResponse(CamelModel):
 
 
 class GetJobMetadataResponse(CamelModel):
-    jobs: Optional[List[SlurmJobMetadata]] = None
+    jobs: Optional[List[SlurmJobMetadata | PbsJobMetadata]] = None
 
 
 class PostJobSubmissionResponse(CamelModel):
