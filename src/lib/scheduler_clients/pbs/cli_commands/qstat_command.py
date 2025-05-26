@@ -36,8 +36,6 @@ class QstatCommand(QstatBaseCommand):
             info["job_id"] = int(job_id.split(".")[0])
             info["name"] = job_data.get("Job_Name", "")
             info["user"] = job_data.get("Job_Owner", "").split("@")[0]
-            # FIXME: take into account the case when the cluster is not present
-            # in the job owner
             info["cluster"] = job_data.get("Job_Owner", "").split("@")[1]
 
             info["account"] = job_data.get("project", "")

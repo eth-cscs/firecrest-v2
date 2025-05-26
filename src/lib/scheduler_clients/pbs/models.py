@@ -105,21 +105,16 @@ class JobTimePbs(JobTime):
 
 
 class PbsJob(JobModel):
-    # TODO: Are there tasks in PBS?
     tasks: None = None
-
     time: JobTimePbs
     account: str
     allocation_nodes: int
     cluster: str
-    # TODO: not sure what this is in Slurm
-    # group: str
     nodes: str
     partition: str
     priority: int
     user: str
-    # Working directory is set after the job is started
-    working_directory: Optional[str] = None
+    working_directory: str
 
 
 class PbsNode(NodeModel):
