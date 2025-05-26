@@ -32,7 +32,7 @@ class PbsnodesCommand(BaseCommand):
         except json.JSONDecodeError as e:
             raise PbsError(
                 f"Failed to parse JSON from pbsnodes output: {e}\nOutput was:\n{stdout!r}"
-            )
+            ) from e
 
         nodes = []
 
