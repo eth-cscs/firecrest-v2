@@ -87,7 +87,7 @@ class JobTimePbs(JobTime):
                 h, m, s = map(int, v.split(":"))
                 return h * 3600 + m * 60 + s
             except ValueError:
-                raise ValueError(f"invalid duration string: {v!r}")
+                raise ValueError(f"invalid duration string: {v!r}") from None
         return v
 
     @validator("start", pre=True)
