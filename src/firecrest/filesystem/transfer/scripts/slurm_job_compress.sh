@@ -7,7 +7,7 @@
 
 {{ sbatch_directives }}
 
-echo "$(date -u) Compress Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID}})"
+echo "$(date -u) Compress Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
 {% if match_pattern %}
 
