@@ -7,7 +7,7 @@
 
 {{ sbatch_directives }}
 
-echo "$(date -u) Copy Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID}})"
+echo "$(date -u) Copy Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
 status=$(cp  -- '{{ source_path }}' '{{ target_path }}')
 if [[ "$?" == '0' ]]

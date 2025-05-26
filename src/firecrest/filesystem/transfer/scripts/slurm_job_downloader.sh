@@ -7,7 +7,7 @@
 
 {{ sbatch_directives }}
 
-echo "$(date -u) Ingress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID}})"
+echo "$(date -u) Ingress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
 echo $(date -u) "Waiting till file to tranfer is available..."
 for i in `seq 1440`

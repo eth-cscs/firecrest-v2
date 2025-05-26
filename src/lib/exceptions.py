@@ -29,4 +29,5 @@ class SSHCredentials(Exception):
 
 
 class PbsError(SchedulerError):
+    """Exception raised for errors related to the PBS scheduler."""
     pass
