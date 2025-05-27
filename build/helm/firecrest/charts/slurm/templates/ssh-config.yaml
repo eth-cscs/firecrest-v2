@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slurm-ssh-config
+data:
+  sshd_config_base: |
+    {{ tpl (.Files.Get "files/sshd_config_base") . | nindent 4 }}
