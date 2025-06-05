@@ -16,6 +16,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmPartitions,
     SlurmReservations,
 )
+from lib.scheduler_clients.pbs.models import PbsNode, PbsPartition, PbsReservation
 
 
 class GetLiveness(CamelModel):
@@ -29,15 +30,15 @@ class GetSystemsResponse(CamelModel):
 
 
 class GetNodesResponse(CamelModel):
-    nodes: List[SlurmNode]
+    nodes: List[SlurmNode | PbsNode]
 
 
 class GetPartitionsResponse(CamelModel):
-    partitions: List[SlurmPartitions]
+    partitions: List[SlurmPartitions | PbsPartition]
 
 
 class GetReservationsResponse(CamelModel):
-    reservations: List[SlurmReservations]
+    reservations: List[SlurmReservations | PbsReservation]
 
 
 class PosixIdentified(CamelModel):
