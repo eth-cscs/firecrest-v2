@@ -35,7 +35,7 @@ spec:
               value: {{ .Values.loggingLevel }}
             {{- if .Values.logConfig }}
             - name: UVICORN_LOG_CONFIG
-              values: {{ .Values.logConfig }}
+              value: {{ .Values.logConfig }}
             {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
