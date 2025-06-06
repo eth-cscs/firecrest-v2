@@ -1814,7 +1814,7 @@ components:
       type: http
 info:
   title: FirecREST
-  version: 2.x.x
+  version: 2.2.7
 openapi: 3.1.0
 paths:
   /compute/{system_name}/jobs:
