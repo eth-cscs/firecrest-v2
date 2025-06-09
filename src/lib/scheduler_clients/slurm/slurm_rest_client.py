@@ -15,14 +15,14 @@ from packaging.version import Version
 from lib.exceptions import SlurmAuthTokenError, SlurmError
 
 # Models
-from lib.scheduler_clients.slurm.models import (
-    SlurmJob,
-    SlurmJobDescription,
-    SlurmJobMetadata,
-    SlurmNode,
-    SlurmPartitions,
-    SlurmPing,
-    SlurmReservations,
+from lib.scheduler_clients.models import (
+    JobModel,
+    JobDescriptionModel,
+    JobMetadataModel,
+    NodeModel,
+    PartitionModel,
+    ReservationModel,
+    SchedulerPing,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
@@ -85,7 +85,7 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: SlurmJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -141,7 +141,7 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def get_job(
         self, job_id: str, username: str, jwt_token: str
-    ) -> List[SlurmJob] | None:
+    ) -> List[JobModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -165,11 +165,11 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
-    ) -> List[SlurmJobMetadata]:
+    ) -> List[JobMetadataModel]:
         # Until version 4.05.1 slurmdb/job end-point does not provide stdout & stderr information
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
-    async def get_jobs(self, username: str, jwt_token: str) -> List[SlurmJob] | None:
+    async def get_jobs(self, username: str, jwt_token: str) -> List[JobModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -206,7 +206,7 @@ class SlurmRestClient(SlurmBaseClient):
                 return True
             await _slurm_unexpected_response(response)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -226,7 +226,7 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def get_reservations(
         self, username: str, jwt_token: str
-    ) -> List[SlurmReservations] | None:
+    ) -> List[ReservationModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -246,7 +246,7 @@ class SlurmRestClient(SlurmBaseClient):
 
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[SlurmPartitions] | None:
+    ) -> List[PartitionModel] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -264,7 +264,7 @@ class SlurmRestClient(SlurmBaseClient):
                 return []
         return partition_result["partitions"]
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedulerPing] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)

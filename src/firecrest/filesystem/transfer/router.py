@@ -38,7 +38,7 @@ from firecrest.dependencies import (
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 
 # models
-from lib.scheduler_clients.slurm.models import SlurmJobDescription
+from lib.scheduler_clients.models import JobDescriptionModel
 from firecrest.filesystem.transfer.models import (
     DeleteResponse,
     MoveResponse,
@@ -228,7 +228,7 @@ async def post_upload(
         job = JobHelper(f"{work_dir}/{username}", job_script, "IngressFileTransfer")
 
         job_id = await scheduler_client.submit_job(
-            job_description=SlurmJobDescription(**job.job_param),
+            job_description=JobDescriptionModel(**job.job_param),
             username=username,
             jwt_token=access_token,
         )
@@ -361,7 +361,7 @@ async def post_download(
         )
         get_download_url = None
         job_id = await scheduler_client.submit_job(
-            job_description=SlurmJobDescription(**job.job_param),
+            job_description=JobDescriptionModel(**job.job_param),
             username=username,
             jwt_token=access_token,
         )
@@ -425,7 +425,7 @@ async def move_mv(
     job = JobHelper(f"{work_dir}/{username}", job_script, "MoveFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -485,7 +485,7 @@ async def post_cp(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CopyFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -543,7 +543,7 @@ async def delete_rm(
     job = JobHelper(f"{work_dir}/{username}", job_script, "DeleteFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -612,7 +612,7 @@ async def compress(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -670,7 +670,7 @@ async def extract(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )

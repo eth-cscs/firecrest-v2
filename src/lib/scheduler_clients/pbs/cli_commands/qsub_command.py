@@ -5,13 +5,13 @@
 
 import re
 from lib.exceptions import PbsError
-from lib.scheduler_clients.pbs.models import PbsJobDescription
+from lib.scheduler_clients.models import JobDescriptionModel
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
 class QsubCommand(BaseCommand):
 
-    def __init__(self, job_description: PbsJobDescription) -> None:
+    def __init__(self, job_description: JobDescriptionModel) -> None:
         super().__init__()
         self.job_description = job_description
 

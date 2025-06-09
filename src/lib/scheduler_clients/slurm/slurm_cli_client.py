@@ -32,14 +32,15 @@ from lib.scheduler_clients.slurm.cli_commands.scontrol_reservations_command impo
 )
 from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
-from lib.scheduler_clients.slurm.models import (
-    SlurmJob,
-    SlurmJobMetadata,
-    SlurmNode,
-    SlurmJobDescription,
-    SlurmPartitions,
-    SlurmPing,
-    SlurmReservations,
+
+from lib.scheduler_clients.models import (
+    JobModel,
+    JobMetadataModel,
+    NodeModel,
+    JobDescriptionModel,
+    PartitionModel,
+    ReservationModel,
+    SchedulerPing,
 )
 
 # clients
@@ -63,7 +64,7 @@ class SlurmCliClient(SlurmBaseClient):
 
     async def submit_job(
         self,
-        job_description: SlurmJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> int | None:
@@ -84,13 +85,13 @@ class SlurmCliClient(SlurmBaseClient):
 
     async def get_job(
         self, job_id: str | None, username: str, jwt_token: str
-    ) -> List[SlurmJob] | None:
+    ) -> List[JobModel] | None:
         sacct = SacctCommand(username, [job_id] if job_id else None)
         return await self.__executed_ssh_cmd(username, jwt_token, sacct)
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
-    ) -> List[SlurmJobMetadata]:
+    ) -> List[JobMetadataModel]:
 
         # Note:
         # sacct --format="StdOut,StdIn,StdErr" and batch-script require custom config
@@ -133,36 +134,36 @@ class SlurmCliClient(SlurmBaseClient):
         jobs = []
         for i in range(len(results[cmd_result_i])):
             jobs.append(
-                SlurmJobMetadata(
+                JobMetadataModel(
                     **{**results[cmd_result_i][i], **results[cmd_result_i + 1][i]}
                 )
             )
 
         return jobs
 
-    async def get_jobs(self, username: str, jwt_token: str) -> List[SlurmJob] | None:
+    async def get_jobs(self, username: str, jwt_token: str) -> List[JobModel] | None:
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         scancel = ScancelCommand(username, job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, scancel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         sinfo = SinfoCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, sinfo)
 
     async def get_reservations(
         self, username: str, jwt_token: str
-    ) -> List[SlurmReservations] | None:
+    ) -> List[ReservationModel] | None:
         scontrolreservation = ScontrolReservationCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
 
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[SlurmPartitions] | None:
+    ) -> List[PartitionModel] | None:
         scontrolpartition = ScontrolPartitionCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedulerPing] | None:
         scontrolping = ScontrolPingCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolping)

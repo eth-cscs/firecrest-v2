@@ -7,7 +7,8 @@ from typing import List
 from firecrest.config import HPCCluster, SchedulerServiceHealth
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
-from lib.scheduler_clients.slurm.models import SlurmPing
+
+# from lib.scheduler_clients.slurm.models import SlurmPing
 
 
 class SchedulerHealthCheck(HealthCheckBase):

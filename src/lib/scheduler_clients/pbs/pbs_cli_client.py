@@ -26,14 +26,14 @@ from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
 from lib.scheduler_clients.pbs.cli_commands.ping_command import PbsPingCommand
 
 # models
-from lib.scheduler_clients.pbs.models import (
-    PbsJob,
-    PbsJobMetadata,
-    PbsNode,
-    PbsJobDescription,
-    PbsPartition,
-    PbsReservation,
-    PbsPing,
+from lib.scheduler_clients.models import (
+    JobModel,
+    JobDescriptionModel,
+    JobMetadataModel,
+    NodeModel,
+    PartitionModel,
+    ReservationModel,
+    SchedulerPing,
 )
 
 # base client
@@ -63,7 +63,7 @@ class PbsCliClient(SchedulerBaseClient):
 
     async def submit_job(
         self,
-        job_description: PbsJobDescription,
+        job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
     ) -> str | None:
@@ -86,39 +86,39 @@ class PbsCliClient(SchedulerBaseClient):
 
     async def get_job(
         self, job_id: Optional[str], username: str, jwt_token: str
-    ) -> List[PbsJob] | None:
+    ) -> List[JobModel] | None:
         qstat = QstatCommand(username, [job_id] if job_id else None)
         return await self.__executed_ssh_cmd(username, jwt_token, qstat)
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
-    ) -> List[PbsJobMetadata] | Exception | None:
+    ) -> List[JobMetadataModel] | Exception | None:
         qstat_meta = QstatJobMetadataCommand(username, [job_id])
         return await self.__executed_ssh_cmd(username, jwt_token, qstat_meta)
 
-    async def get_jobs(self, username: str, jwt_token: str) -> List[PbsJob] | None:
+    async def get_jobs(self, username: str, jwt_token: str) -> List[JobModel] | None:
         return await self.get_job(job_id=None, username=username, jwt_token=jwt_token)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         qdel = QdelCommand(username=username, job_id=job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, qdel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[PbsNode] | None:
+    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
         nodes = PbsnodesCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, nodes)
 
     async def get_reservations(
         self, username: str, jwt_token: str
-    ) -> List[PbsReservation] | None:
+    ) -> List[ReservationModel] | None:
         reservations = RstatReservationsCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, reservations)
 
     async def get_partitions(
         self, username: str, jwt_token: str
-    ) -> List[PbsPartition] | None:
+    ) -> List[PartitionModel] | None:
         queues = PbsPartitionsCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, queues)
 
-    async def ping(self, username: str, jwt_token: str) -> List[PbsPing] | None:
+    async def ping(self, username: str, jwt_token: str) -> List[SchedulerPing] | None:
         ping_cmd = PbsPingCommand()
         return await self.__executed_ssh_cmd(username, jwt_token, ping_cmd)

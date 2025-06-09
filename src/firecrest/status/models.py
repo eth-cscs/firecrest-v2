@@ -11,12 +11,7 @@ from firecrest.config import HPCCluster, Storage
 
 # models
 from lib.models import CamelModel
-from lib.scheduler_clients.slurm.models import (
-    SlurmNode,
-    SlurmPartitions,
-    SlurmReservations,
-)
-from lib.scheduler_clients.pbs.models import PbsNode, PbsPartition, PbsReservation
+from lib.scheduler_clients.models import NodeModel, PartitionModel, ReservationModel
 
 
 class GetLiveness(CamelModel):
@@ -30,15 +25,15 @@ class GetSystemsResponse(CamelModel):
 
 
 class GetNodesResponse(CamelModel):
-    nodes: List[SlurmNode | PbsNode]
+    nodes: List[NodeModel]
 
 
 class GetPartitionsResponse(CamelModel):
-    partitions: List[SlurmPartitions | PbsPartition]
+    partitions: List[PartitionModel]
 
 
 class GetReservationsResponse(CamelModel):
-    reservations: List[SlurmReservations | PbsReservation]
+    reservations: List[ReservationModel]
 
 
 class PosixIdentified(CamelModel):
