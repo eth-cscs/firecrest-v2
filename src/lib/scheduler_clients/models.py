@@ -68,6 +68,12 @@ class JobTime(CamelModel):
         """
         if isinstance(v, str):
             try:
+                int(v)  # Check if it's already an int
+                return int(v)
+            except ValueError:
+                pass
+
+            try:
                 h, m, s = map(int, v.split(":"))
                 return h * 3600 + m * 60 + s
             except ValueError:
@@ -129,20 +135,32 @@ class JobModel(CamelModel):
             }
         if "steps" in kwargs:
             kwargs["tasks"] = kwargs["steps"]
+
+        # Initializing PBS fields
+        if "Job_Owner" in kwargs:
+            # Extract user and cluster from Job_Owner
+            job_owner = kwargs["Job_Owner"].split("@")
+            if len(job_owner) == 2:
+                kwargs["user"] = job_owner[0]
+                kwargs["cluster"] = job_owner[1]
+            else:
+                kwargs["user"] = job_owner[0]
+                kwargs["cluster"] = ""
+
         super().__init__(**kwargs)
 
     job_id: int
-    name: str
+    name: str = Field(validation_alias=AliasChoices("Job_Name"), default="")
     status: JobStatus
     tasks: Optional[List[JobTask]] = None
     time: JobTime
-    account: Optional[str]
+    account: Optional[str] = Field(validation_alias=AliasChoices("queue"), default=None)
     allocation_nodes: int
     cluster: str
     group: Optional[str] = None
     nodes: str
-    partition: str
-    priority: CustomInt
+    partition: str = Field(validation_alias=AliasChoices("queue"))
+    priority: CustomInt = Field(validation_alias=AliasChoices("Priority"), default=0)
     kill_request_user: Optional[str] = None
     user: Optional[str]
     working_directory: str
@@ -155,10 +173,12 @@ class JobMetadataModel(CamelModel):
         validation_alias=AliasChoices("StdIn", "standardInput"), default=None
     )
     standard_output: Optional[str] = Field(
-        validation_alias=AliasChoices("StdOut", "standardOutput"), default=None
+        validation_alias=AliasChoices("StdOut", "standardOutput", "Output_Path"),
+        default=None,
     )
     standard_error: Optional[str] = Field(
-        validation_alias=AliasChoices("StdErr", "standardError"), default=None
+        validation_alias=AliasChoices("StdErr", "standardError", "Error_Path"),
+        default=None,
     )
 
 
@@ -196,6 +216,15 @@ class JobSubmitRequestModel(CamelModel):
 
 
 class NodeModel(CamelModel):
+
+    def __init__(self, **kwargs):
+        # Custom status field definition
+        if "resources_available" in kwargs:
+            kwargs["cpus"] = kwargs["resources_available"].get("ncpus")
+            kwargs["memory"] = kwargs["resources_available"].get("mem")
+
+        super().__init__(**kwargs)
+
     sockets: Optional[int] = None
     cores: Optional[int] = None
     threads: Optional[int] = None
@@ -223,13 +252,6 @@ class SchedulerPing(CamelModel):
     mode: Optional[str] = None
 
 
-class Partition(RootModel):
-    root: List[str]
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs["state"])
-
-
 class ReservationModel(CamelModel):
     name: str = Field(
         validation_alias=AliasChoices("reservationName", "ReservationName")
@@ -245,16 +267,31 @@ class ReservationModel(CamelModel):
 
 
 class PartitionModel(CamelModel):
-    name: str = Field(validation_alias=AliasChoices("partitionName", "PartitionName"))
-    cpus: int | PartitionCPUs = Field(
-        validation_alias=AliasChoices("totalCPUs", "total_cpus", "TotalCPUs")
-    )
-    total_nodes: int = Field(validation_alias=AliasChoices("totalNodes", "TotalNodes"))
-    partition: Partition | str = Field(validation_alias=AliasChoices("state", "State"))
 
     def __init__(self, **kwargs):
 
         # To allow back compatibility with Slurm API versions <= 0.0.38
         if "total_nodes" not in kwargs and "nodes" in kwargs:
             kwargs["total_nodes"] = kwargs["nodes"]["total"]
+
+        if "total_nodes" not in kwargs:
+            kwargs["total_nodes"] = kwargs.get("resources_assigned", {}).get(
+                "nodect", 0
+            )
+        if "cpus" not in kwargs:
+            kwargs["cpus"] = kwargs.get("resources_assigned", {}).get("ncpus", 0)
+
+        if "enabled" in kwargs and "started" in kwargs:
+            if kwargs["enabled"] and kwargs["started"]:
+                kwargs["partition"] = "UP"
+            else:
+                kwargs["partition"] = "DOWN"
+
         super().__init__(**kwargs)
+
+    name: str = Field(validation_alias=AliasChoices("partitionName", "PartitionName"))
+    cpus: int | PartitionCPUs = Field(
+        validation_alias=AliasChoices("totalCPUs", "total_cpus", "TotalCPUs")
+    )
+    total_nodes: int = Field(validation_alias=AliasChoices("totalNodes", "TotalNodes"))
+    partition: Partition | str = Field(validation_alias=AliasChoices("state", "State"))

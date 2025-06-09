@@ -5,6 +5,7 @@
 
 from lib.exceptions import PbsError
 from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
+from lib.scheduler_clients.models import PartitionModel
 import json
 
 
@@ -33,18 +34,6 @@ class PbsPartitionsCommand(QstatBaseCommand):
 
         result = []
         for name, attrs in queues_data.items():
-            info = {}
-            info["name"] = name
-            info["total_nodes"] = attrs.get("resources_assigned", {}).get("nodect", 0)
-            info["cpus"] = attrs.get("resources_assigned", {}).get("ncpus", 0)
-            # Trying to adjust to Slurm output format
-            if attrs.get("enabled") and attrs.get("started"):
-                state = "UP"
-            else:
-                state = "DOWN"
-
-            info["partition"] = state
-
-            result.append(info)
+            result.append(PartitionModel(name=name, **attrs))
 
         return result

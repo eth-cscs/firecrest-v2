@@ -6,6 +6,7 @@
 import json
 from lib.exceptions import PbsError
 from lib.ssh_clients.ssh_client import BaseCommand
+from lib.scheduler_clients.models import NodeModel
 
 
 class PbsnodesCommand(BaseCommand):
@@ -38,13 +39,11 @@ class PbsnodesCommand(BaseCommand):
 
         nodes_data = payload.get("nodes")
         for node_name, node_data in nodes_data.items():
-            node_info = {
-                "name": node_name,
-            }
-            node_info["state"] = node_data.get("state")
-            node_info["cpus"] = node_data.get("resources_available", {}).get("ncpus")
-            node_info["memory"] = node_data.get("resources_available", {}).get("mem")
-
-            nodes.append(node_info)
+            nodes.append(
+                NodeModel(
+                    name=node_name,
+                    **node_data,
+                )
+            )
 
         return nodes

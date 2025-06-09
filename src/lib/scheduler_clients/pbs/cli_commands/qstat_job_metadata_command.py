@@ -7,6 +7,7 @@ import json
 from lib.exceptions import PbsError
 
 from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
+from lib.scheduler_clients.models import JobMetadataModel
 
 
 class QstatJobMetadataCommand(QstatBaseCommand):
@@ -31,12 +32,6 @@ class QstatJobMetadataCommand(QstatBaseCommand):
         res = payload.get("Jobs", {})
         jobs = []
         for job_id, job_data in res.items():
-            info = {}
-            info["job_id"] = int(job_id.split(".")[0])
-            info["name"] = job_data.get("Job_Name", "")
-            info["standardOutput"] = job_data.get("Output_Path", "")
-            info["standardError"] = job_data.get("Error_Path", "")
-
-            jobs.append(info)
+            jobs.append(JobMetadataModel(job_id=int(job_id.split(".")[0]), **job_data))
 
         return jobs
