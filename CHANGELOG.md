@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Environment variable `UVICORN_LOG_CONFIG` to enable [Uvicorn log configuration](https://www.uvicorn.org/settings/#logging) file path (analog to `--log-config`)
+- Add support for the PBS scheduler
 
 ### Changed
 
