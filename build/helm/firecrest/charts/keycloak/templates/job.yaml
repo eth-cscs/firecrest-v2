@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-create-user
+spec:
+  template:
+    spec:
+      containers:
+        - name: keycloak-create-user
+          image: quay.io/keycloak/keycloak:26.0.7
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+              /opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080/auth/ --realm master --user admin --password admin2
+              /opt/keycloak/bin/kcadm.sh create users -r kcrealm -s username=fireuser -s enabled=true
+              /opt/keycloak/bin/kcadm.sh set-password -r kcrealm --username fireuser -p password
+          volumeMounts:
+          - name: keycloak-config
+            mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: keycloak-config
+          configMap:
+            name: keycloak-config
+            items:
+              - key: keycloak-config
+                path: config.json
+      restartPolicy: OnFailure
+  backoffLimit: 4
