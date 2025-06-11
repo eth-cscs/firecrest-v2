@@ -21,6 +21,8 @@ from firecrest.plugins import settings
 from firecrest.filesystem.transfer import scripts
 
 # helpers
+from lib.datamovers.datamover_base import DataMoverLocation
+from lib.datamovers.s3.s3_datamover import S3Datamover
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.helpers.router_helper import create_router
 
@@ -54,7 +56,7 @@ from firecrest.filesystem.transfer.models import (
     CompressRequest,
     CompressResponse,
     ExtractRequest,
-    ExtractResponse
+    ExtractResponse,
 )
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -92,9 +94,8 @@ class JobHelper:
 def _build_script(filename: str, parameters):
 
     script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)),
-        autoescape=True
-        )
+        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
+    )
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)
@@ -153,99 +154,43 @@ async def post_upload(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    job_id = None
-    object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
-
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
         )
 
-    async with s3_client_private:
-        try:
-            await s3_client_private.create_bucket(**{"Bucket": username})
-            # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
-            await s3_client_private.put_bucket_lifecycle_configuration(
-                Bucket=username,
-                LifecycleConfiguration=settings.storage.bucket_lifecycle_configuration.to_json(),
-            )
-        except s3_client_private.exceptions.BucketAlreadyOwnedByYou:
-            pass
+    datamover = S3Datamover(
+        scheduler_client=scheduler_client,
+        directives=system.datatransfer_jobs_directives,
+        s3_client_private=s3_client_private,
+        s3_client_public=s3_client_public,
+        work_dir=work_dir,
+        bucket_lifecycle_configuration=settings.storage.bucket_lifecycle_configuration,
+        max_part_size=settings.storage.multipart.max_part_size,
+        tenant=settings.storage.tenant,
+        ttl=settings.storage.ttl,
+    )
 
-        upload_id = (
-            await s3_client_private.create_multipart_upload(
-                Bucket=username, Key=object_name
-            )
-        )["UploadId"]
+    source = DataMoverLocation(
+        host=None, system=None, path=None, size=upload_request.file_size
+    )
+    target = DataMoverLocation(
+        host=None,
+        system=system_name,
+        path=f"{upload_request.path}/{upload_request.file_name}",
+        size=upload_request.file_size,
+    )
 
-        post_external_upload_urls = []
-        for part_number in range(
-            1,
-            ceil(upload_request.file_size / settings.storage.multipart.max_part_size)
-            + 1,
-        ):
-            post_external_upload_urls.append(
-                await _generate_presigned_url(
-                    s3_client_public,
-                    "upload_part",
-                    {
-                        "Bucket": username,
-                        "Key": object_name,
-                        "UploadId": upload_id,
-                        "PartNumber": part_number,
-                    },
-                )
-            )
-
-        complete_external_multipart_upload_url = await _generate_presigned_url(
-            s3_client_public,
-            "complete_multipart_upload",
-            {"Bucket": username, "Key": object_name, "UploadId": upload_id},
-            "POST",
-        )
-
-        get_download_url = await _generate_presigned_url(
-            s3_client_private, "get_object", {"Bucket": username, "Key": object_name}
-        )
-
-        head_download_url = await _generate_presigned_url(
-            s3_client_private, "head_object", {"Bucket": username, "Key": object_name}
-        )
-
-        parameters = {
-            "sbatch_directives": _format_directives(
-                system.datatransfer_jobs_directives, upload_request.account
-            ),
-            "download_head_url": head_download_url,
-            "download_url": get_download_url,
-            "target_path": f"{upload_request.path}/{upload_request.file_name}",
-            "max_part_size": str(settings.storage.multipart.max_part_size),
-        }
-
-        job_script = _build_script("slurm_job_downloader.sh", parameters)
-        job = JobHelper(f"{work_dir}/{username}", job_script, "IngressFileTransfer")
-
-        job_id = await scheduler_client.submit_job(
-            job_description=SlurmJobDescription(**job.job_param),
-            username=username,
-            jwt_token=access_token,
-        )
-
-    return {
-        "partsUploadUrls": post_external_upload_urls,
-        "completeUploadUrl": complete_external_multipart_upload_url,
-        "maxPartSize": settings.storage.multipart.max_part_size,
-        "transferJob": TransferJob(
-            job_id=job_id,
-            system=system_name,
-            working_directory=job.working_dir,
-            logs=TransferJobLogs(
-                output_log=job.job_param["standard_output"],
-                error_log=job.job_param["standard_error"],
-            ),
-        ),
-    }
+    return await datamover.upload(
+        source=source,
+        target=target,
+        username=username,
+        access_token=access_token,
+        account=upload_request.account,
+    )
 
 
 @router.post(
@@ -281,7 +226,9 @@ async def post_download(
     job_id = None
     object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -387,7 +334,7 @@ async def post_download(
     description=f"Create move file or directory operation (`mv`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=MoveResponse,
-    response_description="Move file or directory operation created successfully"
+    response_description="Move file or directory operation created successfully",
 )
 async def move_mv(
     request: MoveRequest,
@@ -402,7 +349,9 @@ async def move_mv(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -443,7 +392,7 @@ async def move_mv(
     description=f"Create copy file or directory operation (`cp`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CopyResponse,
-    response_description="Copy file or directory operation created successfully"
+    response_description="Copy file or directory operation created successfully",
 )
 async def post_cp(
     request: CopyRequest,
@@ -467,7 +416,9 @@ async def post_cp(
         "target_path": request.target_path,
     }
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -501,7 +452,7 @@ async def post_cp(
     description=f"Create remove file or directory operation (`rm`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_200_OK,
     response_model=DeleteResponse,
-    response_description="Remove file or directory operation created successfully"
+    response_description="Remove file or directory operation created successfully",
 )
 async def delete_rm(
     path: Annotated[str, Query(description="The path to delete")],
@@ -518,7 +469,9 @@ async def delete_rm(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -557,7 +510,7 @@ async def delete_rm(
     description=f"Create compress file or directory operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CompressResponse,
-    response_description="Compress file or directory operation created successfully"
+    response_description="Compress file or directory operation created successfully",
 )
 async def compress(
     request: CompressRequest,
@@ -572,7 +525,9 @@ async def compress(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -624,7 +579,7 @@ async def compress(
     description=f"Create extract file operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=ExtractResponse,
-    response_description="Extract file or directory operation created successfully"
+    response_description="Extract file or directory operation created successfully",
 )
 async def extract(
     request: ExtractRequest,
@@ -639,7 +594,9 @@ async def extract(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
