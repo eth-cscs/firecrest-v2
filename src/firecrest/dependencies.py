@@ -25,6 +25,7 @@ from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.auth.authN.authentication_service import AuthenticationService
 from lib.auth.authZ.open_fga_client import OpenFGAClient
 from lib.auth.authZ.authorization_service import AuthorizationService
+from lib.datamovers.s3.s3_datamover import S3Datamover
 from lib.dependencies import AuthDependency
 
 # clients
@@ -291,7 +292,8 @@ class SchedulerClientDependency:
                     system.scheduler.version,
                     system.scheduler.api_version,
                     system.scheduler.api_url,
-                    system.scheduler.timeout)
+                    system.scheduler.timeout,
+                )
             case _:
                 raise HTTPException(
                     status_code=status.HTTP_501_NOT_IMPLEMENTED,
@@ -350,3 +352,61 @@ class S3ClientDependency:
     # To allow for dependency override hash is based on class
     def __hash__(self):
         return hash(S3ClientDependency.__class__)
+
+
+class DataMoverDependency:
+    def __init__(self):
+        pass
+
+    async def __call__(
+        self,
+        system_name: str,
+    ):
+        system = ServiceAvailabilityDependency(service_type=HealthCheckType.s3)(
+            system_name=system_name
+        )
+        scheduler_client = await SchedulerClientDependency()(system_name=system_name)
+        work_dir = next(
+            iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+        )
+
+        if not work_dir:
+            raise ValueError(
+                f"The system {system_name} has no filesystem defined as default_work_dir"
+            )
+
+        async with get_session().create_client(
+            "s3",
+            region_name=settings.storage.region,
+            aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
+            aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
+            endpoint_url=settings.storage.public_url,
+            config=AioConfig(signature_version="s3v4"),
+        ) as s3_client_public:
+            async with get_session().create_client(
+                "s3",
+                region_name=settings.storage.region,
+                aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
+                aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
+                endpoint_url=settings.storage.private_url.get_secret_value(),
+                config=AioConfig(signature_version="s3v4"),
+            ) as s3_client_private:
+                return S3Datamover(
+                    scheduler_client=scheduler_client,
+                    directives=system.datatransfer_jobs_directives,
+                    s3_client_private=s3_client_private,
+                    s3_client_public=s3_client_public,
+                    work_dir=work_dir,
+                    bucket_lifecycle_configuration=settings.storage.bucket_lifecycle_configuration,
+                    max_part_size=settings.storage.multipart.max_part_size,
+                    tenant=settings.storage.tenant,
+                    ttl=settings.storage.ttl,
+                )
+
+    # To allow for dependency override eq checks for class equality
+    def __eq__(self, other):
+        return isinstance(other, DataMoverDependency)
+
+    # To allow for dependency override hash is based on class
+    def __hash__(self):
+        return hash(DataMoverDependency.__class__)

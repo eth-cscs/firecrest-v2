@@ -29,6 +29,7 @@ from lib.helpers.router_helper import create_router
 # dependencies
 from firecrest.dependencies import (
     APIAuthDependency,
+    DataMoverDependency,
     S3ClientConnectionType,
     S3ClientDependency,
     SSHClientDependency,
@@ -139,40 +140,10 @@ def _format_directives(directives: List[str], account: str):
 async def post_upload(
     upload_request: PostFileUploadRequest,
     system_name: Annotated[str, Path(description="Target system")],
-    system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
-        use_cache=False,
-    ),
-    scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
-    s3_client_private=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.private)
-    ),
-    s3_client_public=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.public)
-    ),
+    datamover=Depends(DataMoverDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-
-    work_dir = next(
-        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
-    )
-    if not work_dir:
-        raise ValueError(
-            f"The system {system_name} has no filesystem defined as default_work_dir"
-        )
-
-    datamover = S3Datamover(
-        scheduler_client=scheduler_client,
-        directives=system.datatransfer_jobs_directives,
-        s3_client_private=s3_client_private,
-        s3_client_public=s3_client_public,
-        work_dir=work_dir,
-        bucket_lifecycle_configuration=settings.storage.bucket_lifecycle_configuration,
-        max_part_size=settings.storage.multipart.max_part_size,
-        tenant=settings.storage.tenant,
-        ttl=settings.storage.ttl,
-    )
 
     source = DataMoverLocation(
         host=None, system=None, path=None, size=upload_request.file_size
