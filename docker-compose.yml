@@ -30,6 +30,7 @@ services:
       - ssh_passphrase_firesrv
     environment:
       ENVIRONMENT: development
+      APP_VERSION: local
       SSH_KEYGEN_URL: http://192.168.240.20:5000
       YAML_CONFIG_FILE: "/app/config/app-config.yaml"
     depends_on:
@@ -86,6 +87,36 @@ services:
         timeout: 2s
         retries: 30
 
+  pbs:
+    image: openpbs:23.06.06
+    privileged: true
+    environment:
+      OIDC_CERT_URLS: '["http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/certs"]'
+      PBS_START_MOM: "1"
+    build:
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      context: ./
+      dockerfile: ./build/docker/pbs-cluster/Dockerfile
+    hostname: pbs
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.4
+    ports:
+      - 15001:15001   # PBS Server Port
+      - 15002:15002   # PBS Scheduler Port
+      - 15003:15003   # PBS Communication Manager
+      - 2223:22       # SSH Access
+    volumes:
+        # ssh config
+        - ./build/docker/pbs-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
+    healthcheck:
+        test: ["CMD", "pbsnodes", "-a"]
+        interval: 1s
+        timeout: 2s
+        retries: 30
+
   # complementary 3rd party services
   keycloak:
     image: "quay.io/keycloak/keycloak:26.0.7"
@@ -106,19 +137,19 @@ services:
         interval: 1s
         timeout: 2s
         retries: 30
- 
+
   keycloak-create-user:
      image: "quay.io/keycloak/keycloak:26.0.7"
      depends_on:
-         keycloak:
-           condition: service_healthy
+        keycloak:
+          condition: service_healthy
      restart: "no"
      networks:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.55
      volumes:
        - ./build/docker/keycloak/config.json:/opt/keycloak/data/import/config.json:ro
-     entrypoint: ["/bin/sh", "-c" , "/opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080/auth/ --realm master --user admin --password admin2 && /opt/keycloak/bin/kcadm.sh create users -r kcrealm -s username=fireuser -s enabled=true && /opt/keycloak/bin/kcadm.sh set-password -r kcrealm --username fireuser -p password"]   
+     entrypoint: ["/bin/sh", "-c" , "/opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080/auth/ --realm master --user admin --password admin2 && /opt/keycloak/bin/kcadm.sh create users -r kcrealm -s username=fireuser -s enabled=true && /opt/keycloak/bin/kcadm.sh set-password -r kcrealm --username fireuser -p password"]
 
   # S3 backend
   minio:
