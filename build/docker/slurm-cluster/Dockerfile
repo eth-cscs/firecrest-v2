@@ -46,7 +46,6 @@ ADD --chown=fireuser:users ./build/environment/keys/fireuser.pub /home/fireuser/
 ADD --chown=firesrv:service-accounts ./build/environment/keys/firesrv.pub /home/firesrv/.ssh/authorized_keys
 
 # Setup SSH keys
-RUN chmod 0755 /var/run/sshd
 # use the fireuser.pub key also as a trusted ca (used for cscs keygen solution)
 ADD ./build/environment/keys/fireuser.pub  /etc/ssh/ca-key.pub
 RUN chmod -R 400 /etc/ssh/  && chown -R root:root /etc/ssh/

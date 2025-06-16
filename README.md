@@ -64,7 +64,7 @@ The environment comes with two predefined users:
 
 ## Accessing Firecrest
 
-- The Firecrest endpoints are accessible at: http://localhost:8000/
+- The Firecrest endpoints are accessible at: http://localhost:8000
 - The Firecrest API swagger: http://localhost:8000/docs and http://localhost:8000/redoc
 
 To access most of the end-points you need an authorization token. Firecrest authorization is based on the standard [Oauth2 Client Credentials Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/client-credentials-flow)
@@ -85,6 +85,16 @@ curl -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/t
      -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
      -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: */*"
 ```
+
+## Additional Configuration Variables
+
+If you need to test other functionalities such as job submission, file transfers, and more, you can use the following variables:
+```
+system_name: "cluster-slurm-api" or "cluster-slurm-ssh"
+home directory: "/home/fireuser/"
+account: "myproject"
+```
+
 
 # Development
 
