@@ -90,9 +90,9 @@ curl -X POST http://localhost:8080/auth/realms/kcrealm/protocol/openid-connect/t
 
 If you need to test other functionalities such as job submission, file transfers, and more, you can use the following variables:
 ```
-system_name: "cluster-slurm-api",
-home directory: "/home/fireuser/",
-account: "myproject",
+system_name: "cluster-slurm-api" or "cluster-slurm-ssh"
+home directory: "/home/fireuser/"
+account: "myproject"
 ```
 
 
