@@ -19,10 +19,10 @@ from lib.scheduler_clients.slurm.models import (
     SlurmJob,
     SlurmJobDescription,
     SlurmJobMetadata,
-    SlurmNode,
     SlurmPartitions,
     SlurmPing,
     SlurmReservations,
+    SlurmNode,
 )
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
@@ -140,11 +140,7 @@ class SlurmRestClient(SlurmBaseClient):
         pass
 
     async def get_job(
-        self,
-        job_id: str,
-        username: str,
-        jwt_token: str,
-        allusers: bool = True   
+        self, job_id: str, username: str, jwt_token: str, allusers: bool = True
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -163,10 +159,11 @@ class SlurmRestClient(SlurmBaseClient):
             # Note: starting from API version v0.0.39 this filter can be set as query param
             jobs = list(
                 filter(
-                    lambda job: allusers or job["user"] == username,
-                    job_result["jobs"]
-                    )
+                    lambda job: allusers or job["user"] == username, job_result["jobs"]
                 )
+            )
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
             if len(jobs) == 0:
                 return None
 
@@ -179,11 +176,8 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-            self,
-            username: str,
-            jwt_token: str,
-            allusers: bool = False
-            ) -> List[SlurmJob] | None:
+        self, username: str, jwt_token: str, allusers: bool = False
+    ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token)
@@ -201,10 +195,11 @@ class SlurmRestClient(SlurmBaseClient):
             # Note: starting from API version v0.0.39 this filter can be set as query param
             jobs = list(
                 filter(
-                    lambda job: allusers or job["user"] == username,
-                    job_result["jobs"]
-                    )
+                    lambda job: allusers or job["user"] == username, job_result["jobs"]
                 )
+            )
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
             if len(jobs) == 0:
                 return None
 
@@ -259,9 +254,12 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             reservation_result = await response.json()
-            if len(reservation_result["reservations"]) == 0:
-                return []
-        return reservation_result["reservations"]
+            # Apply Slurm model
+            res = [
+                SlurmReservations.model_validate(r)
+                for r in reservation_result["reservations"]
+            ]
+        return res
 
     async def get_partitions(
         self, username: str, jwt_token: str
@@ -279,9 +277,12 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
-            if len(partition_result["partitions"]) == 0:
-                return []
-        return partition_result["partitions"]
+            # Apply Slurm model
+            res = [
+                SlurmPartitions.model_validate(partition)
+                for partition in partition_result["partitions"]
+            ]
+        return res
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         client = await self.get_aiohttp_client()

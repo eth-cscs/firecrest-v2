@@ -6,21 +6,22 @@
 # commands
 import re
 from lib.exceptions import SlurmError
-from lib.scheduler_clients.slurm.models import SlurmJobDescription
+
+from lib.scheduler_clients.models import JobDescriptionModel
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
 class SbatchCommand(BaseCommand):
 
-    def __init__(self, job_description: SlurmJobDescription) -> None:
+    def __init__(self, job_description: JobDescriptionModel) -> None:
         super().__init__()
         self.job_description = job_description
 
     def get_command(self) -> str:
         cmd = ["sbatch"]
-        env = ",".join(f"{key}={value}"
-                       for key, value
-                       in self.job_description.environment.items())
+        env = ",".join(
+            f"{key}={value}" for key, value in self.job_description.environment.items()
+        )
         cmd += [f"--export='ALL,{env}'"]
         cmd += [f"--chdir='{self.job_description.current_working_directory}'"]
         if self.job_description.account:
