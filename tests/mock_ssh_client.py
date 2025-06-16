@@ -10,7 +10,7 @@ from typing import List
 import asyncssh
 
 from lib.models.base_model import CamelModel
-from lib.ssh_clients.ssh_client import BaseCommand, SSHClient, SSHClientPool
+from lib.ssh_clients.ssh_client import SSHClient, SSHClientPool
 
 
 class NoAuthSSHServer(asyncssh.SSHServer):

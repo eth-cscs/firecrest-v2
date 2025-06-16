@@ -7,7 +7,7 @@ from typing import List
 from firecrest.config import HPCCluster, SchedulerServiceHealth
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
-from lib.scheduler_clients.slurm.models import SlurmPing
+from lib.scheduler_clients.models import SchedPing
 
 
 class SchedulerHealthCheck(HealthCheckBase):
@@ -25,7 +25,7 @@ class SchedulerHealthCheck(HealthCheckBase):
         )
 
         health = SchedulerServiceHealth(service_type="scheduler")
-        pings: List[SlurmPing] = await self.scheduler_client.ping(
+        pings: List[SchedPing] = await self.scheduler_client.ping(
             self.auth.username, self.token["access_token"]
         )
         health.healthy = all(ping["pinged"].lower() == "up" for ping in pings)

@@ -34,12 +34,12 @@ from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
-    SlurmJobMetadata,
-    SlurmNode,
     SlurmJobDescription,
+    SlurmJobMetadata,
     SlurmPartitions,
     SlurmPing,
     SlurmReservations,
+    SlurmNode,
 )
 
 # clients
@@ -83,18 +83,14 @@ class SlurmCliClient(SlurmBaseClient):
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
 
     async def get_job(
-        self,
-        job_id: str | None,
-        username: str,
-        jwt_token: str,
-        allusers: bool = True
+        self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True
     ) -> List[SlurmJob] | None:
-        sacct = SacctCommand(
-            username,
-            [job_id] if job_id else None,
-            allusers
-            )
-        return await self.__executed_ssh_cmd(username, jwt_token, sacct)
+        sacct = SacctCommand(username, [job_id] if job_id else None, allusers)
+        jobs = await self.__executed_ssh_cmd(username, jwt_token, sacct)
+        if jobs:
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
+        return jobs
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
@@ -148,15 +144,12 @@ class SlurmCliClient(SlurmBaseClient):
 
         return jobs
 
-    async def get_jobs(self,
-                       username: str,
-                       jwt_token: str,
-                       allusers: bool = False
-                       ) -> List[SlurmJob] | None:
-        return await self.get_job(job_id=None,
-                                  username=username,
-                                  jwt_token=jwt_token,
-                                  allusers=allusers)
+    async def get_jobs(
+        self, username: str, jwt_token: str, allusers: bool = False
+    ) -> List[SlurmJob] | None:
+        return await self.get_job(
+            job_id=None, username=username, jwt_token=jwt_token, allusers=allusers
+        )
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         scancel = ScancelCommand(username, job_id)
@@ -170,13 +163,24 @@ class SlurmCliClient(SlurmBaseClient):
         self, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
         scontrolreservation = ScontrolReservationCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
+        result = await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
+        # Apply Slurm model
+        if result:
+            result = [
+                SlurmReservations.model_validate(reservation) for reservation in result
+            ]
+        return result
 
     async def get_partitions(
         self, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         scontrolpartition = ScontrolPartitionCommand()
-        return await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
+        result = await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
+        if result:
+            result = [
+                SlurmPartitions.model_validate(reservation) for reservation in result
+            ]
+        return result
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         scontrolping = ScontrolPingCommand()

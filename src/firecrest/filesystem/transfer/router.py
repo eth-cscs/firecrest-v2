@@ -38,7 +38,7 @@ from firecrest.dependencies import (
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
 
 # models
-from lib.scheduler_clients.slurm.models import SlurmJobDescription
+from lib.scheduler_clients.models import JobDescriptionModel
 from firecrest.filesystem.transfer.models import (
     DeleteResponse,
     MoveResponse,
@@ -54,7 +54,7 @@ from firecrest.filesystem.transfer.models import (
     CompressRequest,
     CompressResponse,
     ExtractRequest,
-    ExtractResponse
+    ExtractResponse,
 )
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -92,9 +92,8 @@ class JobHelper:
 def _build_script(filename: str, parameters):
 
     script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)),
-        autoescape=True
-        )
+        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
+    )
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)
@@ -156,7 +155,9 @@ async def post_upload(
     job_id = None
     object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -227,7 +228,7 @@ async def post_upload(
         job = JobHelper(f"{work_dir}/{username}", job_script, "IngressFileTransfer")
 
         job_id = await scheduler_client.submit_job(
-            job_description=SlurmJobDescription(**job.job_param),
+            job_description=JobDescriptionModel(**job.job_param),
             username=username,
             jwt_token=access_token,
         )
@@ -281,7 +282,9 @@ async def post_download(
     job_id = None
     object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -358,7 +361,7 @@ async def post_download(
         )
         get_download_url = None
         job_id = await scheduler_client.submit_job(
-            job_description=SlurmJobDescription(**job.job_param),
+            job_description=JobDescriptionModel(**job.job_param),
             username=username,
             jwt_token=access_token,
         )
@@ -387,7 +390,7 @@ async def post_download(
     description=f"Create move file or directory operation (`mv`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=MoveResponse,
-    response_description="Move file or directory operation created successfully"
+    response_description="Move file or directory operation created successfully",
 )
 async def move_mv(
     request: MoveRequest,
@@ -402,7 +405,9 @@ async def move_mv(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -420,7 +425,7 @@ async def move_mv(
     job = JobHelper(f"{work_dir}/{username}", job_script, "MoveFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -443,7 +448,7 @@ async def move_mv(
     description=f"Create copy file or directory operation (`cp`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CopyResponse,
-    response_description="Copy file or directory operation created successfully"
+    response_description="Copy file or directory operation created successfully",
 )
 async def post_cp(
     request: CopyRequest,
@@ -467,7 +472,9 @@ async def post_cp(
         "target_path": request.target_path,
     }
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -478,7 +485,7 @@ async def post_cp(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CopyFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -501,7 +508,7 @@ async def post_cp(
     description=f"Create remove file or directory operation (`rm`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_200_OK,
     response_model=DeleteResponse,
-    response_description="Remove file or directory operation created successfully"
+    response_description="Remove file or directory operation created successfully",
 )
 async def delete_rm(
     path: Annotated[str, Query(description="The path to delete")],
@@ -518,7 +525,9 @@ async def delete_rm(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -534,7 +543,7 @@ async def delete_rm(
     job = JobHelper(f"{work_dir}/{username}", job_script, "DeleteFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -557,7 +566,7 @@ async def delete_rm(
     description=f"Create compress file or directory operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CompressResponse,
-    response_description="Compress file or directory operation created successfully"
+    response_description="Compress file or directory operation created successfully",
 )
 async def compress(
     request: CompressRequest,
@@ -572,7 +581,9 @@ async def compress(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -601,7 +612,7 @@ async def compress(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
@@ -624,7 +635,7 @@ async def compress(
     description=f"Create extract file operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=ExtractResponse,
-    response_description="Extract file or directory operation created successfully"
+    response_description="Extract file or directory operation created successfully",
 )
 async def extract(
     request: ExtractRequest,
@@ -639,7 +650,9 @@ async def extract(
     access_token = ApiAuthHelper.get_access_token()
     job_id = None
 
-    work_dir = next(iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None)
+    work_dir = next(
+        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    )
     if not work_dir:
         raise ValueError(
             f"The system {system_name} has no filesystem defined as default_work_dir"
@@ -657,7 +670,7 @@ async def extract(
     job = JobHelper(f"{work_dir}/{username}", job_script, "CompressFiles")
 
     job_id = await scheduler_client.submit_job(
-        job_description=SlurmJobDescription(**job.job_param),
+        job_description=JobDescriptionModel(**job.job_param),
         username=username,
         jwt_token=access_token,
     )
