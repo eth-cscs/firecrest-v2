@@ -63,9 +63,8 @@ class UploadFileResponse(DataMoverOperation):
     pass
 
 
-class DownloadFileResponse(CamelModel):
-    download_url: str
-    transfer_job: TransferJob
+class DownloadFileResponse(DataMoverOperation):
+    pass
 
 
 class CopyRequest(FilesystemRequestBase):

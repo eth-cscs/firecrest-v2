@@ -360,9 +360,7 @@ class DataMoverDependency:
 
     # Note: this fuction allows for unit test client injection override
     async def _get_ssh_client(self, system_name):
-        return await SSHClientDependency(ignore_health=self.ignore_health)(
-            system_name=system_name
-        )
+        return await SSHClientDependency(ignore_health=False)(system_name=system_name)
 
     async def __call__(
         self,

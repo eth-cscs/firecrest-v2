@@ -286,6 +286,8 @@ class S3Datamover(DatamoverBase):
                             "UploadId": upload_id,
                             "PartNumber": part_number,
                         },
+                        self.tenant,
+                        self.ttl,
                     )
                 )
 
@@ -293,6 +295,8 @@ class S3Datamover(DatamoverBase):
                 self.s3_client_private,
                 "complete_multipart_upload",
                 {"Bucket": username, "Key": object_name, "UploadId": upload_id},
+                self.tenant,
+                self.ttl,
                 "POST",
             )
 
@@ -327,9 +331,12 @@ class S3Datamover(DatamoverBase):
                 self.s3_client_public,
                 "get_object",
                 {"Bucket": username, "Key": object_name},
+                self.tenant,
+                self.ttl,
             )
-        transferJob = (
-            TransferJob(
+
+        return DataMoverOperation(
+            transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,
                 working_directory=job.working_dir,
@@ -338,9 +345,6 @@ class S3Datamover(DatamoverBase):
                     error_log=job.job_param["standard_error"],
                 ),
             ),
-        )
-        return DataMoverOperation(
-            transferJob=transferJob,
             instructions={
                 "downloadUrl": get_download_url,
             },
