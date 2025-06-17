@@ -8,6 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 
 
 # storage
+from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from firecrest.filesystem.transfer import scripts
 
 # helpers
@@ -20,6 +21,7 @@ from lib.datamovers.datamover_base import (
 )
 
 # dependencies
+from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.scheduler_clients.slurm.models import SlurmJobDescription
 
@@ -100,20 +102,30 @@ class S3Datamover(DatamoverBase):
         directives,
         s3_client_private,
         s3_client_public,
+        ssh_client,
         work_dir,
         bucket_lifecycle_configuration,
         max_part_size,
+        use_split,
+        tmp_folder,
+        parallel_runs,
         tenant,
         ttl,
+        system_name,
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.s3_client_private = s3_client_private
         self.s3_client_public = s3_client_public
+        self.ssh_client = ssh_client
         self.work_dir = work_dir
         self.bucket_lifecycle_configuration = bucket_lifecycle_configuration
         self.max_part_size = max_part_size
+        self.use_split = use_split
+        self.tmp_folder = tmp_folder
+        self.parallel_runs = parallel_runs
         self.tenant = tenant
         self.ttl = ttl
+        self.system_name = system_name
 
     async def upload(
         self,
@@ -122,7 +134,7 @@ class S3Datamover(DatamoverBase):
         username,
         access_token,
         account,
-    ) -> int | None:
+    ) -> DataMoverOperation | None:
 
         job_id = None
         object_name = f"{str(uuid.uuid4())}/{os.path.basename(target.path)}"
@@ -226,5 +238,110 @@ class S3Datamover(DatamoverBase):
             },
         )
 
-    async def download(self) -> int | None:
-        pass
+    async def download(
+        self,
+        source: DataMoverLocation,
+        target: DataMoverLocation,
+        username,
+        access_token,
+        account,
+    ) -> DataMoverOperation | None:
+
+        job_id = None
+
+        stat = StatCommand(source.path, True)
+        async with self.ssh_client.get_client(username, access_token) as client:
+            stat_output = await client.execute(stat)
+
+        object_name = f"{source.path.split('/')[-1]}_{str(uuid.uuid4())}"
+
+        async with self.s3_client_private:
+            try:
+                await self.s3_client_private.create_bucket(**{"Bucket": username})
+                # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
+                await self.s3_client_private.put_bucket_lifecycle_configuration(
+                    Bucket=username,
+                    LifecycleConfiguration=self.bucket_lifecycle_configuration,
+                )
+            except self.s3_client_private.exceptions.BucketAlreadyOwnedByYou:
+                pass
+            upload_id = (
+                await self.s3_client_private.create_multipart_upload(
+                    Bucket=username, Key=object_name
+                )
+            )["UploadId"]
+
+            post_upload_urls = []
+            for part_number in range(
+                1,
+                ceil(stat_output["size"] / self.max_part_size) + 1,
+            ):
+                post_upload_urls.append(
+                    await _generate_presigned_url(
+                        self.s3_client_private,
+                        "upload_part",
+                        {
+                            "Bucket": username,
+                            "Key": object_name,
+                            "UploadId": upload_id,
+                            "PartNumber": part_number,
+                        },
+                    )
+                )
+
+            complete_multipart_url = await _generate_presigned_url(
+                self.s3_client_private,
+                "complete_multipart_upload",
+                {"Bucket": username, "Key": object_name, "UploadId": upload_id},
+                "POST",
+            )
+
+            parameters = {
+                "sbatch_directives": _format_directives(self.directives, account),
+                "F7T_MAX_PART_SIZE": str(self.max_part_size),
+                "F7T_MP_USE_SPLIT": ("true" if self.use_split else "false"),
+                "F7T_TMP_FOLDER": f"{self.tmp_folder}/{str(uuid.uuid1())}/",
+                "F7T_MP_PARALLEL_RUN": str(self.parallel_runs),
+                "F7T_MP_PARTS_URL": " ".join(f'"{url}"' for url in post_upload_urls),
+                "F7T_MP_NUM_PARTS": str(len(post_upload_urls)),
+                "F7T_MP_INPUT_FILE": source.path,
+                "F7T_MP_COMPLETE_URL": complete_multipart_url,
+            }
+
+            job = JobHelper(
+                f"{self.work_dir}/{username}",
+                _build_script(
+                    "slurm_job_uploader_multipart.sh",
+                    parameters,
+                ),
+                "OutgressFileTransfer",
+            )
+            get_download_url = None
+            job_id = await self.scheduler_client.submit_job(
+                job_description=JobDescriptionModel(**job.job_param),
+                username=username,
+                jwt_token=access_token,
+            )
+        async with self.s3_client_public:
+            get_download_url = await _generate_presigned_url(
+                self.s3_client_public,
+                "get_object",
+                {"Bucket": username, "Key": object_name},
+            )
+        transferJob = (
+            TransferJob(
+                job_id=job_id,
+                system=self.system_name,
+                working_directory=job.working_dir,
+                logs=TransferJobLogs(
+                    output_log=job.job_param["standard_output"],
+                    error_log=job.job_param["standard_error"],
+                ),
+            ),
+        )
+        return DataMoverOperation(
+            transferJob=transferJob,
+            instructions={
+                "downloadUrl": get_download_url,
+            },
+        )
