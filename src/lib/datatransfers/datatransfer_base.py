@@ -17,19 +17,19 @@ class TransferJob(CamelModel):
     logs: TransferJobLogs
 
 
-class DataMoverLocation(CamelModel):
+class DataTransferLocation(CamelModel):
     host: Optional[str] = None
     system: Optional[str] = None
     path: Optional[str] = None
     size: Optional[int] = None
 
 
-class DataMoverOperation(CamelModel):
+class DataTransferOperation(CamelModel):
     transferJob: TransferJob
     instructions: Dict[str, any]
 
 
-class DatamoverBase(ABC):
+class DatatransferBase(ABC):
 
     def __init__(
         self,
@@ -42,11 +42,11 @@ class DatamoverBase(ABC):
     @abstractmethod
     async def upload(
         self,
-        source: DataMoverLocation,
-        target: DataMoverLocation,
-    ) -> DataMoverOperation | None:
+        source: DataTransferLocation,
+        target: DataTransferLocation,
+    ) -> DataTransferOperation | None:
         pass
 
     @abstractmethod
-    async def download(self) -> DataMoverOperation | None:
+    async def download(self) -> DataTransferOperation | None:
         pass

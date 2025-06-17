@@ -8,8 +8,8 @@ from pydantic import Field
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
-from lib.datamovers.datamover_base import DataMoverOperation
-from lib.models import CamelModel
+from lib.datatransfers.datatransfer_base import DataTransferOperation
+from lib.models.base_model import CamelModel
 
 
 class PostFileUploadRequest(FilesystemRequestBase):
@@ -59,11 +59,11 @@ class TransferJob(CamelModel):
     logs: TransferJobLogs
 
 
-class UploadFileResponse(DataMoverOperation):
+class UploadFileResponse(DataTransferOperation):
     pass
 
 
-class DownloadFileResponse(DataMoverOperation):
+class DownloadFileResponse(DataTransferOperation):
     pass
 
 

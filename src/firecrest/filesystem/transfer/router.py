@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from math import ceil
 import uuid
 import os
 from fastapi import Depends, Path, Query, status, HTTPException
@@ -14,25 +13,20 @@ from jinja2 import Environment, FileSystemLoader
 
 # plugins
 from firecrest.config import HPCCluster, HealthCheckType
-from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from firecrest.plugins import settings
 
 # storage
 from firecrest.filesystem.transfer import scripts
 
 # helpers
-from lib.datamovers.datamover_base import DataMoverLocation
-from lib.datamovers.s3.s3_datamover import S3Datamover
+from lib.datatransfers.datatransfer_base import DataTransferLocation
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.helpers.router_helper import create_router
 
 # dependencies
 from firecrest.dependencies import (
     APIAuthDependency,
-    DataMoverDependency,
-    S3ClientConnectionType,
-    S3ClientDependency,
-    SSHClientDependency,
+    DataTransferDependency,
     SchedulerClientDependency,
     ServiceAvailabilityDependency,
 )
@@ -104,19 +98,6 @@ def _build_script(filename: str, parameters):
     return script_code
 
 
-async def _generate_presigned_url(client, action, params, method=None):
-    if settings.storage.tenant:
-        if "Bucket" in params:
-            params["Bucket"] = f"{settings.storage.tenant}:{params['Bucket']}"
-    url = await client.generate_presigned_url(
-        ClientMethod=action,
-        Params=params,
-        ExpiresIn=settings.storage.ttl,
-        HttpMethod=method,
-    )
-    return url
-
-
 def _format_directives(directives: List[str], account: str):
 
     directives_str = "\n".join(directives)
@@ -140,22 +121,22 @@ def _format_directives(directives: List[str], account: str):
 async def post_upload(
     upload_request: PostFileUploadRequest,
     system_name: Annotated[str, Path(description="Target system")],
-    datamover=Depends(DataMoverDependency()),
+    datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    source = DataMoverLocation(
+    source = DataTransferLocation(
         host=None, system=None, path=None, size=upload_request.file_size
     )
-    target = DataMoverLocation(
+    target = DataTransferLocation(
         host=None,
         system=system_name,
         path=f"{upload_request.path}/{upload_request.file_name}",
         size=upload_request.file_size,
     )
 
-    return await datamover.upload(
+    return await datatransfer.upload(
         source=source,
         target=target,
         username=username,
@@ -174,25 +155,25 @@ async def post_upload(
 async def post_download(
     download_request: PostFileDownloadRequest,
     system_name: Annotated[str, Path(description="System where the jobs are running")],
-    datamover=Depends(DataMoverDependency()),
+    datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    source = DataMoverLocation(
+    source = DataTransferLocation(
         host=None,
         system=system_name,
         path=download_request.path,
         size=None,
     )
-    target = DataMoverLocation(
+    target = DataTransferLocation(
         host=None,
         system=None,
         path=None,
         size=None,
     )
 
-    return await datamover.download(
+    return await datatransfer.download(
         source=source,
         target=target,
         username=username,

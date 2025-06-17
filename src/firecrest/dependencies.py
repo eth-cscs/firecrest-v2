@@ -25,7 +25,7 @@ from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.auth.authN.authentication_service import AuthenticationService
 from lib.auth.authZ.open_fga_client import OpenFGAClient
 from lib.auth.authZ.authorization_service import AuthorizationService
-from lib.datamovers.s3.s3_datamover import S3Datamover
+from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
 from lib.dependencies import AuthDependency
 
 # clients
@@ -354,7 +354,7 @@ class S3ClientDependency:
         return hash(S3ClientDependency.__class__)
 
 
-class DataMoverDependency:
+class DataTransferDependency:
     def __init__(self):
         pass
 
@@ -396,7 +396,7 @@ class DataMoverDependency:
                 endpoint_url=settings.storage.private_url.get_secret_value(),
                 config=AioConfig(signature_version="s3v4"),
             ) as s3_client_private:
-                return S3Datamover(
+                return S3Datatransfer(
                     scheduler_client=scheduler_client,
                     directives=system.datatransfer_jobs_directives,
                     s3_client_private=s3_client_private,
@@ -415,8 +415,8 @@ class DataMoverDependency:
 
     # To allow for dependency override eq checks for class equality
     def __eq__(self, other):
-        return isinstance(other, DataMoverDependency)
+        return isinstance(other, DataTransferDependency)
 
     # To allow for dependency override hash is based on class
     def __hash__(self):
-        return hash(DataMoverDependency.__class__)
+        return hash(DataTransferDependency.__class__)

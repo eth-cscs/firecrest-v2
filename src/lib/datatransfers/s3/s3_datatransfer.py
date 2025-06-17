@@ -12,10 +12,10 @@ from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from firecrest.filesystem.transfer import scripts
 
 # helpers
-from lib.datamovers.datamover_base import (
-    DataMoverLocation,
-    DataMoverOperation,
-    DatamoverBase,
+from lib.datatransfers.datatransfer_base import (
+    DataTransferLocation,
+    DataTransferOperation,
+    DatatransferBase,
     TransferJob,
     TransferJobLogs,
 )
@@ -94,7 +94,7 @@ def _format_directives(directives: List[str], account: str):
     return directives_str
 
 
-class S3Datamover(DatamoverBase):
+class S3Datatransfer(DatatransferBase):
 
     def __init__(
         self,
@@ -129,12 +129,12 @@ class S3Datamover(DatamoverBase):
 
     async def upload(
         self,
-        source: DataMoverLocation,
-        target: DataMoverLocation,
+        source: DataTransferLocation,
+        target: DataTransferLocation,
         username,
         access_token,
         account,
-    ) -> DataMoverOperation | None:
+    ) -> DataTransferOperation | None:
 
         job_id = None
         object_name = f"{str(uuid.uuid4())}/{os.path.basename(target.path)}"
@@ -229,7 +229,7 @@ class S3Datamover(DatamoverBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        return DataMoverOperation(
+        return DataTransferOperation(
             transferJob=transferJob,
             instructions={
                 "partsUploadUrls": post_external_upload_urls,
@@ -240,12 +240,12 @@ class S3Datamover(DatamoverBase):
 
     async def download(
         self,
-        source: DataMoverLocation,
-        target: DataMoverLocation,
+        source: DataTransferLocation,
+        target: DataTransferLocation,
         username,
         access_token,
         account,
-    ) -> DataMoverOperation | None:
+    ) -> DataTransferOperation | None:
 
         job_id = None
 
@@ -335,7 +335,7 @@ class S3Datamover(DatamoverBase):
                 self.ttl,
             )
 
-        return DataMoverOperation(
+        return DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,
