@@ -72,6 +72,13 @@ class CopyRequest(FilesystemRequestBase):
     account: Optional[str] = Field(
         default=None, description="Name of the account in the scheduler"
     )
+    dereference: Optional[bool] = Field(
+        default=False,
+        description=(
+            "If set to `true`, it follows symbolic links and copies the "
+            "files they point to instead of the links themselves."
+        ),
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -79,6 +86,7 @@ class CopyRequest(FilesystemRequestBase):
                     "source_path": "/home/user/dir/file.orig",
                     "target_path": "/home/user/dir/file.new",
                     "account": "group",
+                    "dereference": "true",
                 }
             ]
         }

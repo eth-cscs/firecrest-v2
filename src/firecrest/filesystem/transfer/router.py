@@ -267,6 +267,7 @@ async def post_cp(
         ),
         "source_path": request.path,
         "target_path": request.target_path,
+        "dereference": request.dereference,
     }
 
     work_dir = next(
