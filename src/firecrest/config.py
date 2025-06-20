@@ -435,7 +435,7 @@ class Settings(BaseSettings):
                     f"Clusters config path: {path} is not a folder!"
                 )
             clusters = []
-            for file in Path(path).rglob("*.yaml"):
+            for file in Path(path).glob("*.yaml"):
                 with open(file) as stream:
                     clusters.append(
                         HPCCluster.model_validate(yaml.safe_load(stream))
