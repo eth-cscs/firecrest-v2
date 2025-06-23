@@ -5,6 +5,7 @@ metadata:
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
     {{ $key }}: {{ $value | quote }}
+  {{- end }}
 
 spec:
   replicas: {{ .Values.replicas }}
