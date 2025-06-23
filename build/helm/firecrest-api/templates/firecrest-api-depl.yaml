@@ -2,9 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: firecrest-api-depl
+  {{- if .Values.metadata }}
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
     {{ $key }}: {{ $value | quote }}
+  {{- end }}
   {{- end }}
 
 spec:
@@ -16,9 +18,11 @@ spec:
     metadata:
       labels:
         app: firecrest-api
+      {{- if .Values.template }}
       annotations:
       {{- range $key, $value := .Values.template.annotations }}
         {{ $key }}: {{ $value | quote}}
+      {{- end }}
       {{- end }}
     spec:
       containers:
@@ -42,17 +46,17 @@ spec:
           volumeMounts:
           {{- range .Values.volumes }}
           - name: {{ .name }}
-            {{- if eq .name "firecrest-configs-volume" -}}
+            {{- if eq .name "firecrest-configs-volume" }}
             mountPath: /app/configs/
-            {{- else if eq .name "firecrest-secrets-volume" -}}
+            {{- else if eq .name "firecrest-secrets-volume" }}
             mountPath: /app/secrets/
-            {{- else if eq .name "firecrest-clusters-configs-volume" -}}
+            {{- else if eq .name "firecrest-clusters-configs-volume" }}
             mountPath: /app/clusters/
-            {{- else -}}
+            {{- else }}
             mountPath: /app/{{ .name }}/            
-            {{- end -}}
+            {{- end }}
             readOnly : true
-          {{- end -}}
+          {{- end }}
           livenessProbe:
             exec:
               command:
