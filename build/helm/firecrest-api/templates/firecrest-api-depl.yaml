@@ -2,14 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: firecrest-api-depl
-  {{- with .Values.metadata }}
-  {{- with .annotations }}
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
     {{ $key }}: {{ $value | quote }}
-    {{- end }}
-  {{- end }}
-  {{- end }}
 
 spec:
   replicas: {{ .Values.replicas }}
@@ -20,13 +15,9 @@ spec:
     metadata:
       labels:
         app: firecrest-api
-      {{- with .Values.template }}
-      {{- with .annotations }}
       annotations:
       {{- range $key, $value := .Values.template.annotations }}
         {{ $key }}: {{ $value | quote}}
-        {{- end }}
-      {{- end }}
       {{- end }}
     spec:
       containers:
@@ -103,9 +94,5 @@ spec:
   ports:
     - name: firecrest-api
       protocol: TCP
-      {{- if and .Values.service .Values.service.port -}}
       port: {{ .Values.service.port }}
-      {{- else }}
-      port: 5001
-      {{- end }}
       targetPort: 5000
