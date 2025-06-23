@@ -2,9 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: firecrest-api-depl
+  {{- with .Values.metadata }}
+  {{- with .annotations }}
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
     {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
   {{- end }}
 
 spec:
@@ -16,35 +20,47 @@ spec:
     metadata:
       labels:
         app: firecrest-api
+      {{- with .Values.template }}
+      {{- with .annotations }}
       annotations:
       {{- range $key, $value := .Values.template.annotations }}
         {{ $key }}: {{ $value | quote}}
+        {{- end }}
+      {{- end }}
       {{- end }}
     spec:
       containers:
         - name: firecrest-api
           image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
           env:
+            {{- if .Values.global }}
             - name: ENVIRONMENT
               value: {{ .Values.global.environment }}
+            {{- end }}
             - name: YAML_CONFIG_FILE
               value: "/app/configs/firecrest-config.yaml"
+            {{- if .Values.loggingLevel }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel }}
+            {{- end }}
             {{- if .Values.logConfig }}
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
             {{- end }}
           volumeMounts:
-          - name: firecrest-configs-volume
+          {{- range .Values.volumes }}
+          - name: {{ .name }}
+            {{- if eq .name "firecrest-configs-volume" -}}
             mountPath: /app/configs/
-            readOnly: true
-          - name: firecrest-secrets-volume
+            {{- else if eq .name "firecrest-secrets-volume" -}}
             mountPath: /app/secrets/
-            readOnly: true
-          - name: firecrest-clusters-configs-volume
+            {{- else if eq .name "firecrest-clusters-configs-volume" -}}
             mountPath: /app/clusters/
-            readOnly: true
+            {{- else -}}
+            mountPath: /app/{{ .name }}/            
+            {{- end -}}
+            readOnly : true
+          {{- end -}}
           livenessProbe:
             exec:
               command:
@@ -75,7 +91,6 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-
             
 ---
 apiVersion: v1
@@ -88,5 +103,9 @@ spec:
   ports:
     - name: firecrest-api
       protocol: TCP
+      {{- if and .Values.service .Values.service.port -}}
       port: {{ .Values.service.port }}
+      {{- else }}
+      port: 5001
+      {{- end }}
       targetPort: 5000
