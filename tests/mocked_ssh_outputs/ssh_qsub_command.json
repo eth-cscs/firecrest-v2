@@ -1,0 +1,8 @@
+
+{
+    "stdout": "1.pbs\n",
+    "stderr": "",
+    "exit_code": 0,
+    "swalllow_stdin":true,
+    "command":"cd /home/test1 && qsub -v PATH=/bin:/usr/bin/:/usr/local/bin/ -N 'test1'"
+}

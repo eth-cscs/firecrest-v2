@@ -1,0 +1,6 @@
+{
+    "stdout": "",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"qdel 1"
+}

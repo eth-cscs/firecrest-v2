@@ -76,6 +76,36 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+- name: "cluster-pbs"
+  ssh:
+    host: "192.168.240.4"
+    port: 22
+    max_clients: 500
+    timeout:
+      connection: 5
+      login: 5
+      command_execution: 5
+      idle_timeout: 60
+      keep_alive: 5
+  scheduler:
+    type: "pbs"
+    version: "23.06.06"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-health-check"
+    secret: "secret_file:/run/secrets/service_account_client_secret"
+  probing:
+    interval: 120
+    timeout: 10
+    startup_grace_period: 300
+    datatransfer_jobs_directives:
+      - "#PBS -l nodes=1:ppn=1"
+      - "#PBS -l walltime=00:15:00"
+      - "#PBS -V"
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
 storage:
   name: "s3-storage"
   private_url: "http://192.168.240.19:9000"

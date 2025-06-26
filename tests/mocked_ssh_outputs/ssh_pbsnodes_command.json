@@ -1,0 +1,6 @@
+{
+    "stdout": "{\n    \"timestamp\":1750370801,\n    \"pbs_version\":\"23.06.06\",\n    \"pbs_server\":\"pbs\",\n    \"nodes\":{\n        \"pbs\":{\n            \"Mom\":\"pbs\",\n            \"ntype\":\"PBS\",\n            \"state\":\"free\",\n            \"pcpus\":12,\n            \"resources_available\":{\n                \"arch\":\"linux\",\n                \"host\":\"pbs\",\n                \"mem\":\"1024mb\",\n                \"ncpus\":1,\n                \"vnode\":\"pbs\"\n            },\n            \"resources_assigned\":{\n            },\n            \"resv_enable\":\"True\",\n            \"sharing\":\"default_shared\",\n            \"license\":\"l\",\n            \"last_state_change_time\":1750370547,\n            \"last_used_time\":1750370547\n        }\n    }\n}",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"pbsnodes -a -F json"
+}

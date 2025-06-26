@@ -31,6 +31,7 @@ from lib.dependencies import AuthDependency
 # clients
 from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.helpers.api_auth_helper import ApiAuthHelper
+from lib.scheduler_clients.pbs.pbs_client import PbsClient
 from lib.scheduler_clients.slurm.slurm_client import SlurmClient
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
@@ -292,6 +293,12 @@ class SchedulerClientDependency:
                     system.scheduler.version,
                     system.scheduler.api_version,
                     system.scheduler.api_url,
+                    system.scheduler.timeout,
+                )
+            case SchedulerType.pbs:
+                return PbsClient(
+                    await self._get_ssh_client(system_name),
+                    system.scheduler.version,
                     system.scheduler.timeout,
                 )
             case _:

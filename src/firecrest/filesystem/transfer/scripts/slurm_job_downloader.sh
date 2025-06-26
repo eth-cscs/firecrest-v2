@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # Copyright (c) 2025, ETH Zurich. All rights reserved.
 #
 # Please, refer to the LICENSE file in the root directory.
@@ -7,10 +7,10 @@
 
 {{ sbatch_directives }}
 
-echo $(date -u) "Ingress File Transfer Job (id:${SLURM_JOB_ID})"
+echo $(date -u) "Ingress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 echo $(date -u) "Waiting till file to tranfer is available..."
-for i in `seq 1440` 
-do 
+for i in `seq 1440`
+do
     status=$(curl --silent --head -o /dev/null --silent -Iw '%{http_code}' "{{ download_head_url | safe }}")
     if [[ "$status" == '200' ]]
         then
@@ -58,15 +58,15 @@ do
             rm "$headers_file"
 
             # Convert to MB to make logs more readable
-            download_bytes=$(echo | awk -v download_bytes="$downloaded_data_count" ' { printf "%0.3f\n", (download_bytes/1024/1024); } ')              
-            if [ $? -eq 0 ] 
-                then 
-                    echo $(date -u) "File was successfully downloaded (size: ${download_bytes}MB)" 
-                else 
-                    echo $(date -u) "Unable to download file" >&2 
+            download_bytes=$(echo | awk -v download_bytes="$downloaded_data_count" ' { printf "%0.3f\n", (download_bytes/1024/1024); } ')
+            if [ $? -eq 0 ]
+                then
+                    echo $(date -u) "File was successfully downloaded (size: ${download_bytes}MB)"
+                else
+                    echo $(date -u) "Unable to download file" >&2
                     exit 2
                 fi
             break
         fi
     sleep 60;
-done 
+done

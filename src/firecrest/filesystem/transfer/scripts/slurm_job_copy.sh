@@ -7,7 +7,7 @@
 
 {{ sbatch_directives }}
 
-echo $(date -u) "Copy Files Job (id:${SLURM_JOB_ID})"
+echo $(date -u) "Copy Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
 
 if [ "{{ dereference }}" = "True" ]; then 

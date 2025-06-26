@@ -29,8 +29,6 @@ spec:
               value: {{ .Values.global.environment }}
             - name: YAML_CONFIG_FILE
               value: "/app/configs/firecrest-config.yaml"
-            - name: APP_VERSION
-              value: {{ .Chart.AppVersion }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel }}
             {{- if .Values.logConfig }}

@@ -12,17 +12,15 @@ from lib.ssh_clients.ssh_client import BaseCommand
 class SacctCommandBase(BaseCommand):
 
     def __init__(
-            self,
-            username: str = None,
-            job_ids: List[str] = None,
-            allusers: bool = False) -> None:
+        self, username: str = None, job_ids: List[str] = None, allusers: bool = False
+    ) -> None:
         super().__init__()
         self.username = username
         self.allusers = allusers
         self.job_ids = job_ids
 
     def get_command(self) -> str:
-        cmd = ["sacct"]
+        cmd = ["SLURM_TIME_FORMAT='%s' sacct"]
         if self.allusers:
             cmd += ["--allusers"]
         if self.job_ids:

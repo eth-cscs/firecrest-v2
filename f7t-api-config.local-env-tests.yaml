@@ -54,6 +54,28 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+- name: "cluster-pbs"
+  ssh:
+    host: "192.168.240.2"
+    port: 22
+    max_clients: 500
+  scheduler:
+    type: "pbs"
+    version: "23.06.06"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-api"
+    secret: ""
+  probing:
+    interval: 60
+    timeout: 10
+  datatransfer_jobs_directives:
+    - "#PBS -l nodes=1:ppn=1"
+    - "#PBS -l walltime=00:15:00"
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
 storage:
   name: "s3-storage"
   private_url: "http://192.168.240.19:9000"

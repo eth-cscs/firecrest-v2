@@ -1,5 +1,5 @@
 {
-    "stdout": "3|1|cluster|0:0|users|staff|SbatchTest|localhost|part01|1|COMPLETED|None|100|2025-06-03T09:34:07|2025-06-03T09:37:28|2025-06-03T09:39:08|00:00:00|7200|fireuser|/home/fireuser\n4|1|cluster|0:0|service-accounts|staff|sbatch.sh|localhost|part01|1|COMPLETED|None|101|2025-06-03T09:36:26|2025-06-03T09:39:08|2025-06-03T09:40:49|00:00:00|7200|firesrv|/home/firesrv",
+    "stdout": "3|1|cluster|0:0|users|staff|SbatchTest|localhost|part01|1|COMPLETED|None|100|1750232859|1750232859|1750232859|00:00:00|7200|fireuser|/home/fireuser\n4|1|cluster|0:0|service-accounts|staff|sbatch.sh|localhost|part01|1|COMPLETED|None|101|1750232859|1750232859|1750232859|00:00:00|7200|firesrv|/home/firesrv",
     "stderr": "",
     "exit_code": 0,
     "command": "sacct --allusers --noheader --parsable2 --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"

@@ -1,0 +1,6 @@
+{
+    "stdout": "{\n    \"timestamp\":1750397593,\n    \"pbs_version\":\"23.06.06\",\n    \"pbs_server\":\"pbs\",\n    \"Queue\":{\n        \"workq\":{\n            \"queue_type\":\"Execution\",\n            \"total_jobs\":0,\n            \"state_count\":\"Transit:0 Queued:0 Held:0 Waiting:0 Running:0 Exiting:0 Begun:0 \",\n            \"resources_assigned\":{\n                \"ncpus\":0,\n                \"nodect\":0\n            },\n            \"enabled\":\"True\",\n            \"started\":\"True\"\n        }\n    }\n}",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"qstat -F json -f -Q"
+}

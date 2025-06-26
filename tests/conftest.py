@@ -116,14 +116,27 @@ class OverrideSchedulerClient(SchedulerClientDependency):
 @pytest.fixture(scope="module")
 def slurm_cluster_with_api_config():
     for cluster in settings.clusters:
-        if cluster.scheduler.api_url is not None:
+        if (
+            getattr(cluster.scheduler, "type", "").lower() == "slurm"
+            and cluster.scheduler.api_url is not None
+        ):
             return cluster
 
 
 @pytest.fixture(scope="module")
 def slurm_cluster_with_ssh_config():
     for cluster in settings.clusters:
-        if cluster.scheduler.api_url is None:
+        if (
+            getattr(cluster.scheduler, "type", "").lower() == "slurm"
+            and cluster.scheduler.api_url is None
+        ):
+            return cluster
+
+
+@pytest.fixture(scope="module")
+def pbs_cluster():
+    for cluster in settings.clusters:
+        if getattr(cluster.scheduler, "type", "").lower() == "pbs":
             return cluster
 
 

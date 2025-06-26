@@ -1,5 +1,5 @@
 {
-    "stdout": "1|1|cluster|0:0|users|staff|SbatchTest|localhost|part01|1|COMPLETED|None|100|2025-06-03T09:34:05|2025-06-03T09:34:06|2025-06-03T09:35:46|00:00:00|7200|fireuser|/home/fireuser",
+    "stdout": "1|1|cluster|0:0|users|staff|SbatchTest|localhost|part01|1|COMPLETED|None|100|1750232859|1750232859|1750232859|00:00:00|7200|fireuser|/home/fireuser",
     "stderr": "",
     "exit_code": 0,
     "command":"sacct --allusers --jobs='1' --noheader --parsable2 --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
