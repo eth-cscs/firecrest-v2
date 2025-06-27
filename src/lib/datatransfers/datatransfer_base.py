@@ -25,8 +25,7 @@ class DataTransferLocation(CamelModel):
 
 
 class DataTransferOperation(CamelModel):
-    transferJob: TransferJob
-    instructions: Dict[str, any]
+    transfer_job: TransferJob
 
 
 class DatatransferBase(ABC):

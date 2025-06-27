@@ -9,6 +9,7 @@ from pydantic import Field
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
 from lib.datatransfers.datatransfer_base import DataTransferOperation
+from lib.datatransfers.s3.models import S3DataTransferOperation
 from lib.models.base_model import CamelModel
 
 
@@ -59,11 +60,11 @@ class TransferJob(CamelModel):
     logs: TransferJobLogs
 
 
-class UploadFileResponse(DataTransferOperation):
+class UploadFileResponse(S3DataTransferOperation):
     pass
 
 
-class DownloadFileResponse(DataTransferOperation):
+class DownloadFileResponse(S3DataTransferOperation):
     pass
 
 

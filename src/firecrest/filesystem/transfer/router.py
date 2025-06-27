@@ -117,6 +117,7 @@ def _format_directives(directives: List[str], account: str):
     status_code=status.HTTP_201_CREATED,
     response_model=UploadFileResponse,
     response_description="Upload operation created successfully",
+    response_model_exclude_none=True,
 )
 async def post_upload(
     upload_request: PostFileUploadRequest,
@@ -151,6 +152,7 @@ async def post_upload(
     status_code=status.HTTP_201_CREATED,
     response_model=DownloadFileResponse,
     response_description="Download operation created successfully",
+    response_model_exclude_none=True,
 )
 async def post_download(
     download_request: PostFileDownloadRequest,

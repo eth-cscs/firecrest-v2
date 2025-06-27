@@ -21,6 +21,7 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 # dependencies
+from lib.datatransfers.s3.models import S3DataTransferOperation
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.scheduler_clients.slurm.models import SlurmJobDescription
@@ -229,13 +230,11 @@ class S3Datatransfer(DatatransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        return DataTransferOperation(
+        return S3DataTransferOperation(
             transferJob=transferJob,
-            instructions={
-                "partsUploadUrls": post_external_upload_urls,
-                "completeUploadUrl": complete_external_multipart_upload_url,
-                "maxPartSize": self.max_part_size,
-            },
+            partsUploadUrls=post_external_upload_urls,
+            completeUploadUrl=complete_external_multipart_upload_url,
+            maxPartSize=self.max_part_size,
         )
 
     async def download(
@@ -335,7 +334,7 @@ class S3Datatransfer(DatatransferBase):
                 self.ttl,
             )
 
-        return DataTransferOperation(
+        return S3DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,
@@ -345,7 +344,5 @@ class S3Datatransfer(DatatransferBase):
                     error_log=job.job_param["standard_error"],
                 ),
             ),
-            instructions={
-                "downloadUrl": get_download_url,
-            },
+            download_url=get_download_url,
         )
