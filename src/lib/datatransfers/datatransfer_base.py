@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Optional
 
 from lib.models.base_model import CamelModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient

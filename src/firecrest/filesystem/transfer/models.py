@@ -8,7 +8,6 @@ from pydantic import Field
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
-from lib.datatransfers.datatransfer_base import DataTransferOperation
 from lib.datatransfers.s3.models import S3DataTransferOperation
 from lib.models.base_model import CamelModel
 
