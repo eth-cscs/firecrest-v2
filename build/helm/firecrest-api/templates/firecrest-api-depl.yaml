@@ -29,33 +29,24 @@ spec:
         - name: firecrest-api
           image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
           env:
-            {{- if .Values.global }}
             - name: ENVIRONMENT
               value: {{ .Values.global.environment }}
-            {{- end }}
             - name: YAML_CONFIG_FILE
               value: "/app/configs/firecrest-config.yaml"
-            {{- if .Values.loggingLevel }}
             - name: LOGGING_LEVEL
               value: {{ .Values.loggingLevel }}
-            {{- end }}
             {{- if .Values.logConfig }}
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
             {{- end }}
           volumeMounts:
-          {{- range .Values.volumes }}
-          - name: {{ .name }}
-            {{- if eq .name "firecrest-configs-volume" }}
+          - name: firecrest-configs-volume
             mountPath: /app/configs/
-            {{- else if eq .name "firecrest-secrets-volume" }}
+          - name: firecrest-secrets-volume
             mountPath: /app/secrets/
-            {{- else if eq .name "firecrest-clusters-configs-volume" }}
+          {{- if (default false .Values.enable_clusters_configs) }}
+          - name: firecrest-clusters-configs-volume
             mountPath: /app/clusters/
-            {{- else }}
-            mountPath: /app/{{ .name }}/            
-            {{- end }}
-            readOnly : true
           {{- end }}
           livenessProbe:
             exec:
@@ -86,6 +77,11 @@ spec:
                 path: {{ .path }}
             {{- end }}
           {{- end }}
+        {{- end }}
+        {{- if (default false .Values.enable_clusters_configs) }}
+        - name: firecrest-clusters-configs-volume
+          configMap:
+            name: firecrest-clusters-configs
         {{- end }}
             
 ---
