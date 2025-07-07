@@ -10,7 +10,7 @@ The .NET solution file (`data_transfer_dotnet.sln`) is available by cloning this
 
 This .NET solution provides examples demonstrating how to connect to FirecREST and transfer files using C# via different API endpoints. The implementation follows a fully `async` approach.
 
-The Examples do not requires parameters. You may be able to build them and run the generated executable. All of them, by default, target the [Docker-Compose demo environment](../../getting_started/README.md#trying-firecrest-in-a-containerised-environment).
+The Examples do not requires parameters. You may be able to build them and run the generated executable. All of them, by default, target the [Docker-Compose demo environment](../../getting_started/README.md#trying-firecrest-in-a-containerized-environment).
 
 ## Environment and packages
 The examples are written in C# for .NET 8.0. 
