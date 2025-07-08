@@ -369,6 +369,19 @@ class DataTransferDependency:
     async def _get_ssh_client(self, system_name):
         return await SSHClientDependency(ignore_health=False)(system_name=system_name)
 
+    async def _get_scheduler_client(self, system_name):
+        return await SchedulerClientDependency()(system_name=system_name)
+
+    def _get_s3_client(self, endpoint_url):
+        return get_session().create_client(
+            "s3",
+            region_name=settings.storage.region,
+            aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
+            aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
+            endpoint_url=endpoint_url,
+            config=AioConfig(signature_version="s3v4"),
+        )
+
     async def __call__(
         self,
         system_name: str,
@@ -376,7 +389,7 @@ class DataTransferDependency:
         system = ServiceAvailabilityDependency(service_type=HealthCheckType.s3)(
             system_name=system_name
         )
-        scheduler_client = await SchedulerClientDependency()(system_name=system_name)
+        scheduler_client = await self._get_scheduler_client(system_name)
         ssh_client = await self._get_ssh_client(system_name)
         work_dir = next(
             iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
@@ -387,21 +400,9 @@ class DataTransferDependency:
                 f"The system {system_name} has no filesystem defined as default_work_dir"
             )
 
-        async with get_session().create_client(
-            "s3",
-            region_name=settings.storage.region,
-            aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
-            aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
-            endpoint_url=settings.storage.public_url,
-            config=AioConfig(signature_version="s3v4"),
-        ) as s3_client_public:
-            async with get_session().create_client(
-                "s3",
-                region_name=settings.storage.region,
-                aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
-                aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
-                endpoint_url=settings.storage.private_url.get_secret_value(),
-                config=AioConfig(signature_version="s3v4"),
+        async with self._get_s3_client(settings.storage.public_url) as s3_client_public:
+            async with self._get_s3_client(
+                settings.storage.private_url.get_secret_value()
             ) as s3_client_private:
                 return S3Datatransfer(
                     scheduler_client=scheduler_client,
