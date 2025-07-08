@@ -260,7 +260,7 @@ class S3Datatransfer(DatatransferBase):
                 # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
                 await self.s3_client_private.put_bucket_lifecycle_configuration(
                     Bucket=username,
-                    LifecycleConfiguration=self.bucket_lifecycle_configuration,
+                    LifecycleConfiguration=self.bucket_lifecycle_configuration.to_json(),
                 )
             except self.s3_client_private.exceptions.BucketAlreadyOwnedByYou:
                 pass
