@@ -53,7 +53,6 @@ from firecrest.filesystem.transfer.models import (
     ExtractRequest,
     ExtractResponse,
 )
-from lib.ssh_clients.ssh_client import SSHClientPool
 
 
 router = create_router(
