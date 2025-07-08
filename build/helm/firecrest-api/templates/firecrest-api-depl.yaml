@@ -44,8 +44,8 @@ spec:
             mountPath: /app/configs/
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
-          {{- if (default false .Values.enable_clusters_configs) }}
-          - name: firecrest-clusters-configs-volume
+          {{- if (default false .Values.use_cluster_configs_path) }}
+          - name: firecrest-cluster-configs-volume
             mountPath: /app/clusters/
           {{- end }}
           livenessProbe:
@@ -78,10 +78,10 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-        {{- if (default false .Values.enable_clusters_configs) }}
-        - name: firecrest-clusters-configs-volume
+        {{- if (default false .Values.use_cluster_configs_path) }}
+        - name: firecrest-cluster-configs-volume
           configMap:
-            name: firecrest-clusters-configs
+            name: firecrest-cluster-configs
         {{- end }}
             
 ---

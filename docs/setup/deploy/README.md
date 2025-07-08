@@ -41,5 +41,5 @@ data:
 ```
 To enable the Helm Chart to mount the ConfigMap, set the following value in `values.yaml`:
 ```
-enable_clusters_configs: true
+use_cluster_configs_path: true
 ```
