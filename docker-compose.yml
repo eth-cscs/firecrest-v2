@@ -178,6 +178,9 @@ services:
       args:
         ENVIRONMENT: development
       dockerfile: ./build/docker/deic-sshca/Dockerfile
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.22
     ports:
       - 2221:2221
       - 2280:2280
