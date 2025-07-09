@@ -28,6 +28,7 @@ from lib.auth.authZ.authorization_service import AuthorizationService
 from lib.dependencies import AuthDependency
 
 # clients
+from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
 from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.scheduler_clients.pbs.pbs_client import PbsClient
@@ -218,10 +219,14 @@ class SSHClientDependency:
     ):
         self.ignore_health = ignore_health
         if isinstance(settings.ssh_credentials, SSHKeysService):
-            self.key_provider = SSHKeygenClient(
+            self.key_provider = DeiCSSHCAClient(
                 settings.ssh_credentials.url,
                 settings.ssh_credentials.max_connections,
             )
+            # self.key_provider = SSHKeygenClient(
+            #    settings.ssh_credentials.url,
+            #    settings.ssh_credentials.max_connections,
+            # )
         elif isinstance(settings.ssh_credentials, dict):
             self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials)
         else:
@@ -292,12 +297,14 @@ class SchedulerClientDependency:
                     system.scheduler.version,
                     system.scheduler.api_version,
                     system.scheduler.api_url,
-                    system.scheduler.timeout)
+                    system.scheduler.timeout,
+                )
             case SchedulerType.pbs:
                 return PbsClient(
                     await self._get_ssh_client(system_name),
                     system.scheduler.version,
-                    system.scheduler.timeout)
+                    system.scheduler.timeout,
+                )
             case _:
                 raise HTTPException(
                     status_code=status.HTTP_501_NOT_IMPLEMENTED,

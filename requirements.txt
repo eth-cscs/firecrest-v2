@@ -18,3 +18,4 @@ python-json-logger
 PyJWT
 bcrypt
 starlette_context==0.4.0
+cryptography
