@@ -42,11 +42,14 @@ spec:
           volumeMounts:
           - name: firecrest-configs-volume
             mountPath: /app/configs/
+            readOnly: true
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
+            readOnly: true
           {{- if (default false .Values.use_cluster_configs_path) }}
           - name: firecrest-cluster-configs-volume
             mountPath: /app/clusters/
+            readOnly: true
           {{- end }}
           livenessProbe:
             exec:
