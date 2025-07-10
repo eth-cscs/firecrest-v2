@@ -21,7 +21,7 @@ Once the container is running, open your browser and navigate to:
 ➡️ **[http://localhost:8025/](http://localhost:8025/)**
 
 
-## Trying FirecREST in a containerised environment
+## Trying FirecREST in a containerized environment
 
 In addition, to test and debug FirecREST locally we provide a local Docker environment that already contains all required dependencies (an HPC cluster, identity provider, object storage, etc.). Please make sure [Docker](https://www.docker.com/) is installed and running on your machine.
 
