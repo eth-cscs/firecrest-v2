@@ -47,7 +47,8 @@ As mentioned above, **client credentials** grant type is an important case of au
 
 A limitation with client credentials is that it's not designed to be used by "human" clients but for machines (also known as "service accounts" for some IdPs), and thus it doesn't include any information of the user.
 
-This integration between users and clients must be done on the HPC center side. FirecREST expects that the access token's `preferred_username` or `username` [claims](https://datatracker.ietf.org/doc/html/rfc7519#section-4) are populated with the user name on the target system (see [FirecREST command execution docs](../../arch/systems/README.md))
+This integration between users and clients must be done on the HPC center side. FirecREST expects that the JWT access token comes with a [claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4) that 
+is populated with the username to be used on the target system (see [FirecREST command execution docs](../../arch/systems/README.md)). By default FirecREST expect such information to be sotred in the  `preferred_username` claim, this [setting](../../conf/#oidc) is configurable.
 
 ## Authorization
 

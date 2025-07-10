@@ -21,10 +21,10 @@ This means that FirecREST can be installed in any platform or infrastructure (cl
 
 To answer to the question on "how the SSH credentials are obtained or created", FirecREST provides an integration with JSON Web Tokens used to authenticate agains the API.
 
-FirecREST uses the `username` or `preferred_username` claim from the JWT access token created by the Identity Provider (IdP) when the user or application [authenticated to use the API](../auth/README.md).
+By default FirecREST extracts the username from the `preferred_username` claim of the JWT access token created by the Identity Provider (IdP) as part of the [authentication process](../auth/README.md). It is possible to configure FirecREST to extract the username from a different claim by setting the OIDC[username_claim](../../conf/#oidc) parameter.
 
 !!! info
-    This `username` value on the token must be a valid username on the HPC system, otherwise the SSH credential created on its behalf won't be allowed in the system.
+    The `username` value provided by the JWT token must be a valid user on the targeted HPC system, otherwise the SSH credential created on its behalf won't work.
 
 The JWT signature is verified using the Identity Provider (IdP) public key, and then the token time validity is checked. If both are successful, the `username` is extracted and a SSH key is created for the user if there isn't an active connection to the cluster.
 
