@@ -50,7 +50,8 @@ class APIAuthDependency(AuthDependency):
         # Init sigleton authN services
         if not hasattr(APIAuthDependency, "globalAuthN"):
             APIAuthDependency.globalAuthN = OIDCTokenAuth(
-                public_certs=settings.auth.authentication.public_certs
+                public_certs=settings.auth.authentication.public_certs,
+                username_claim=settings.auth.authentication.username_claim,
             )
 
         # Init sigleton authZ services

@@ -8,6 +8,7 @@ auth:
     tokenUrl:  "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token"
     publicCerts:
         - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"
+    username_claim: "sub"
 ssh_credentials:
   provider: "DeiCSSHCA"
   url: "http://deic-sshca:2280/demoCA"

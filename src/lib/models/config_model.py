@@ -33,6 +33,10 @@ class Oidc(CamelModel):
             "to verify the OIDC token."
         ),
     )
+    username_claim: Optional[str] = Field(
+        "preferred_username",
+        description="Name of the JWT claim containing the username (e.g. sub, preferred_username, etc.)",
+    )
 
 
 class LoadFileSecretStr(SecretStr):
