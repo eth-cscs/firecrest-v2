@@ -37,6 +37,9 @@ func main() {
 					Token:                "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token",
 					Issuer:               "http://localhost:8080/auth/realms/kcrealm",
 				},
+				CAParams: sshca.CAParams{
+					Ttl: 500,
+				},
 			},
 			"transport": {
 				Signer: signer,

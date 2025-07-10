@@ -7,6 +7,7 @@ RUN git clone https://github.com/wayf-dk/sshca.git
 
 WORKDIR /go/sshca
 
+COPY ./build/docker/deic-sshca/sshca.go ./sshca.go
 COPY ./build/docker/deic-sshca/main.go ./cmd/main.go
 
 ADD ./build/environment/keys/fireuser-key  /go/.ssh/ca-key
