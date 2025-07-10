@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for the OpenPBS scheduler.
+- Add support for the DeiC ssh certificate authority.
+- Allows to set the JWT claim that contains the username.
 
 ### Changed
 
