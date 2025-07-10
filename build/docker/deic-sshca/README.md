@@ -7,7 +7,7 @@ The clients used to generate the user's JWT need to have a Client Scope that inc
 To username set as principal in the generated certificate needs to be set in the JWT sub claim. The Identity Provider (e.g. Keycloaclk) needs to be configured accordingly.
 
 
-# Usage
+# Manual Usage / Debug
 
 Generate a private and pub key pair:
 ```

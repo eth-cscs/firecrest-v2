@@ -219,14 +219,18 @@ class SSHClientDependency:
     ):
         self.ignore_health = ignore_health
         if isinstance(settings.ssh_credentials, SSHKeysService):
-            self.key_provider = DeiCSSHCAClient(
-                settings.ssh_credentials.url,
-                settings.ssh_credentials.max_connections,
-            )
-            # self.key_provider = SSHKeygenClient(
-            #    settings.ssh_credentials.url,
-            #    settings.ssh_credentials.max_connections,
-            # )
+            if settings.ssh_credentials.provider == "DeiCSSHCA":
+                self.key_provider = DeiCSSHCAClient(
+                    settings.ssh_credentials.url,
+                    settings.ssh_credentials.max_connections,
+                )
+            elif settings.ssh_credentials.provider == "SSHService":
+                self.key_provider = SSHKeygenClient(
+                    settings.ssh_credentials.url,
+                    settings.ssh_credentials.max_connections,
+                )
+            else:
+                raise TypeError("Unsupported SSHKeysProvider")
         elif isinstance(settings.ssh_credentials, dict):
             self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials)
         else:
