@@ -9,8 +9,8 @@ WORKDIR /go/sshca
 
 # The sshca repo is currently under development, the state at this commit
 # has been tested and vetted
-RUN git fetch --depth=1 origin 6b5bbfadb7c0d5dfd211eb91a6053f554d4dfba1
-RUN git checkout 6b5bbfadb7c0d5dfd211eb91a6053f554d4dfba1
+RUN git fetch --depth=1 origin 6c8f316c22f510b1d4ac09c12d86ecf73049306e
+RUN git checkout 6c8f316c22f510b1d4ac09c12d86ecf73049306e
 
 COPY ./build/docker/deic-sshca/main.go ./cmd/main.go
 
