@@ -38,7 +38,7 @@ func main() {
 					Issuer:               "http://localhost:8080/auth/realms/kcrealm",
 				},
 				CAParams: sshca.CAParams{
-					Ttl: 500,
+					Ttl: 60,
 				},
 			},
 			"transport": {

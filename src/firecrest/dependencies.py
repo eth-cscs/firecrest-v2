@@ -220,7 +220,7 @@ class SSHClientDependency:
     ):
         self.ignore_health = ignore_health
         if isinstance(settings.ssh_credentials, SSHKeysService):
-            if settings.ssh_credentials.provider == "DeiCSSHCA":
+            if settings.ssh_credentials.provider == "SSHCA":
                 self.key_provider = DeiCSSHCAClient(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,

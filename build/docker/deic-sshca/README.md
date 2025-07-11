@@ -30,12 +30,3 @@ curl -X POST  --header "Content-Type: application/json"  --data '{"PublicKey": "
 
 # TODO
 
-## Fix Certificate Validity
-By default the certificate validity is 1m, for some reaons this often result in SSHD rejecting the certificate.
-Extending the validity to 5m fixes the issue. However the certificate TTL configuration is ignored for some reason.
-
-Fix proposed: https://github.com/wayf-dk/sshca/pull/2
-
-
-## Remove custom sshca.go impl
-Once the above fixes are implemented the custom sshca.go file should be removed.

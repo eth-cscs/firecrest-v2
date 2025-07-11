@@ -348,7 +348,7 @@ class SSHKeysService(CamelModel):
             "`0`, there is no limit."
         ),
     )
-    provider: str = Literal["SSHService", "DeiCSSHCA"]
+    provider: str = Literal["SSHService", "SSHCA"]
 
 
 class Auth(CamelModel):
