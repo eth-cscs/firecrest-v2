@@ -20,7 +20,10 @@ class OIDCTokenAuth(AuthenticationService):
 
     public_keys = {}
 
-    def __init__(self, public_certs: List[str] = None):
+    def __init__(self, public_certs: List[str] = None, username_claim: str = None):
+
+        self.username_claim = username_claim
+
         keys = []
         s = requests.Session()
         retries = Retry(total=6, backoff_factor=0.22)
@@ -48,7 +51,9 @@ class OIDCTokenAuth(AuthenticationService):
 
         options = {"verify_signature": True, "verify_aud": False, "verify_exp": True}
         decoded_token = jwt.decode(token=access_token, key=public_key, options=options)
-        return ApiAuthModel.build_from_oidc_decoded_token(decoded_token=decoded_token)
+        return ApiAuthModel.build_from_oidc_decoded_token(
+            decoded_token=decoded_token, username_claim=self.username_claim
+        )
 
     async def authenticate(self, access_token: str):
         try:

@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
 
 # clients
+from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
 from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
@@ -178,6 +179,18 @@ class SSHClientPool:
             ) from e
 
         match self.key_provider:
+            case DeiCSSHCAClient():
+                sshkey_private = asyncssh.import_private_key(keys["private"])
+                sshkey_cert_public = asyncssh.import_certificate(keys["public"])
+                options = asyncssh.SSHClientConnectionOptions(
+                    username=username,
+                    client_keys=[sshkey_private],
+                    client_certs=[sshkey_cert_public],
+                    known_hosts=None,
+                    connect_timeout=self.connect_timeout,
+                    login_timeout=self.login_timeout,
+                    window=self.buffer_limit,
+                )
             case SSHKeygenClient():
                 sshkey_private = asyncssh.import_private_key(
                     keys["private"], passphrase=keys["passphrase"]

@@ -1714,6 +1714,37 @@
       },
       "protocolMappers": [
         {
+          "id": "f40f0934-fc76-480f-9c3e-0395af4361e2",
+          "name": "Firecrest-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "false",
+            "lightweight.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true",
+            "included.custom.audience": "Firecrest-v2"
+          }
+        },
+        {
+          "id": "e75eaaaa-f57e-48f3-a047-a3cfaf9626dc",
+          "name": "username-sub",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "user.attribute": "owner",
+            "id.token.claim": "true",
+            "lightweight.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "sub",
+            "jsonType.label": "String"
+          }
+        },
+        {
           "id": "b8cf4473-dc00-48bc-b43b-aaf334a92acb",
           "name": "username",
           "protocol": "openid-connect",

@@ -7,7 +7,7 @@ from enum import Enum
 import os
 import yaml
 from pathlib import Path
-from typing import Any, Dict, Literal, Tuple, Type
+from typing import Any, Dict, Literal, Tuple, Type, Union
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -337,7 +337,24 @@ class OpenFGA(CamelModel):
     )
 
 
-class SSHKeysService(CamelModel):
+class SSHKeysServiceType(str, Enum):
+    """Supported job scheduler types."""
+
+    SSHService = "SSHService"
+    SSHCA = "SSHCA"
+    SSHStaticKeys = "SSHStaticKeys"
+
+
+class BaseSSHKeysService(CamelModel):
+
+    type: Literal[
+        SSHKeysServiceType.SSHService,
+        SSHKeysServiceType.SSHCA,
+        SSHKeysServiceType.SSHStaticKeys,
+    ]
+
+
+class SSHService(BaseSSHKeysService):
     """External service for managing SSH keys."""
 
     url: str = Field(..., description="URL of the SSH keys management service.")
@@ -348,6 +365,28 @@ class SSHKeysService(CamelModel):
             "`0`, there is no limit."
         ),
     )
+    type: Literal[SSHKeysServiceType.SSHService]
+
+
+class SSHCA(BaseSSHKeysService):
+    """External service for managing SSH keys."""
+
+    url: str = Field(..., description="URL of the SSH keys management service.")
+    max_connections: int = Field(
+        100,
+        description=(
+            "Maximum concurrent connections to the service. When set to "
+            "`0`, there is no limit."
+        ),
+    )
+    type: Literal[SSHKeysServiceType.SSHCA]
+
+
+class SSHStaticKeys(BaseSSHKeysService):
+    """External service for managing SSH keys."""
+
+    keys: Dict[str, SSHUserKeys]
+    type: Literal[SSHKeysServiceType.SSHStaticKeys]
 
 
 class Auth(CamelModel):
@@ -398,12 +437,14 @@ class Settings(BaseSettings):
     auth: Auth = Field(
         ..., description="Authentication and authorization config (OIDC, FGA)."
     )
-    ssh_credentials: SSHKeysService | Dict[str, SSHUserKeys] = Field(
+
+    ssh_credentials: Union[SSHService, SSHCA, SSHStaticKeys] = Field(
         ...,
         description=(
             "SSH keys service or manually defined user keys. More details in "
             "[this section](../arch/systems/README.md#obtaining-ssh-credentials-on-behalf-of-the-user)."
         ),
+        discriminator="type",
     )
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."

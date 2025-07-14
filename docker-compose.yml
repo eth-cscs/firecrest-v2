@@ -164,3 +164,23 @@ services:
       - 9001:9001
     volumes:
       - ./build/minio:/data:delegated
+  deic-sshca:
+    image: deic-sshca
+    environment:
+      ENVIRONMENT: development
+      SSH_KEYGEN_URL: http://192.168.240.20:5000
+      YAML_CONFIG_FILE: "/app/config/app-config.yaml"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    build:
+      context: ./
+      args:
+        ENVIRONMENT: development
+      dockerfile: ./build/docker/deic-sshca/Dockerfile
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.22
+    ports:
+      - 2221:2221
+      - 2280:2280

@@ -8,12 +8,19 @@ auth:
     tokenUrl:  "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token"
     publicCerts:
         - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"
+    username_claim: "sub"
+#ssh_credentials:
+#  type: "SSHCA"
+#  url: "http://deic-sshca:2280/demoCA"
+#  max_connections: 500
 ssh_credentials:
-  fireuser:
-    private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
-  firesrv:
-    private_key: "secret_file:/run/secrets/ssh_private_key_firesrv"
-    passphrase: "secret_file:/run/secrets/ssh_passphrase_firesrv"
+  type: "SSHStaticKeys"
+  keys:
+    fireuser:
+      private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
+    firesrv:
+      private_key: "secret_file:/run/secrets/ssh_private_key_firesrv"
+      passphrase: "secret_file:/run/secrets/ssh_passphrase_firesrv"
 clusters:
 - name: "cluster-slurm-api"
   ssh:
