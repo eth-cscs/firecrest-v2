@@ -27,8 +27,10 @@ class S3HealthCheck(HealthCheckBase):
         async with await S3ClientDependency(
             connection=S3ClientConnectionType.private
         )() as s3_client:
-
-            await s3_client.list_buckets(MaxBuckets=1)
+            paginator = s3_client.get_paginator("list_buckets")
+            iterator = paginator.paginate(PaginationConfig={"MaxItems": 1})
+            async for _page in iterator:
+                pass
 
         return health
 
