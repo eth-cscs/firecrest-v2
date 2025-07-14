@@ -12,9 +12,12 @@ from botocore.handlers import validate_bucket_name
 
 # extensions
 from firecrest.config import (
+    SSHCA,
     HPCCluster,
     HealthCheckType,
-    SSHKeysService,
+    SSHKeysServiceType,
+    SSHService,
+    SSHStaticKeys,
     SchedulerType,
 )
 from firecrest.filesystem.models import FilesystemRequestBase
@@ -219,23 +222,21 @@ class SSHClientDependency:
         ignore_health: bool = False,
     ):
         self.ignore_health = ignore_health
-        if isinstance(settings.ssh_credentials, SSHKeysService):
-            if settings.ssh_credentials.provider == "SSHCA":
+        match settings.ssh_credentials.type:
+            case SSHKeysServiceType.SSHCA:
                 self.key_provider = DeiCSSHCAClient(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
                 )
-            elif settings.ssh_credentials.provider == "SSHService":
+            case SSHKeysServiceType.SSHService:
                 self.key_provider = SSHKeygenClient(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
                 )
-            else:
+            case SSHKeysServiceType.SSHStaticKeys:
+                self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials.keys)
+            case _:
                 raise TypeError("Unsupported SSHKeysProvider")
-        elif isinstance(settings.ssh_credentials, dict):
-            self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials)
-        else:
-            raise TypeError("Unsupported SSHKeysProvider")
 
     async def __call__(self, system_name: str):
         system = ServiceAvailabilityDependency(
