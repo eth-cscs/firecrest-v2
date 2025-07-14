@@ -12,12 +12,9 @@ from botocore.handlers import validate_bucket_name
 
 # extensions
 from firecrest.config import (
-    SSHCA,
     HPCCluster,
     HealthCheckType,
     SSHKeysServiceType,
-    SSHService,
-    SSHStaticKeys,
     SchedulerType,
 )
 from firecrest.filesystem.models import FilesystemRequestBase
