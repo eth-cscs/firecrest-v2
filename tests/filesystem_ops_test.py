@@ -54,9 +54,13 @@ def mocked_ssh_head_output():
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_view_output():
-    return load_ssh_output("ssh_view_command.json")
+def mocked_ssh_dd_output():
+    return load_ssh_output("ssh_dd_command.json")
 
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_with_size_output():
+    return load_ssh_output("ssh_dd_command_with_size.json")
 
 @pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
@@ -285,9 +289,9 @@ async def test_file_command(client, ssh_client, mocked_ssh_file_output):
         assert response.json()["output"] == mocked_ssh_file_output["stdout"]
 
 
-async def test_view_command(client, ssh_client, mocked_ssh_view_output):
+async def test_dd_command(client, ssh_client, mocked_ssh_dd_output):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_view_output)]):
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_dd_output)]):
 
         response = client.get(
             "/filesystem/cluster-slurm-ssh/ops/view?path={path}".format(
@@ -296,7 +300,20 @@ async def test_view_command(client, ssh_client, mocked_ssh_view_output):
         )
         assert response.status_code == 200
         assert response.json() is not None
-        assert response.json()["output"] == mocked_ssh_view_output["stdout"]
+        assert response.json()["output"] == mocked_ssh_dd_output["stdout"]
+
+async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_output):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_dd_with_size_output)]):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}".format(
+                path="/home/readme.txt", size=5
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"] == mocked_ssh_dd_with_size_output["stdout"]
 
 
 async def test_head_command(client, ssh_client, mocked_ssh_head_output):

@@ -33,7 +33,7 @@ from firecrest.dependencies import (
 from firecrest.filesystem.ops.commands.base64_command import Base64Command
 from firecrest.filesystem.ops.commands.file_command import FileCommand
 from firecrest.filesystem.ops.commands.rm_command import RmCommand
-from firecrest.filesystem.ops.commands.view_command import ViewCommand
+from firecrest.filesystem.ops.commands.dd_command import DdCommand
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.helpers.router_helper import create_router
 
@@ -265,7 +265,7 @@ async def get_head(
 
 @router.get(
     "/view",
-    description=f"View full file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes files)",
+    description=f"View file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes files)",
     status_code=status.HTTP_200_OK,
     response_model=GetViewFileResponse,
     response_description="View operation finished successfully",
@@ -281,10 +281,43 @@ async def get_view(
         ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
         use_cache=False,
     ),
+    size: Annotated[
+        int | None,
+        Query(
+            alias="size",
+            description="Value, in bytes, of the size of data to be retrieved from the file.",
+        ),
+    ] = settings.storage.max_ops_file_size,
+    offset: Annotated[
+        int | None,
+        Query(
+            alias="offset",
+            description="Value in bytes of the offset.",
+        ),
+    ] = 0,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    view = ViewCommand(path)
+
+    if offset < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="`offset` value must be an integer value equal or greater than 0",
+        )
+
+    if size <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="`size` value must be an integer value greater than 0",
+        )
+
+    if size > settings.storage.max_ops_file_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"`size` value must be less than {settings.storage.max_ops_file_size} bytes",
+        )
+
+    view = DdCommand(path, size, offset)
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(view)
         return {"output": output}
