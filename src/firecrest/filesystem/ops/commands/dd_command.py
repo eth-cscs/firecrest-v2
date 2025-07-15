@@ -36,7 +36,6 @@ class DdCommand(BaseCommandWithTimeout):
             self.skip = offset // self.size
 
     def get_command(self) -> str:
-        print(f"dd if='{self.target_path}' bs={self.size} skip={self.skip} count={self.count}")
         return (
             f"{super().get_command()} dd if='{self.target_path}' bs={self.size} skip={self.skip} count={self.count}"
         )
