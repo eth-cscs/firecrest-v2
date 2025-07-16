@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `/filesystem/cluster-slurm-ssh/ops/view` endpoint now accepts `size` and `offset` parameters to arbitrary select a chunk of a file
+- `/filesystem/cluster-slurm-ssh/ops/view` endpoint now accepts `size` and `offset` parameters to read an arbitrary chunk of a file
 
 ### Fixed
 

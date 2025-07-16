@@ -265,7 +265,7 @@ async def get_head(
 
 @router.get(
     "/view",
-    description=f"View file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes files)",
+    description=f"View file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} bytes)",
     status_code=status.HTTP_200_OK,
     response_model=GetViewFileResponse,
     response_description="View operation finished successfully",
