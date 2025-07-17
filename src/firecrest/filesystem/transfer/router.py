@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from math import ceil
 import uuid
 import os
 from fastapi import Depends, Path, Query, status, HTTPException
@@ -14,22 +13,20 @@ from jinja2 import Environment, FileSystemLoader
 
 # plugins
 from firecrest.config import HPCCluster, HealthCheckType
-from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from firecrest.plugins import settings
 
 # storage
 from firecrest.filesystem.transfer import scripts
 
 # helpers
+from lib.datatransfers.datatransfer_base import DataTransferLocation
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.helpers.router_helper import create_router
 
 # dependencies
 from firecrest.dependencies import (
     APIAuthDependency,
-    S3ClientConnectionType,
-    S3ClientDependency,
-    SSHClientDependency,
+    DataTransferDependency,
     SchedulerClientDependency,
     ServiceAvailabilityDependency,
 )
@@ -56,7 +53,6 @@ from firecrest.filesystem.transfer.models import (
     ExtractRequest,
     ExtractResponse,
 )
-from lib.ssh_clients.ssh_client import SSHClientPool
 
 
 router = create_router(
@@ -101,19 +97,6 @@ def _build_script(filename: str, parameters):
     return script_code
 
 
-async def _generate_presigned_url(client, action, params, method=None):
-    if settings.storage.tenant:
-        if "Bucket" in params:
-            params["Bucket"] = f"{settings.storage.tenant}:{params['Bucket']}"
-    url = await client.generate_presigned_url(
-        ClientMethod=action,
-        Params=params,
-        ExpiresIn=settings.storage.ttl,
-        HttpMethod=method,
-    )
-    return url
-
-
 def _format_directives(directives: List[str], account: str):
 
     directives_str = "\n".join(directives)
@@ -133,120 +116,33 @@ def _format_directives(directives: List[str], account: str):
     status_code=status.HTTP_201_CREATED,
     response_model=UploadFileResponse,
     response_description="Upload operation created successfully",
+    response_model_exclude_none=True,
 )
 async def post_upload(
     upload_request: PostFileUploadRequest,
     system_name: Annotated[str, Path(description="Target system")],
-    system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
-        use_cache=False,
-    ),
-    scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
-    s3_client_private=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.private)
-    ),
-    s3_client_public=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.public)
-    ),
+    datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    job_id = None
-    object_name = f"{str(uuid.uuid4())}/{upload_request.file_name}"
-
-    work_dir = next(
-        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    source = DataTransferLocation(
+        host=None, system=None, path=None, size=upload_request.file_size
     )
-    if not work_dir:
-        raise ValueError(
-            f"The system {system_name} has no filesystem defined as default_work_dir"
-        )
+    target = DataTransferLocation(
+        host=None,
+        system=system_name,
+        path=f"{upload_request.path}/{upload_request.file_name}",
+        size=upload_request.file_size,
+    )
 
-    async with s3_client_private:
-        try:
-            await s3_client_private.create_bucket(**{"Bucket": username})
-            # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
-            await s3_client_private.put_bucket_lifecycle_configuration(
-                Bucket=username,
-                LifecycleConfiguration=settings.storage.bucket_lifecycle_configuration.to_json(),
-            )
-        except s3_client_private.exceptions.BucketAlreadyOwnedByYou:
-            pass
-
-        upload_id = (
-            await s3_client_private.create_multipart_upload(
-                Bucket=username, Key=object_name
-            )
-        )["UploadId"]
-
-        post_external_upload_urls = []
-        for part_number in range(
-            1,
-            ceil(upload_request.file_size / settings.storage.multipart.max_part_size)
-            + 1,
-        ):
-            post_external_upload_urls.append(
-                await _generate_presigned_url(
-                    s3_client_public,
-                    "upload_part",
-                    {
-                        "Bucket": username,
-                        "Key": object_name,
-                        "UploadId": upload_id,
-                        "PartNumber": part_number,
-                    },
-                )
-            )
-
-        complete_external_multipart_upload_url = await _generate_presigned_url(
-            s3_client_public,
-            "complete_multipart_upload",
-            {"Bucket": username, "Key": object_name, "UploadId": upload_id},
-            "POST",
-        )
-
-        get_download_url = await _generate_presigned_url(
-            s3_client_private, "get_object", {"Bucket": username, "Key": object_name}
-        )
-
-        head_download_url = await _generate_presigned_url(
-            s3_client_private, "head_object", {"Bucket": username, "Key": object_name}
-        )
-
-        parameters = {
-            "sbatch_directives": _format_directives(
-                system.datatransfer_jobs_directives, upload_request.account
-            ),
-            "download_head_url": head_download_url,
-            "download_url": get_download_url,
-            "target_path": f"{upload_request.path}/{upload_request.file_name}",
-            "max_part_size": str(settings.storage.multipart.max_part_size),
-        }
-
-        job_script = _build_script("slurm_job_downloader.sh", parameters)
-        job = JobHelper(f"{work_dir}/{username}", job_script, "IngressFileTransfer")
-
-        job_id = await scheduler_client.submit_job(
-            job_description=JobDescriptionModel(**job.job_param),
-            username=username,
-            jwt_token=access_token,
-        )
-
-    return {
-        "partsUploadUrls": post_external_upload_urls,
-        "completeUploadUrl": complete_external_multipart_upload_url,
-        "maxPartSize": settings.storage.multipart.max_part_size,
-        "transferJob": TransferJob(
-            job_id=job_id,
-            system=system_name,
-            working_directory=job.working_dir,
-            logs=TransferJobLogs(
-                output_log=job.job_param["standard_output"],
-                error_log=job.job_param["standard_error"],
-            ),
-        ),
-    }
+    return await datatransfer.upload(
+        source=source,
+        target=target,
+        username=username,
+        access_token=access_token,
+        account=upload_request.account,
+    )
 
 
 @router.post(
@@ -255,134 +151,36 @@ async def post_upload(
     status_code=status.HTTP_201_CREATED,
     response_model=DownloadFileResponse,
     response_description="Download operation created successfully",
+    response_model_exclude_none=True,
 )
 async def post_download(
     download_request: PostFileDownloadRequest,
     system_name: Annotated[str, Path(description="System where the jobs are running")],
-    ssh_client: Annotated[
-        SSHClientPool,
-        Path(alias="system_name", description="Target system"),
-        Depends(SSHClientDependency()),
-    ],
-    system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
-        use_cache=False,
-    ),
-    scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
-    s3_client_private=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.private)
-    ),
-    s3_client_public=Depends(
-        S3ClientDependency(connection=S3ClientConnectionType.public)
-    ),
+    datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    job_id = None
-    object_name = f"{download_request.path.split('/')[-1]}_{str(uuid.uuid4())}"
-
-    work_dir = next(
-        iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+    source = DataTransferLocation(
+        host=None,
+        system=system_name,
+        path=download_request.path,
+        size=None,
     )
-    if not work_dir:
-        raise ValueError(
-            f"The system {system_name} has no filesystem defined as default_work_dir"
-        )
+    target = DataTransferLocation(
+        host=None,
+        system=None,
+        path=None,
+        size=None,
+    )
 
-    stat = StatCommand(download_request.path, True)
-    async with ssh_client.get_client(username, access_token) as client:
-        stat_output = await client.execute(stat)
-
-    async with s3_client_private:
-        try:
-            await s3_client_private.create_bucket(**{"Bucket": username})
-            # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
-            await s3_client_private.put_bucket_lifecycle_configuration(
-                Bucket=username,
-                LifecycleConfiguration=settings.storage.bucket_lifecycle_configuration.to_json(),
-            )
-        except s3_client_private.exceptions.BucketAlreadyOwnedByYou:
-            pass
-        upload_id = (
-            await s3_client_private.create_multipart_upload(
-                Bucket=username, Key=object_name
-            )
-        )["UploadId"]
-
-        post_upload_urls = []
-        for part_number in range(
-            1,
-            ceil(stat_output["size"] / settings.storage.multipart.max_part_size) + 1,
-        ):
-            post_upload_urls.append(
-                await _generate_presigned_url(
-                    s3_client_private,
-                    "upload_part",
-                    {
-                        "Bucket": username,
-                        "Key": object_name,
-                        "UploadId": upload_id,
-                        "PartNumber": part_number,
-                    },
-                )
-            )
-
-        complete_multipart_url = await _generate_presigned_url(
-            s3_client_private,
-            "complete_multipart_upload",
-            {"Bucket": username, "Key": object_name, "UploadId": upload_id},
-            "POST",
-        )
-
-        parameters = {
-            "sbatch_directives": _format_directives(
-                system.datatransfer_jobs_directives, download_request.account
-            ),
-            "F7T_MAX_PART_SIZE": str(settings.storage.multipart.max_part_size),
-            "F7T_MP_USE_SPLIT": (
-                "true" if settings.storage.multipart.use_split else "false"
-            ),
-            "F7T_TMP_FOLDER": f"{settings.storage.multipart.tmp_folder}/{str(uuid.uuid1())}/",
-            "F7T_MP_PARALLEL_RUN": str(settings.storage.multipart.parallel_runs),
-            "F7T_MP_PARTS_URL": " ".join(f'"{url}"' for url in post_upload_urls),
-            "F7T_MP_NUM_PARTS": str(len(post_upload_urls)),
-            "F7T_MP_INPUT_FILE": download_request.path,
-            "F7T_MP_COMPLETE_URL": complete_multipart_url,
-        }
-
-        job = JobHelper(
-            f"{work_dir}/{username}",
-            _build_script(
-                "slurm_job_uploader_multipart.sh",
-                parameters,
-            ),
-            "OutgressFileTransfer",
-        )
-        get_download_url = None
-        job_id = await scheduler_client.submit_job(
-            job_description=JobDescriptionModel(**job.job_param),
-            username=username,
-            jwt_token=access_token,
-        )
-    async with s3_client_public:
-        get_download_url = await _generate_presigned_url(
-            s3_client_public,
-            "get_object",
-            {"Bucket": username, "Key": object_name},
-        )
-    return {
-        "downloadUrl": get_download_url,
-        "transferJob": TransferJob(
-            job_id=job_id,
-            system=system_name,
-            working_directory=job.working_dir,
-            logs=TransferJobLogs(
-                output_log=job.job_param["standard_output"],
-                error_log=job.job_param["standard_error"],
-            ),
-        ),
-    }
+    return await datatransfer.download(
+        source=source,
+        target=target,
+        username=username,
+        access_token=access_token,
+        account=download_request.account,
+    )
 
 
 @router.post(
