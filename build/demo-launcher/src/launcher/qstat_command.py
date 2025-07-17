@@ -11,7 +11,7 @@ from firecrest.filesystem.ops.commands.base_command_with_timeout import (
 )
 
 
-class SinfoVersionCommand(BaseCommandWithTimeout):
+class QstatVersionCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
@@ -19,11 +19,11 @@ class SinfoVersionCommand(BaseCommandWithTimeout):
         super().__init__()
 
     def get_command(self) -> str:
-        return f"{super().get_command()} sinfo -V"
+        return f"{super().get_command()} qstat --version"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
 
         if exit_status != 0:
             super().error_handling(stderr, exit_status)
 
-        return stdout.split()[1]
+        return stdout.strip().removeprefix("pbs_version = ")
