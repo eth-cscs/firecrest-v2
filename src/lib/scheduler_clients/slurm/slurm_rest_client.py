@@ -139,6 +139,15 @@ class SlurmRestClient(SlurmBaseClient):
     ) -> int | None:
         pass
 
+    async def attach_command_proccess(
+        self,
+        command: str,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+    ) -> int | None:
+        pass
+
     async def get_job(
         self, job_id: str, username: str, jwt_token: str, allusers: bool = True
     ) -> List[SlurmJob] | None:
