@@ -168,7 +168,7 @@ async def get_job_metadata(
 async def attach(
     websocket: WebSocket,
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],
-    entrypoint: str,
+    cmd: str,
     token: str,
     scheduler_client: Annotated[
         SchedulerBaseClient,
@@ -204,7 +204,7 @@ async def attach(
 
     try:
         async with scheduler_client.attach_command_proccess(
-            command=entrypoint,
+            command=cmd,
             job_id=None if job_id == "0" else job_id,
             username=username,
             jwt_token=access_token,
