@@ -83,6 +83,15 @@ class PbsClient(SchedulerBaseClient):
             "Interactive attach is not supported in PBS CLI client"
         )
 
+    async def attach_command_proccess(
+        self,
+        command: str,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+    ) -> int | None:
+        pass
+
     async def get_job(
         self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True
     ) -> List[PbsJob] | None:

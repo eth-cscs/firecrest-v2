@@ -109,6 +109,33 @@ class SSHClient:
         except ChannelOpenError as e:
             raise SSHConnectionError("Unable to open a new SSH channel.") from e
 
+    @asynccontextmanager
+    async def create(self, command: BaseCommand, stdin: str = None):
+        try:
+            # TODO: introduce stream timeout
+            # async with asyncio.timeout(self.execute_timeout * 100000):
+            command_line = command.get_command()
+            process = await self.conn.create_process(command_line, send_eof=False)
+
+            yield process
+
+            process.close()
+            await process.wait_closed()
+            # Log command
+            log_backend_command(command_line, process.exit_status)
+
+        except TimeoutError as e:
+            process.terminate()
+            process.stdin.write("\x03")
+            process.stdin.write_eof()
+            raise TimeoutLimitExceeded(
+                "Command execution timeout limit exceeded."
+            ) from e
+        except ConnectionLost as e:
+            raise SSHConnectionError("Unable to establish SSH connection.") from e
+        except ChannelOpenError as e:
+            raise SSHConnectionError("Unable to open a new SSH channel.") from e
+
     def reset_idle(
         self,
     ) -> None:

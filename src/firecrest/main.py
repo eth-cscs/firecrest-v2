@@ -44,6 +44,7 @@ from firecrest.status.router import (
     router_liveness as status_liveness_router,
 )
 from firecrest.compute.router import router as compute_router
+from firecrest.compute.router import router_ws as compute_router_ws
 from firecrest.filesystem.router import router as filesystem_router
 from lib.scheduler_clients import SlurmRestClient
 
@@ -173,6 +174,7 @@ def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(status_system_router)
     app.include_router(status_liveness_router)
     app.include_router(compute_router)
+    app.include_router(compute_router_ws)
     app.include_router(filesystem_router)
 
 

@@ -3,7 +3,18 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from fastapi import status, Path, HTTPException, Depends, Query
+import asyncio
+from time import time
+from asyncssh import SSHClientProcess
+from fastapi import (
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+    Path,
+    HTTPException,
+    Depends,
+    Query,
+)
 from typing import Any, Annotated
 
 # helpers
@@ -33,6 +44,11 @@ router = create_router(
     prefix="/compute/{system_name}/jobs",
     tags=["compute"],
     dependencies=[Depends(APIAuthDependency(authorize=True))],
+)
+
+router_ws = create_router(
+    prefix="/compute/{system_name}/jobs/{job_id}/attach",
+    tags=["compute"],
 )
 
 
@@ -79,14 +95,17 @@ async def get_jobs(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
     ],
-    allusers: Annotated[bool, Query(description="If set to `true` returns all jobs visible by the current user, otherwise only the current user owned jobs")] = False
+    allusers: Annotated[
+        bool,
+        Query(
+            description="If set to `true` returns all jobs visible by the current user, otherwise only the current user owned jobs"
+        ),
+    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(
-        username=username,
-        jwt_token=access_token,
-        allusers=allusers
+        username=username, jwt_token=access_token, allusers=allusers
     )
     return {"jobs": jobs}
 
@@ -104,14 +123,12 @@ async def get_job(
         SchedulerBaseClient,
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
-    ]    
+    ],
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_job(
-        job_id=job_id,
-        username=username,
-        jwt_token=access_token
+        job_id=job_id, username=username, jwt_token=access_token
     )
     if jobs is None:
         raise HTTPException(
@@ -147,29 +164,73 @@ async def get_job_metadata(
     return {"jobs": jobs}
 
 
-@router.put(
-    "/{job_id}/attach",
-    description="Attach a procces to a job by `{job_id}`",
-    status_code=status.HTTP_204_NO_CONTENT,
-    response_description="Process attached succesfully",
-)
+@router_ws.websocket("")
 async def attach(
+    websocket: WebSocket,
     job_id: Annotated[str, Path(description="Job id", pattern="^[a-zA-Z0-9]+$")],
-    job_attach: PostJobAttachRequest,
+    entrypoint: str,
+    token: str,
     scheduler_client: Annotated[
         SchedulerBaseClient,
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
     ],
 ) -> None:
-    username = ApiAuthHelper.get_auth().username
-    access_token = ApiAuthHelper.get_access_token()
-    await scheduler_client.attach_command(
-        command=job_attach.command,
-        job_id=job_id,
-        username=username,
-        jwt_token=access_token,
-    )
+
+    # TODO: Refactor authentication dependency to support JWT as query param
+    username = "fireuser"  # ApiAuthHelper.get_auth().username
+    access_token = token  # ApiAuthHelper.get_access_token()
+
+    await websocket.accept()
+
+    async def read_stdout(process):
+        async for line in process.stdout:
+            await websocket.send_text(line)
+
+    async def read_stderr(process):
+        async for line in process.stderr:
+            await websocket.send_text(line)
+
+    async def write_stdin(process):
+        while True:
+            data = await websocket.receive_text()
+            process.stdin.write(data)
+            await process.stdin.drain()
+
+    async def keep_alive(process: SSHClientProcess):
+        while True:
+            process.channel.get_connection().set_extra_info(**{"last_used": time()})
+            await asyncio.sleep(5)
+
+    try:
+        async with scheduler_client.attach_command_proccess(
+            command=entrypoint,
+            job_id=None if job_id == "0" else job_id,
+            username=username,
+            jwt_token=access_token,
+        ) as process:
+            # Run all tasks concurrently
+            stdout_task = asyncio.create_task(read_stdout(process))
+            stderr_task = asyncio.create_task(read_stderr(process))
+            stdin_task = asyncio.create_task(write_stdin(process))
+            keep_alive_task = asyncio.create_task(keep_alive(process))
+
+            # Wait until one of the tasks ends (usually stdin via disconnect)
+            done, pending = await asyncio.wait(
+                [stdout_task, stderr_task, stdin_task, keep_alive_task],
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+
+            # Cancel remaining tasks
+            for task in pending:
+                task.cancel()
+
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
+    except Exception as e:
+        await websocket.send_text(f"Error: {str(e)}")
+        await websocket.close()
+
     return None
 
 
