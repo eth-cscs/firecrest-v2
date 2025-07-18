@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, SecretStr
 import asyncssh
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
 
@@ -31,13 +31,15 @@ import subprocess
 
 from launcher.pwd_command import PwdCommand
 from launcher.sinfo_command import SinfoVersionCommand
+from launcher.qstat_command import QstatVersionCommand
 
 
 sys.path.append("../../../src")
 sys.path.append("../")
 from firecrest.config import FileSystem
-from lib.ssh_clients.ssh_client import SSHClient
 from firecrest.config import FileSystemDataType
+from lib.ssh_clients.ssh_client import SSHClient
+from lib.models.config_model import LoadFileSecretStr
 
 
 keys = {}
@@ -244,23 +246,16 @@ def download_certificate():
 
 class Scheduler(BaseModel):
     cluster_name: str
+    scheduler_type: str
 
 
 @app.post("/boot")
 async def boot(scheduler: Scheduler):
 
-    username = next(iter(settings.ssh_credentials))
-    credentials = settings.ssh_credentials[username]
+    username = next(iter(settings.ssh_credentials.keys))
+    credentials = settings.ssh_credentials.keys[username]
 
-    demo_cluster = settings.clusters[0]
-    demo_cluster.name = scheduler.cluster_name
-
-    dump: dict[str, Any] = settings.model_dump()
-    settings_file = os.getenv("YAML_CONFIG_FILE", None)
-    with open(settings_file, "w") as yaml_file:
-        yaml.dump(dump, yaml_file)
-
-    scheduler_campatible: bool = True
+    scheduler_compatible: bool = True
     try:
         sshkey_private = asyncssh.import_private_key(
             credentials.private_key, passphrase=credentials.passphrase
@@ -272,11 +267,31 @@ async def boot(scheduler: Scheduler):
         client = await sshClient(
             username, sshkey_private, credentials.passphrase, sshkey_cert_public
         )
-        sinfo = SinfoVersionCommand()
-        version = await client.execute(sinfo)
-        scheduler_campatible = Version(version) > Version("22.05")
+
+        if scheduler.scheduler_type == "pbs":
+            qstat = QstatVersionCommand()
+            version = await client.execute(qstat)
+            scheduler_compatible = Version(version) >= Version("23.06.06")
+        elif scheduler.scheduler_type == "slurm":
+            sinfo = SinfoVersionCommand()
+            version = await client.execute(sinfo)
+            scheduler_compatible = Version(version) > Version("22.05")
+        else:
+            scheduler_compatible = False
+            version = None
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=repr(e)) from e
+
+    demo_cluster = settings.clusters[0]
+    demo_cluster.name = scheduler.cluster_name
+    demo_cluster.scheduler.type = scheduler.scheduler_type
+    demo_cluster.scheduler.version = version
+
+    dump: dict[str, Any] = settings.model_dump()
+    settings_file = os.getenv("YAML_CONFIG_FILE", None)
+    with open(settings_file, "w") as yaml_file:
+        yaml.dump(dump, yaml_file)
 
     server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
@@ -297,9 +312,9 @@ async def boot(scheduler: Scheduler):
         "access_token": token,
         "system_name": demo_cluster.name,
         "scheduler": {
-            "type": "Slurm",
+            "type": scheduler.scheduler_type,
             "version": version,
-            "is_compatible": scheduler_campatible,
+            "is_compatible": scheduler_compatible,
         },
     }
 
@@ -337,15 +352,22 @@ async def credentials(credentials: Credentials):
         if credentials.public_cert:
             sshkey_cert_public = asyncssh.import_certificate(credentials.public_cert)
 
+        user_credentials = dict()
+        user_credentials["private_key"] = credentials.private_key
+        if credentials.public_cert:
+            user_credentials["public_cert"] = credentials.public_cert
+        if credentials.passphrase:
+            user_credentials["passphrase"] = credentials.passphrase
+
         ssh_credential = UnsafeSSHUserKeys(
             **{
-                "private_key": credentials.private_key,
-                "public_cert": credentials.public_cert,
-                "passphrase": credentials.passphrase,
+                "keys": {
+                    credentials.username: user_credentials
+                }
             }
         )
-        settings.ssh_credentials.clear()
-        settings.ssh_credentials[credentials.username] = ssh_credential
+
+        settings.ssh_credentials = ssh_credential
 
         client = await sshClient(
             credentials.username,

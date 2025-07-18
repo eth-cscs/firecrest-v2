@@ -9,9 +9,11 @@ auth:
     publicCerts:
         - "http://localhost:8025/certs"
 ssh_credentials:
-  tempuser:
-    private_key: "tempuser"
-    public_key: "tempuser"
+  type: "SSHStaticKeys"
+  keys:
+    tempuser:
+      private_key: "tempuser"
+      public_cert: "tempuser"
 clusters:
 - name: "cluster"
   ssh:
@@ -39,3 +41,20 @@ clusters:
     - path: '/users'
       data_type: 'users'
       default_work_dir: true
+storage:
+  name: "s3-storage"
+  private_url: "http://192.168.240.19:9000"
+  public_url: "http://localhost:9000"
+  access_key_id: "storage_access_key"
+  secret_access_key: "secret_access_key"
+  region: "us-east-1"
+  ttl: 604800
+  multipart:
+    use_split: false
+    max_part_size: 1073741824 # 1G
+    parallel_runs: 3
+    tmp_folder: "tmp"
+  max_ops_file_size: 1048576 # 1M
+  probing:
+    interval: 60
+    timeout: 10
