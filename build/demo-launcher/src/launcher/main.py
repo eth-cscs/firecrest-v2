@@ -255,15 +255,7 @@ async def boot(scheduler: Scheduler):
     username = next(iter(settings.ssh_credentials.keys))
     credentials = settings.ssh_credentials.keys[username]
 
-    demo_cluster = settings.clusters[0]
-    demo_cluster.name = scheduler.cluster_name
-
-    dump: dict[str, Any] = settings.model_dump()
-    settings_file = os.getenv("YAML_CONFIG_FILE", None)
-    with open(settings_file, "w") as yaml_file:
-        yaml.dump(dump, yaml_file)
-
-    scheduler_campatible: bool = True
+    scheduler_compatible: bool = True
     try:
         sshkey_private = asyncssh.import_private_key(
             credentials.private_key, passphrase=credentials.passphrase
@@ -279,16 +271,27 @@ async def boot(scheduler: Scheduler):
         if scheduler.scheduler_type == "pbs":
             qstat = QstatVersionCommand()
             version = await client.execute(qstat)
-            scheduler_campatible = Version(version) == Version("23.06.06")
+            scheduler_compatible = Version(version) >= Version("23.06.06")
         elif scheduler.scheduler_type == "slurm":
             sinfo = SinfoVersionCommand()
             version = await client.execute(sinfo)
-            scheduler_campatible = Version(version) > Version("22.05")
+            scheduler_compatible = Version(version) > Version("22.05")
         else:
-            scheduler_campatible = False
+            scheduler_compatible = False
+            version = None
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=repr(e)) from e
+
+    demo_cluster = settings.clusters[0]
+    demo_cluster.name = scheduler.cluster_name
+    demo_cluster.scheduler.type = scheduler.scheduler_type
+    demo_cluster.scheduler.version = version
+
+    dump: dict[str, Any] = settings.model_dump()
+    settings_file = os.getenv("YAML_CONFIG_FILE", None)
+    with open(settings_file, "w") as yaml_file:
+        yaml.dump(dump, yaml_file)
 
     server = ServerProxy("http://dummy:dummy@localhost:9001/RPC2")
 
@@ -311,7 +314,7 @@ async def boot(scheduler: Scheduler):
         "scheduler": {
             "type": scheduler.scheduler_type,
             "version": version,
-            "is_compatible": scheduler_campatible,
+            "is_compatible": scheduler_compatible,
         },
     }
 
@@ -363,7 +366,7 @@ async def credentials(credentials: Credentials):
                 }
             }
         )
-        
+
         settings.ssh_credentials = ssh_credential
 
         client = await sshClient(
