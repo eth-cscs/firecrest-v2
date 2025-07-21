@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 sys.path.append("../../../src")
 sys.path.append("../")
-from firecrest.config import Settings, HPCCluster, ServiceAccount, SSHClientPool
+from firecrest.config import Settings, HPCCluster, ServiceAccount, SSHClientPool, SSHStaticKeys, Storage
 
 
 class CamelModel(BaseModel):
@@ -21,10 +21,15 @@ class UnsafeSSHClientPool(SSHClientPool):
     pass
 
 
-class UnsafeSSHUserKeys(CamelModel):
+class UnsafeSSHStaticKeys(BaseModel):
     private_key: str
     public_cert: Optional[str] = None
     passphrase: Optional[str] = None
+
+
+class UnsafeSSHUserKeys(SSHStaticKeys):
+    keys: Dict[str, UnsafeSSHStaticKeys]
+    type: str = "SSHStaticKeys"
 
 
 class UnsafeServiceAccount(ServiceAccount):
@@ -37,6 +42,13 @@ class UnsafeHPCCluster(HPCCluster):
     ssh: UnsafeSSHClientPool
 
 
+class UnsafeStorage(Storage):
+    secret_access_key: str
+    access_key_id: str
+    private_url: str
+
+
 class UnsafeSettings(Settings):
-    ssh_credentials: Dict[str, UnsafeSSHUserKeys]
+    ssh_credentials: UnsafeSSHUserKeys
     clusters: List[UnsafeHPCCluster] = []
+    storage: UnsafeStorage
