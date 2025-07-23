@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
+from contextlib import asynccontextmanager, contextmanager
 from typing import List
 from packaging.version import Version
 
@@ -53,6 +54,12 @@ class SlurmCliClient(SlurmBaseClient):
         async with self.ssh_client.get_client(username, jwt_token) as client:
             return await client.execute(command, stdin)
 
+    @asynccontextmanager
+    async def __create_ssh_cmd(self, username, jwt_token, command):
+        async with self.ssh_client.get_client(username, jwt_token) as client:
+            async with client.create(command) as process:
+                yield process
+
     def __init__(
         self,
         ssh_client: SSHClientPool,
@@ -79,8 +86,20 @@ class SlurmCliClient(SlurmBaseClient):
         username: str,
         jwt_token: str,
     ) -> int | None:
-        srun = SrunCommand(command=command, job_id=job_id, overlap=True)
+        srun = SrunCommand(command=command, job_id=job_id, overlap=(job_id is not None))
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
+
+    @asynccontextmanager
+    async def attach_command_proccess(
+        self,
+        command: str,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+    ):
+        srun = SrunCommand(command=command, job_id=job_id, overlap=True)
+        async with self.__create_ssh_cmd(username, jwt_token, srun) as process:
+            yield process
 
     async def get_job(
         self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True

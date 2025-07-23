@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import List
 
 from lib.scheduler_clients.slurm.models import (
@@ -64,6 +65,19 @@ class SlurmClient(SlurmBaseClient):
         return await self.slurm_default_client.attach_command(
             command, job_id, username, jwt_token
         )
+
+    @asynccontextmanager
+    async def attach_command_proccess(
+        self,
+        command: str,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+    ):
+        async with self.slurm_default_client.attach_command_proccess(
+            command, job_id, username, jwt_token
+        ) as process:
+            yield process
 
     async def get_job(
         self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True
