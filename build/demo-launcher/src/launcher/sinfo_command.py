@@ -26,4 +26,4 @@ class SinfoVersionCommand(BaseCommandWithTimeout):
         if exit_status != 0:
             super().error_handling(stderr, exit_status)
 
-        return stdout.strip().removeprefix("slurm ")
+        return stdout.split()[1]

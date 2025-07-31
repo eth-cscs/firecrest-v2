@@ -34,7 +34,8 @@ class ClusterHealthChecker:
         self.cluster = cluster
         if token_decoder is None:
             self.token_decoder = OIDCTokenAuth(
-                settings.auth.authentication.public_certs
+                settings.auth.authentication.public_certs,
+                username_claim=settings.auth.authentication.username_claim,
             )
         else:
             self.token_decoder = token_decoder

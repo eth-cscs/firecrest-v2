@@ -4,6 +4,7 @@ auth:
     tokenUrl:  "http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/token"
     publicCerts: []
 ssh_credentials:
+  type: "SSHService"
   url: "http://192.168.240.20:5000"
   max_connections: 500
 clusters:

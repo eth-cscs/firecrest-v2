@@ -22,15 +22,15 @@ class ApiAuthModel(CamelModel):
     username: str = None
 
     @staticmethod
-    def build_from_oidc_decoded_token(decoded_token: dict):
-        if "preferred_username" not in decoded_token:
+    def build_from_oidc_decoded_token(
+        decoded_token: dict, username_claim: str = "preferred_username"
+    ):
+        if username_claim not in decoded_token:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Authentication token 'preferred_username' claim is missing",
+                detail=f"Authentication token '{username_claim}' claim is missing",
             )
-        username = decoded_token.get("preferred_username")
-        if "username" in decoded_token:
-            username = decoded_token.get("username")
+        username = decoded_token.get(username_claim)
 
         if "email" not in decoded_token:
             return ApiAuthServiceAccount(

@@ -1,0 +1,6 @@
+{
+    "stdout": "ABCDE",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"dd if='/home/readme.txt' bs=5 skip=0 count=2"
+}

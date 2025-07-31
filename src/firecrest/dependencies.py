@@ -14,7 +14,7 @@ from botocore.handlers import validate_bucket_name
 from firecrest.config import (
     HPCCluster,
     HealthCheckType,
-    SSHKeysService,
+    SSHKeysServiceType,
     SchedulerType,
 )
 from firecrest.filesystem.models import FilesystemRequestBase
@@ -29,6 +29,7 @@ from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
 from lib.dependencies import AuthDependency
 
 # clients
+from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
 from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.scheduler_clients.pbs.pbs_client import PbsClient
@@ -50,7 +51,8 @@ class APIAuthDependency(AuthDependency):
         # Init sigleton authN services
         if not hasattr(APIAuthDependency, "globalAuthN"):
             APIAuthDependency.globalAuthN = OIDCTokenAuth(
-                public_certs=settings.auth.authentication.public_certs
+                public_certs=settings.auth.authentication.public_certs,
+                username_claim=settings.auth.authentication.username_claim,
             )
 
         # Init sigleton authZ services
@@ -218,15 +220,21 @@ class SSHClientDependency:
         ignore_health: bool = False,
     ):
         self.ignore_health = ignore_health
-        if isinstance(settings.ssh_credentials, SSHKeysService):
-            self.key_provider = SSHKeygenClient(
-                settings.ssh_credentials.url,
-                settings.ssh_credentials.max_connections,
-            )
-        elif isinstance(settings.ssh_credentials, dict):
-            self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials)
-        else:
-            raise TypeError("Unsupported SSHKeysProvider")
+        match settings.ssh_credentials.type:
+            case SSHKeysServiceType.SSHCA:
+                self.key_provider = DeiCSSHCAClient(
+                    settings.ssh_credentials.url,
+                    settings.ssh_credentials.max_connections,
+                )
+            case SSHKeysServiceType.SSHService:
+                self.key_provider = SSHKeygenClient(
+                    settings.ssh_credentials.url,
+                    settings.ssh_credentials.max_connections,
+                )
+            case SSHKeysServiceType.SSHStaticKeys:
+                self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials.keys)
+            case _:
+                raise TypeError("Unsupported SSHKeysProvider")
 
     async def __call__(self, system_name: str):
         system = ServiceAvailabilityDependency(

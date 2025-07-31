@@ -171,5 +171,3 @@ chmod 400 build/environment/keys/fireuser-key
 ssh-keygen -s build/environment/keys/fireuser-key -n fireuser -I fireuser build/environment/keys/fireuser.pub
 ssh -i build/environment/keys/fireuser-key -o CertificateFile=build/environment/keys/fireuser-cert.pub fireuser@localhost -p 2222
 ```
-
-

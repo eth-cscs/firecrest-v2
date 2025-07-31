@@ -102,7 +102,7 @@
                 showStep(3)
             } else {
                 error = await response.json()
-                console.log(error);
+                console.error(error);
                 alert('Invalid SSH credentials: ' + error.detail);
             }
         }
@@ -136,19 +136,25 @@
         async function bootPlayground() {
           
             var cluster_name = document.getElementById('cluster-name').value;
-
+            var scheduler_opt = document.getElementById('scheduler');
+            var scheduler_type = scheduler_opt.options[scheduler_opt.selectedIndex].value;
+            
             if (cluster_name == ""){
                 console.log('Cluster name is empty');
                 alert('Cluster name is empty');
                 return;
             }
 
-
             showSpinner('boot_button')
             const response = await fetch('/boot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ "cluster_name":cluster_name })
+                body: JSON.stringify(
+                    { 
+                        "cluster_name":cluster_name,
+                        "scheduler_type": scheduler_type,
+                    }
+                )
             });
 
 
@@ -483,7 +489,7 @@
                         </span>
                         <select id="scheduler" class="mt-1 block w-full rounded-md border py-2 px-3 shadow-sm sm:text-sm focus:outline-none border-gray-300 focus:border-blue-300 focus:ring-blue-300">
                             <option value="slurm" selected>Slurm</option>
-                            <option value="openPBS" disabled>openPBS (not available on playground)</option>
+                            <option value="pbs">OpenPBS</option>
                         </select>
                     </div>
 

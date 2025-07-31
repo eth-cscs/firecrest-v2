@@ -8,9 +8,6 @@ from firecrest.filesystem.ops.commands.base_command_with_timeout import (
 )
 
 
-UTILITIES_MAX_FILE = 5 * 1024 * 1024  # 5MB
-
-
 class IdCommand(BaseCommandWithTimeout):
 
     def __init__(

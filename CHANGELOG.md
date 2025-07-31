@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for the OpenPBS scheduler.
+- Add support for the DeiC ssh certificate authority.
+- Allows to set the JWT claim that contains the username.
 
 ### Changed
+
+- `/filesystem/cluster-slurm-ssh/ops/view` endpoint now accepts `size` and `offset` parameters to read an arbitrary chunk of a file
 
 ### Fixed
 
@@ -21,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refactor FastAPI models for Slurm, in order to make it easier to add new schedulers.
 - Make cp recursive so that directories can also be copied and add the option to keep symbolic links.
+- Support for clusters configuration files on option in Helm Chart: if enabled the a `firecrest-cluster-configs` ConfigMap is expected to expose YAML files for clusters configuration.
 
 ### Changed
 
