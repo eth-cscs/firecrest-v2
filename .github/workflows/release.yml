@@ -270,7 +270,7 @@ jobs:
         echo "    tokenUrl:  \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token\"" >> f7t-api-config.local-env-empty.yaml
         echo "    publicCerts:" >> f7t-api-config.local-env-empty.yaml
         echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
-        echo "ssh_credentials: {}" >> f7t-api-config.local-env-empty.yaml
+        echo "ssh_credentials: {type: "SSHStaticKeys", keys:[]}" >> f7t-api-config.local-env-empty.yaml
         echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
     - name: Generate OpenAPI file
       uses: column-st/fastapi-openapi-specs-action@v1.0.2
