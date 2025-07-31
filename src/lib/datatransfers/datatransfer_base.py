@@ -28,7 +28,7 @@ class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
 
 
-class DatatransferBase(ABC):
+class DataTransferBase(ABC):
 
     def __init__(
         self,

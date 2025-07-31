@@ -15,7 +15,7 @@ from firecrest.filesystem.transfer import scripts
 from lib.datatransfers.datatransfer_base import (
     DataTransferLocation,
     DataTransferOperation,
-    DatatransferBase,
+    DataTransferBase,
     TransferJob,
     TransferJobLogs,
 )
@@ -95,7 +95,7 @@ def _format_directives(directives: List[str], account: str):
     return directives_str
 
 
-class S3Datatransfer(DatatransferBase):
+class S3Datatransfer(DataTransferBase):
 
     def __init__(
         self,
