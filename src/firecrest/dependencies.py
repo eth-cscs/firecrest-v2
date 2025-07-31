@@ -25,6 +25,7 @@ from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.auth.authN.authentication_service import AuthenticationService
 from lib.auth.authZ.open_fga_client import OpenFGAClient
 from lib.auth.authZ.authorization_service import AuthorizationService
+from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
 from lib.dependencies import AuthDependency
 
 # clients
@@ -366,3 +367,72 @@ class S3ClientDependency:
     # To allow for dependency override hash is based on class
     def __hash__(self):
         return hash(S3ClientDependency.__class__)
+
+
+class DataTransferDependency:
+    def __init__(self):
+        pass
+
+    # Note: this fuction allows for unit test client injection override
+    async def _get_ssh_client(self, system_name):
+        return await SSHClientDependency(ignore_health=False)(system_name=system_name)
+
+    async def _get_scheduler_client(self, system_name):
+        return await SchedulerClientDependency()(system_name=system_name)
+
+    def _get_s3_client(self, endpoint_url):
+        return get_session().create_client(
+            "s3",
+            region_name=settings.storage.region,
+            aws_secret_access_key=settings.storage.secret_access_key.get_secret_value(),
+            aws_access_key_id=settings.storage.access_key_id.get_secret_value(),
+            endpoint_url=endpoint_url,
+            config=AioConfig(signature_version="s3v4"),
+        )
+
+    async def __call__(
+        self,
+        system_name: str,
+    ):
+        system = ServiceAvailabilityDependency(service_type=HealthCheckType.s3)(
+            system_name=system_name
+        )
+        scheduler_client = await self._get_scheduler_client(system_name)
+        ssh_client = await self._get_ssh_client(system_name)
+        work_dir = next(
+            iter([fs.path for fs in system.file_systems if fs.default_work_dir]), None
+        )
+
+        if not work_dir:
+            raise ValueError(
+                f"The system {system_name} has no filesystem defined as default_work_dir"
+            )
+
+        async with self._get_s3_client(settings.storage.public_url) as s3_client_public:
+            async with self._get_s3_client(
+                settings.storage.private_url.get_secret_value()
+            ) as s3_client_private:
+                return S3Datatransfer(
+                    scheduler_client=scheduler_client,
+                    directives=system.datatransfer_jobs_directives,
+                    s3_client_private=s3_client_private,
+                    s3_client_public=s3_client_public,
+                    ssh_client=ssh_client,
+                    work_dir=work_dir,
+                    bucket_lifecycle_configuration=settings.storage.bucket_lifecycle_configuration,
+                    max_part_size=settings.storage.multipart.max_part_size,
+                    use_split=settings.storage.multipart.use_split,
+                    tmp_folder=settings.storage.multipart.tmp_folder,
+                    parallel_runs=settings.storage.multipart.parallel_runs,
+                    tenant=settings.storage.tenant,
+                    ttl=settings.storage.ttl,
+                    system_name=system_name,
+                )
+
+    # To allow for dependency override eq checks for class equality
+    def __eq__(self, other):
+        return isinstance(other, DataTransferDependency)
+
+    # To allow for dependency override hash is based on class
+    def __hash__(self):
+        return hash(DataTransferDependency.__class__)

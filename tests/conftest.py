@@ -3,9 +3,11 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from contextlib import asynccontextmanager
 from datetime import datetime
 from firecrest.dependencies import (
     APIAuthDependency,
+    DataTransferDependency,
     S3ClientConnectionType,
     S3ClientDependency,
     SSHClientDependency,
@@ -113,6 +115,20 @@ class OverrideSchedulerClient(SchedulerClientDependency):
         return global_ssh_client
 
 
+class OverrideDataTransferDependency(DataTransferDependency):
+
+    async def _get_ssh_client(self, system_name):
+        return global_ssh_client
+
+    async def _get_scheduler_client(self, system_name):
+        return await OverrideSchedulerClient()(system_name=system_name)
+
+    @asynccontextmanager
+    async def _get_s3_client(self, endpoint_url):
+        global global_s3_client
+        yield global_s3_client
+
+
 @pytest.fixture(scope="module")
 def slurm_cluster_with_api_config():
     for cluster in settings.clusters:
@@ -163,10 +179,16 @@ def client(app, s3_client, ssh_client):
         S3ClientDependency(connection=S3ClientConnectionType.private)
     ] = OverrideS3ClientDependency(connection=S3ClientConnectionType.private)
 
+    app.dependency_overrides[SSHClientDependency(ignore_health=True)] = (
+        OverrideSSHClientPool()
+    )
     app.dependency_overrides[SSHClientDependency()] = OverrideSSHClientPool()
     app.dependency_overrides[SchedulerClientDependency()] = OverrideSchedulerClient()
     app.dependency_overrides[SchedulerClientDependency(ignore_health=True)] = (
         OverrideSchedulerClient(ignore_health=True)
+    )
+    app.dependency_overrides[DataTransferDependency()] = (
+        OverrideDataTransferDependency()
     )
 
     client = TestClient(app)
