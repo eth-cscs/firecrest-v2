@@ -61,6 +61,10 @@ router = create_router(
     dependencies=[Depends(APIAuthDependency(authorize=True))],
 )
 
+OPS_SIZE_LIMIT = 5 * 1024 * 1024
+if settings.storage:
+    OPS_SIZE_LIMIT = settings.storage.max_ops_file_size
+
 
 class JobHelper:
     job_param = None
@@ -112,7 +116,7 @@ def _format_directives(directives: List[str], account: str):
 
 @router.post(
     "/upload",
-    description=f"Create asynchronous upload operation (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create asynchronous upload operation (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=UploadFileResponse,
     response_description="Upload operation created successfully",
@@ -147,7 +151,7 @@ async def post_upload(
 
 @router.post(
     "/download",
-    description=f"Create asynchronous download operation (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create asynchronous download operation (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=DownloadFileResponse,
     response_description="Download operation created successfully",
@@ -185,7 +189,7 @@ async def post_download(
 
 @router.post(
     "/mv",
-    description=f"Create move file or directory operation (`mv`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create move file or directory operation (`mv`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=MoveResponse,
     response_description="Move file or directory operation created successfully",
@@ -243,7 +247,7 @@ async def move_mv(
 
 @router.post(
     "/cp",
-    description=f"Create copy file or directory operation (`cp`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create copy file or directory operation (`cp`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CopyResponse,
     response_description="Copy file or directory operation created successfully",
@@ -304,7 +308,7 @@ async def post_cp(
 
 @router.delete(
     "/rm",
-    description=f"Create remove file or directory operation (`rm`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create remove file or directory operation (`rm`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_200_OK,
     response_model=DeleteResponse,
     response_description="Remove file or directory operation created successfully",
@@ -362,7 +366,7 @@ async def delete_rm(
 
 @router.post(
     "/compress",
-    description=f"Create compress file or directory operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create compress file or directory operation (`tar`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=CompressResponse,
     response_description="Compress file or directory operation created successfully",
@@ -431,7 +435,7 @@ async def compress(
 
 @router.post(
     "/extract",
-    description=f"Create extract file operation (`tar`) (for files larger than {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Create extract file operation (`tar`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_201_CREATED,
     response_model=ExtractResponse,
     response_description="Extract file or directory operation created successfully",

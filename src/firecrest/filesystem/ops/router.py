@@ -81,6 +81,11 @@ router = create_router(
 )
 
 
+OPS_SIZE_LIMIT = 5 * 1024 * 1024
+if settings.storage:
+    OPS_SIZE_LIMIT = settings.storage.max_ops_file_size
+
+
 @router.put(
     "/chmod",
     description="Change the permission mode of a file(`chmod`)",
@@ -265,7 +270,7 @@ async def get_head(
 
 @router.get(
     "/view",
-    description=f"View file content (up to max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} bytes)",
+    description=f"View file content (up to max {OPS_SIZE_LIMIT} bytes)",
     status_code=status.HTTP_200_OK,
     response_model=GetViewFileResponse,
     response_description="View operation finished successfully",
@@ -287,7 +292,7 @@ async def get_view(
             alias="size",
             description="Value, in bytes, of the size of data to be retrieved from the file.",
         ),
-    ] = settings.storage.max_ops_file_size,
+    ] = OPS_SIZE_LIMIT,
     offset: Annotated[
         int | None,
         Query(
@@ -311,10 +316,10 @@ async def get_view(
             detail="`size` value must be an integer value greater than 0",
         )
 
-    if size > settings.storage.max_ops_file_size:
+    if size > OPS_SIZE_LIMIT:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"`size` value must be less than {settings.storage.max_ops_file_size} bytes",
+            detail=f"`size` value must be less than {OPS_SIZE_LIMIT} bytes",
         )
 
     view = DdCommand(path, size, offset)
@@ -560,10 +565,10 @@ async def post_symlink(
 
 @router.get(
     "/download",
-    description=f"Download a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Download a small file (max {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_200_OK,
     response_model=None,
-    response_description="File downloaded successfully"
+    response_description="File downloaded successfully",
 )
 async def get_download(
     ssh_client: Annotated[
@@ -589,10 +594,10 @@ async def get_download(
 
 @router.post(
     "/upload",
-    description=f"Upload a small file (max {settings.storage.max_ops_file_size if settings.storage else 'undef.'} Bytes)",
+    description=f"Upload a small file (max {OPS_SIZE_LIMIT} Bytes)",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    response_description="File uploaded successfully"
+    response_description="File uploaded successfully",
 )
 async def post_upload(
     ssh_client: Annotated[
@@ -614,7 +619,7 @@ async def post_upload(
     base64 = Base64Command(f"{path}/{file.filename}", decode=True)
 
     raw_content = file.file.read()
-    if sys.getsizeof(raw_content) > settings.storage.max_ops_file_size:
+    if sys.getsizeof(raw_content) > OPS_SIZE_LIMIT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded file is too large.",
