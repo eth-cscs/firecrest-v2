@@ -32,6 +32,8 @@ jobs:
         run: |
           # Replace in a specific file — adjust pattern and file path
           sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
+          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" build/demo-launcher/Dockerfile
+
 
       - name: Commit and push changes
         run: |
