@@ -3,9 +3,9 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import json
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.scontrol_base import ScontrolBase
-import re
 
 
 class ScontrolPingCommand(ScontrolBase):
@@ -13,6 +13,7 @@ class ScontrolPingCommand(ScontrolBase):
     def get_command(self) -> str:
         cmd = [super().get_command()]
         cmd += ["ping"]
+        cmd += ["--json"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -22,20 +23,15 @@ class ScontrolPingCommand(ScontrolBase):
             )
 
         pings = []
-
-        for ping_str in stdout.split("\n"):
-            if len(ping_str) == 0:
-                continue
-            ping = {}
-            attr_match = re.search(r"Slurmctld\((\S+)\) at (\S+) is (\S+)", ping_str)
-            if attr_match:
-                ping["mode"] = attr_match.group(1)
-                ping["hostname"] = attr_match.group(2)
-                ping["pinged"] = attr_match.group(3)
-            else:
-                raise ValueError("Could not parse ping output")
-
-            pings.append(ping)
+        raw_pings = json.loads(stdout)["pings"]
+        for raw_ping in raw_pings:
+            pings.append(
+                {
+                    "mode": raw_ping["mode"],
+                    "hostname": raw_ping["hostname"],
+                    "pinged": raw_ping["pinged"],
+                }
+            )
 
         if len(pings) == 0:
             return None
