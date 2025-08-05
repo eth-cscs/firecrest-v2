@@ -6,7 +6,6 @@
 import json
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.scontrol_base import ScontrolBase
-import re
 
 
 class ScontrolPartitionCommand(ScontrolBase):
