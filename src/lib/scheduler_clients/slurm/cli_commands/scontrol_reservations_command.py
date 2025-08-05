@@ -5,8 +5,6 @@
 
 import json
 from lib.exceptions import SlurmError
-import re
-from datetime import datetime
 
 from lib.scheduler_clients.slurm.cli_commands.scontrol_base import ScontrolBase
 
