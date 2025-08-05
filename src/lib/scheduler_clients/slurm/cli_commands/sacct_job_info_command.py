@@ -4,26 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
-from datetime import datetime
+import json
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
-
-
-def _timestr_to_seconds(timestr: str):
-    try:
-        time = datetime.strptime(timestr, "%H:%M:%S")
-        return time.second + time.minute * 60 + time.hour * 3600
-    except ValueError:
-        return None
-
-
-def _parse_timestamp(timestr: str):
-    if timestr == "Unknown":
-        return None
-    try:
-        return int(timestr)
-    except ValueError:
-        return None
 
 
 class SacctCommand(SacctCommandBase):
@@ -45,16 +28,10 @@ class SacctCommand(SacctCommandBase):
             )
 
         jobs = {}
-        for job_str in stdout.split("\n"):
-            job_info = job_str.split("|")
-            if len(job_info) != 20:
-                continue
-            jobId = job_info[0]
-            if "." in jobId:
-                main_job_id, step_id = jobId.split(".")
-                jobs[main_job_id]["steps"].append(self._parse_step(job_info))
-            else:
-                jobs[jobId] = self._parse_job(job_info)
+        raw_jobs = json.loads(stdout)["jobs"]
+        for raw_job in raw_jobs:
+            jobId = str(raw_job["job_id"])
+            jobs[jobId] = self._parse_job(raw_job)
 
         if len(jobs) == 0:
             return None
@@ -62,55 +39,77 @@ class SacctCommand(SacctCommandBase):
 
     def _parse_job(self, job_info):
         return {
-            "jobId": job_info[0],
-            "allocationNodes": job_info[1],
-            "cluster": job_info[2],
+            "jobId": str(job_info["job_id"]),
+            "allocationNodes": job_info["allocation_nodes"],
+            "cluster": job_info["cluster"],
             "exit_code": (
                 {
-                    "return_code": job_info[3].split(":")[0],
-                    "signal": {"id": job_info[3].split(":")[1]},
+                    "return_code": job_info["exit_code"]["return_code"]["number"],
+                    "signal": {"id": job_info["exit_code"]["signal"]["id"]["number"]},
                 }
-                if job_info[3]
+                if "exit_code" in job_info
                 else None
             ),
-            "group": job_info[4],
-            "account": job_info[5],
-            "name": job_info[6],
-            "nodes": job_info[7],
-            "partition": job_info[8],
-            "priority": job_info[9],
-            "state": {"current": job_info[10], "reason": job_info[11]},
-            "time": {
-                "elapsed": job_info[12],
-                "submission": _parse_timestamp(job_info[13]),
-                "start": _parse_timestamp(job_info[14]),
-                "end": _parse_timestamp(job_info[15]),
-                "suspended": _timestr_to_seconds(job_info[16]),
-                "limit": int(job_info[17]) if job_info[17] else None,
+            "group": job_info["group"],
+            "account": job_info["account"],
+            "name": job_info["name"],
+            "nodes": job_info["nodes"],
+            "partition": job_info["partition"],
+            "priority": job_info["priority"]["number"],
+            "state": {
+                "current": job_info["state"]["current"][0],
+                "reason": job_info["state"]["reason"],
             },
-            "user": job_info[18],
-            "workingDirectory": job_info[19],
-            "steps": [],
+            "time": {
+                "elapsed": job_info["time"]["elapsed"],
+                "submission": job_info["time"]["submission"],
+                "start": job_info["time"]["start"],
+                "end": job_info["time"]["end"],
+                "suspended": job_info["time"]["suspended"],
+                "limit": (
+                    job_info["time"]["limit"]["number"]
+                    if "limit" in job_info["time"]
+                    else None
+                ),
+            },
+            "user": job_info["user"],
+            "workingDirectory": job_info["working_directory"],
+            "steps": self._parse_step(job_info["steps"]),
         }
 
-    def _parse_step(self, job_info):
-        return {
-            "step": {"id": job_info[0], "name": job_info[6]},
-            "state": job_info[10],
-            "exit_code": (
+    def _parse_step(self, raw_steps):
+        steps = []
+        for raw_step in raw_steps:
+            steps.append(
                 {
-                    "return_code": job_info[3].split(":")[0],
-                    "signal": {"id": job_info[3].split(":")[1]},
+                    "step": {
+                        "id": raw_step["step"]["id"],
+                        "name": raw_step["step"]["name"],
+                    },
+                    "state": raw_step["state"][0],
+                    "exit_code": (
+                        {
+                            "return_code": raw_step["exit_code"]["return_code"][
+                                "number"
+                            ],
+                            "signal": {
+                                "id": raw_step["exit_code"]["signal"]["id"]["number"]
+                            },
+                        }
+                        if "exit_code" in raw_step
+                        else None
+                    ),
+                    "time": {
+                        "elapsed": raw_step["time"]["elapsed"],
+                        "start": raw_step["time"]["start"],
+                        "end": raw_step["time"]["end"],
+                        "suspended": raw_step["time"]["suspended"],
+                        "limit": (
+                            raw_step["time"]["limit"]["number"]
+                            if "limit" in raw_step["time"]
+                            else None
+                        ),
+                    },
                 }
-                if job_info[3]
-                else None
-            ),
-            "time": {
-                "elapsed": job_info[12],
-                "submission": _parse_timestamp(job_info[13]),
-                "start": _parse_timestamp(job_info[14]),
-                "end": _parse_timestamp(job_info[15]),
-                "suspended": _timestr_to_seconds(job_info[16]),
-                "limit": int(job_info[17]) if job_info[17] else None,
-            },
-        }
+            )
+        return steps

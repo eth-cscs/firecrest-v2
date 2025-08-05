@@ -27,7 +27,7 @@ class SacctCommandBase(BaseCommand):
             str_job_ids = ",".join(self.job_ids)
             cmd += [f"--jobs='{str_job_ids}'"]
         cmd += ["--noheader"]
-        cmd += ["--parsable2"]
+        cmd += ["--json"]
 
         return " ".join(cmd)
 
