@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+import json
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
 
@@ -22,17 +23,15 @@ class SacctJobMetadataCommand(SacctCommandBase):
             )
 
         jobs = []
-        for job_str in stdout.split("\n"):
-            job_info = job_str.split("|")
-            if len(job_info) != 5:
-                continue
+        raw_jobs = json.loads(stdout)["jobs"]
+        for raw_job in raw_jobs:
             jobs.append(
                 {
-                    "jobId": job_info[0],
-                    "jobName": job_info[1],
-                    "standardInput": job_info[2],
-                    "standardOutput": job_info[3],
-                    "standardError": job_info[4],
+                    "jobId": raw_job["job_id"],
+                    "jobName": raw_job["name"],
+                    "standardInput": raw_job["stdin"],
+                    "standardOutput": raw_job["stdout"],
+                    "standardError": raw_job["stderr"],
                 }
             )
         if len(jobs) == 0:
