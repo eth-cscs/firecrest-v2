@@ -20,7 +20,7 @@ class SacctCommandBase(BaseCommand):
         self.job_ids = job_ids
 
     def get_command(self) -> str:
-        cmd = ["SLURM_TIME_FORMAT='%s' sacct"]
+        cmd = ["sacct"]
         if self.allusers:
             cmd += ["--allusers"]
         if self.job_ids:
