@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import json
 from lib.exceptions import SlurmError
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -27,6 +28,7 @@ class SinfoCommand(BaseCommand):
         cmd = ["sinfo -a -N"]
         cmd += ["--noheader"]
         cmd += ["--format='%z|%c|%O|%e|%f|%N|%o|%n|%T|%R|%w|%v|%m|%C'"]
+        cmd += ["--json"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -35,36 +37,31 @@ class SinfoCommand(BaseCommand):
                 f"Unexpected Slurm command response. exit_status:{exit_status} std_err:{stderr}"
             )
 
-        nodes = {}
-        for node_str in stdout.split("\n"):
-            node_info = node_str.split("|")
-            if len(node_info) != 14:
-                continue
-
-            node_name = node_info[5]
-            if node_name in nodes:
-                nodes[node_name]["partitions"] += node_info[9].split(",")
-            else:
-                nodes[node_name] = {
-                    "sockets": _int_or_none(node_info[0].split(":")[0]),
-                    "cores": _int_or_none(node_info[0].split(":")[0]),
-                    "threads": _int_or_none(node_info[0].split(":")[0]),
-                    "cpus": _int_or_none(node_info[1]),
-                    "cpu_load": _float_or_none(node_info[2]),
-                    "free_memory": _int_or_none(node_info[3]),
-                    "features": node_info[4],
-                    "name": node_info[5],
-                    "address": node_info[6],
-                    "hostname": node_info[7],
-                    "state": node_info[8],
-                    "partitions": node_info[9].split(","),
-                    "weight": _int_or_none(node_info[10]),
-                    "slurmd_version": node_info[11],
-                    "alloc_memory": _int_or_none(node_info[12]),
-                    "alloc_cpus": _int_or_none(node_info[13].split("/")[0]),
-                    "idle_cpus": _int_or_none(node_info[13].split("/")[1]),
+        nodes = []
+        raw_nodes = json.loads(stdout)["sinfo"]
+        for raw_node in raw_nodes:
+            nodes.append(
+                {
+                    "sockets": raw_node["sockets"]["minimum"],
+                    "cores": raw_node["cores"]["minimum"],
+                    "threads": raw_node["threads"]["minimum"],
+                    "cpus": raw_node["cpus"]["total"],
+                    "cpu_load": raw_node["cpus"]["load"]["minimum"],
+                    "free_memory": raw_node["memory"]["free"]["minimum"]["number"],
+                    "features": raw_node["features"]["active"],
+                    "name": raw_node["nodes"]["nodes"][0],
+                    "address": raw_node["nodes"]["addresses"][0],
+                    "hostname": raw_node["nodes"]["hostnames"][0],
+                    "state": raw_node["node"]["state"][0],
+                    "partitions": raw_node["partition"]["name"].split(","),
+                    "weight": raw_node["weight"]["minimum"],
+                    # "slurmd_version": node_info[11],
+                    "alloc_memory": raw_node["memory"]["allocated"],
+                    "alloc_cpus": raw_node["cpus"]["allocated"],
+                    "idle_cpus": raw_node["cpus"]["idle"],
                 }
+            )
 
         if len(nodes) == 0:
             return None
-        return nodes.values()
+        return nodes
