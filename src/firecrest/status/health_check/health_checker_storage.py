@@ -7,27 +7,26 @@ import asyncio
 import time
 
 
-from firecrest.config import HealthCheckException, Storage
+from firecrest.config import DataTransferType, HealthCheckException, BaseDataTransfer
 from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
-from firecrest.plugins import settings
 
 
-class StorageHealthChecker:
+class DataTransferHealthChecker:
 
-    storage: Storage = None
+    data_transfer: BaseDataTransfer = None
+    checks = []
 
-    def __init__(self, storage: Storage):
-        self.storage = storage
+    def __init__(self, data_transfer: BaseDataTransfer):
+        self.data_transfer = data_transfer
+
+        match data_transfer.service_type:
+            case DataTransferType.s3:
+                s3Check = S3HealthCheck(timeout=data_transfer.probing.timeout)
+                self.checks += [s3Check.check()]
 
     async def check(self) -> None:
         try:
-            checks = []
-            s3Check = S3HealthCheck(
-                timeout=settings.data_operation.data_transfer.probing.timeout
-            )
-            checks += [s3Check.check()]
-
-            results = await asyncio.gather(*checks, return_exceptions=True)
+            results = await asyncio.gather(*self.checks, return_exceptions=True)
             self.storage.servicesHealth = results
         except Exception as ex:
             error_message = f"Storage HealthChecker execution failed with error: {ex.__class__.__name__}"

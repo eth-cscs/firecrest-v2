@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # configs
-from firecrest.config import HPCCluster, Storage
+from firecrest.config import HPCCluster, DataOperation
 
 # models
 from lib.models import CamelModel
@@ -25,7 +25,7 @@ class GetLiveness(CamelModel):
 
 class GetSystemsResponse(CamelModel):
     systems: List[HPCCluster]
-    storage: Optional[Storage] = None
+    data_operations: Optional[DataOperation] = None
 
 
 class GetNodesResponse(CamelModel):
