@@ -18,7 +18,7 @@ from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
-from firecrest.status.health_check.health_checker_storage import (
+from firecrest.status.health_check.health_checker_data_transfer import (
     DataTransferHealthChecker,
 )
 from starlette_context import plugins

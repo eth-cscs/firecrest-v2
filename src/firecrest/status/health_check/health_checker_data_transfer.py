@@ -9,6 +9,7 @@ import time
 
 from firecrest.config import DataTransferType, HealthCheckException, BaseDataTransfer
 from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
+from firecrest.plugins import settings
 
 
 class DataTransferHealthChecker:
@@ -27,7 +28,7 @@ class DataTransferHealthChecker:
     async def check(self) -> None:
         try:
             results = await asyncio.gather(*self.checks, return_exceptions=True)
-            self.storage.servicesHealth = results
+            settings.data_operation.data_transfer.servicesHealth = results
         except Exception as ex:
             error_message = f"Storage HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
@@ -36,7 +37,7 @@ class DataTransferHealthChecker:
             exception.healthy = False
             exception.last_checked = time.time()
             exception.message = error_message
-            self.storage.servicesHealth = [exception]
+            settings.data_operation.data_transfer.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
             # Instead consider printing the exceotion with: traceback.print_exception(ex)
             raise ex

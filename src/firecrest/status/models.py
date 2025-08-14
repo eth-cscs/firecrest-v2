@@ -25,7 +25,7 @@ class GetLiveness(CamelModel):
 
 class GetSystemsResponse(CamelModel):
     systems: List[HPCCluster]
-    data_operations: Optional[DataOperation] = None
+    data_operation: Optional[DataOperation] = None
 
 
 class GetNodesResponse(CamelModel):
