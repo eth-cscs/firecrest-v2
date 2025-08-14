@@ -116,7 +116,7 @@ clusters:
 data_operation:
   max_ops_file_size: 1048576 # 1M
   data_transfer:
-    type: "s3"
+    service_type: "s3"
     name: "s3-storage"
     private_url: "http://192.168.240.19:9000"
     public_url: "http://localhost:9000"

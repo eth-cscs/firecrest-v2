@@ -202,6 +202,14 @@ class BaseDataTransfer(CamelModel):
     service_type: DataTransferType = Field(
         ..., description="Type of data transfer service."
     )
+    probing: Optional[Probing] = Field(
+        None, description="Configuration for probing storage availability."
+    )
+    servicesHealth: Optional[List[S3ServiceHealth]] = Field(
+        None,
+        description="Optional health information for different services in the cluster.",
+    )
+
     model_config = ConfigDict(use_enum_values=True)
 
 
@@ -235,14 +243,6 @@ class S3DataTransfer(BaseDataTransfer):
     bucket_lifecycle_configuration: BucketLifecycleConfiguration = Field(
         default_factory=BucketLifecycleConfiguration,
         description="Lifecycle policy settings for auto-deleting files after a given number of days.",
-    )
-
-    probing: Optional[Probing] = Field(
-        None, description="Configuration for probing storage availability."
-    )
-    servicesHealth: Optional[List[S3ServiceHealth]] = Field(
-        None,
-        description="Optional health information for different services in the cluster.",
     )
 
 
