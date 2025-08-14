@@ -80,10 +80,7 @@ router = create_router(
     dependencies=[Depends(APIAuthDependency(authorize=True))],
 )
 
-
-OPS_SIZE_LIMIT = 5 * 1024 * 1024
-if settings.storage:
-    OPS_SIZE_LIMIT = settings.storage.max_ops_file_size
+OPS_SIZE_LIMIT = settings.data_operation.max_ops_file_size
 
 
 @router.put(

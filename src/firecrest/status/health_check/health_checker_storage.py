@@ -22,7 +22,9 @@ class StorageHealthChecker:
     async def check(self) -> None:
         try:
             checks = []
-            s3Check = S3HealthCheck(timeout=settings.storage.probing.timeout)
+            s3Check = S3HealthCheck(
+                timeout=settings.data_operation.data_transfer.probing.timeout
+            )
             checks += [s3Check.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)

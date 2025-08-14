@@ -119,10 +119,15 @@ async def schedule_tasks(scheduler: AsyncScheduler):
                 IntervalTrigger(seconds=cluster.probing.interval),
                 id=f"check-cluster-{cluster.name}",
             )
-    if settings.storage and settings.storage.probing:
+    if (
+        settings.data_operation.data_transfer
+        and settings.data_operation.data_transfer.probing
+    ):
         await scheduler.add_schedule(
-            StorageHealthChecker(settings.storage).check,
-            IntervalTrigger(seconds=settings.storage.probing.interval),
+            StorageHealthChecker(settings.data_operation.data_transfer).check,
+            IntervalTrigger(
+                seconds=settings.data_operation.data_transfer.probing.interval
+            ),
             id="check-storage",
         )
     await scheduler.add_schedule(
