@@ -8,8 +8,6 @@ from datetime import datetime
 from firecrest.dependencies import (
     APIAuthDependency,
     DataTransferDependency,
-    S3ClientConnectionType,
-    S3ClientDependency,
     SSHClientDependency,
     SchedulerClientDependency,
 )
@@ -73,17 +71,6 @@ async def s3_client():
         config=AioConfig(signature_version="s3v4"),
     ) as client:
         global_s3_client = client
-        yield global_s3_client
-
-
-class OverrideS3ClientDependency:
-    def __init__(
-        self, connection: S3ClientConnectionType = S3ClientConnectionType.public
-    ):
-        pass
-
-    async def __call__(self):
-        global global_s3_client
         yield global_s3_client
 
 
@@ -172,13 +159,6 @@ def client(app, s3_client, ssh_client):
     assert ssh_client is not None
 
     app.dependency_overrides[APIAuthDependency()] = OverrideAPIAuthDependency()
-    app.dependency_overrides[
-        S3ClientDependency(connection=S3ClientConnectionType.public)
-    ] = OverrideS3ClientDependency(connection=S3ClientConnectionType.public)
-    app.dependency_overrides[
-        S3ClientDependency(connection=S3ClientConnectionType.private)
-    ] = OverrideS3ClientDependency(connection=S3ClientConnectionType.private)
-
     app.dependency_overrides[SSHClientDependency(ignore_health=True)] = (
         OverrideSSHClientPool()
     )
