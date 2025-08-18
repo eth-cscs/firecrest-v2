@@ -205,7 +205,7 @@ class BaseDataTransfer(CamelModel):
     probing: Optional[Probing] = Field(
         None, description="Configuration for probing storage availability."
     )
-    servicesHealth: Optional[List[S3ServiceHealth]] = Field(
+    servicesHealth: Optional[List[S3ServiceHealth | HealthCheckException]] = Field(
         None,
         description="Optional health information for different services in the cluster.",
     )

@@ -9,35 +9,34 @@ import time
 
 from firecrest.config import DataTransferType, HealthCheckException, BaseDataTransfer
 from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
-from firecrest.plugins import settings
 
 
 class DataTransferHealthChecker:
 
     data_transfer: BaseDataTransfer = None
-    checks = []
 
     def __init__(self, data_transfer: BaseDataTransfer):
         self.data_transfer = data_transfer
 
-        match data_transfer.service_type:
-            case DataTransferType.s3:
-                s3Check = S3HealthCheck(timeout=data_transfer.probing.timeout)
-                self.checks += [s3Check.check()]
-
     async def check(self) -> None:
+        checks = []
+        match self.data_transfer.service_type:
+            case DataTransferType.s3:
+                s3Check = S3HealthCheck(timeout=self.data_transfer.probing.timeout)
+                checks += [s3Check.check()]
+
         try:
-            results = await asyncio.gather(*self.checks, return_exceptions=True)
-            settings.data_operation.data_transfer.servicesHealth = results
+            results = await asyncio.gather(*checks, return_exceptions=True)
+            self.data_transfer.servicesHealth = results
         except Exception as ex:
-            error_message = f"Storage HealthChecker execution failed with error: {ex.__class__.__name__}"
+            error_message = f"DataTransfer HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
-                error_message = f"Storage HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
+                error_message = f"DataTransfer HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
             exception = HealthCheckException(service_type="exception")
             exception.healthy = False
             exception.last_checked = time.time()
             exception.message = error_message
-            settings.data_operation.data_transfer.servicesHealth = [exception]
+            self.data_transfer.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
             # Instead consider printing the exceotion with: traceback.print_exception(ex)
             raise ex
