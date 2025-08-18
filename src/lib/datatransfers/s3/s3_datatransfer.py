@@ -210,7 +210,7 @@ class S3Datatransfer(DataTransferBase):
                 "max_part_size": str(self.max_part_size),
             }
 
-            job_script = _build_script("slurm_job_downloader.sh", parameters)
+            job_script = _build_script("job_downloader.sh", parameters)
             job = JobHelper(
                 f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
             )
@@ -314,7 +314,7 @@ class S3Datatransfer(DataTransferBase):
             job = JobHelper(
                 f"{self.work_dir}/{username}",
                 _build_script(
-                    "slurm_job_uploader_multipart.sh",
+                    "job_uploader_multipart.sh",
                     parameters,
                 ),
                 "OutgressFileTransfer",
