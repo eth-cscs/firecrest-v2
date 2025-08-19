@@ -176,7 +176,8 @@ num_parts={{ F7T_MP_NUM_PARTS }}
 input_file={{ F7T_MP_INPUT_FILE }}
 complete_multipart_url='{{ F7T_MP_COMPLETE_URL | safe }}'
 
-echo "[INFO] Uploading file:$input_file into $num_parts chunks"
+echo $(date -u) "Upload File Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
+echo "Uploading file:$input_file into $num_parts chunks"
 
 # Check input file
 if [ ! -f "$input_file" ];
