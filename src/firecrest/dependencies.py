@@ -4,11 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
-from enum import Enum
 from fastapi import Request, status, HTTPException
 from aiobotocore.config import AioConfig
 from aiobotocore.session import get_session
-from botocore.handlers import validate_bucket_name
 
 # extensions
 from firecrest.config import (

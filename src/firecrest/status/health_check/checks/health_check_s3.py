@@ -8,9 +8,6 @@ from firecrest.config import (
 )
 from aiobotocore.session import get_session
 from aiobotocore.config import AioConfig
-from firecrest.dependencies import (
-    DataTransferDependency,
-)
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from firecrest.plugins import settings
 
