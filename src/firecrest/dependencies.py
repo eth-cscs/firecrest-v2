@@ -412,6 +412,17 @@ class DataTransferDependency:
             async with self._get_s3_client(
                 settings.storage.private_url.get_secret_value()
             ) as s3_client_private:
+
+                # This is required because botocore library bucket_name validation is not compliant
+                # with ceph multi tenancy bucket names
+                if settings.storage.tenant:
+                    s3_client_public.meta.events.unregister(
+                        "before-parameter-build.s3", validate_bucket_name
+                    )
+                    s3_client_private.meta.events.unregister(
+                        "before-parameter-build.s3", validate_bucket_name
+                    )
+
                 return S3Datatransfer(
                     scheduler_client=scheduler_client,
                     directives=system.datatransfer_jobs_directives,

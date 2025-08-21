@@ -127,6 +127,7 @@ storage:
     parallel_runs: 3
     tmp_folder: "tmp"
   max_ops_file_size: 1048576 # 1M
+  tenant: "test"
   probing:
     interval: 60
     timeout: 10
