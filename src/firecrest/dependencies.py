@@ -380,7 +380,7 @@ class DataTransferDependency:
 
                         # This is required because botocore library bucket_name validation is not compliant
                         # with ceph multi tenancy bucket names
-                        if settings.storage.tenant:
+                        if settings.data_operation.data_transfer.tenant:
                             s3_client_public.meta.events.unregister(
                                 "before-parameter-build.s3", validate_bucket_name
                             )
