@@ -27,4 +27,4 @@ async def test_settings(app_settings: Settings):
     assert app_settings.clusters[0].scheduler is not None
     assert app_settings.clusters[0].scheduler.type == SchedulerType.slurm
 
-    assert app_settings.storage is not None
+    assert app_settings.data_operation is not None

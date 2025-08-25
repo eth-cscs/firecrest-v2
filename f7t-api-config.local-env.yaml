@@ -113,20 +113,22 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
-storage:
-  name: "s3-storage"
-  private_url: "http://192.168.240.19:9000"
-  public_url: "http://localhost:9000"
-  access_key_id: "storage_access_key"
-  secret_access_key: "secret_file:/run/secrets/s3_secret_access_key"
-  region: "us-east-1"
-  ttl: 604800
-  multipart:
-    use_split: false
-    max_part_size: 1073741824 # 1G
-    parallel_runs: 3
-    tmp_folder: "tmp"
+data_operation:
   max_ops_file_size: 1048576 # 1M
-  probing:
-    interval: 60
-    timeout: 10
+  data_transfer:
+    service_type: "s3"
+    name: "s3-storage"
+    private_url: "http://192.168.240.19:9000"
+    public_url: "http://localhost:9000"
+    access_key_id: "storage_access_key"
+    secret_access_key: "secret_file:/run/secrets/s3_secret_access_key"
+    region: "us-east-1"
+    ttl: 604800
+    multipart:
+      use_split: false
+      max_part_size: 1073741824 # 1G
+      parallel_runs: 3
+      tmp_folder: "tmp"
+    probing:
+      interval: 60
+      timeout: 10

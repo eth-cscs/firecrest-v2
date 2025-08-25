@@ -62,7 +62,7 @@ router_liveness = create_router(
     response_description="System list returned successfully",
 )
 async def get_systems() -> Any:
-    return {"systems": settings.clusters, "storage": settings.storage}
+    return {"systems": settings.clusters, "data_operation": settings.data_operation}
 
 
 @router_on_systen.get(
