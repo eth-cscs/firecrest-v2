@@ -5,15 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [2.3.1] - OPEN
 
 ### Added
 
-
 ### Changed
 
-- data_operation setting to replace storage. The new setting decouples the max_ops_file_size parameter from the data_transfer settings that are now a child parameter of data_operation. Also, data_transfer can be of multiple types.
+- New data_operation setting to replace storage. The new setting decouples the max_ops_file_size parameter from the data_transfer settings that are now a child parameter of data_operation. Also, data_transfer can be of multiple types.
+- Certificates debug information when SSH connection fails
 
 ### Fixed
 

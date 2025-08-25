@@ -5,9 +5,14 @@
 
 import asyncio
 from time import time
+from datetime import datetime
+
 from typing import Any, Dict
 import asyncssh
-from asyncssh import ChannelOpenError, ConnectionLost, SSHClientConnection
+from asyncssh import (
+    ChannelOpenError, ConnectionLost, SSHClientConnection, PermissionDenied,
+    ProtocolError
+)
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
 
@@ -18,6 +23,7 @@ from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
 from lib.loggers.tracing_log import log_backend_command
+import logging
 
 
 class BaseCommand(ABC):
@@ -225,6 +231,24 @@ class SSHClientPool:
                 raise TypeError("Unsupported SSHKeysProvider")
         return options
 
+    async def get_ssh_debug_info(self,
+                                 options: asyncssh.SSHClientConnectionOptions,
+                                 exp_reason: str):
+
+        logger = logging.getLogger("uvicorn.error")
+
+        logger.error(f"SSH Server Error: {exp_reason}")
+        if len(options.kwargs["client_certs"]) > 0:
+            logger.error("[BEG] Client Certificate debug info:")
+            for cert in options.kwargs["client_certs"]:
+                logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
+                logger.error(f"\tPrincipals: {cert.principals}")
+                logger.error(f"\tPublic key: {cert.key.export_public_key().decode().strip()}")
+                logger.error(f"\tSerial ID: {cert._serial}")
+                logger.error(f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}")
+                logger.error(f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}")
+            logger.error("[END] Client Certificate debug info")
+
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
         client: SSHClient = None
@@ -269,6 +293,18 @@ class SSHClientPool:
                     "SSH connection timeout limit exceeded."
                 ) from e
             except ConnectionResetError as e:
-                raise SSHConnectionError("Unable to establish SSH connection.") from e
+                raise SSHConnectionError(
+                    "Unable to establish SSH connection."
+                    ) from e
             except ConnectionLost as e:
+                raise SSHConnectionError(
+                    "Unable to establish SSH connection."
+                    ) from e
+            except PermissionDenied as e:
+                await self.get_ssh_debug_info(options, e.reason)
+
+                raise SSHConnectionError("Unable to establish SSH connection.") from e
+            except ProtocolError as e:
+                await self.get_ssh_debug_info(options, e.reason)
+
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
