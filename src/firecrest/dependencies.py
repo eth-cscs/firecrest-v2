@@ -7,6 +7,7 @@ import asyncio
 from fastapi import Request, status, HTTPException
 from aiobotocore.config import AioConfig
 from aiobotocore.session import get_session
+from botocore.handlers import validate_bucket_name
 
 # extensions
 from firecrest.config import (
@@ -376,6 +377,17 @@ class DataTransferDependency:
                     async with self._get_s3_client(
                         settings.data_operation.data_transfer.private_url.get_secret_value()
                     ) as s3_client_private:
+
+                        # This is required because botocore library bucket_name validation is not compliant
+                        # with ceph multi tenancy bucket names
+                        if settings.data_operation.data_transfer.tenant:
+                            s3_client_public.meta.events.unregister(
+                                "before-parameter-build.s3", validate_bucket_name
+                            )
+                            s3_client_private.meta.events.unregister(
+                                "before-parameter-build.s3", validate_bucket_name
+                            )
+
                         return S3Datatransfer(
                             scheduler_client=scheduler_client,
                             directives=system.datatransfer_jobs_directives,
