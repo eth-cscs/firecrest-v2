@@ -18,7 +18,9 @@ from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
-from firecrest.status.health_check.health_checker_storage import StorageHealthChecker
+from firecrest.status.health_check.health_checker_data_transfer import (
+    DataTransferHealthChecker,
+)
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
 
@@ -119,10 +121,15 @@ async def schedule_tasks(scheduler: AsyncScheduler):
                 IntervalTrigger(seconds=cluster.probing.interval),
                 id=f"check-cluster-{cluster.name}",
             )
-    if settings.storage and settings.storage.probing:
+    if (
+        settings.data_operation.data_transfer
+        and settings.data_operation.data_transfer.probing
+    ):
         await scheduler.add_schedule(
-            StorageHealthChecker(settings.storage).check,
-            IntervalTrigger(seconds=settings.storage.probing.interval),
+            DataTransferHealthChecker(settings.data_operation.data_transfer).check,
+            IntervalTrigger(
+                seconds=settings.data_operation.data_transfer.probing.interval
+            ),
             id="check-storage",
         )
     await scheduler.add_schedule(

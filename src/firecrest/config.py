@@ -190,7 +190,30 @@ class Probing(CamelModel):
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
-class Storage(BaseModel):
+class DataTransferType(str, Enum):
+    """Types of data transfer services"""
+
+    s3 = "s3"
+
+
+class BaseDataTransfer(CamelModel):
+    """Base data transfer setting"""
+
+    service_type: DataTransferType = Field(
+        ..., description="Type of data transfer service."
+    )
+    probing: Optional[Probing] = Field(
+        None, description="Configuration for probing storage availability."
+    )
+    servicesHealth: Optional[List[S3ServiceHealth | HealthCheckException]] = Field(
+        None,
+        description="Optional health information for different services in the cluster.",
+    )
+
+    model_config = ConfigDict(use_enum_values=True)
+
+
+class S3DataTransfer(BaseDataTransfer):
     """Object storage configuration, including credentials, endpoints, and upload behavior."""
 
     name: str = Field(..., description="Name identifier for the storage.")
@@ -221,6 +244,9 @@ class Storage(BaseModel):
         default_factory=BucketLifecycleConfiguration,
         description="Lifecycle policy settings for auto-deleting files after a given number of days.",
     )
+
+
+class DataOperation(BaseModel):
     max_ops_file_size: int = Field(
         5 * 1024 * 1024,
         description=(
@@ -228,12 +254,9 @@ class Storage(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    probing: Optional[Probing] = Field(
-        None, description="Configuration for probing storage availability."
-    )
-    servicesHealth: Optional[List[S3ServiceHealth]] = Field(
+    data_transfer: Optional[S3DataTransfer] = Field(
         None,
-        description="Optional health information for different services in the cluster.",
+        description=("Data transfer service configuration"),
     )
 
 
@@ -449,10 +472,10 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
     )
-    storage: Optional[Storage] = Field(
-        None,
+    data_operation: Optional[DataOperation] = Field(
+        DataOperation(),
         description=(
-            "Storage backend configuration. More details in "
+            "Data transfer backend configuration. More details in "
             "[this section](../arch/external_storage/README.md)."
         ),
     )
@@ -479,9 +502,7 @@ class Settings(BaseSettings):
             clusters = []
             for file in Path(path).glob("*.yaml"):
                 with open(file) as stream:
-                    clusters.append(
-                        HPCCluster.model_validate(yaml.safe_load(stream))
-                )
+                    clusters.append(HPCCluster.model_validate(yaml.safe_load(stream)))
             return clusters
         else:
             return value

@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Certificates debug information when SSH connection fails
-
 ### Changed
+
+- New data_operation setting to replace storage. The new setting decouples the max_ops_file_size parameter from the data_transfer settings that are now a child parameter of data_operation. Also, data_transfer can be of multiple types.
+- Certificates debug information when SSH connection fails
 
 ### Fixed
 
