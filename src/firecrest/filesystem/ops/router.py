@@ -654,8 +654,9 @@ async def post_compress(
     tar = TarCommand(
         request_model.path,
         request_model.target_path,
-        request_model.match_pattern,
-        request_model.dereference,
+        match_pattern=request_model.match_pattern,
+        dereference=request_model.dereference,
+        compression=request_model.compression,
         operation=TarCommand.Operation.compress,
     )
 
@@ -684,6 +685,7 @@ async def post_extract(
     tar = TarCommand(
         request_model.path,
         request_model.target_path,
+        compression=request_model.compression,
         operation=TarCommand.Operation.extract,
     )
 

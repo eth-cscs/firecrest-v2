@@ -10,6 +10,7 @@ from pydantic import Field
 from firecrest.filesystem.models import FilesystemRequestBase
 from lib.datatransfers.s3.models import S3DataTransferOperation
 from lib.models.base_model import CamelModel
+from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 
 class PostFileUploadRequest(FilesystemRequestBase):
@@ -135,6 +136,10 @@ class CompressRequest(FilesystemRequestBase):
         default=False,
         description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.",
     )
+    compression: Optional[TarCommand.CompressionType] = Field(
+        default="gzip",
+        description="Defines the type of compression to be used. By default gzip is used.",
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -144,6 +149,7 @@ class CompressRequest(FilesystemRequestBase):
                     "match_pattern": "*./[ab].*\\.txt",
                     "dereference": "true",
                     "account": "group",
+                    "compression": "none",
                 }
             ]
         }
@@ -161,6 +167,10 @@ class ExtractRequest(FilesystemRequestBase):
     account: Optional[str] = Field(
         default=None, description="Name of the account in the scheduler"
     )
+    compression: Optional[TarCommand.CompressionType] = Field(
+        default="gzip",
+        description="Defines the type of compression to be used. By default gzip is used.",
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -168,6 +178,7 @@ class ExtractRequest(FilesystemRequestBase):
                     "source_path": "/home/user/dir/file.tar.gz",
                     "target_path": "/home/user/dir",
                     "account": "group",
+                    "compression": "none",
                 }
             ]
         }

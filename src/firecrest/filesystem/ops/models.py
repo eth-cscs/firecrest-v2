@@ -10,6 +10,7 @@ from typing import Optional
 from firecrest.filesystem.models import FilesystemRequestBase
 from lib.models import CamelModel
 from pydantic import Field
+from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 
 class ContentUnit(str, Enum):
@@ -100,12 +101,7 @@ class PutFileChmodRequest(FilesystemRequestBase):
     mode: str = Field(..., description="Mode in octal permission format")
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "path": "/home/user/dir/file.out",
-                    "mode": "777"
-                }
-            ]
+            "examples": [{"path": "/home/user/dir/file.out", "mode": "777"}]
         }
     }
 
@@ -115,15 +111,19 @@ class PutFileChmodResponse(CamelModel):
 
 
 class PutFileChownRequest(FilesystemRequestBase):
-    owner: Optional[str] = Field(default="", description="User name of the new user owner of the file")
-    group: Optional[str] = Field(default="", description="Group name of the new group owner of the file")
+    owner: Optional[str] = Field(
+        default="", description="User name of the new user owner of the file"
+    )
+    group: Optional[str] = Field(
+        default="", description="Group name of the new group owner of the file"
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "path": "/home/user/dir/file.out",
                     "owner": "user",
-                    "group": "my-group"
+                    "group": "my-group",
                 }
             ]
         }
@@ -135,15 +135,13 @@ class PutFileChownResponse(CamelModel):
 
 
 class PostMakeDirRequest(FilesystemRequestBase):
-    parent: Optional[bool] = Field(default=False, description="If set to `true` creates all its parent directories if they do not already exist")
+    parent: Optional[bool] = Field(
+        default=False,
+        description="If set to `true` creates all its parent directories if they do not already exist",
+    )
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "path": "/home/user/dir/newdir",
-                    "parent": "true"
-                }
-            ]
+            "examples": [{"path": "/home/user/dir/newdir", "parent": "true"}]
         }
     }
 
@@ -152,12 +150,7 @@ class PostFileSymlinkRequest(FilesystemRequestBase):
     link_path: str = Field(..., description="Path to the new symlink")
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "path": "/home/user/dir",
-                    "link_path": "/home/user/newlink"
-                }
-            ]
+            "examples": [{"path": "/home/user/dir", "link_path": "/home/user/newlink"}]
         }
     }
 
@@ -176,8 +169,17 @@ class PostMkdirResponse(CamelModel):
 
 class PostCompressRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Path to the compressed file")
-    match_pattern: Optional[str] = Field(default=None, description="Regex pattern to filter files to compress")
-    dereference: Optional[bool] = Field(default=False, description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.")
+    match_pattern: Optional[str] = Field(
+        default=None, description="Regex pattern to filter files to compress"
+    )
+    dereference: Optional[bool] = Field(
+        default=False,
+        description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.",
+    )
+    compression: Optional[TarCommand.CompressionType] = Field(
+        default="gzip",
+        description="Defines the type of compression to be used. By default gzip is used.",
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -185,7 +187,8 @@ class PostCompressRequest(FilesystemRequestBase):
                     "path": "/home/user/dir",
                     "target_path": "/home/user/file.tar.gz",
                     "match_pattern": "*./[ab].*\\.txt",
-                    "dereference": "true"
+                    "dereference": "true",
+                    "compression": "none",
                 }
             ]
         }
@@ -193,13 +196,20 @@ class PostCompressRequest(FilesystemRequestBase):
 
 
 class PostExtractRequest(FilesystemRequestBase):
-    target_path: str = Field(..., description="Path to the directory where to extract the compressed file")
+    target_path: str = Field(
+        ..., description="Path to the directory where to extract the compressed file"
+    )
+    compression: Optional[TarCommand.CompressionType] = Field(
+        default="gzip",
+        description="Defines the type of compression to be used. By default gzip is used.",
+    )
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "path": "/home/user/dir/file.tar.gz",
-                    "target_path": "/home/user/dir"
+                    "target_path": "/home/user/dir",
+                    "compression": "none",
                 }
             ]
         }
