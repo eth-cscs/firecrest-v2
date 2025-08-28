@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The System Name path parameter and the corresponding Cluster name configuration are case insensitive.
+
 ## [2.3.1]
 
 ### Added
