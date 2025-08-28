@@ -28,11 +28,15 @@ def mocked_get_job_response():
     with response_file.open("r") as response:
         return json.load(response)
 
+
 @pytest.fixture(scope="module")
 def mocked_get_jobs_allusers_response():
-    response_file = impresources.files(mocked_api_responses) / "slurm_get_allusers_jobs.json"
+    response_file = (
+        impresources.files(mocked_api_responses) / "slurm_get_allusers_jobs.json"
+    )
     with response_file.open("r") as response:
         return json.load(response)
+
 
 @pytest.fixture(scope="module")
 def mocked_get_job_not_found_response():
@@ -113,6 +117,41 @@ def test_get_job(client, mocked_get_job_response, slurm_cluster_with_api_config)
 
         response = client.get(
             f"/compute/{slurm_cluster_with_api_config.name}/jobs/{job_id}"
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        jobs_result = GetJobResponse(**response.json())
+        assert jobs_result.jobs[0].job_id == job_id
+        timeout = aiohttp.ClientTimeout(
+            total=slurm_cluster_with_api_config.scheduler.timeout
+        )
+        mocked.assert_called_once_with(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/job/{job_id}",
+            method="GET",
+            headers={
+                "Content-Type": "application/json",
+                "X-SLURM-USER-NAME": "test-user",
+                "X-SLURM-USER-TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJ0ZXN0IiwicHJlZmZlcmVkLXVzZXJuYW1lIjoidGVzdCJ9.9lEMnYRwLVeOTQKoXxzMd81zJNOAEnrDI3QtcJsUi7A",
+            },
+            timeout=timeout,
+        )
+
+
+def test_case_insensitive_system_name(
+    client, mocked_get_job_response, slurm_cluster_with_api_config
+):
+
+    job_id = mocked_get_job_response["jobs"][0]["job_id"]
+
+    with aioresponses() as mocked:
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/job/{job_id}",
+            status=200,
+            body=json.dumps(mocked_get_job_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name.upper()}/jobs/{job_id}"
         )
         assert response.status_code == 200
         assert response.json() is not None

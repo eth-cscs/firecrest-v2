@@ -174,6 +174,15 @@ def register_middlewares(app: FastAPI):
             )
             raise e
 
+    @app.middleware("http")
+    async def lower_case_path(request: Request, call_next):
+
+        path = request.scope["path"].lower()
+        request.scope["path"] = path
+
+        response = await call_next(request)
+        return response
+
 
 def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(status_router)

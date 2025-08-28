@@ -8,7 +8,7 @@ ssh_credentials:
   url: "http://192.168.240.20:5000"
   max_connections: 500
 clusters:
-- name: "cluster-slurm-api"
+- name: "cluster-SLURM-api"
   ssh:
     host: "192.168.240.2"
     port: 22
@@ -33,7 +33,7 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
-- name: "cluster-slurm-ssh"
+- name: "cluster-SLURM-ssh"
   ssh:
     host: "192.168.240.2"
     port: 22
