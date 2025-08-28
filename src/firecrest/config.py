@@ -5,6 +5,7 @@
 
 from enum import Enum
 import os
+import pydantic
 import yaml
 from pathlib import Path
 from typing import Any, Dict, Literal, Tuple, Type, Union
@@ -314,7 +315,9 @@ class HPCCluster(CamelModel):
     [the systems' section](../arch/systems//README.md).
     """
 
-    name: str = Field(..., description="Unique name for the cluster.")
+    name: str = Field(
+        ..., description="Unique name for the cluster. This field is case insensitive."
+    )
     ssh: SSHClientPool = Field(
         ..., description="SSH configuration for accessing the cluster nodes."
     )
@@ -344,6 +347,12 @@ class HPCCluster(CamelModel):
         default_factory=list,
         description="Custom scheduler flags passed to data transfer jobs (e.g. `-pxfer` for a dedicated partition).",
     )
+
+    @pydantic.field_validator("name", mode="before")
+    def to_lowercase(cls, value):
+        if isinstance(value, str):
+            return value.lower()
+        return value
 
 
 class OpenFGA(CamelModel):
