@@ -162,7 +162,7 @@ Once all parts have been uploaded, the user must call the provided complete uplo
 
 #### Multi part upload example
 
-Compute the size, expressed in bytes, of your large file. A good way is to use `stat --printf "%s" "your-file.dat"`.
+The first step is to determine the size of your large file, expressed in bytes. A reliable method is to use the command: `stat --printf "%s" "$LARGE_FILE_NAME"`.
 
 Then call the `/filesystem/{system}/transfer/upload` endpoint as following.
 
@@ -198,7 +198,7 @@ The JSON response from this call follows the structure shown below. FirecREST ca
     ],
     "completeUploadUrl": "https://upload-complete-url",
     "maxPartSize": 1073741824
-}
+    }
     ```
 Given the `maxPartSize` field in the `/filesystem/{system}/transfer/upload` end-point response, split your large file consequently:
 
@@ -207,7 +207,7 @@ Given the `maxPartSize` field in the `/filesystem/{system}/transfer/upload` end-
     $ split "$LARGE_FILE_NAME" -b "$maxPartSize" --numeric-suffixes=1
     ```
 
-This will divide your large file in a set of parts numbered from x01 to the number of parts that the AWS protocol expects. The number of split parts must match the number of items in the `partsUploadUrls`list.
+This will divide your large file in a set of parts numbered from <i>x01</i>,<i>x02</i>, etc. to the number of parts that the S3 multipart upload protocol expects. The number of split parts must match the number of items in the `partsUploadUrls`list.
 
 Upload each part in the correct order. After a successful upload, S3 responds with an `ETag`, which is a checksum of that specific part. This value is essential for completing the multipart upload, so be sure to record it.
 
@@ -230,6 +230,8 @@ The example below demonstrates a simple sequential upload. However, this approac
         fi
         part_id=$(( part_id + 1 ))
     done <<< "$(echo "$partsUploadUrls" | jq -r '.[]')"
+
+    # Prepare ETag's XML collection
     complete_upload_xml="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">${etags_xml}</CompleteMultipartUpload>"
     ```
 
