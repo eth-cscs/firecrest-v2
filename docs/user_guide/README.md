@@ -162,25 +162,105 @@ Once all parts have been uploaded, the user must call the provided complete uplo
 
 #### Multi part upload example
 
-Split your large file into as many parts as provided partsUploadUrls by the `/filesystem/{system}/transfer/upload` end-point:
+Compute the size, expressed in bytes, of your large file. A good way is to use `stat --printf "%s" "your-file.dat"`.
+
+Then call the `/filesystem/{system}/transfer/upload` endpoint as following.
+
+!!! example "Call to transfer/upload to activate the multipart protocol"
+    ```bash
+    curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
+    --header "Content-Type: application/json" \
+    --header "Authorization: Bearer $ACCESS_TOKEN" \
+    --data "{
+        \"path\":\"${DESTINATION_PATH}\",
+        \"account\": \"${ACCOUNT}\",
+        \"fileName\":\"${LARGE_FILE_NAME}\",
+        \"fileSize\":\"${LARGE_FILE_SIZE_IN_BYTES}\"
+    }"
+    ```
+
+The JSON response from this call follows the structure shown below. FirecREST calculates the number of parts the file must be split into, based on the provided file size and the `maxPartSize` setting. Each part is assigned a number from <i>1</i> to <i>n</i> and must be uploaded using the presigned URLs listed in `partsUploadUrls`. Once all parts have been successfully uploaded, the presigned URL in `completeUploadUrl` is used to finalize the upload sequence and initiate the transfer of the complete data file from S3 to its final destination.
+
+!!! example "FirecREST response from `/filesystem/{system}/transfer/upload` endpoint"
+    ```json
+    {
+    "transferJob": {
+        "jobId": nnnnnnnnn,
+        "system": "SYSTEM",
+        "workingDirectory": "/xxxxxxxxx",
+        "logs": {
+            "outputLog": "/xxxxxxxx.log",
+            "errorLog": "/xxxxxxxxx.log"
+        }
+    },
+    "partsUploadUrls": [
+        "https://part1-url", "https://part2-url", "https://part3-url"
+    ],
+    "completeUploadUrl": "https://upload-complete-url",
+    "maxPartSize": 1073741824
+}
+    ```
+Given the `maxPartSize` field in the `/filesystem/{system}/transfer/upload` end-point response, split your large file consequently:
 
 !!! example "Split large file to upload"
     ```bash
-    $ split -n 7 -d large-file.zip large-file-part-
+    $ split "$LARGE_FILE_NAME" -b "$maxPartSize" --numeric-suffixes=1
     ```
 
-Upload each individual part following the correct part order:
+This will divide your large file in a set of parts numbered from x01 to the number of parts that the AWS protocol expects. The number of split parts must match the number of items in the `partsUploadUrls`list.
+
+Upload each part in the correct order. After a successful upload, S3 responds with an `ETag`, which is a checksum of that specific part. This value is essential for completing the multipart upload, so be sure to record it.
+
+The example below demonstrates a simple sequential upload. However, this approach is not mandatory, since S3 fully supports uploading parts in parallel.
 
 !!! example "Upload parts call"
     ```bash
-    $ curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&partNumber=1&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400' --upload-file large-file-part-00
+    part_id=1
+    etags_xml=""
+    while read -r part_url; do
+        # Generate the name of the part file sequentially
+        part_file=$(printf "%s/x%02d" $PARTS_DIR ${part_id})
+        # Upload data with curl and extract ETag
+        if line=$(curl -f --show-error -D - --upload-file "$part_file" "$part_url" | grep -i "^ETag: " ) ;
+        then
+            etag=$(echo $line | awk -F'"' '{print $2}')
+            etags_xml="${etags_xml}<Part><PartNumber>${part_id}</PartNumber><ETag>\"${etag%|*}\"</ETag></Part>"
+        else
+            echo "Error uploading part ${part_id}"
+        fi
+        part_id=$(( part_id + 1 ))
+    done <<< "$(echo "$partsUploadUrls" | jq -r '.[]')"
+    complete_upload_xml="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">${etags_xml}</CompleteMultipartUpload>"
     ```
 
-Complete the upload by calling the completeUploadUrl:
+Note: The `ETags` have been assembled into an XML structure, as required by the S3 multipart upload protocol. This format ensures the upload can be finalized correctly. The XML must strictly follow the expected schema, including XML namespace, quoted `ETag` values and integer `PartNumber` entries.
+
+!!! example "`Etag` collection's XML."
+    ```xml
+    <CompleteMultipartUpload
+        xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+        <Part>
+            <PartNumber>1</PartNumber>
+            <ETag>"b93fa37618435783645da0f851497506"</ETag>
+        </Part>
+        <Part>
+            <PartNumber>2</PartNumber>
+            <ETag>"f3f341e6043429eb010fa335f0697390"</ETag>
+        </Part>
+        <Part>
+            <PartNumber>3</PartNumber>
+            <ETag>"f621481ce07eddab98291227f81d8248"</ETag>
+        </Part>
+    </CompleteMultipartUpload>
+    ```
+
+
+Complete the upload by calling the presigned `completeUploadUrl` as in the example below. Pass the XML collection of ETags as body data.
 
 !!! example "Complete upload call"
     ```
-    $ curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400'
+    curl -f --show-error -i -w "%{http_code}" -H "Content-Type: application/xml" -d "$complete_upload_xml" -X POST $complete_upload_url
+
     ```
 
 ## File Transfer with .NET
