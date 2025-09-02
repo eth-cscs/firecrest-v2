@@ -173,7 +173,6 @@ Then call the `/filesystem/{system}/transfer/upload` endpoint as following.
     --header "Authorization: Bearer $ACCESS_TOKEN" \
     --data "{
         \"path\":\"${DESTINATION_PATH}\",
-        \"account\": \"${ACCOUNT}\",
         \"fileName\":\"${LARGE_FILE_NAME}\",
         \"fileSize\":\"${LARGE_FILE_SIZE_IN_BYTES}\"
     }"
@@ -234,8 +233,8 @@ The example below demonstrates a simple sequential upload. However, this approac
     # Prepare ETag's XML collection
     complete_upload_xml="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">${etags_xml}</CompleteMultipartUpload>"
     ```
-
-Note: The `ETags` have been assembled into an XML structure, as required by the S3 multipart upload protocol. This format ensures the upload can be finalized correctly. The XML must strictly follow the expected schema, including XML namespace, quoted `ETag` values and integer `PartNumber` entries.
+!!! note
+    Note: The `ETags` have been assembled into an XML structure, as required by the S3 multipart upload protocol. This format ensures the upload can be finalized correctly. The XML must strictly follow the expected schema, including XML namespace, quoted `ETag` values and integer `PartNumber` entries.
 
 !!! example "`Etag` collection's XML."
     ```xml
