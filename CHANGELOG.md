@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Compress and Extract end-points now support multiple compresion types (none, bz2, gzip, and xz).
+
 ### Changed
 
 - The System Name path parameter and the corresponding Cluster name configuration are case insensitive.

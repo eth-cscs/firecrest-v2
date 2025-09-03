@@ -30,6 +30,7 @@ from firecrest.dependencies import (
     SchedulerClientDependency,
     ServiceAvailabilityDependency,
 )
+from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 # clients
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
@@ -397,6 +398,21 @@ async def compress(
     if request.dereference:
         options += "--dereference"
 
+    match request.compression:
+        case TarCommand.CompressionType.none:
+            compression_flag = ""
+        case TarCommand.CompressionType.gzip:
+            compression_flag = "z"
+        case TarCommand.CompressionType.bzip2:
+            compression_flag = "j"
+        case TarCommand.CompressionType.xz:
+            compression_flag = "J"
+        case _:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="The requested compression type is not implemented.",
+            )
+
     parameters = {
         "sbatch_directives": _format_directives(
             system.datatransfer_jobs_directives, request.account
@@ -406,6 +422,7 @@ async def compress(
         "target_path": request.target_path,
         "match_pattern": request.match_pattern,
         "options": options,
+        "compression_flag": compression_flag,
     }
 
     job_script = _build_script("job_compress.sh", parameters)
@@ -459,12 +476,28 @@ async def extract(
             f"The system {system_name} has no filesystem defined as default_work_dir"
         )
 
+    match request.compression:
+        case TarCommand.CompressionType.none:
+            compression_flag = ""
+        case TarCommand.CompressionType.gzip:
+            compression_flag = "z"
+        case TarCommand.CompressionType.bzip2:
+            compression_flag = "j"
+        case TarCommand.CompressionType.xz:
+            compression_flag = "J"
+        case _:
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail="The requested compression type is not implemented.",
+            )
+
     parameters = {
         "sbatch_directives": _format_directives(
             system.datatransfer_jobs_directives, request.account
         ),
         "source_path": request.path,
         "target_path": request.target_path,
+        "compression_flag": compression_flag,
     }
 
     job_script = _build_script("job_extract.sh", parameters)
