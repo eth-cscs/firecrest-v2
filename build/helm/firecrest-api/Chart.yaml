@@ -1,6 +1,6 @@
 apiVersion: v2
-name: firecrest-api
-description: FirecREST APIs (version 2)
+name: firecrest
+description: A Kubernetes Helm chart for FirecREST API
 type: application
 version: 0.1.0 # --> overridden by helm package --version
 appVersion: 0.0.1 # --> overridden by helm package --app-version

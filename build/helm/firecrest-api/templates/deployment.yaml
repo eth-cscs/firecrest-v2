@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: firecrest-api-depl
+  name: firecrest-api-depl-{{ .Release.Name }}
   {{- if .Values.metadata }}
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicas | default 1}}
   selector:
     matchLabels:
       app: firecrest-api
@@ -30,11 +30,11 @@ spec:
           image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
           env:
             - name: ENVIRONMENT
-              value: {{ .Values.global.environment }}
+              value: {{ .Values.global.environment | default "development" | quote }}
             - name: YAML_CONFIG_FILE
               value: "/app/configs/firecrest-config.yaml"
             - name: LOGGING_LEVEL
-              value: {{ .Values.loggingLevel }}
+              value: {{ .Values.loggingLevel | default "DEBUG" | quote }}
             {{- if .Values.logConfig }}
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
@@ -43,9 +43,13 @@ spec:
           - name: firecrest-configs-volume
             mountPath: /app/configs/
             readOnly: true
+          {{- range .Values.volumes }}
+            {{- if .secret }}
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
             readOnly: true
+            {{- end }}
+          {{- end }}
           {{- if (default false .Values.use_cluster_configs_path) }}
           - name: firecrest-cluster-configs-volume
             mountPath: /app/clusters/
@@ -60,6 +64,12 @@ spec:
             periodSeconds: 60
             failureThreshold: 3
       volumes:
+        - name: firecrest-configs-volume
+          configMap: 
+            name: firecrest-config-{{ .Release.Name }}
+            items:
+              - key: firecrest-config
+                path: firecrest-config.yaml
         {{- range .Values.volumes }}
         - name: {{ .name }}
           {{- if .configMap }}
