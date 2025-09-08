@@ -15,13 +15,18 @@ if [ ! -f "$DATA_FILE" ]; then echo "$DATA_FILE not found"; fi
 if [ ! -f "$ENV_FILE"  ]; then echo "$ENV_FILE not found";  fi
 
 # -----------------------------------------------------------------------------
+# Configuration
+PART_FILE="${DATA_FILE}.part" # Temporary file to store parts
+BLOCK_SIZE=1048576  # 1MB
+
+# -----------------------------------------------------------------------------
 # Utilities
 #
 # Cleanup
 cleanup() {
     echo "Cleanup"
-    if [ -d "$PARTS_DIR" ]; then
-        rm -fr "$PARTS_DIR" 
+    if [ -d "$PART_FILE" ]; then
+        rm -fr "$PART_FILE" 
     fi
 }
 #
@@ -34,8 +39,6 @@ error_handler() {
 trap 'error_handler $LINENO' ERR
 
 # -----------------------------------------------------------------------------
-# Configuration
-PARTS_DIR="parts"           # Local directory to store parts
 # Load environment
 source "$ENV_FILE"
 
@@ -71,36 +74,45 @@ parts_upload_urls=$(echo $response | jq -r ".partsUploadUrls")
 complete_upload_url=$(echo $response | jq -r ".completeUploadUrl")
 max_part_size=$(echo $response | jq -r ".maxPartSize")
 
-# Prepare parts
-echo "Split file"
-mkdir -p "$PARTS_DIR"
-cd "$PARTS_DIR"
-split "../$DATA_FILE" -b "$max_part_size" --numeric-suffixes=1 --suffix-length=5
-cd - > /dev/null
 
 # Upload parts and get Etags
 part_id=1
 upload_error=false
 etags_xml=""
-while read -r part_url; do
-    part_file=$(printf "%s/x%05d" $PARTS_DIR ${part_id})
-    echo "Uploading part ${part_id}: ${part_file}"
-    # Upload data with curl and extract ETag
-    if line=$(curl -f --show-error -D - --upload-file "$part_file" "$part_url" | grep -i "^ETag: " ) ;
-    then
-        etag=$(echo $line | awk -F'"' '{print $2}')
-        etags_xml="${etags_xml}<Part><PartNumber>${part_id}</PartNumber><ETag>\"${etag%|*}\"</ETag></Part>"
-    else
-        >&2 echo "Error uploading part ${part_id}"
+skip=""
+# Define the part size, depending on the block size
+part_blocks=$(( max_part_size / BLOCK_SIZE ))
+while read -r part_url; do    
+    # Generate temporary part file    
+    if ! dd if="${DATA_FILE}" of="${PART_FILE}" bs=${BLOCK_SIZE} count=${part_blocks} ${skip} status=none ; then
+        >&2 echo "Error generating part file for part ${part_id}"
         upload_error=true
+    else
+        ls -hl
+        echo "Uploading part ${part_id}: ${PART_FILE}"
+        # Upload data with curl and extract ETag
+        if line=$(curl -f --show-error -D - --upload-file "$PART_FILE" "$part_url" | grep -i "^ETag: " ) ;
+        then
+            etag=$(echo $line | awk -F'"' '{print $2}')
+            etags_xml="${etags_xml}<Part><PartNumber>${part_id}</PartNumber><ETag>\"${etag%|*}\"</ETag></Part>"
+        else
+            >&2 echo "Error uploading part ${part_id}"
+            upload_error=true
+        fi
+        # Cleanup
+        rm "${PART_FILE}"
     fi
     # Increase part index
     part_id=$(( part_id + 1 ))
+    # Offset for next chunk
+    skip="skip=$((( part_id - 1 ) * part_blocks))"
+
 done <<< "$(echo "$parts_upload_urls" | jq -r '.[]')"
 
 if $upload_error; 
 then
     >&2 echo "Upload failed."
+    cleanup
     exit 2
 fi
 

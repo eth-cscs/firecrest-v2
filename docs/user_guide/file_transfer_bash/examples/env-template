@@ -1,0 +1,5 @@
+#!/bin/bash
+export CLIENT_ID="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export CLIENT_SECRET="yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+export TOKEN_URI="Auth token generation URL"
+export F7T_URL="FirecREST URL"

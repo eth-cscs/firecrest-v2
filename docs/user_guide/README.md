@@ -155,11 +155,16 @@ Small file transfer endpoints:
 
 When requesting a large file download, FirecREST returns a download URL and a jobId. Once the remote job is completed, the user can retrieve the file using the provided URL.
 
-## File Transfer with Bash
+### File Transfer with Bash
 [Detailed example.](file_transfer_bash/README.md)
 
-## File Transfer with .NET
+### File Transfer with .NET
 [Detailed example.](file_transfer_dotnet/README.md)
+
+### Need more examples?
+The complexity of using FirecREST, for example implementing the multipart protocol, can vary depending on the programming language used and how well it aligns with your specific requirements or constraints such as speed, disk space, or else.
+
+If you need tailored examples for your particular use case, feel free to open an issue on GitHub. We'd be happy to create one for you.
 
 ## FirecREST SDK
 

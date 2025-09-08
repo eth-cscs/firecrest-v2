@@ -1,10 +1,12 @@
+# File Transfer with Bash
 
-### Uploading Large Files
-For large file uploads, FirecREST provides multi part upload URLs, the number of URLs depends on the file size. The user must split the file accordingly and upload each part to the assigned URL.
+## Uploading large files using S3 multipart protocol
+
+For large file uploads, FirecREST provides upload URLs based on the S3 multipart protocol, the number of URLs depends on the file size and on the FirecREST settings. The user must split the file accordingly and upload each part to the assigned URL.
 
 Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.
 
-#### Multi part upload example
+### Commented example
 
 The first step is to determine the size of your large file, expressed in bytes. A reliable method is to use the command: `stat --printf "%s" "$LARGE_FILE_NAME"`.
 
@@ -43,6 +45,18 @@ The JSON response from this call follows the structure shown below. FirecREST ca
     "maxPartSize": 1073741824
     }
     ```
+Extract the most useful information from the response using `jq`_
+- the list of presigned URLs to upload the single parts is treated as a single string that will be parsed later
+- the presigned URL to close the upload protocol
+- the maximum part size allowed to prepare valid chunks of your large file to be uploaded.
+
+!!! example "Extract information from FirecREST response."
+    ```bash
+    parts_upload_urls=$(echo $response | jq -r ".partsUploadUrls")
+    complete_upload_url=$(echo $response | jq -r ".completeUploadUrl")
+    max_part_size=$(echo $response | jq -r ".maxPartSize")
+    ```
+
 Given the `maxPartSize` field in the `/filesystem/{system}/transfer/upload` end-point response, split your large file consequently:
 
 !!! example "Split large file to upload"
@@ -105,5 +119,67 @@ Complete the upload by calling the presigned `completeUploadUrl` as in the examp
 !!! example "Complete upload call"
     ```
     curl -f --show-error -i -w "%{http_code}" -H "Content-Type: application/xml" -d "$complete_upload_xml" -X POST $complete_upload_url
+    ```
 
+## Script examples
+
+### Using split
+
+To run the [example](examples/multipart_upload_split.sh) you need first to set up the `environment file` using the provided [env-template](examples/env-template) file.
+Set the field in the template as described int the [user guide](../README.md) to match your deployment and save the template as a new file.
+
+Launch the script as in the example
+
+!!! example "File upload using split"
+    ```bash
+    ./multipart_upload_split your_data_file.zip cluster_name /home/user/data_dir/ environment_file
+    ```
+
+The script uploads `your_data_fil.zip` to the designated cluster. Note that the `split` command generates all temporary part files beforehand, so <b>your local disk must have at least as much free space as the total size of the data being uploaded</b>.
+
+
+### Using dd
+
+To run the [example](examples/multipart_upload_dd.sh) you need first to set up the `environment file` using the provided [env-template](examples/env-template) file.
+Set the field in the template as described int the [user guide](../README.md) to match your deployment and save the template as a new file.
+
+Launch the script as in the example
+!!! example "File upload using split"
+    ```bash
+    ./multipart_upload_dd your_data_file.zip cluster_name /home/user/data_dir/ environment_file
+    ```
+
+The script uploads `your_data_fil.zip` to the specified cluster. When using `dd`, only a <b>single temporary part file</b> is created and overwritten with each upload. In this case, your local disk must have at least as much free space as the max_part_size, which defaults to 1GB.
+
+The key difference when using `split` is highlighted in the upload loop below. The `dd` tool reads data blocks sequentially at each iteration, by incrementing the `skip` offset. For correct operation, the part size and offset must be specified as a multiple of `BLOCK_SIZE` bytes. By default, this example assumes 1MB per block. This value can be adjusted to optimize performance, but regardless of tuning, the part file size is always defined in blocks. The final part may be shorter than expected, which is acceptable and does not result in an error.
+
+!!! example "Creating temporary part files with `dd`"
+    ```bash
+    # Define the part size, depending on the block size
+    part_blocks=$(( max_part_size / BLOCK_SIZE ))
+    while read -r part_url; do    
+        # Generate temporary part file    
+        if ! dd if="${DATA_FILE}" of="${PART_FILE}" bs=${BLOCK_SIZE} count=${part_blocks} ${skip} status=none ; then
+            >&2 echo "Error generating part file for part ${part_id}"
+            upload_error=true
+        else
+            ls -hl
+            echo "Uploading part ${part_id}: ${PART_FILE}"
+            # Upload data with curl and extract ETag
+            if line=$(curl -f --show-error -D - --upload-file "$PART_FILE" "$part_url" | grep -i "^ETag: " ) ;
+            then
+                etag=$(echo $line | awk -F'"' '{print $2}')
+                etags_xml="${etags_xml}<Part><PartNumber>${part_id}</PartNumber><ETag>\"${etag%|*}\"</ETag></Part>"
+            else
+                >&2 echo "Error uploading part ${part_id}"
+                upload_error=true
+            fi
+            # Cleanup
+            rm "${PART_FILE}"
+        fi
+        # Increase part index
+        part_id=$(( part_id + 1 ))
+        # Offset for next chunk
+        skip="skip=$((( part_id - 1 ) * part_blocks))"
+    done <<< "$(echo "$parts_upload_urls" | jq -r '.[]')"
     ```
