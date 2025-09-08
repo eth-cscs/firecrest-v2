@@ -10,15 +10,18 @@ from datetime import datetime
 from typing import Any, Dict
 import asyncssh
 from asyncssh import (
-    ChannelOpenError, ConnectionLost, SSHClientConnection, PermissionDenied,
-    ProtocolError
+    ChannelOpenError,
+    ConnectionLost,
+    SSHClientConnection,
+    PermissionDenied,
+    ProtocolError,
 )
 from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
 
 # clients
 from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
-from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
+from lib.ssh_clients.ssh_credentials_provider import SSHCredentialsProvider
 from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
@@ -141,7 +144,7 @@ class SSHClientPool:
         port: int,
         proxy_host: str = None,
         proxy_port: int = None,
-        key_provider: SSHKeysProvider = None,
+        key_provider: SSHCredentialsProvider = None,
         buffer_limit: int = 5 * 1024 * 1024,
         connect_timeout: int = 5,
         login_timeout: int = 5,
@@ -178,62 +181,36 @@ class SSHClientPool:
 
     async def get_conn_options(self, username: str, jwt_token: str):
         try:
-            keys = await self.key_provider.get_keys(username, jwt_token)
+            credentials = await self.key_provider.get_credentials(username, jwt_token)
         except TimeoutError as e:
             raise TimeoutLimitExceeded(
                 "SSH keys generation timeout limit exceeded."
             ) from e
 
-        match self.key_provider:
-            case DeiCSSHCAClient():
-                sshkey_private = asyncssh.import_private_key(keys["private"])
-                sshkey_cert_public = asyncssh.import_certificate(keys["public"])
-                options = asyncssh.SSHClientConnectionOptions(
-                    username=username,
-                    client_keys=[sshkey_private],
-                    client_certs=[sshkey_cert_public],
-                    known_hosts=None,
-                    connect_timeout=self.connect_timeout,
-                    login_timeout=self.login_timeout,
-                    window=self.buffer_limit,
-                )
-            case SSHKeygenClient():
-                sshkey_private = asyncssh.import_private_key(
-                    keys["private"], passphrase=keys["passphrase"]
-                )
-                sshkey_cert_public = asyncssh.import_certificate(keys["public"])
-                options = asyncssh.SSHClientConnectionOptions(
-                    username=username,
-                    client_keys=[sshkey_private],
-                    client_certs=[sshkey_cert_public],
-                    known_hosts=None,
-                    connect_timeout=self.connect_timeout,
-                    login_timeout=self.login_timeout,
-                    window=self.buffer_limit,
-                )
-            case SSHStaticKeysProvider():
-                sshkey_private = asyncssh.import_private_key(
-                    keys["private"], passphrase=keys["passphrase"]
-                )
-                sshkey_cert_public = ()
-                if keys["public"]:
-                    sshkey_cert_public = asyncssh.import_certificate(keys["public"])
-                options = asyncssh.SSHClientConnectionOptions(
-                    username=username,
-                    client_keys=[sshkey_private],
-                    client_certs=[sshkey_cert_public],
-                    known_hosts=None,
-                    connect_timeout=self.connect_timeout,
-                    login_timeout=self.login_timeout,
-                    window=self.buffer_limit,
-                )
-            case _:
-                raise TypeError("Unsupported SSHKeysProvider")
+        sshkey_cert_public = ()
+        if credentials.public_certificate:
+            sshkey_cert_public = asyncssh.import_certificate(
+                credentials.public_certificate
+            )
+        sshkey_private = asyncssh.import_private_key(
+            credentials.private_key, passphrase=credentials.passphrase
+        )
+
+        options = asyncssh.SSHClientConnectionOptions(
+            username=username,
+            client_keys=[sshkey_private],
+            client_certs=[sshkey_cert_public],
+            known_hosts=None,
+            connect_timeout=self.connect_timeout,
+            login_timeout=self.login_timeout,
+            window=self.buffer_limit,
+        )
+
         return options
 
-    async def get_ssh_debug_info(self,
-                                 options: asyncssh.SSHClientConnectionOptions,
-                                 exp_reason: str):
+    async def get_ssh_debug_info(
+        self, options: asyncssh.SSHClientConnectionOptions, exp_reason: str
+    ):
 
         logger = logging.getLogger("uvicorn.error")
 
@@ -243,10 +220,16 @@ class SSHClientPool:
             for cert in options.kwargs["client_certs"]:
                 logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
                 logger.error(f"\tPrincipals: {cert.principals}")
-                logger.error(f"\tPublic key: {cert.key.export_public_key().decode().strip()}")
+                logger.error(
+                    f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
+                )
                 logger.error(f"\tSerial ID: {cert._serial}")
-                logger.error(f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}")
-                logger.error(f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}")
+                logger.error(
+                    f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
+                )
+                logger.error(
+                    f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
+                )
             logger.error("[END] Client Certificate debug info")
 
     @asynccontextmanager
@@ -293,13 +276,9 @@ class SSHClientPool:
                     "SSH connection timeout limit exceeded."
                 ) from e
             except ConnectionResetError as e:
-                raise SSHConnectionError(
-                    "Unable to establish SSH connection."
-                    ) from e
+                raise SSHConnectionError("Unable to establish SSH connection.") from e
             except ConnectionLost as e:
-                raise SSHConnectionError(
-                    "Unable to establish SSH connection."
-                    ) from e
+                raise SSHConnectionError("Unable to establish SSH connection.") from e
             except PermissionDenied as e:
                 await self.get_ssh_debug_info(options, e.reason)
 

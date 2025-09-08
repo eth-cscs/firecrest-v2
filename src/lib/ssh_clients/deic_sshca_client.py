@@ -15,12 +15,12 @@ from cryptography.hazmat.primitives import serialization
 
 # exceptions
 from lib.exceptions import SSHServiceError
-from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
+from lib.ssh_clients.ssh_credentials_provider import SSHCredentialsProvider
 
 SIZE_POOL_AIOHTTP = 100
 
 
-class DeiCSSHCAClient(SSHKeysProvider):
+class DeiCSSHCAClient(SSHCredentialsProvider):
     aiohttp_client: Optional[aiohttp.ClientSession] = None
     max_connections: int = 0
 
@@ -64,7 +64,9 @@ class DeiCSSHCAClient(SSHKeysProvider):
 
         return raw_private.decode(), raw_public.decode()
 
-    async def get_keys(self, username: str, jwt_token: str):
+    async def get_credentials(
+        self, username: str, jwt_token: str
+    ) -> SSHCredentialsProvider.SSHCredentials:
 
         client = await self.get_aiohttp_client()
 
@@ -81,7 +83,9 @@ class DeiCSSHCAClient(SSHKeysProvider):
                     f"Unexpected SSHService response. status:{response.status} message:{message}"
                 )
             certificate = await response.text()
-        return {
-            "private": private,
-            "public": certificate,
-        }
+            return SSHCredentialsProvider.SSHCredentials(
+                {
+                    "private_key": private,
+                    "public_certificate": certificate,
+                }
+            )
