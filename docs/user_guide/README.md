@@ -144,47 +144,29 @@ FirecREST provides two methods for transferring files:
 - Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
 
 Small file transfer endpoints:
+
  - `/filesystem/{system_name}/ops/download`
  - `/filesystem/{system_name}/ops/upload`
 
- Large file transfer endpoints:
+Large file transfer endpoints:
+
  - `/filesystem/{system_name}/transfer/download`
  - `/filesystem/{system_name}/transfer/upload`
 
 ### Downloading Large Files
 
-When requesting a large file download, FirecREST returns a download URL and a jobId. Once the remote job is completed, the user can retrieve the file using the provided URL.
+When requesting a large file download, FirecREST returns a download URL and a `jobId`. Once the remote job is completed, the user can retrieve the file using the provided URL.
 
-### Uploading Large Files
-For large file uploads, FirecREST provides multi part upload URLs, the number of URLs depends on the file size. The user must split the file accordingly and upload each part to the assigned URL.
+### File Transfer with Bash
+[Detailed example.](file_transfer_bash/README.md)
 
-Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.
-
-#### Multi part upload example
-
-Split your large file into as many parts as provided partsUploadUrls by the `/filesystem/{system}/transfer/upload` end-point:
-
-!!! example "Split large file to upload"
-    ```bash
-    $ split -n 7 -d large-file.zip large-file-part-
-    ```
-
-Upload each individual part following the correct part order:
-
-!!! example "Upload parts call"
-    ```bash
-    $ curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&partNumber=1&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400' --upload-file large-file-part-00
-    ```
-
-Complete the upload by calling the completeUploadUrl:
-
-!!! example "Complete upload call"
-    ```
-    $ curl 'https://rgw.cscs.ch/firecresttds%3Auser/62ad2cd8-7398-4955-929d-cbfae5088c6a/large-file.zip?uploadId=2~qiT12y-T1Hhl_ELCozIt3ZlLhMoTcmy&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GET9Y98HGJARIS4I447Z%2F20250325%2Fcscs-zonegroup%2Fs3%2Faws4_request&X-Amz-Date=20250325T071416Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=d0edacd3fe1d3dc1e38f5d632f7760275cda29e9e41c49548b5da94e47699400'
-    ```
-
-## File Transfer with .NET
+### File Transfer with .NET
 [Detailed example.](file_transfer_dotnet/README.md)
+
+### Need more examples?
+The complexity of using FirecREST, for example implementing the multipart protocol, can vary depending on the programming language used and how well it aligns with your specific requirements or constraints such as speed, disk space, or else.
+
+If you need tailored examples for your particular use case, feel free to open an [issue on GitHub](https://github.com/eth-cscs/firecrest-v2/issues/new). We'd be happy to create one for you.
 
 ## FirecREST SDK
 
