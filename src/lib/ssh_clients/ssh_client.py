@@ -20,10 +20,7 @@ from contextlib import asynccontextmanager
 from abc import ABC, abstractmethod
 
 # clients
-from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
 from lib.ssh_clients.ssh_credentials_provider import SSHCredentialsProvider
-from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
-from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
 from lib.loggers.tracing_log import log_backend_command
 import logging
