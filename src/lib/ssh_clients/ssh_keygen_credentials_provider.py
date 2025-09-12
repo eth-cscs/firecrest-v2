@@ -12,16 +12,19 @@ from typing import Optional
 
 # exceptions
 from lib.exceptions import SSHServiceError
-from lib.ssh_clients.ssh_key_provider import SSHKeysProvider
+from lib.ssh_clients.ssh_credentials_provider import SSHCredentialsProvider
 
 SIZE_POOL_AIOHTTP = 100
 
 
 def _ssh_service_headers(jwt_token: str):
-    return {"Content-Type": "application/json", "Authorization": f"Bearer {jwt_token}"}
+    return {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {jwt_token}",
+    }
 
 
-class SSHKeygenClient(SSHKeysProvider):
+class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
     aiohttp_client: Optional[aiohttp.ClientSession] = None
     max_connections: int = 0
 
@@ -30,7 +33,8 @@ class SSHKeygenClient(SSHKeysProvider):
         if cls.aiohttp_client is None:
             timeout = aiohttp.ClientTimeout(total=5)
             connector = aiohttp.TCPConnector(
-                family=AF_INET, limit_per_host=SSHKeygenClient.max_connections
+                family=AF_INET,
+                limit_per_host=SSHKeygenCredentialsProvider.max_connections,
             )
             cls.aiohttp_client = aiohttp.ClientSession(
                 timeout=timeout, connector=connector
@@ -45,13 +49,16 @@ class SSHKeygenClient(SSHKeysProvider):
 
     def __init__(self, ssh_keygen_url: str, max_connections: int = 100):
         self.ssh_keygen_url = ssh_keygen_url
-        SSHKeygenClient.max_connections = max_connections
+        SSHKeygenCredentialsProvider.max_connections = max_connections
 
-    async def get_keys(self, username: str, jwt_token: str):
+    async def get_credentials(self, username: str, jwt_token: str):
         client = await self.get_aiohttp_client()
         headers = _ssh_service_headers(jwt_token)
 
-        post_data = {"duration": "1min"}
+        post_data = {
+            "duration": "1min",
+            "username": username,
+        }
 
         async with client.post(
             url=f"{self.ssh_keygen_url}/api/v1/ssh-keys",
@@ -63,6 +70,10 @@ class SSHKeygenClient(SSHKeysProvider):
                 raise SSHServiceError(
                     f"Unexpected SSHService response. status:{response.status} message:{message}"
                 )
-            job_submit_result = await response.json()
-            job_submit_result["sshKey"]["passphrase"] = None
-        return job_submit_result["sshKey"]
+            response = await response.json()
+            return SSHCredentialsProvider.SSHCredentials(
+                **{
+                    "private_key": response["sshKey"]["privateKey"] + "\n",
+                    "public_certificate": response["sshKey"]["publicKey"] + "\n",
+                }
+            )

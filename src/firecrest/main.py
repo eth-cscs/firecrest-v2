@@ -36,7 +36,7 @@ from lib.handlers.api_response_handler import (
     response_error_handler,
     meta_headers_handler,
 )
-from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
+from lib.ssh_clients.ssh_keygen_credentials_provider import SSHKeygenCredentialsProvider
 from firecrest.dependencies import SSHClientDependency
 
 # routers
@@ -102,7 +102,7 @@ async def lifespan(app: FastAPI):
 
     # Init Slurm REST Client
     await SlurmRestClient.get_aiohttp_client()
-    await SSHKeygenClient.get_aiohttp_client()
+    await SSHKeygenCredentialsProvider.get_aiohttp_client()
     async with app.state.scheduler as scheduler:
         await schedule_tasks(scheduler)
         await scheduler.start_in_background()
@@ -110,7 +110,7 @@ async def lifespan(app: FastAPI):
         await scheduler.stop()
     # Clean up Slurm REST Client
     await SlurmRestClient.close_aiohttp_client()
-    await SSHKeygenClient.close_aiohttp_client()
+    await SSHKeygenCredentialsProvider.close_aiohttp_client()
 
 
 async def schedule_tasks(scheduler: AsyncScheduler):
