@@ -29,12 +29,12 @@ from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
 from lib.dependencies import AuthDependency
 
 # clients
-from lib.ssh_clients.deic_sshca_client import DeiCSSHCAClient
+from lib.ssh_clients.deic_sshca_credentials_provider import DeiCSSHCACredentialsProvider
 from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.helpers.api_auth_helper import ApiAuthHelper
 from lib.scheduler_clients.pbs.pbs_client import PbsClient
 from lib.scheduler_clients.slurm.slurm_client import SlurmClient
-from lib.ssh_clients.ssh_keygen_client import SSHKeygenClient
+from lib.ssh_clients.ssh_keygen_credentials_provider import SSHKeygenCredentialsProvider
 from lib.ssh_clients.ssh_static_keys_provider import SSHStaticKeysProvider
 
 from fastapi.security import HTTPBearer
@@ -222,12 +222,12 @@ class SSHClientDependency:
         self.ignore_health = ignore_health
         match settings.ssh_credentials.type:
             case SSHKeysServiceType.SSHCA:
-                self.key_provider = DeiCSSHCAClient(
+                self.key_provider = DeiCSSHCACredentialsProvider(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
                 )
             case SSHKeysServiceType.SSHService:
-                self.key_provider = SSHKeygenClient(
+                self.key_provider = SSHKeygenCredentialsProvider(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
                 )

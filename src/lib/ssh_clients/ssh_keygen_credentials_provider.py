@@ -24,7 +24,7 @@ def _ssh_service_headers(jwt_token: str):
     }
 
 
-class SSHKeygenClient(SSHCredentialsProvider):
+class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
     aiohttp_client: Optional[aiohttp.ClientSession] = None
     max_connections: int = 0
 
@@ -33,7 +33,8 @@ class SSHKeygenClient(SSHCredentialsProvider):
         if cls.aiohttp_client is None:
             timeout = aiohttp.ClientTimeout(total=5)
             connector = aiohttp.TCPConnector(
-                family=AF_INET, limit_per_host=SSHKeygenClient.max_connections
+                family=AF_INET,
+                limit_per_host=SSHKeygenCredentialsProvider.max_connections,
             )
             cls.aiohttp_client = aiohttp.ClientSession(
                 timeout=timeout, connector=connector
@@ -48,7 +49,7 @@ class SSHKeygenClient(SSHCredentialsProvider):
 
     def __init__(self, ssh_keygen_url: str, max_connections: int = 100):
         self.ssh_keygen_url = ssh_keygen_url
-        SSHKeygenClient.max_connections = max_connections
+        SSHKeygenCredentialsProvider.max_connections = max_connections
 
     async def get_credentials(self, username: str, jwt_token: str):
         client = await self.get_aiohttp_client()
