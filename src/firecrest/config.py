@@ -195,14 +195,17 @@ class DataTransferType(str, Enum):
     """Types of data transfer services"""
 
     s3 = "s3"
+    wormhole = "wormhole"
 
 
 class BaseDataTransfer(CamelModel):
     """Base data transfer setting"""
 
-    service_type: DataTransferType = Field(
-        ..., description="Type of data transfer service."
-    )
+    service_type: Literal[
+        DataTransferType.s3,
+        DataTransferType.wormhole,
+    ]
+
     probing: Optional[Probing] = Field(
         None, description="Configuration for probing storage availability."
     )
@@ -217,6 +220,7 @@ class BaseDataTransfer(CamelModel):
 class S3DataTransfer(BaseDataTransfer):
     """Object storage configuration, including credentials, endpoints, and upload behavior."""
 
+    service_type: Literal[DataTransferType.s3,]
     name: str = Field(..., description="Name identifier for the storage.")
     private_url: SecretStr = Field(
         ..., description="Private/internal endpoint URL for the storage."
@@ -247,6 +251,11 @@ class S3DataTransfer(BaseDataTransfer):
     )
 
 
+class WormholeTransfer(BaseDataTransfer):
+    service_type: Literal[DataTransferType.wormhole]
+    pass
+
+
 class DataOperation(BaseModel):
     max_ops_file_size: int = Field(
         5 * 1024 * 1024,
@@ -255,7 +264,7 @@ class DataOperation(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    data_transfer: Optional[S3DataTransfer] = Field(
+    data_transfer: Optional[S3DataTransfer | WormholeTransfer] = Field(
         None,
         description=("Data transfer service configuration"),
     )
