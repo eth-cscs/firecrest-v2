@@ -18,7 +18,7 @@ class SSHStaticKeysProvider(SSHCredentialsProvider):
 
         if username in self.users_keys:
             return SSHCredentialsProvider.SSHCredentials(
-                {
+                **{
                     "private_key": self.users_keys[
                         username
                     ].private_key.get_secret_value(),
