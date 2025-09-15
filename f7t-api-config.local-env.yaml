@@ -116,20 +116,4 @@ clusters:
 data_operation:
   max_ops_file_size: 1048576 # 1M
   data_transfer:
-    service_type: "s3"
-    name: "s3-storage"
-    private_url: "http://192.168.240.19:9000"
-    public_url: "http://localhost:9000"
-    access_key_id: "storage_access_key"
-    secret_access_key: "secret_file:/run/secrets/s3_secret_access_key"
-    region: "us-east-1"
-    ttl: 604800
-    tenant: "test"
-    multipart:
-      use_split: false
-      max_part_size: 1073741824 # 1G
-      parallel_runs: 3
-      tmp_folder: "tmp"
-    probing:
-      interval: 60
-      timeout: 10
+    service_type: "wormhole"
