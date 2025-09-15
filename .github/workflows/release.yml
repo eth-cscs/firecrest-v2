@@ -33,7 +33,7 @@ jobs:
           # Replace in a specific file — adjust pattern and file path
           sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
           sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" build/demo-launcher/Dockerfile
-          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" build/helm/firecrest-api/Chart.yaml
+          sed -i "s/appVersion: 2\.x\.x/appVersion: ${{ env.RELEASE_TAG }}/g" build/helm/firecrest-api/Chart.yaml
 
 
       - name: Commit and push changes
