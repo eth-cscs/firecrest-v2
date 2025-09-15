@@ -86,9 +86,8 @@ firecrest:
       ## this is used by the service account to get tokens to query status of services
       ## example:
       ##   token_url:  "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
-      # token_url: "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
-      token_url: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token"
-
+      token_url: "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
+      
       ## scopes: Map of OIDC scopes and their purposes.
       ## example:
       ##   scopes:
