@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The System Name path parameter and the corresponding Cluster name configuration are case insensitive.
+- Installation docs:
+    - Helm charts: FirecREST settings are all included in values.yaml file
+    - Changed documentation name from Deployment to Install
 
 ## [2.3.1]
 

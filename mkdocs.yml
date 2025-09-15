@@ -24,8 +24,8 @@ nav:
         - setup/arch/logging/README.md
     - 'Configuration':
       - setup/conf/README.md
-    - 'Deployment':
-      - setup/deploy/README.md
+    - 'Install':
+      - setup/install/README.md
   - 'User guide':
     - user_guide/README.md
     - 'File Transfer with .NET':

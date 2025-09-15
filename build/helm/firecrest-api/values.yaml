@@ -1,13 +1,34 @@
+## This is the values file for helm deployment of FirecREST-v2.
+
 ## Global variables
 global:
   ## - environment: optional arbitrary string with description of the deployment (dev, prod, etc)
   environment: "development"
-  dns:
-    ## - firecrestApi: URL to use in an Ingress and Certificate.
-    ## example:
-    ##  firecrestApi: "firecrest.svc.com"
-    firecrestApi:
-      urls: ""
+
+## type: Deployment configuration
+
+## firecrest-v2 image repository
+image: ghcr.io/eth-cscs/firecrest-v2
+
+## firecrest-v2 version
+##  example:
+##    version: 2.3.1
+##  default: version in Chart.yaml
+# version: 2.x.x
+  
+## replicas: number of replicas of the pod to be deployed
+replicas: 1
+  
+## loggingLevel: FirecREST logging level: INFO, ERROR, DEBUG, WARN, CRITICAL, or NOTSET.
+## For more details: https://docs.python.org/3/library/logging.html#logging-levels
+loggingLevel: "INFO"
+
+## logConfig: if set, enables the log configuration in a file in the container.
+## If empty, log configuration is taken by default from gunicorn
+## For more details and examples of the config file: https://docs.python.org/3/library/logging.config.html
+## example:
+##   logConfig: "/app/configs/log-config.yaml"
+logConfig: ""
 
 ## Metadata to add to the deployment of FirecREST app (Deployment: metadata)
 # metadata:
@@ -19,31 +40,23 @@ global:
 ## Template to add to the deployment (spec -> templates -> metadata)
 # template:
 #  annotations: {}
-    
-
-## FirecREST API configuration
-firecrest-api:
-  image: ghcr.io/eth-cscs/firecrest-v2
-  
-  ## replicas: number of replicas of the pod to be deployed
-  replicas: 1
-  
-  ## loggingLevel: FirecREST logging level: INFO, ERROR, DEBUG, WARN, CRITICAL, or NOTSET.
-  ## For more details: https://docs.python.org/3/library/logging.html#logging-levels
-  loggingLevel: "INFO"
-
-  ## logConfig: if set, enables the log configuration in a file in the container.
-  ## If empty, log configuration is taken by default from gunicorn
-  ## For more details and examples of the config file: https://docs.python.org/3/library/logging.config.html
-  ## example:
-  ##   logConfig: "/app/configs/log-config.yaml"
-  logConfig: ""
 
   
 service:
   ## port: TCP port where the FirecREST will be listening for requests
   port: 5001
 
+  ## type: ClusterIP or NodePort, etc, as explained in https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  ## default: ClusterIP
+  ## example:
+  ##  type: NodePort
+  # type: ClusterIP
+
+## use_cluster_configs_path: Use Cluster configuration from a directory
+##  In case you want to load the firecrest.cluster configuration from a directory and not directly
+##  in this values file, you can set this var to true (by default is false) 
+## After doing so, you must specify the variable firecrest.cluster: "path: /app/clusters"
+# use_cluster_configs_path: true
 
 ## FirecREST app configuration
 ##   for a better understanding of the configuration visit https://eth-cscs.github.io/firecrest-v2/setup/conf/
@@ -60,7 +73,7 @@ firecrest:
     ## description: a description of the API
     ##
     ## example:
-    ##   - url: "https://gateway.com/firecrest/v2"
+    ##   - url: "https://gateway.example.com/firecrest/v2"
     ##     description: "FirecREST v2 API"
     - url: ""
       description: ""
@@ -72,8 +85,9 @@ firecrest:
       ## token_url: URL to obtain a JWT in an OIDC/OAuth2 Identity Provider
       ## this is used by the service account to get tokens to query status of services
       ## example:
-      ##   token_url:  "https://oauth.com/auth/realms/realm/protocol/openid-connect/token"
-      token_url: ""
+      ##   token_url:  "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
+      # token_url: "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
+      token_url: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token"
 
       ## scopes: Map of OIDC scopes and their purposes.
       ## example:
@@ -84,9 +98,10 @@ firecrest:
       ## public_certs: list of public certificate endpoints for IdPs accepted by FirecREST
       ## example:
       ##   public_certs:
-      ##   - "https://oauth.com/auth/realms/realms/protocol/openid-connect/certs"
-      ##   - "https://oauth.com/auth/realms/other-realm/protocol/openid-connect/certs"
-      public_certs: {}
+      ##   - "https://oauth2.example.com/auth/realms/realms/protocol/openid-connect/certs"
+      ##   - "https://oauth2.example.com/auth/realms/other-realm/protocol/openid-connect/certs"
+      public_certs:
+        - "https://oauth2.example.com/auth/realms/realms/protocol/openid-connect/certs"
 
       ## username_claim: Name of the JWT claim containing the username (e.g. sub, preferred_username, etc.)
       ## example:
@@ -97,7 +112,7 @@ firecrest:
     # authorization:
       ##   url: endpoint to query the AuthZ service
       ##   example: 
-      ##     url: "https://authz.com/check"
+      ##     url: "https://authz.example.com/check"
       #   url: ""
       ##   timeout: in seconds to query AuthZ service
       ##   example:
@@ -133,21 +148,24 @@ firecrest:
     ## type: "SSHStaticKeys"
     ## keys:
     ##   user1:
-    ##     private_key: "secret_file:/path/to/secrets/user1/private_key" 
+    ##     private_key: "secret_file:/app/secrets/user1_private_key" 
     ##     public_cert: ""
-    ##     passphrase: "secret_file:/path/to/secrets/user1/passphrase"
+    ##     passphrase: "secret_file:/app/secrets/user1_passphrase"
     ##   user2: 
-    ##     private_key: "secret_file:/path/to/secrets/user2/private_key" 
-    ##     public_cert: ""
-    ##     passphrase: "secret_file:/path/to/secrets/user2/passphrase"
+    ##     private_key: "secret_file:/app/secrets/user2_private_key" 
+    ##     public_cert: "secret_file:/app/secrets/user2.pub"    
     type: "SSHStaticKeys"
     keys:
       fireuser:
-        private_key: "secret_file:/run/secrets/ssh_private_key_fireuser"
+        private_key: ""
 
 
   ## HPC clusters configuration  
   ## cluster: list of cluster's configuration
+  ##  (as an alternative you can set this variable as `clusters: path:/app/clusters`
+  ##   This option will search *.yaml files within /app/clusters directory with settings for each cluster 
+  ##   to include in FirecREST interface)
+  ## The recommended way for initial setups is to complete this list of clusters in this file:
   clusters:
     ## name: public name of the cluster, to be used in API calls
     ## example:
@@ -157,14 +175,14 @@ firecrest:
     ssh:
       ## host: domain name or IP used to connect via SSH
       ## example:
-      ##   host: "cluster.svc.com"
+      ##   host: "cluster.example.com"
       ##   or host: "192.168.0.1" 
       host: ""
       ## port: SSH port enable for the cluster
       port: 22
       ## proxy_host: Optional proxy host for SSH tunneling
       ## example:
-      ##   proxy_host: proxy.svc.com
+      ##   proxy_host: proxy.example.com
       # proxy_host: ""
       ## proxy_port: Optional proxy port for SSH tunneling
       ## example:
@@ -198,7 +216,7 @@ firecrest:
       # timeout: 10
       ## api_url: base REST API endpoint for scheduler (only needed if SLURM API is used)
       ## example:
-      ##   api_url: "https://slurm-api.com/"
+      ##   api_url: "https://slurm-api.example.com/"
       # api_url: "" 
       ## api_version: scheduler API version  (only needed if SLURM API is used)
       # api_version: ""
@@ -237,9 +255,10 @@ firecrest:
     ## (e.g. -pxfer for a dedicated partition).
     ## example:
     ## datatransfer_jobs_directives:
-    ##   - #SBATCH --partition=xfer
-    ##   - #SBATCH --ntasks=1
-    datatransfer_jobs_directives: {}
+    ##   - "#SBATCH --partition=xfer"
+    ##   - "#SBATCH --ntasks=1"
+    datatransfer_jobs_directives:
+      - "#SBATCH --ntasks=1"
     
 
   ## Configuration for data transfers and small operations  
@@ -260,20 +279,20 @@ firecrest:
       access_key_id: ""
       ## secret_access_key: Secret access key for storage. You can give directly the content or the file path using 'secret_file:/path/to/file'
       ## example:
-      ##  secret_access_key: "secret_file:/path/to/s3/secret"
+      ##  secret_access_key: "secret_file:/app/secrets/s3_secret_access_key"
       secret_access_key: ""
       ## region: Region of the storage bucket.
       ## example
       ## region: "eu-central-1"
-      # region: ""
+      region: "eu-central-1"
       ## tenant: Optional tenant identifier for multi-tenant setups.
       ## example
       ##  tenant: "firecrest"
       # tenant: ""
       ## ttl: Time-to-live (in seconds) for generated URLs.
-      ## example:
-      ##  ttl: 604800
-      # ttl: 604800
+      ## example for one day:
+      ##  ttl: 86400
+      ttl: 86400
 
       ## Configuration for multipart upload behavior.
       # multipart:
@@ -316,6 +335,9 @@ firecrest:
     # enable_tracing_log: true
 
 ## Volumes to mount config files and secrets into FirecREST pod
+##  this can be used for storing secrets for:
+##    - SSHStaticKeys in .firecrest.ssh_credentials
+##    - S3 Secret Key in .firecrest.data_operation.data_storage.secret_access_key, etc
 ## example:
 # volumes:
 #   - name: firecrest-configs-volume
@@ -333,23 +355,5 @@ firecrest:
 #         - key: s3-secret-access-key
 #           path: s3_secret_access_key
 
-
-## Vault integration if using HC Vault for secret management
-# vault:
-##  url: endpoint of the vault instance
-#   url: "https://hcvault.svc.com/"
-##  secretEngine: where secrets are stored
-#   secretEngine: "firecrest"
-##  secretPath: path to the secret
-#   secretPath: "prod"
-##  roleId: to access the secrets from K8s app using AppRole auth, as detailed here: https://developer.hashicorp.com/vault/docs/auth/approle
-#   roleId: ""
-
-
-## Enables reloader (https://docs.stakater.com/reloader/) to watch configmaps and secrets changes and reaload the app
-# reloader:
-#   reloader:
-#     watchGlobally: false
-#     isArgoRollouts: true
-#     serviceAccount:
-#       create: false
+## Secrets must be created manually or in a separate template (not provided here)
+## or stored in a HC Vault instance (see: https://developer.hashicorp.com/vault/docs/auth/approle)

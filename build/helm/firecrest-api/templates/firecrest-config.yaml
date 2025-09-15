@@ -4,6 +4,6 @@ metadata:
   name: firecrest-config-{{ .Release.Name }}
 
 data:
-  firecrest-config.yaml: |-
+  firecrest-config: |-
 {{  toYaml .Values.firecrest | indent 4 }}
   

@@ -27,7 +27,9 @@ spec:
     spec:
       containers:
         - name: firecrest-api
-          image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image }}:{{ .Values.version | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: {{ .Values.service.port | default 5000 }}
           env:
             - name: ENVIRONMENT
               value: {{ .Values.global.environment | default "development" | quote }}
@@ -62,7 +64,8 @@ spec:
                 - /app/check_liveness.py
             initialDelaySeconds: 30
             periodSeconds: 60
-            failureThreshold: 3
+            failureThreshold: 3          
+
       volumes:
         - name: firecrest-configs-volume
           configMap: 
@@ -101,12 +104,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: firecrest-api-srv
+  name: firecrest-api-srv-{{ .Release.Name }}
 spec:
   selector:
     app: firecrest-api
+  type: {{ .Values.service.type | quote | default "ClusterIP" }}
   ports:
-    - name: firecrest-api
-      protocol: TCP
-      port: {{ .Values.service.port }}
-      targetPort: 5000
+    - name: firecrest-api-http
+      port: {{ .Values.service.port | default 5000 }}
+      targetPort: {{ .Values.service.port | default 5000 }}
