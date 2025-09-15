@@ -52,12 +52,6 @@ service:
   ##  type: NodePort
   # type: ClusterIP
 
-## use_cluster_configs_path: Use Cluster configuration from a directory
-##  In case you want to load the firecrest.cluster configuration from a directory and not directly
-##  in this values file, you can set this var to true (by default is false) 
-## After doing so, you must specify the variable firecrest.cluster: "path: /app/clusters"
-# use_cluster_configs_path: true
-
 ## FirecREST app configuration
 ##   for a better understanding of the configuration visit https://eth-cscs.github.io/firecrest-v2/setup/conf/
 firecrest:

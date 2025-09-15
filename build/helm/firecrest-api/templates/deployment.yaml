@@ -52,11 +52,12 @@ spec:
             readOnly: true
             {{- end }}
           {{- end }}
-          {{- if (default false .Values.use_cluster_configs_path) }}
+          {{- $cluster_path := .Values.firecrest.clusters | toString }}
+            {{- if hasPrefix "path:" $cluster_path  }}
           - name: firecrest-cluster-configs-volume
             mountPath: /app/clusters/
             readOnly: true
-          {{- end }}
+            {{- end }}
           livenessProbe:
             exec:
               command:
@@ -94,11 +95,12 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-        {{- if (default false .Values.use_cluster_configs_path) }}
+        {{- $cluster_path := .Values.firecrest.clusters | toString }}
+          {{- if hasPrefix "path:" $cluster_path }}
         - name: firecrest-cluster-configs-volume
           configMap:
             name: firecrest-cluster-configs
-        {{- end }}
+          {{- end }}
             
 ---
 apiVersion: v1

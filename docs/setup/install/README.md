@@ -92,15 +92,6 @@ The example below automatically loads all cluster's YAML files from the designat
     {{- (.Files.Glob "clusters/**.yaml").AsConfig | indent 2 }}
     ```
 
-To enable the Helm Chart to mount the ConfigMap, set the following value in `values.yaml`:
-
-!!! example "Enabling cluster configuration from path"
-
-    ```yaml
-    (...)
-    use_cluster_configs_path: true
-    ```
-
 ### Templates
 
 This setup only provides the pod deployment and service [templates](https://github.com/eth-cscs/firecrest-v2/tree/master/build/helm/firecrest-api/templates). This should be enough to run FirecREST as a standalone container with a functional TCP port to receive requests.
