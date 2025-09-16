@@ -121,6 +121,7 @@ spec:
     app: firecrest-api
   type: {{ .Values.service.type | quote | default "ClusterIP" }}
   ports:
-    - name: firecrest-api-http
+    - name: firecrest-api
       port: {{ .Values.service.port | default 5000 }}
-      targetPort: {{ .Values.service.port | default 5000 }}
+      protocol: TCP
+      targetPort: 5000
