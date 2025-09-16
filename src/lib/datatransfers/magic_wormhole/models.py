@@ -1,14 +1,13 @@
 from typing import Optional
 from lib.datatransfers.datatransfer_base import (
+    DataTransferDirective,
     DataTransferLocation,
     DataTransferOperation,
 )
-from lib.models.base_model import CamelModel
 
 
-class WormholeDataTransferDirective(CamelModel):
+class WormholeDataTransferDirective(DataTransferDirective):
     wormhole_code: Optional[str] = None
-    transfer_method: str = None
 
 
 class WormholeDataTransferOperation(DataTransferOperation):

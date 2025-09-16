@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import List, Optional
 import uuid
 
 from jinja2 import Environment, FileSystemLoader
@@ -30,9 +30,16 @@ class DataTransferLocation(CamelModel):
     size: Optional[int] = None
 
 
+class DataTransferDirective(CamelModel):
+    transfer_method: str = None
+
+
 class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
-    transfer_directives: Optional[Any] = None
+    transfer_directives: DataTransferDirective
+
+    class Config:
+        json_encoders = {DataTransferDirective: lambda a: a.__dict__}
 
 
 class JobHelper:

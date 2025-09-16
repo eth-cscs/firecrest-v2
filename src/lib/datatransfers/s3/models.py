@@ -1,11 +1,11 @@
 from typing import List, Optional
 from lib.datatransfers.datatransfer_base import (
+    DataTransferDirective,
     DataTransferOperation,
 )
-from lib.models.base_model import CamelModel
 
 
-class S3DataTransferDirective(CamelModel):
+class S3DataTransferDirective(DataTransferDirective):
     download_url: Optional[str] = None
     parts_upload_urls: Optional[List[str]] = None
     complete_upload_url: Optional[str] = None
