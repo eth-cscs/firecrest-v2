@@ -23,15 +23,15 @@ class TransferJob(CamelModel):
     logs: TransferJobLogs
 
 
+class DataTransferDirective(CamelModel):
+    transfer_method: str = None
+
+
 class DataTransferLocation(CamelModel):
     host: Optional[str] = None
     system: Optional[str] = None
     path: Optional[str] = None
-    size: Optional[int] = None
-
-
-class DataTransferDirective(CamelModel):
-    transfer_method: str = None
+    transfer_directives: DataTransferDirective = None
 
 
 class DataTransferOperation(CamelModel):
@@ -39,7 +39,11 @@ class DataTransferOperation(CamelModel):
     transfer_directives: DataTransferDirective
 
     class Config:
-        json_encoders = {DataTransferDirective: lambda a: a.__dict__}
+        json_encoders = {
+            DataTransferDirective: lambda d: {
+                k: v for k, v in d.__dict__.items() if v is not None
+            }
+        }
 
 
 class JobHelper:

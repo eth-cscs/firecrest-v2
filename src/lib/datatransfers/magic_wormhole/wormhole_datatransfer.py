@@ -14,7 +14,6 @@ from lib.scheduler_clients.models import JobDescriptionModel
 from lib.datatransfers.magic_wormhole.models import (
     WormholeDataTransferDirective,
     WormholeDataTransferOperation,
-    WormholeTransferLocation,
 )
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 import random
@@ -76,7 +75,7 @@ class WormholeDatatransfer(DataTransferBase):
 
     async def upload(
         self,
-        source: WormholeTransferLocation,
+        source: DataTransferLocation,
         target: DataTransferLocation,
         username,
         access_token,
@@ -88,7 +87,7 @@ class WormholeDatatransfer(DataTransferBase):
         parameters = {
             "sbatch_directives": _format_directives(self.directives, account),
             "target_path": target.path,
-            "wormhole_code": source.wormhole_code,
+            "wormhole_code": source.transfer_directives.wormhole_code,
             "pypi_index_url": "https://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple",
         }
 
@@ -112,9 +111,7 @@ class WormholeDatatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        directives = WormholeDataTransferDirective(
-            **{"transfer_method": "Magic Wormhole"}
-        )
+        directives = WormholeDataTransferDirective(**{"transfer_method": "wormhole"})
 
         return WormholeDataTransferOperation(
             transferJob=transferJob,
@@ -156,7 +153,7 @@ class WormholeDatatransfer(DataTransferBase):
         )
 
         directives = WormholeDataTransferDirective(
-            **{"wormhole_code": wormhole_code, "transfer_method": "Magic Wormhole"}
+            **{"wormhole_code": wormhole_code, "transfer_method": "wormhole"}
         )
 
         return WormholeDataTransferOperation(

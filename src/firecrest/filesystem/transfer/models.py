@@ -3,32 +3,39 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from pydantic import Field
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
-from lib.datatransfers.s3.models import S3DataTransferOperation
-from lib.datatransfers.magic_wormhole.models import WormholeDataTransferOperation
 from lib.datatransfers.datatransfer_base import DataTransferOperation
+from lib.datatransfers.magic_wormhole.models import WormholeDataTransferDirective
+from lib.datatransfers.s3.models import S3DataTransferDirective
 from lib.models.base_model import CamelModel
 from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 
 class PostFileUploadRequest(FilesystemRequestBase):
-    file_name: str = Field(..., description="Name of the local file to upload")
+    transfer_directives: Union[
+        WormholeDataTransferDirective | S3DataTransferDirective
+    ] = Field(
+        ..., description="Data transfer parameters specific to the transfer method"
+    )
+
     account: Optional[str] = Field(
         default=None, description="Name of the account in the scheduler"
     )
-    file_size: int = Field(..., description="Size of the file to upload in bytes")
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "path": "/home/user/dir/file",
-                    "file_name": "/path/local/file",
-                    "account": "group",
-                    "file_size": "7340032",
+                    "transfer_directives": {
+                        "transfer_method": "s3",
+                        "file_name": "/path/local/file",
+                        "account": "group",
+                        "file_size": "7340032",
+                    },
                 }
             ]
         }
