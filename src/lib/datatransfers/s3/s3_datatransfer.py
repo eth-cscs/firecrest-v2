@@ -20,7 +20,7 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 # dependencies
-from lib.datatransfers.s3.models import S3DataTransferOperation
+from lib.datatransfers.s3.models import S3DataTransferDirective, S3DataTransferOperation
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 
@@ -180,11 +180,16 @@ class S3Datatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
+        directives = S3DataTransferDirective(
+            **{
+                "partsUploadUrls": post_external_upload_urls,
+                "completeUploadUrl": complete_external_multipart_upload_url,
+                "maxPartSize": self.max_part_size,
+            }
+        )
+
         return S3DataTransferOperation(
-            transferJob=transferJob,
-            partsUploadUrls=post_external_upload_urls,
-            completeUploadUrl=complete_external_multipart_upload_url,
-            maxPartSize=self.max_part_size,
+            transferJob=transferJob, transfer_directives=directives
         )
 
     async def download(
@@ -284,6 +289,8 @@ class S3Datatransfer(DataTransferBase):
                 self.ttl,
             )
 
+        directives = S3DataTransferDirective(**{"download_url": get_download_url})
+
         return S3DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
@@ -294,5 +301,5 @@ class S3Datatransfer(DataTransferBase):
                     error_log=job.job_param["standard_error"],
                 ),
             ),
-            download_url=get_download_url,
+            transfer_directives=directives,
         )

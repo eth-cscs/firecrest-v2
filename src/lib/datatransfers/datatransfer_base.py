@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Any, List, Optional
 import uuid
 
 from jinja2 import Environment, FileSystemLoader
 from importlib import resources as imp_resources
+
 from lib.models.base_model import CamelModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.datatransfers import scripts
@@ -31,6 +32,7 @@ class DataTransferLocation(CamelModel):
 
 class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
+    transfer_directives: Optional[Any] = None
 
 
 class JobHelper:

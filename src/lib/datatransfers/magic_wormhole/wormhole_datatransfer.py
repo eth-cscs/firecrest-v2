@@ -12,6 +12,7 @@ from lib.datatransfers.datatransfer_base import (
 
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.datatransfers.magic_wormhole.models import (
+    WormholeDataTransferDirective,
     WormholeDataTransferOperation,
     WormholeTransferLocation,
 )
@@ -111,8 +112,13 @@ class WormholeDatatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
+        directives = WormholeDataTransferDirective(
+            **{"transfer_method": "Magic Wormhole"}
+        )
+
         return WormholeDataTransferOperation(
             transferJob=transferJob,
+            transfer_directives=directives,
         )
 
     async def download(
@@ -149,6 +155,10 @@ class WormholeDatatransfer(DataTransferBase):
             jwt_token=access_token,
         )
 
+        directives = WormholeDataTransferDirective(
+            **{"wormhole_code": wormhole_code, "transfer_method": "Magic Wormhole"}
+        )
+
         return WormholeDataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
@@ -159,5 +169,5 @@ class WormholeDatatransfer(DataTransferBase):
                     error_log=job.job_param["standard_error"],
                 ),
             ),
-            wormhole_code=wormhole_code,
+            transfer_directives=directives,
         )
