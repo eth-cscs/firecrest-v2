@@ -43,9 +43,18 @@ spec:
             {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
-            mountPath: /app/configs/
+            mountPath: "/app/configs/firecrest-config.yaml"
             readOnly: true
+            subPath: firecrest-config.yaml
           {{- range .Values.volumes }}
+            {{- if .configMap }}
+          - name: firecrest-logs-volume
+              {{- range .configMap.items }}
+              mountPath: "/app/configs/{{ .path }}"
+              readOnly: true
+              subPath: {{ .key }}
+              {{- end }}
+            {{- end }}
             {{- if .secret }}
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
