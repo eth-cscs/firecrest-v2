@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: firecrest-api-depl
+  name: firecrest-api-depl-{{ .Release.Name }}
   {{- if .Values.metadata }}
   annotations:
   {{- range $key, $value := .Values.metadata.annotations }}
@@ -10,7 +10,7 @@ metadata:
   {{- end }}
 
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicas | default 1}}
   selector:
     matchLabels:
       app: firecrest-api
@@ -27,30 +27,46 @@ spec:
     spec:
       containers:
         - name: firecrest-api
-          image: "{{ .Values.image }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image }}:{{ .Values.version | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: {{ .Values.service.port | default 5000 }}
           env:
             - name: ENVIRONMENT
-              value: {{ .Values.global.environment }}
+              value: {{ .Values.global.environment | default "development" | quote }}
             - name: YAML_CONFIG_FILE
               value: "/app/configs/firecrest-config.yaml"
             - name: LOGGING_LEVEL
-              value: {{ .Values.loggingLevel }}
+              value: {{ .Values.loggingLevel | default "DEBUG" | quote }}
             {{- if .Values.logConfig }}
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
             {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
-            mountPath: /app/configs/
+            mountPath: "/app/configs/firecrest-config.yaml"
             readOnly: true
+            subPath: firecrest-config.yaml
+          {{- range .Values.volumes }}
+            {{- if .configMap }}
+          - name: firecrest-logs-volume
+            {{- range .configMap.items }}
+            mountPath: "/app/configs/{{ .path }}"
+            readOnly: true
+            subPath: {{ .path }}
+            {{- end }}
+            {{- end }}
+            {{- if .secret }}
           - name: firecrest-secrets-volume
             mountPath: /app/secrets/
             readOnly: true
-          {{- if (default false .Values.use_cluster_configs_path) }}
+            {{- end }}
+          {{- end }}
+          {{- $cluster_path := .Values.firecrest.clusters | toString }}
+            {{- if hasPrefix "path:" $cluster_path  }}
           - name: firecrest-cluster-configs-volume
             mountPath: /app/clusters/
             readOnly: true
-          {{- end }}
+            {{- end }}
           livenessProbe:
             exec:
               command:
@@ -58,8 +74,15 @@ spec:
                 - /app/check_liveness.py
             initialDelaySeconds: 30
             periodSeconds: 60
-            failureThreshold: 3
+            failureThreshold: 3          
+
       volumes:
+        - name: firecrest-configs-volume
+          configMap: 
+            name: firecrest-config-{{ .Release.Name }}
+            items:
+              - key: firecrest-config
+                path: firecrest-config.yaml
         {{- range .Values.volumes }}
         - name: {{ .name }}
           {{- if .configMap }}
@@ -81,22 +104,24 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-        {{- if (default false .Values.use_cluster_configs_path) }}
+        {{- $cluster_path := .Values.firecrest.clusters | toString }}
+          {{- if hasPrefix "path:" $cluster_path }}
         - name: firecrest-cluster-configs-volume
           configMap:
             name: firecrest-cluster-configs
-        {{- end }}
+          {{- end }}
             
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: firecrest-api-srv
+  name: firecrest-api-srv-{{ .Release.Name }}
 spec:
   selector:
     app: firecrest-api
+  type: {{ .Values.service.type | quote | default "ClusterIP" }}
   ports:
     - name: firecrest-api
+      port: {{ .Values.service.port | default 5000 }}
       protocol: TCP
-      port: {{ .Values.service.port }}
       targetPort: 5000

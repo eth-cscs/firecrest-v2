@@ -1,0 +1,352 @@
+## This is the values file for helm deployment of FirecREST-v2.
+
+## Global variables
+global:
+  ## - environment: optional arbitrary string with description of the deployment (dev, prod, etc)
+  environment: "development"
+
+## type: Deployment configuration
+
+## firecrest-v2 image repository
+image: ghcr.io/eth-cscs/firecrest-v2
+
+## firecrest-v2 version
+##  example:
+##    version: 2.3.1
+##  default: version in Chart.yaml
+# version: 2.x.x
+  
+## replicas: number of replicas of the pod to be deployed
+replicas: 1
+  
+## loggingLevel: FirecREST logging level: INFO, ERROR, DEBUG, WARN, CRITICAL, or NOTSET.
+## For more details: https://docs.python.org/3/library/logging.html#logging-levels
+loggingLevel: "INFO"
+
+## logConfig: if set, enables the log configuration in a file in the container.
+## If empty, log configuration is taken by default from gunicorn
+## For more details and examples of the config file: https://docs.python.org/3/library/logging.config.html
+## example:
+##   logConfig: "/app/configs/log-config.yaml"
+logConfig: ""
+
+## Metadata to add to the deployment of FirecREST app (Deployment: metadata)
+# metadata:
+#   annotations: {}
+##    example to enable stakater reloader (https://docs.stakater.com/reloader/) to reload the appp when a config map changes:
+##     reloader.stakater.com/search: 'true'
+##     configmap.reloader.stakater.com/reload: 'firecrest-configmap'
+
+## Template to add to the deployment (spec -> templates -> metadata)
+# template:
+#  annotations: {}
+
+  
+service:
+  ## port: TCP port where the FirecREST will be listening for requests
+  port: 5001
+
+  ## type: ClusterIP or NodePort, etc, as explained in https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  ## default: ClusterIP
+  ## example:
+  ##  type: NodePort
+  # type: ClusterIP
+
+## FirecREST app configuration
+##   for a better understanding of the configuration visit https://eth-cscs.github.io/firecrest-v2/setup/conf/
+firecrest:
+  ## apis_root_path: base path prefix for exposing the APIs (in case of using a gateway)
+  ## example:
+  ##   apis_root_path: "/firecrest/v2"
+  apis_root_path: ""
+
+  ## The path to the automatic interactive API documentation.
+  ## It is handled in the browser by Swagger UI.
+  doc_servers:
+    ## url: complete base URL (including gateway, when used) to the API
+    ## description: a description of the API
+    ##
+    ## example:
+    ##   - url: "https://gateway.example.com/firecrest/v2"
+    ##     description: "FirecREST v2 API"
+    - url: ""
+      description: ""
+
+  ## FirecREST authentication and authorization options
+  auth:
+    ## OIDC authentication settings
+    authentication:
+      ## token_url: URL to obtain a JWT in an OIDC/OAuth2 Identity Provider
+      ## this is used by the service account to get tokens to query status of services
+      ## example:
+      ##   token_url:  "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
+      token_url: "https://oauth2.example.com/auth/realms/realm/protocol/openid-connect/token"
+      
+      ## scopes: Map of OIDC scopes and their purposes.
+      ## example:
+      ##   scopes:
+      ##     - firecrest
+      ## scopes: {}
+
+      ## public_certs: list of public certificate endpoints for IdPs accepted by FirecREST
+      ## example:
+      ##   public_certs:
+      ##   - "https://oauth2.example.com/auth/realms/realms/protocol/openid-connect/certs"
+      ##   - "https://oauth2.example.com/auth/realms/other-realm/protocol/openid-connect/certs"
+      public_certs:
+        - "https://oauth2.example.com/auth/realms/realms/protocol/openid-connect/certs"
+
+      ## username_claim: Name of the JWT claim containing the username (e.g. sub, preferred_username, etc.)
+      ## example:
+      ##    username_claim: "username"
+      # username_claim: "preferred_username"
+
+    ## Authorization settings via OpenFGA
+    # authorization:
+      ##   url: endpoint to query the AuthZ service
+      ##   example: 
+      ##     url: "https://authz.example.com/check"
+      #   url: ""
+      ##   timeout: in seconds to query AuthZ service
+      ##   example:
+      ##      timeout: 1  
+      #   timeout: 1
+      ##  max_connections: max amount of concurent connections to the AuthZ service
+      ##  example:
+      ##    max_connections: 100
+      #   max_connections: 100
+
+
+  ## SSH Credentials options
+  ssh_credentials:
+    ## type: type of SSH credentials service. It accepts: 
+    ## - "SSHService", 
+    ## - "SSHCA" or 
+    ## - "SSHStaticKeys"
+
+    ## for type "SSHService" and "SSHCA"
+    # type: "SSHService"
+    ## url: endpoint to obtain the SSH key on behalf of the user
+    # url: ""
+    ## max_connections: max amount of concurent connections to the SSH Service (when set to 0, there is no limit)
+    # max_connections: 100
+
+    ## if used type: "SSHStaticKeys"
+    ## keys: list of static keys by user
+    ##  username: name of the user in the cluster
+    ##    private_key (required): SSH private key. You can give directly the content or the file path using 'secret_file:/path/to/file'.
+    ##    public_cert: Optional SSH public certificate.
+    ##    Optional passphrase for the private key. You can give directly the content or the file path using 'secret_file:/path/to/file'.
+    ## example:
+    ## type: "SSHStaticKeys"
+    ## keys:
+    ##   user1:
+    ##     private_key: "secret_file:/app/secrets/user1_private_key" 
+    ##     public_cert: ""
+    ##     passphrase: "secret_file:/app/secrets/user1_passphrase"
+    ##   user2: 
+    ##     private_key: "secret_file:/app/secrets/user2_private_key" 
+    ##     public_cert: "secret_file:/app/secrets/user2.pub"    
+    type: "SSHStaticKeys"
+    keys:
+      fireuser:
+        private_key: ""
+
+
+  ## HPC clusters configuration  
+  ## cluster: list of cluster's configuration
+  ##  (as an alternative you can set this variable as `clusters: path:/app/clusters`
+  ##   This option will search *.yaml files within /app/clusters directory with settings for each cluster 
+  ##   to include in FirecREST interface)
+  ## The recommended way for initial setups is to complete this list of clusters in this file:
+  clusters:
+    ## name: public name of the cluster, to be used in API calls
+    ## example:
+    ##   name: "cluster-name"
+  - name: ""
+    ## ssh: SSH configuration for accessing the cluster nodes
+    ssh:
+      ## host: domain name or IP used to connect via SSH
+      ## example:
+      ##   host: "cluster.example.com"
+      ##   or host: "192.168.0.1" 
+      host: ""
+      ## port: SSH port enable for the cluster
+      port: 22
+      ## proxy_host: Optional proxy host for SSH tunneling
+      ## example:
+      ##   proxy_host: proxy.example.com
+      # proxy_host: ""
+      ## proxy_port: Optional proxy port for SSH tunneling
+      ## example:
+      ##   proxy_port: 22
+      # proxy_port: 22
+      ## max_clients: max number of concurrent of SSH clients
+      ## example:
+      ##   max_clients: 100
+      # max_clients: 10
+
+      ## timeout: connection timeout options
+      timeout:
+        ## connection: timeout (in seconds) for initial SSH connection
+        connection: 5
+        ## login: timeout (in seconds) used for login via SSH
+        login: 5
+        ## command_execution: timeout (in seconds) used for execution of commands via SSH
+        command_execution: 5
+        ## idle_timeout: Max idle time (seconds) before disconnecting.
+        # idle_timeout: 60
+        ## keep_alive: Interval (seconds) for sending keep-alive messages
+        # keep_alive: 5
+
+    ## scheduler: options for the job scheduler used in the cluster      
+    scheduler:
+      ## type: of scheduler, can be "slurm" (for SLURM CLI or API) or "pbs" (for PBSPro or OpenPBS)
+      type: "slurm"
+      ## version: version of the scheduler used in the cluster
+      version: "24.05.4"
+      ## timeout: Timeout (in seconds) for scheduler communication with the API (only needed if SLURM API is used)
+      # timeout: 10
+      ## api_url: base REST API endpoint for scheduler (only needed if SLURM API is used)
+      ## example:
+      ##   api_url: "https://slurm-api.example.com/"
+      # api_url: "" 
+      ## api_version: scheduler API version  (only needed if SLURM API is used)
+      # api_version: ""
+
+    ## service_account: internal service account credentials (to poll for services status)
+    service_account:
+      ## client_id: service account client ID (as for OIDC/OAuth2)
+      ## example:
+      ##   client_id: "f7t-health-check"
+      client_id: ""
+      ## secret: service account client ID (as for OIDC/OAuth2)
+      ##         it can point to a secret in a file in the container
+      ## example:
+      ##   secret: "secret_file:/app/secrets/health_check_service_account_secret"
+      secret: ""
+
+    ## Cluster monitoring attributes.
+    probing:
+      ## interval: (in seconds) between checks
+      interval: 300
+      ## timeout: max time (in seconds) allowed per check
+      timeout: 10
+
+    ## List of mounted file systems on the cluster, such as scratch or home directories.
+    file_systems:
+      ## Mount path for the file system
+      - path: '/home'
+        ## data_type: File system purpose/type (options are: "users", "store", "archive",
+        ## "apps", "scratch", and "project")
+        data_type: 'users'
+        ## default_work_dir: Mark this as the default working directory (ie, for default scheduler logs)
+        ## it's a boolean option (true or false)
+        default_work_dir: true
+
+    ## datatransfer_jobs_directives: Custom scheduler flags passed to data transfer jobs
+    ## (e.g. -pxfer for a dedicated partition).
+    ## example:
+    ## datatransfer_jobs_directives:
+    ##   - "#SBATCH --partition=xfer"
+    ##   - "#SBATCH --ntasks=1"
+    datatransfer_jobs_directives:
+      - "#SBATCH --ntasks=1"
+    
+
+  ## Configuration for data transfers and small operations  
+  data_operation:
+    ## max_ops_file_size: maximum file size (in bytes) allowed for direct upload and download.
+    max_ops_file_size: 5242880 # 5M
+    ## Data transfer service configuration
+    data_transfer:
+      ## service_type: Type of data transfer service (available option "s3")
+      service_type: "s3"
+      ## name: name identifier for the storage.
+      name: "s3-storage"
+      ## private_url: Private/internal endpoint URL for the storage.
+      private_url: ""
+      ## public_url: Public/external endpoint URL for the storage.
+      public_url: ""
+      ## access_key_id: access key ID for S3-compatible storage
+      access_key_id: ""
+      ## secret_access_key: Secret access key for storage. You can give directly the content or the file path using 'secret_file:/path/to/file'
+      ## example:
+      ##  secret_access_key: "secret_file:/app/secrets/s3_secret_access_key"
+      secret_access_key: ""
+      ## region: Region of the storage bucket.
+      ## example
+      ## region: "eu-central-1"
+      region: "eu-central-1"
+      ## tenant: Optional tenant identifier for multi-tenant setups.
+      ## example
+      ##  tenant: "firecrest"
+      # tenant: ""
+      ## ttl: Time-to-live (in seconds) for generated URLs.
+      ## example for one day:
+      ##  ttl: 86400
+      ttl: 86400
+
+      ## Configuration for multipart upload behavior.
+      # multipart:
+        ## use_split: Enable or disable splitting large files into parts when uploading the file to the staging area.
+        ## (default: false)
+        ## example:
+        ##   use_split: true
+        # use_split: false
+        ## max_part_size: Maximum size (in bytes) for multipart data transfers. Default is 2 GB.
+        ## example:
+        ##    max_part_size: 1073741824
+        # max_part_size: 1073741824
+        ## parallel_runs: Number of parts to upload in parallel to the staging area.
+        ## example:
+        ##    parallel_runs: 5
+        # parallel_runs: 3
+        ## tmp_folder: Temporary folder used for storing split parts during upload. Default "tmp"
+        ## example:
+        ##    tmp_folder: "s3tmp"
+        # tmp_folder: "tmp"
+      
+      ## Configuration for automatic object lifecycle in storage buckets.
+      # bucket_lifecycle_configuration:
+        ## days: Number of days after which objects will expire automatically.
+        ## Default 10
+        ## example:
+        ##    days: 1
+        # days: 10
+
+      ## Configuration for probing storage availability.
+      probing:
+        ## timeout: Interval in seconds between cluster checks.
+        timeout: 10
+        ## Maximum time in seconds allowed per check.
+        interval: 60
+
+  ## Logging configuration options.
+  #logger:
+    ## enable_tracing_log: enable tracing logs (boolean). Default: false
+    # enable_tracing_log: true
+
+## Volumes to mount config files and secrets into FirecREST pod
+##  this can be used for storing secrets for:
+##    - SSHStaticKeys in .firecrest.ssh_credentials
+##    - S3 Secret Key in .firecrest.data_operation.data_storage.secret_access_key, etc
+## example:
+# volumes:
+#   - name: firecrest-configs-volume
+#     configMap:
+#       name: firecrest-configmaps
+#       items:
+#           - key: log-config
+#             path: log-config.yaml
+#   - name: firecrest-secrets-volume
+#     secret:
+#       secretName: firecrest-secrets
+#       items:
+#         - key: health-check-service-account-secret
+#           path: health_check_service_account_secret
+#         - key: s3-secret-access-key
+#           path: s3_secret_access_key
+
+## Secrets must be created manually or in a separate template (not provided here)
+## or stored in a HC Vault instance (see: https://developer.hashicorp.com/vault/docs/auth/approle)
