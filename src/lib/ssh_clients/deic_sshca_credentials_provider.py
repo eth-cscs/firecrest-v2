@@ -85,7 +85,7 @@ class DeiCSSHCACredentialsProvider(SSHCredentialsProvider):
                 )
             certificate = await response.text()
             return SSHCredentialsProvider.SSHCredentials(
-                {
+                **{
                     "private_key": private,
                     "public_certificate": certificate,
                 }
