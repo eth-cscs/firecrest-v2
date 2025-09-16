@@ -49,11 +49,11 @@ spec:
           {{- range .Values.volumes }}
             {{- if .configMap }}
           - name: firecrest-logs-volume
-              {{- range .configMap.items }}
-              mountPath: "/app/configs/{{ .path }}"
-              readOnly: true
-              subPath: {{ .key }}
-              {{- end }}
+            {{- range .configMap.items }}
+            mountPath: "/app/configs/{{ .path }}"
+            readOnly: true
+            subPath: {{ .key }}
+            {{- end }}
             {{- end }}
             {{- if .secret }}
           - name: firecrest-secrets-volume
