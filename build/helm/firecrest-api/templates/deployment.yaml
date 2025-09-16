@@ -52,7 +52,7 @@ spec:
             {{- range .configMap.items }}
             mountPath: "/app/configs/{{ .path }}"
             readOnly: true
-            subPath: {{ .key }}
+            subPath: {{ .path }}
             {{- end }}
             {{- end }}
             {{- if .secret }}
