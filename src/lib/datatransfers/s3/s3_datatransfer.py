@@ -185,6 +185,7 @@ class S3Datatransfer(DataTransferBase):
                 "partsUploadUrls": post_external_upload_urls,
                 "completeUploadUrl": complete_external_multipart_upload_url,
                 "maxPartSize": self.max_part_size,
+                "transfer_method": "s3",
             }
         )
 
@@ -289,7 +290,9 @@ class S3Datatransfer(DataTransferBase):
                 self.ttl,
             )
 
-        directives = S3DataTransferDirective(**{"download_url": get_download_url})
+        directives = S3DataTransferDirective(
+            **{"download_url": get_download_url, "transfer_method": "s3"}
+        )
 
         return S3DataTransferOperation(
             transferJob=TransferJob(
