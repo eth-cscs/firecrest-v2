@@ -110,7 +110,7 @@ class S3Datatransfer(DataTransferBase):
             post_external_upload_urls = []
             for part_number in range(
                 1,
-                ceil(source.size / self.max_part_size) + 1,
+                ceil(source.transfer_directives.file_size / self.max_part_size) + 1,
             ):
                 post_external_upload_urls.append(
                     await _generate_presigned_url(
