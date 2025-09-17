@@ -62,7 +62,7 @@ class DataTransferLocation(CamelModel):
         Union[S3DataTransferDirective | WormholeDataTransferDirective]
     ] = Field(
         None,
-        description=("Transfer directives are sepcific to the chosen transfer method"),
+        description=("Provide method specific transfer directives"),
         discriminator="transfer_method",
     )
 
@@ -75,7 +75,7 @@ class DataTransferOperation(CamelModel):
         S3DataTransferDirective | WormholeDataTransferDirective
     ] = Field(
         None,
-        description=("Transfer directives are sepcific to the chosen transfer method"),
+        description=("Provide method specific transfer directives"),
         discriminator="transfer_method",
     )
 
