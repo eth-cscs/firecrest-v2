@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 import uuid
-
+from enum import Enum
 from jinja2 import Environment, FileSystemLoader
 from importlib import resources as imp_resources
-
+from typing import Literal, Union
 from lib.models.base_model import CamelModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.datatransfers import scripts
 from fastapi import HTTPException
+from pydantic import ConfigDict, Field
 
 
 class TransferJobLogs(CamelModel):
@@ -23,20 +24,60 @@ class TransferJob(CamelModel):
     logs: TransferJobLogs
 
 
+class DataTransferType(str, Enum):
+    """Types of data transfer services"""
+
+    s3 = "s3"
+    wormhole = "wormhole"
+
+
 class DataTransferDirective(CamelModel):
-    transfer_method: str = None
+    transfer_method: Literal[
+        DataTransferType.s3,
+        DataTransferType.wormhole,
+    ]
+
+
+class WormholeDataTransferDirective(DataTransferDirective):
+    wormhole_code: Optional[str] = None
+    transfer_method: Literal[DataTransferType.wormhole,]
+
+
+class S3DataTransferDirective(DataTransferDirective):
+    download_url: Optional[str] = None
+    parts_upload_urls: Optional[List[str]] = None
+    complete_upload_url: Optional[str] = None
+    max_part_size: Optional[int] = None
+    file_size: Optional[int] = Field(
+        None, description="Size of the file to upload in bytes"
+    )
+    transfer_method: Literal[DataTransferType.s3,]
 
 
 class DataTransferLocation(CamelModel):
     host: Optional[str] = None
     system: Optional[str] = None
     path: Optional[str] = None
-    transfer_directives: DataTransferDirective = None
+    transfer_directives: Optional[
+        Union[S3DataTransferDirective | WormholeDataTransferDirective]
+    ] = Field(
+        None,
+        description=("Transfer directives are sepcific to the chosen transfer method"),
+        discriminator="transfer_method",
+    )
+
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
-    transfer_directives: DataTransferDirective
+    transfer_directives: Union[
+        S3DataTransferDirective | WormholeDataTransferDirective
+    ] = Field(
+        None,
+        description=("Transfer directives are sepcific to the chosen transfer method"),
+        discriminator="transfer_method",
+    )
 
     class Config:
         json_encoders = {

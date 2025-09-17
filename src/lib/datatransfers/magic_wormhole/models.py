@@ -1,12 +1,7 @@
-from typing import Optional
 from lib.datatransfers.datatransfer_base import (
-    DataTransferDirective,
+    WormholeDataTransferDirective,
     DataTransferOperation,
 )
-
-
-class WormholeDataTransferDirective(DataTransferDirective):
-    wormhole_code: Optional[str] = None
 
 
 class WormholeDataTransferOperation(DataTransferOperation):
