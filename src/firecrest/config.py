@@ -29,6 +29,7 @@ from typing import List, Optional
 
 from lib.models.base_model import CamelModel
 from lib.models.config_model import LoadFileSecretStr, Oidc, SSHUserKeys
+from lib.datatransfers.datatransfer_base import DataTransferType
 
 
 class MultipartUpload(BaseModel):
@@ -189,13 +190,6 @@ class Probing(CamelModel):
         ..., description="Interval in seconds between cluster checks."
     )
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
-
-
-class DataTransferType(str, Enum):
-    """Types of data transfer services"""
-
-    s3 = "s3"
-    wormhole = "wormhole"
 
 
 class BaseDataTransfer(CamelModel):

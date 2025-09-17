@@ -10,7 +10,7 @@
 
 echo $(date -u) "Ingress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-python3 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install magic-wormhole --index-url {{pypi_index_url}}
 
