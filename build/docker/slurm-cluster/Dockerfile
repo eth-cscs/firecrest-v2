@@ -16,6 +16,7 @@ RUN apt update -y \
     wget \
     curl \
     python3 \
+    python3.13-venv \
     supervisor \
     dos2unix
 

@@ -13,7 +13,7 @@ from firecrest.filesystem.transfer.models import (
     MoveResponse,
     UploadFileResponse,
     CompressResponse,
-    ExtractResponse
+    ExtractResponse,
 )
 
 from importlib import resources as impresources
@@ -91,8 +91,11 @@ async def test_upload(
     request_body = {
         "path": "/home/test1/",
         "account": "fireuser",
-        "fileName": "data.big",
-        "fileSize": "100000",
+        "transfer_directives": {
+            "transfer_method": "s3",
+            "fileName": "data.big",
+            "fileSize": "100000",
+        },
     }
     # mocking s3 server response
     with Stubber(s3_client) as stubber:
@@ -132,8 +135,8 @@ async def test_upload(
             assert response.status_code == 201
             assert response.json() is not None
             upload = UploadFileResponse(**response.json())
-            assert upload.parts_upload_urls is not None
-            assert upload.complete_upload_url is not None
+            assert upload.transfer_directives.parts_upload_urls is not None
+            assert upload.transfer_directives.complete_upload_url is not None
             assert upload.transfer_job.job_id == mocked_job_submit_response["job_id"]
             assert upload.transfer_job.system == slurm_cluster_with_api_config.name
         stubber.deactivate()
@@ -195,8 +198,8 @@ async def test_download(
                 )
                 assert response.status_code == 201
                 assert response.json() is not None
-                download = DownloadFileResponse(**response.json())
-                assert download.download_url is not None
+                download: DownloadFileResponse = DownloadFileResponse(**response.json())
+                assert download.transfer_directives.download_url is not None
                 assert (
                     download.transfer_job.job_id == mocked_job_submit_response["job_id"]
                 )
@@ -358,6 +361,7 @@ async def test_compress(
         assert compress.transfer_job.job_id == mocked_job_submit_response["job_id"]
         assert compress.transfer_job.system == slurm_cluster_with_api_config.name
 
+
 @pytest.mark.asyncio
 async def test_compress_with_pattern(
     client,
@@ -370,7 +374,7 @@ async def test_compress_with_pattern(
         "targetPath": "/home/test1/file1.tar",
         "account": "fireuser",
         "dereference": False,
-        "match_pattern": "./[ab].*\\.txt"
+        "match_pattern": "./[ab].*\\.txt",
     }
 
     with aioresponses() as mocked:

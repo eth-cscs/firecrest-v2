@@ -26,6 +26,7 @@ from lib.auth.authN.authentication_service import AuthenticationService
 from lib.auth.authZ.open_fga_client import OpenFGAClient
 from lib.auth.authZ.authorization_service import AuthorizationService
 from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
+from lib.datatransfers.magic_wormhole.wormhole_datatransfer import WormholeDatatransfer
 from lib.dependencies import AuthDependency
 
 # clients
@@ -355,22 +356,30 @@ class DataTransferDependency:
         scheduler_client = await self._get_scheduler_client(system_name)
         ssh_client = await self._get_ssh_client(system_name)
 
+        system = ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler)(
+            system_name=system_name
+        )
+        work_dir = next(
+            iter([fs.path for fs in system.file_systems if fs.default_work_dir]),
+            None,
+        )
+        if not work_dir:
+            raise ValueError(
+                f"The system {system_name} has no filesystem defined as default_work_dir"
+            )
+
         match settings.data_operation.data_transfer.service_type:
+            case DataTransferType.wormhole:
+
+                return WormholeDatatransfer(
+                    scheduler_client=scheduler_client,
+                    directives=system.datatransfer_jobs_directives,
+                    work_dir=work_dir,
+                    system_name=system_name,
+                )
+
             case DataTransferType.s3:
 
-                system = ServiceAvailabilityDependency(
-                    service_type=HealthCheckType.scheduler
-                )(system_name=system_name)
-                work_dir = next(
-                    iter(
-                        [fs.path for fs in system.file_systems if fs.default_work_dir]
-                    ),
-                    None,
-                )
-                if not work_dir:
-                    raise ValueError(
-                        f"The system {system_name} has no filesystem defined as default_work_dir"
-                    )
                 async with self._get_s3_client(
                     settings.data_operation.data_transfer.public_url
                 ) as s3_client_public:
