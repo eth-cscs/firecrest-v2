@@ -220,7 +220,7 @@ class BaseDataTransfer(CamelModel):
 class S3DataTransfer(BaseDataTransfer):
     """Object storage configuration, including credentials, endpoints, and upload behavior."""
 
-    service_type: Literal[DataTransferType.s3,]
+    service_type: Literal[DataTransferType.s3]
     name: str = Field(..., description="Name identifier for the storage.")
     private_url: SecretStr = Field(
         ..., description="Private/internal endpoint URL for the storage."
@@ -267,6 +267,7 @@ class DataOperation(BaseModel):
     data_transfer: Optional[S3DataTransfer | WormholeTransfer] = Field(
         None,
         description=("Data transfer service configuration"),
+        discriminator="service_type",
     )
 
 
