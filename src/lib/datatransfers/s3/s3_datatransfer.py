@@ -1,65 +1,28 @@
 from math import ceil
 import uuid
 import os
-from fastapi import HTTPException
-from typing import List
-from importlib import resources as imp_resources
-from jinja2 import Environment, FileSystemLoader
 
 
 # storage
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
-from firecrest.filesystem.transfer import scripts
+
 
 # helpers
 from lib.datatransfers.datatransfer_base import (
     DataTransferLocation,
     DataTransferOperation,
     DataTransferBase,
+    JobHelper,
     TransferJob,
     TransferJobLogs,
+    _build_script,
+    _format_directives,
 )
 
 # dependencies
-from lib.datatransfers.s3.models import S3DataTransferOperation
+from lib.datatransfers.s3.models import S3DataTransferDirective, S3DataTransferOperation
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
-from lib.scheduler_clients.slurm.models import SlurmJobDescription
-
-
-class JobHelper:
-    job_param = None
-    working_dir: str = None
-
-    def __init__(
-        self,
-        working_dir: str = None,
-        script: str = None,
-        job_name: str = None,
-    ):
-        self.working_dir = working_dir
-        unique_id = uuid.uuid4()
-        self.job_param = {
-            "name": job_name,
-            "working_directory": working_dir,
-            "standard_input": "/dev/null",
-            "standard_output": f"{working_dir}/.f7t_file_handling_job_{unique_id}.log",
-            "standard_error": f"{working_dir}/.f7t_file_handling_job_error_{unique_id}.log",
-            "env": {"PATH": "/bin:/usr/bin/:/usr/local/bin/"},
-            "script": script,
-        }
-
-
-def _build_script(filename: str, parameters):
-
-    script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
-    )
-    script_template = script_environment.get_template(filename)
-
-    script_code = script_template.render(parameters)
-
-    return script_code
 
 
 async def _generate_presigned_url(
@@ -80,19 +43,6 @@ async def _generate_presigned_url(
         HttpMethod=method,
     )
     return url
-
-
-def _format_directives(directives: List[str], account: str):
-
-    directives_str = "\n".join(directives)
-    if "{account}" in directives_str:
-        if account is None:
-            raise HTTPException(
-                status_code=400, detail="Account parameter is required on this system."
-            )
-        directives_str = directives_str.format(account=account)
-
-    return directives_str
 
 
 class S3Datatransfer(DataTransferBase):
@@ -160,7 +110,7 @@ class S3Datatransfer(DataTransferBase):
             post_external_upload_urls = []
             for part_number in range(
                 1,
-                ceil(source.size / self.max_part_size) + 1,
+                ceil(source.transfer_directives.file_size / self.max_part_size) + 1,
             ):
                 post_external_upload_urls.append(
                     await _generate_presigned_url(
@@ -210,13 +160,13 @@ class S3Datatransfer(DataTransferBase):
                 "max_part_size": str(self.max_part_size),
             }
 
-            job_script = _build_script("job_downloader.sh", parameters)
+            job_script = _build_script("job_s3_downloader.sh", parameters)
             job = JobHelper(
                 f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
             )
 
             job_id = await self.scheduler_client.submit_job(
-                job_description=SlurmJobDescription(**job.job_param),
+                job_description=JobDescriptionModel(**job.job_param),
                 username=username,
                 jwt_token=access_token,
             )
@@ -230,11 +180,17 @@ class S3Datatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
+        directives = S3DataTransferDirective(
+            **{
+                "partsUploadUrls": post_external_upload_urls,
+                "completeUploadUrl": complete_external_multipart_upload_url,
+                "maxPartSize": self.max_part_size,
+                "transfer_method": "s3",
+            }
+        )
+
         return S3DataTransferOperation(
-            transferJob=transferJob,
-            partsUploadUrls=post_external_upload_urls,
-            completeUploadUrl=complete_external_multipart_upload_url,
-            maxPartSize=self.max_part_size,
+            transferJob=transferJob, transfer_directives=directives
         )
 
     async def download(
@@ -314,7 +270,7 @@ class S3Datatransfer(DataTransferBase):
             job = JobHelper(
                 f"{self.work_dir}/{username}",
                 _build_script(
-                    "job_uploader_multipart.sh",
+                    "job_s3_uploader_multipart.sh",
                     parameters,
                 ),
                 "OutgressFileTransfer",
@@ -334,6 +290,10 @@ class S3Datatransfer(DataTransferBase):
                 self.ttl,
             )
 
+        directives = S3DataTransferDirective(
+            **{"download_url": get_download_url, "transfer_method": "s3"}
+        )
+
         return S3DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
@@ -344,5 +304,5 @@ class S3Datatransfer(DataTransferBase):
                     error_log=job.job_param["standard_error"],
                 ),
             ),
-            download_url=get_download_url,
+            transfer_directives=directives,
         )

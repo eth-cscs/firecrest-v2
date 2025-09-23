@@ -130,13 +130,16 @@ async def post_upload(
     access_token = ApiAuthHelper.get_access_token()
 
     source = DataTransferLocation(
-        host=None, system=None, path=None, size=upload_request.file_size
+        host=None,
+        system=None,
+        path=None,
+        transfer_directives=upload_request.transfer_directives,
     )
     target = DataTransferLocation(
         host=None,
         system=system_name,
-        path=f"{upload_request.path}/{upload_request.file_name}",
-        size=upload_request.file_size,
+        path=upload_request.path,
+        transfer_directives=upload_request.transfer_directives,
     )
 
     return await datatransfer.upload(

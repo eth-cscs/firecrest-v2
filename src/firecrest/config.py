@@ -29,6 +29,7 @@ from typing import List, Optional
 
 from lib.models.base_model import CamelModel
 from lib.models.config_model import LoadFileSecretStr, Oidc, SSHUserKeys
+from lib.datatransfers.datatransfer_base import DataTransferType
 
 
 class MultipartUpload(BaseModel):
@@ -191,18 +192,14 @@ class Probing(CamelModel):
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
-class DataTransferType(str, Enum):
-    """Types of data transfer services"""
-
-    s3 = "s3"
-
-
 class BaseDataTransfer(CamelModel):
     """Base data transfer setting"""
 
-    service_type: DataTransferType = Field(
-        ..., description="Type of data transfer service."
-    )
+    service_type: Literal[
+        DataTransferType.s3,
+        DataTransferType.wormhole,
+    ] = Field(None, description="Type of data transfer service.")
+
     probing: Optional[Probing] = Field(
         None, description="Configuration for probing storage availability."
     )
@@ -217,6 +214,7 @@ class BaseDataTransfer(CamelModel):
 class S3DataTransfer(BaseDataTransfer):
     """Object storage configuration, including credentials, endpoints, and upload behavior."""
 
+    service_type: Literal[DataTransferType.s3]
     name: str = Field(..., description="Name identifier for the storage.")
     private_url: SecretStr = Field(
         ..., description="Private/internal endpoint URL for the storage."
@@ -247,6 +245,11 @@ class S3DataTransfer(BaseDataTransfer):
     )
 
 
+class WormholeDataTransfer(BaseDataTransfer):
+    service_type: Literal[DataTransferType.wormhole]
+    pass
+
+
 class DataOperation(BaseModel):
     max_ops_file_size: int = Field(
         5 * 1024 * 1024,
@@ -255,9 +258,10 @@ class DataOperation(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    data_transfer: Optional[S3DataTransfer] = Field(
+    data_transfer: Optional[S3DataTransfer | WormholeDataTransfer] = Field(
         None,
         description=("Data transfer service configuration"),
+        discriminator="service_type",
     )
 
 
