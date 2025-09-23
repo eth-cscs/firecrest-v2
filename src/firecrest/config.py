@@ -245,7 +245,7 @@ class S3DataTransfer(BaseDataTransfer):
     )
 
 
-class WormholeTransfer(BaseDataTransfer):
+class WormholeDataTransfer(BaseDataTransfer):
     service_type: Literal[DataTransferType.wormhole]
     pass
 
@@ -258,7 +258,7 @@ class DataOperation(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    data_transfer: Optional[S3DataTransfer | WormholeTransfer] = Field(
+    data_transfer: Optional[S3DataTransfer | WormholeDataTransfer] = Field(
         None,
         description=("Data transfer service configuration"),
         discriminator="service_type",
