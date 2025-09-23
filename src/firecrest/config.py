@@ -198,7 +198,7 @@ class BaseDataTransfer(CamelModel):
     service_type: Literal[
         DataTransferType.s3,
         DataTransferType.wormhole,
-    ]
+    ] = Field(None, description="Type of data transfer service.")
 
     probing: Optional[Probing] = Field(
         None, description="Configuration for probing storage availability."
