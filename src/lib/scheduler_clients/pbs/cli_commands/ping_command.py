@@ -35,7 +35,7 @@ class PbsPingCommand(QstatBaseCommand):
                 "hostname": server_name,
             }
             state = server_data.get("server_state")
-            if state == "Active":
+            if state in ["Active", "Scheduling", "Idle"]:
                 server_info["pinged"] = "UP"
             else:
                 server_info["pinged"] = "DOWN"
