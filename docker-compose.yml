@@ -56,8 +56,8 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.10
     ports:
-      - 8000:5000
-      - 5678:5678
+      - "${F7T_HOST_IP:-127.0.0.1}:8000:5000"
+      - "${F7T_HOST_IP:-127.0.0.1}:5678:5678"
 
   slurm:
     image: slurm
@@ -75,8 +75,8 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.2
     ports:
-      - 6820:6820
-      - 2222:22
+      - "${F7T_HOST_IP:-127.0.0.1}:6820:6820"
+      - "${F7T_HOST_IP:-127.0.0.1}:2222:22"
     volumes:
         # ssh config
         - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
@@ -102,10 +102,10 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.4
     ports:
-      - 15001:15001   # PBS Server Port
-      - 15002:15002   # PBS Scheduler Port
-      - 15003:15003   # PBS Communication Manager
-      - 2223:22       # SSH Access
+      - "${F7T_HOST_IP:-127.0.0.1}:15001:15001"   # PBS Server Port
+      - "${F7T_HOST_IP:-127.0.0.1}:15002:15002"   # PBS Scheduler Port
+      - "${F7T_HOST_IP:-127.0.0.1}:15003:15003"   # PBS Communication Manager
+      - "${F7T_HOST_IP:-127.0.0.1}:2223:22"       # SSH Access
     volumes:
         # ssh config
         - ./build/docker/pbs-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
@@ -124,8 +124,8 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.3
     ports:
-      - "8080:8080"
-      - "9090:9000"
+      - "${F7T_HOST_IP:-127.0.0.1}:8080:8080"
+      - "${F7T_HOST_IP:-127.0.0.1}:9090:9000"
     volumes:
       - ./build/docker/keycloak/config.json:/opt/keycloak/data/import/config.json:ro
       - ./build/logs/keycloak:/opt/jboss/keycloak/standalone/log/:delegated
@@ -160,8 +160,8 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.19
     ports:
-      - 9000:9000
-      - 9001:9001
+      - "${F7T_HOST_IP:-127.0.0.1}:9000:9000"
+      - "${F7T_HOST_IP:-127.0.0.1}:9001:9001"
     volumes:
       - ./build/minio:/data:delegated
   ssh-ca:
@@ -182,5 +182,5 @@ services:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.22
     ports:
-      - 2221:2221
-      - 2280:2280
+      - "${F7T_HOST_IP:-127.0.0.1}:2221:2221"
+      - "${F7T_HOST_IP:-127.0.0.1}:2280:2280"
