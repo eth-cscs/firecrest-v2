@@ -56,7 +56,7 @@ ADD ./build/demo-launcher/supervisord.conf /etc/supervisord.conf
 COPY --from=ghcr.io/eth-cscs/firecrest-ui /usr/server/app ./web-ui
 RUN npm install --global yarn@1.22.19
 
-ENV APP_VERSION="2.x.x"
+ENV APP_VERSION="2.4.0"
 ENV ENVIRONMENT='development'
 ENV SERVICE_NAME='firecrest-web-ui'
 ENV LOGGING_LEVEL='error'
