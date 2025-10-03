@@ -40,6 +40,11 @@ class DataTransferDirective(CamelModel):
     ]
 
 
+class StreamerDataTransferDirective(DataTransferDirective):
+    streamer_coordinates: Optional[str] = None
+    transfer_method: Literal[DataTransferType.streamer,]
+
+
 class WormholeDataTransferDirective(DataTransferDirective):
     wormhole_code: Optional[str] = None
     transfer_method: Literal[DataTransferType.wormhole,]
