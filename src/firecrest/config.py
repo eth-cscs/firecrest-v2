@@ -250,6 +250,11 @@ class WormholeDataTransfer(BaseDataTransfer):
     pass
 
 
+class StreamerDataTransfer(BaseDataTransfer):
+    service_type: Literal[DataTransferType.streamer]
+    pass
+
+
 class DataOperation(BaseModel):
     max_ops_file_size: int = Field(
         5 * 1024 * 1024,
