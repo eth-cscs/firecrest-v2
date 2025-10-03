@@ -29,12 +29,14 @@ class DataTransferType(str, Enum):
 
     s3 = "s3"
     wormhole = "wormhole"
+    streamer = "streamer"
 
 
 class DataTransferDirective(CamelModel):
     transfer_method: Literal[
         DataTransferType.s3,
         DataTransferType.wormhole,
+        DataTransferType.streamer,
     ]
 
 

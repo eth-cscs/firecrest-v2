@@ -17,3 +17,6 @@ pip install streamer --index-url {{pypi_index_url}}
 echo $(date -u) "Waiting till file to tranfer is available..."
 
 streamer {{operation}} {{streamer_coordinates}} --path {{target_path}}
+
+
+
