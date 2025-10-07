@@ -14,10 +14,6 @@ from lib.datatransfers.datatransfer_base import (
 )
 import secrets
 from lib.scheduler_clients.models import JobDescriptionModel
-from lib.datatransfers.magic_wormhole.models import (
-    WormholeDataTransferDirective,
-    WormholeDataTransferOperation,
-)
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.datatransfers.streamer.models import StreamerDataTransferOperation
 
@@ -37,6 +33,9 @@ class StreamerDatatransfer(DataTransferBase):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
         self.system_name = system_name
+        self.pypi_index_url = pypi_index_url
+        self.port_range = port_range
+        self.ips = ips if ips else ["0.0.0.0"]
 
     async def upload(
         self,
@@ -108,21 +107,20 @@ class StreamerDatatransfer(DataTransferBase):
     ) -> DataTransferOperation | None:
 
         job_id = None
-        wormhole_code = generate_wormhole_code()
-
+        secret = secrets.token_urlsafe(16)
+        start_port, end_port = self.port_range
         parameters = {
             "sbatch_directives": _format_directives(self.directives, account),
-            "source": source.path,
-            "wormhole_code": wormhole_code,
-            "pypi_index_url": "https://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple",
+            "operation": "send",
+            "target_path": target.path,
+            "secret": secret,
+            "port_range": f"{start_port} {end_port}",
+            "pypi_index_url": self.pypi_index_url,
         }
 
         job = JobHelper(
             f"{self.work_dir}/{username}",
-            _build_script(
-                "job_wormhole_send.sh",
-                parameters,
-            ),
+            _build_script("job_streame.sh", parameters),
             "OutgressFileTransfer",
         )
 
@@ -132,11 +130,20 @@ class StreamerDatatransfer(DataTransferBase):
             jwt_token=access_token,
         )
 
-        directives = WormholeDataTransferDirective(
-            **{"wormhole_code": wormhole_code, "transfer_method": "wormhole"}
+        coordinates = {
+            "ports": [start_port, end_port],
+            "ips": self.ips,
+            "secret": secret,
+        }
+        encoded = base64.urlsafe_b64encode(
+            json.dumps(coordinates).encode("utf-8")
+        ).decode("utf-8")
+
+        directives = StreamerDataTransferDirective(
+            **{"coordinates": encoded, "transfer_method": "wormhole"}
         )
 
-        return WormholeDataTransferOperation(
+        return StreamerDataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,

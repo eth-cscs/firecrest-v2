@@ -73,6 +73,7 @@ class WormholeDatatransfer(DataTransferBase):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
         self.system_name = system_name
+        self.pypi_index_url = pypi_index_url
 
     async def upload(
         self,
