@@ -20,9 +20,10 @@ class OIDCTokenAuth(AuthenticationService):
 
     public_keys = {}
 
-    def __init__(self, public_certs: List[str] = None, username_claim: str = None):
+    def __init__(self, public_certs: List[str] = None, username_claim: str = None, jwk_algorithm: str = None):
 
         self.username_claim = username_claim
+        self.jwk_algorithm = jwk_algorithm
 
         keys = []
         s = requests.Session()
@@ -40,8 +41,47 @@ class OIDCTokenAuth(AuthenticationService):
 
         for key in keys:
             identifier = key.get("kid", None) or key.get("x5t", None)
+            algorithm = key.get("alg", None)
+            if not algorithm:
+                if self.jwk_algorithm:
+                    algorithm = self.jwk_algorithm
+                else:
+                    # If alg is not included in JWK nor specified explicitly in configuration,
+                    # try guessing a probable algorithm based on the key type.
+                    kty = key.get("kty", None)
+                    crv = key.get("crv", None)
+
+                    if kty == "RSA":
+                        algorithm = "RS256"
+                    elif kty == "oct":
+                        algorithm = "HS256"
+                    elif kty == "EC":
+                        if crv == "P-256" or not crv:
+                            algorithm = "ES256"
+                        elif crv == "P-384":
+                            algorithm = "ES384"
+                        elif crv == "P-521":
+                            algorithm = "ES512"
+                        elif crv == "secp256k1":
+                            algorithm = "ES256K"
+                        else:
+                            raise ValueError(
+                                f"Unsupported crv value '{crv}'. Configure jwk_algorithm to skip auto-detection."
+                            )
+                    elif kty == "OKP":
+                        if crv == "Ed25519":
+                            algorithm = "EdDSA"
+                        else:
+                            raise ValueError(
+                                f"Unsupported crv value '{crv}'. Configure jwk_algorithm to skip auto-detection."
+                            )
+                    else:
+                        raise ValueError(
+                            f"Unsupported key type '{kty}'. Configure jwk_algorithm to skip auto-detection."
+                        )
+
             if identifier:
-                self.public_keys[identifier] = jwk.construct(key)
+                self.public_keys[identifier] = jwk.construct(key, algorithm=algorithm)
 
     def auth_from_token(self, access_token: str):
         token_header = jwt.get_unverified_header(access_token)
