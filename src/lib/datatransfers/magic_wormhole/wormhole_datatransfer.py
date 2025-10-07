@@ -68,6 +68,7 @@ class WormholeDatatransfer(DataTransferBase):
         directives,
         work_dir,
         system_name,
+        pypi_index_url=None,
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
@@ -88,7 +89,7 @@ class WormholeDatatransfer(DataTransferBase):
             "sbatch_directives": _format_directives(self.directives, account),
             "target_path": target.path,
             "wormhole_code": source.transfer_directives.wormhole_code,
-            "pypi_index_url": "https://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple",
+            "pypi_index_url": self.pypi_index_url,
         }
 
         job_script = _build_script("job_wormhole_receive.sh", parameters)
