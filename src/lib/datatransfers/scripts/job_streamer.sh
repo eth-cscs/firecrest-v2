@@ -12,11 +12,11 @@ echo $(date -u) "Ingress/Outgress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JO
 
 python3.11 -m venv .venv
 source .venv/bin/activate
-pip install streamer --index-url {{pypi_index_url}}
+pip install firecrest-streamer --index-url {{pypi_index_url}}
 
-echo $(date -u) "Waiting till file to tranfer is available..."
+echo $(date -u) "Starting firecrest streamer in {{operation}} mode..."
 
-streamer {{operation}} {{streamer_coordinates}} --path {{target_path}}
+streamer server {{operation}} --secret {{secret}} --path {{target_path}}
 
 
 
