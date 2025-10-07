@@ -27,6 +27,7 @@ from lib.auth.authZ.open_fga_client import OpenFGAClient
 from lib.auth.authZ.authorization_service import AuthorizationService
 from lib.datatransfers.s3.s3_datatransfer import S3Datatransfer
 from lib.datatransfers.magic_wormhole.wormhole_datatransfer import WormholeDatatransfer
+from lib.datatransfers.streamer.streamer_datatransfer import StreamerDatatransfer
 from lib.dependencies import AuthDependency
 
 # clients
@@ -369,6 +370,18 @@ class DataTransferDependency:
             )
 
         match settings.data_operation.data_transfer.service_type:
+            case DataTransferType.streamer:
+
+                return StreamerDatatransfer(
+                    scheduler_client=scheduler_client,
+                    directives=system.datatransfer_jobs_directives,
+                    work_dir=work_dir,
+                    system_name=system_name,
+                    pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
+                    port_range=settings.data_operation.data_transfer.port_range,
+                    ips=settings.data_operation.data_transfer.ips,
+                )
+
             case DataTransferType.wormhole:
 
                 return WormholeDatatransfer(
@@ -376,6 +389,7 @@ class DataTransferDependency:
                     directives=system.datatransfer_jobs_directives,
                     work_dir=work_dir,
                     system_name=system_name,
+                    pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
                 )
 
             case DataTransferType.s3:
