@@ -58,7 +58,7 @@ class StreamerDatatransfer(DataTransferBase):
             "pypi_index_url": self.pypi_index_url,
         }
 
-        job_script = _build_script("job_streame.sh", parameters)
+        job_script = _build_script("job_streamer.sh", parameters)
         job = JobHelper(
             f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
         )
@@ -89,7 +89,7 @@ class StreamerDatatransfer(DataTransferBase):
         ).decode("utf-8")
 
         directives = StreamerDataTransferDirective(
-            **{"coordinates": encoded, "transfer_method": "wormhole"}
+            **{"coordinates": encoded, "transfer_method": "streamer"}
         )
 
         return StreamerDataTransferOperation(
@@ -120,7 +120,7 @@ class StreamerDatatransfer(DataTransferBase):
 
         job = JobHelper(
             f"{self.work_dir}/{username}",
-            _build_script("job_streame.sh", parameters),
+            _build_script("job_streamer.sh", parameters),
             "OutgressFileTransfer",
         )
 
@@ -140,7 +140,7 @@ class StreamerDatatransfer(DataTransferBase):
         ).decode("utf-8")
 
         directives = StreamerDataTransferDirective(
-            **{"coordinates": encoded, "transfer_method": "wormhole"}
+            **{"coordinates": encoded, "transfer_method": "streamer"}
         )
 
         return StreamerDataTransferOperation(

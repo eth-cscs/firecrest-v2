@@ -45,7 +45,7 @@ async def stream_receive():
     global target, scrt, ip_list, port_range
     welcome = None
     for ip in ip_list:
-        for port in range(port_range[0], port_range[1]):
+        for port in range(port_range[0], port_range[1] + 1):
             uri = f"ws://{ip}:{port}"
             try:
                 async with websockets.connect(
@@ -73,7 +73,11 @@ async def stream_receive():
                             )
                     print("File received successfully.")
                     return
-            except (OSError, websockets.exceptions.InvalidStatus):
+            except (
+                OSError,
+                websockets.exceptions.InvalidStatus,
+                websockets.exceptions.InvalidMessage,
+            ):
                 continue
     print("Unable to establish connection to any provided IPs/ports.")
 
@@ -81,8 +85,9 @@ async def stream_receive():
 async def stream_send():
     global target, scrt, ip_list, port_range
     for ip in ip_list:
-        for port in range(port_range[0], port_range[1]):
+        for port in range(port_range[0], port_range[1] + 1):
             uri = f"ws://{ip}:{port}"
+            print(f"Try to connect to {ip}:{port}")
             try:
                 async with websockets.connect(
                     uri,
@@ -97,7 +102,11 @@ async def stream_send():
                     await websocket.send("EOF")  # Signal end of file
                     print("File sent successfully.")
                     return
-            except OSError:
+            except (
+                OSError,
+                websockets.exceptions.InvalidStatus,
+                websockets.exceptions.InvalidMessage,
+            ):
                 continue
     print("Unable to establish connection to any provided IPs/ports.")
 

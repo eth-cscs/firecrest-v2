@@ -276,7 +276,9 @@ class DataOperation(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    data_transfer: Optional[S3DataTransfer | WormholeDataTransfer] = Field(
+    data_transfer: Optional[
+        S3DataTransfer | WormholeDataTransfer | StreamerDataTransfer
+    ] = Field(
         None,
         description=("Data transfer service configuration"),
         discriminator="service_type",

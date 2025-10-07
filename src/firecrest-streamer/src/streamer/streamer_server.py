@@ -84,7 +84,7 @@ def process_request(connection, request):
 async def stream():
     global secret, port_range, ip
     start_port, end_port = port_range
-    for port in range(start_port, end_port):
+    for port in range(start_port, end_port + 1):
         try:
             async with serve(
                 stream_receive if operation == Operation.receive else stream_send,
