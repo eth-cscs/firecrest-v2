@@ -105,7 +105,7 @@ async def stream():
                     json.dumps(coordinates).encode("utf-8")
                 ).decode("utf-8")
 
-                print(f"Use these coordinates to connect: {encoded}")
+                print(f"Use these coordinates to connect: {encoded}", flush=True)
 
                 loop = asyncio.get_running_loop()
                 loop.add_signal_handler(signal.SIGTERM, server.close)

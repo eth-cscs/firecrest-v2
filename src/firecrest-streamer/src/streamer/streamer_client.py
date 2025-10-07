@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import json
+import os
 import websockets
 import click
 
@@ -87,7 +88,6 @@ async def stream_send():
     for ip in ip_list:
         for port in range(port_range[0], port_range[1] + 1):
             uri = f"ws://{ip}:{port}"
-            print(f"Try to connect to {ip}:{port}")
             try:
                 async with websockets.connect(
                     uri,
@@ -96,9 +96,15 @@ async def stream_send():
                     ping_timeout=None,
                     additional_headers={"Authorization": f"Bearer {scrt}"},
                 ) as websocket:
+                    file_size = os.stat(target).st_size
+                    num_chunks = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
+                    print(f"Transfering {sizeof_fmt(file_size)}...")
+                    chunk_count = 0
                     with open(target, "rb") as f:
                         while chunk := f.read(CHUNK_SIZE):
                             await websocket.send(chunk)
+                            chunk_count += 1
+                            printProgressBar(chunk_count, num_chunks, length=40)
                     await websocket.send("EOF")  # Signal end of file
                     print("File sent successfully.")
                     return
@@ -125,12 +131,12 @@ def set_coordinates(coordinates):
 
 
 @click.command()
+@click.option("--path", help="The source path of the file to be sent.", required=True)
 @click.option(
     "--coordinates",
     help="Secret coordinates used to establish a connection",
     required=True,
 )
-@click.option("--path", help="The source path of the file to be sent.", required=True)
 def send(path, coordinates):
     global target
     set_coordinates(coordinates)
