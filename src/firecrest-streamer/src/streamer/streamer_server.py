@@ -3,13 +3,14 @@ import base64
 from enum import Enum
 import http
 import json
+import os
 import signal
 import websockets
 from websockets.asyncio.server import serve
 import click
 
 
-CHUNK_SIZE = 1 * 1024 * 1024  # 5 MiB
+CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
 
 class Operation(Enum):
@@ -41,6 +42,13 @@ async def stream_receive(websocket):
 async def stream_send(websocket):
     global operation, target
     print("Client connected.")
+    file_size = os.stat(target).st_size
+    num_chunks = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
+    await websocket.send(
+        json.dumps({"num_chunks": num_chunks, "file_size": file_size}).encode(
+            encoding="utf-8"
+        )
+    )
     with open(target, "rb") as f:
         try:
             while True:
@@ -105,12 +113,12 @@ async def stream():
 @click.option(
     "--secret", help="A shared secret required to initiate the transfer", required=True
 )
-def cli(secret):
+def server(secret):
     global scrt
     scrt = secret
 
 
-@cli.command()
+@server.command()
 @click.option("--path", help="The target path of the file to be sent.", required=True)
 def send(path):
     global operation, target
@@ -119,7 +127,7 @@ def send(path):
     asyncio.run(stream())
 
 
-@cli.command()
+@server.command()
 @click.option(
     "--path", help="The target path of the file to be received.", required=True
 )
@@ -128,7 +136,3 @@ def receive(path):
     operation = Operation.receive
     target = path
     asyncio.run(stream())
-
-
-if __name__ == "__main__":
-    cli()
