@@ -7,7 +7,7 @@ A simple command-line interface (CLI) tool to **stream files over WebSocket** co
 ## ✨ Features
 - Send and receive files securely via WebSocket.
 - Simple CLI interface for both client and server modes.
-- Token-based authentication.
+- Shared secret based authentication.
 
 ---
 
@@ -31,20 +31,19 @@ pip install firecrest-streamer
 
 ### Run as a Client
 
-To send or receive files, you need a **secret token** issued by the Firecrest Streamer server when a new transfer is initiated.
+To send or receive files, you need the **secret coordinates** issued by the Firecrest Streamer server when a new transfer is initiated.
 
 #### Receive a file:
 ```bash
-streamer receive --token [secret-token] --path [destination-path]
+streamer receive --coordinates [secret-coordinates] --path [destination-path]
 ```
 
 #### Send a file:
 ```bash
-streamer send --token [secret-token] --path [file-to-send]
+streamer send --coordinates [secret-coordinates] --path [file-to-send]
 ```
 
-> **Note:** The `--token` value must match the one provided by the server.  
-> Both commands connect to the corresponding server endpoint.
+> **Note:** The `--coordinates` value must match the one provided by the server.
 
 ---
 
@@ -73,7 +72,7 @@ streamer server --secret [your-secret-string] receive --path [destination-path]
 ```bash
 cd src
 python -m streamer server --secret [your-secret-string] send --path [file-to-send]
-python -m streamer receive --token [secret-token] --path [destination-path]
+python -m streamer receive --coordinates [secret-coordinates] --path [destination-path]
 ```
 
 ---

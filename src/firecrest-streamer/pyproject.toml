@@ -1,6 +1,6 @@
 [project]
 name = "firecrest-streamer"
-version = "0.0.8"
+version = "0.0.10"
 authors = [
   { name="Elia Palme", email="elia.palme@cscs.ch" },
 ]
@@ -31,4 +31,4 @@ build-backend = "hatchling.build"
 packages = ["src/streamer"]
 
 [project.scripts]
-streamer = "streamer.streamer:cli"
+streamer = "streamer.__main__:cli"

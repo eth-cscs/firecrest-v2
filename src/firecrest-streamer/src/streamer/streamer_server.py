@@ -20,7 +20,9 @@ class Operation(Enum):
 
 operation: Operation = None
 target: str = None
-scrt: str = None
+secret: str = None
+port_range: tuple[int, int] = None
+ip: str = None
 
 
 async def stream_receive(websocket):
@@ -64,6 +66,7 @@ async def stream_send(websocket):
 
 
 def process_request(connection, request):
+    global secret
     if "Authorization" not in request.headers:
         return connection.respond(
             http.HTTPStatus.UNAUTHORIZED, "Missing Authorization header\n"
@@ -74,31 +77,35 @@ def process_request(connection, request):
         return connection.respond(http.HTTPStatus.UNAUTHORIZED, "Missing token\n")
 
     token = authorization.split("Bearer ")[-1]
-    if token is None or token != scrt:
+    if token is None or token != secret:
         return connection.respond(http.HTTPStatus.FORBIDDEN, "Invalid secret\n")
 
 
 async def stream():
-    global scrt
-    for port in range(8765, 8775):
+    global secret, port_range, ip
+    start_port, end_port = port_range
+    for port in range(start_port, end_port):
         try:
             async with serve(
                 stream_receive if operation == Operation.receive else stream_send,
-                "0.0.0.0",
+                ip,
                 port,
                 max_size=CHUNK_SIZE,
                 ping_interval=60,
                 ping_timeout=None,
                 process_request=process_request,
             ) as server:
-                print(f"Server is listening on ws://localhost:{port}")
-                token = {"ports": [8765, 8775], "ips": ["localhost"], "secret": scrt}
-                json_str = json.dumps(token)
-                encoded = base64.urlsafe_b64encode(json_str.encode("utf-8")).decode(
-                    "utf-8"
-                )
+                print(f"Server is listening on ws://{ip}:{port}")
+                coordinates = {
+                    "ports": [start_port, end_port],
+                    "ips": [ip],
+                    "secret": secret,
+                }
+                encoded = base64.urlsafe_b64encode(
+                    json.dumps(coordinates).encode("utf-8")
+                ).decode("utf-8")
 
-                print(f"Use this token to connect: {encoded}")
+                print(f"Use these coordinates to connect: {encoded}")
 
                 loop = asyncio.get_running_loop()
                 loop.add_signal_handler(signal.SIGTERM, server.close)
@@ -111,11 +118,29 @@ async def stream():
 
 @click.group()
 @click.option(
-    "--secret", help="A shared secret required to initiate the transfer", required=True
+    "--secret",
+    "_secret",
+    help="A shared secret required to initiate the transfer",
+    required=True,
 )
-def server(secret):
-    global scrt
-    scrt = secret
+@click.option(
+    "--ip",
+    "_ip",
+    help="The IP to use for listening incoming connections",
+    default="0.0.0.0",
+)
+@click.option(
+    "--port-range",
+    "_port_range",
+    type=(int, int),
+    help="A range of ports to pick from to listen for incoming connections e.g. --port-range 5665 5670",
+    default=(5665, 5670),
+)
+def server(_secret, _ip, _port_range):
+    global secret, port_range, ip
+    secret = _secret
+    port_range = _port_range
+    ip = _ip
 
 
 @server.command()

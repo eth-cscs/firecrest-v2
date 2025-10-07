@@ -9,7 +9,6 @@ CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
 
 target: str = None
-token: str = None
 port_range: list[int] = None
 ip_list: list[str] = None
 
@@ -64,14 +63,14 @@ async def stream_receive():
                                 print(
                                     f"Transfering {sizeof_fmt(welcome['file_size'])}..."
                                 )
+                                continue
                             if message == "EOF":
-                                print("File transfer complete.")
                                 break
                             f.write(message)
+                            chunk_count += 1
                             printProgressBar(
                                 chunk_count, welcome["num_chunks"], length=40
                             )
-                            chunk_count += 1
                     print("File received successfully.")
                     return
             except (OSError, websockets.exceptions.InvalidStatus):
@@ -103,38 +102,42 @@ async def stream_send():
     print("Unable to establish connection to any provided IPs/ports.")
 
 
-def set_auth(token):
+def set_coordinates(coordinates):
     global scrt, port_range, ip_list
     try:
-        json_str = base64.urlsafe_b64decode(token).decode("utf-8")
+        json_str = base64.urlsafe_b64decode(coordinates).decode("utf-8")
         data = json.loads(json_str)
 
         scrt = data["secret"]
         port_range = data["ports"]
         ip_list = data["ips"]
     except (json.JSONDecodeError, KeyError, base64.binascii.Error) as e:
-        raise click.ClickException("Invalid token format") from e
+        raise click.ClickException("Invalid coordinates format") from e
 
 
 @click.command()
 @click.option(
-    "--token", help="A secret token used to establish a connection", required=True
+    "--coordinates",
+    help="Secret coordinates used to establish a connection",
+    required=True,
 )
 @click.option("--path", help="The source path of the file to be sent.", required=True)
-def send(path, token):
+def send(path, coordinates):
     global target
-    set_auth(token)
+    set_coordinates(coordinates)
     target = path
     asyncio.run(stream_send())
 
 
 @click.command()
 @click.option(
-    "--token", help="A secret token used to establish a connection", required=True
+    "--coordinates",
+    help="Secret coordinates used to establish a connection",
+    required=True,
 )
 @click.option("--path", help="The target path of the incoming file.", required=True)
-def receive(path, token):
+def receive(path, coordinates):
     global operation, target
-    set_auth(token)
+    set_coordinates(coordinates)
     target = path
     asyncio.run(stream_receive())
