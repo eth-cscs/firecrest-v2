@@ -117,8 +117,7 @@ data_operation:
   max_ops_file_size: 1048576 # 1M
   data_transfer:
     service_type: "streamer"
-    pypi_index_url: "http://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple"
-    port_range: [5665, 5675]
+    port_range: [5665, 5666]
     ips:
       - "localhost"
   # data_transfer:
