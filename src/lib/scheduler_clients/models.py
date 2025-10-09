@@ -58,7 +58,7 @@ class JobModel(CamelModel):
 
 
 class JobMetadataModel(CamelModel):
-    job_id: int
+    job_id: str
     script: Optional[str] = None
     standard_input: Optional[str] = None
     standard_output: Optional[str] = None
