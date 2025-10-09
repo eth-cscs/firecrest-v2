@@ -30,9 +30,9 @@ class PostFileUploadRequest(FilesystemRequestBase):
             "examples": [
                 {
                     "path": "/home/user/dir/file",
+                    "account": "group",
                     "transfer_directives": {
                         "transfer_method": "s3",
-                        "account": "group",
                         "file_size": "7340032",
                     },
                 }
