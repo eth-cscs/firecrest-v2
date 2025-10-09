@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+import re
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
 
@@ -22,14 +23,14 @@ class SacctBatchScriptCommand(SacctCommandBase):
             )
 
         jobs = []
-        parts = stdout.split(
-            "--------------------------------------------------------------------------------\n"
-        )
-        for header, script in zip(parts[0::2], parts[1::2], strict=True):
+        pattern = r"^Batch Script for\s+(\d+)\n-+\n"
+        blocks = re.split(pattern, stdout, flags=re.MULTILINE)
+
+        for i in range(1, len(blocks), 2):
             jobs.append(
                 {
-                    "jobId": int(header[17:]),
-                    "script": script,
+                    "jobId": blocks[i].strip(),
+                    "script": blocks[i + 1].strip(),
                 }
             )
         if len(jobs) == 0:
