@@ -12,7 +12,7 @@ class SacctBatchScriptCommand(SacctCommandBase):
 
     def get_command(self) -> str:
         cmd = [super().get_command()]
-        cmd += [("--batch-script")]
+        cmd += ["--batch-script"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -25,7 +25,7 @@ class SacctBatchScriptCommand(SacctCommandBase):
         parts = stdout.split(
             "--------------------------------------------------------------------------------\n"
         )
-        for header, script in zip(parts[0::2], parts[1::2]):
+        for header, script in zip(parts[0::2], parts[1::2], strict=True):
             jobs.append(
                 {
                     "jobId": int(header[17:]),
