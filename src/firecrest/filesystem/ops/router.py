@@ -616,7 +616,8 @@ async def post_upload(
     base64 = Base64Command(f"{path}/{file.filename}", decode=True)
 
     raw_content = file.file.read()
-    if sys.getsizeof(raw_content) > OPS_SIZE_LIMIT:
+
+    if len(raw_content) > OPS_SIZE_LIMIT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Uploaded file is too large.",
