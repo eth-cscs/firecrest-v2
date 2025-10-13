@@ -12,6 +12,7 @@ ignore = [
     "I001",  # Don't require sorted imports
     "B008",  # Incompatible with FastAPI Dependency declaration
     "B039",  # Do not use mutable data structures for `ContextVar` defaults
+    "B104",  # Allow binding to all interfaces.
     "S104",  # Allow binding to all interfaces.
     "S110",  # Allow unlogged exceptions.
     "S311",  # Allow standard pseudo-random generators for security purposes. #TODO: fix this and remove from ignore
