@@ -42,43 +42,29 @@ class OIDCTokenAuth(AuthenticationService):
         for key in keys:
             identifier = key.get("kid", None) or key.get("x5t", None)
             algorithm = key.get("alg", None)
+            algo_map = {
+                "RSA":"RS256",
+                "oct":"HS256",
+                "EC": {"None":"ES256", "P-256":"ES256", "P-384":"ES384", "P-521":"ES512", "secp256k1":"ES256K"},
+                "OKP":{"Ed25519":"EdDSA"}
+            }
+
             if not algorithm:
                 if self.jwk_algorithm:
                     algorithm = self.jwk_algorithm
                 else:
-                    # If alg is not included in JWK nor specified explicitly in configuration,
-                    # try guessing a probable algorithm based on the key type.
-                    kty = key.get("kty", None)
-                    crv = key.get("crv", None)
+                    kty = key.get("kty", "None")
+                    crv = key.get("crv", "None")
 
-                    if kty == "RSA":
-                        algorithm = "RS256"
-                    elif kty == "oct":
-                        algorithm = "HS256"
-                    elif kty == "EC":
-                        if crv == "P-256" or not crv:
-                            algorithm = "ES256"
-                        elif crv == "P-384":
-                            algorithm = "ES384"
-                        elif crv == "P-521":
-                            algorithm = "ES512"
-                        elif crv == "secp256k1":
-                            algorithm = "ES256K"
+                    try:
+                        if isinstance(algo_map[kty], str):
+                            algorithm = algo_map[kty]
                         else:
-                            raise ValueError(
-                                f"Unsupported crv value '{crv}'. Configure jwk_algorithm to skip auto-detection."
-                            )
-                    elif kty == "OKP":
-                        if crv == "Ed25519":
-                            algorithm = "EdDSA"
-                        else:
-                            raise ValueError(
-                                f"Unsupported crv value '{crv}'. Configure jwk_algorithm to skip auto-detection."
-                            )
-                    else:
+                            algorithm = algo_map[kty][crv]
+                    except KeyError as e:
                         raise ValueError(
-                            f"Unsupported key type '{kty}'. Configure jwk_algorithm to skip auto-detection."
-                        )
+                            "Unsupported kty or crv values. Configure jwk_algorithm to skip auto-detection."
+                        ) from e
 
             if identifier:
                 self.public_keys[identifier] = jwk.construct(key, algorithm=algorithm)
