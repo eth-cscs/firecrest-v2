@@ -11,6 +11,6 @@ ignore = [
     "I001",  # Don't require sorted imports
     "B008",  # Incompatible with FastAPI Dependency declaration
     "B039",  # Do not use mutable data structures for `ContextVar` defaults
-    "B104",  # Allow binding to all interfaces.
+    "B104:hardcoded_bind_all_interfaces",  # Allow binding to all interfaces.
 
 ]
