@@ -37,7 +37,7 @@ class StreamerDatatransfer(DataTransferBase):
         self.system_name = system_name
         self.pypi_index_url = pypi_index_url
         self.port_range = port_range
-        self.ips = ips if ips else ["0.0.0.0"]
+        self.ips = ips if ips else ["localhost"]
         self.wait_timeout = wait_timeout
         self.inbound_transfer_limit = inbound_transfer_limit
 

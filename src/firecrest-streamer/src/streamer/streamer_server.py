@@ -144,7 +144,7 @@ async def stream():
     "--ip",
     "_ip",
     help="The IP to use for listening incoming connections",
-    default="0.0.0.0",
+    default="localhost",
 )
 @click.option(
     "--port-range",
