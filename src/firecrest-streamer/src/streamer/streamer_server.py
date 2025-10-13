@@ -23,17 +23,31 @@ target: str = None
 secret: str = None
 port_range: tuple[int, int] = None
 ip: str = None
+wait_timeout: int = None
+inbound_transfer_limit: int = None
+timeout_handle: asyncio.Handle = None
 
 
 async def stream_receive(websocket):
-    global operation, target
+    global operation, target, inbound_transfer_limit
     print("Client connected.")
+    transfer_size = 0
     with open(target, "wb") as f:
         try:
             async for message in websocket:
                 if message == "EOF":
                     print("File transfer complete.")
                     break
+                transfer_size += CHUNK_SIZE
+                if transfer_size > inbound_transfer_limit:
+                    print("Inbound transfer limit exceeded. Aborting transfer.")
+                    await websocket.close(
+                        code=1009,
+                        reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes",
+                    )
+                    os.remove(target)
+                    websocket.server.close()
+                    return
                 f.write(message)
         except websockets.ConnectionClosed:
             print("Connection closed unexpectedly.")
@@ -66,7 +80,7 @@ async def stream_send(websocket):
 
 
 def process_request(connection, request):
-    global secret
+    global secret, timeout_handle
     if "Authorization" not in request.headers:
         return connection.respond(
             http.HTTPStatus.UNAUTHORIZED, "Missing Authorization header\n"
@@ -80,9 +94,11 @@ def process_request(connection, request):
     if token is None or token != secret:
         return connection.respond(http.HTTPStatus.FORBIDDEN, "Invalid secret\n")
 
+    timeout_handle.cancel()
+
 
 async def stream():
-    global secret, port_range, ip
+    global secret, port_range, ip, wait_timeout, timeout_handle
     start_port, end_port = port_range
     for port in range(start_port, end_port + 1):
         try:
@@ -109,6 +125,7 @@ async def stream():
 
                 loop = asyncio.get_running_loop()
                 loop.add_signal_handler(signal.SIGTERM, server.close)
+                timeout_handle = loop.call_later(wait_timeout, server.close)
                 await server.wait_closed()
             break
         except OSError:
@@ -136,11 +153,25 @@ async def stream():
     help="A range of ports to pick from to listen for incoming connections e.g. --port-range 5665 5670",
     default=(5665, 5670),
 )
-def server(_secret, _ip, _port_range):
-    global secret, port_range, ip
+@click.option(
+    "--wait-timeout",
+    "_wait_timeout",
+    help="How long to wait for a connection before exiting (in seconds)",
+    default=86400,
+)
+@click.option(
+    "--inbound-transfer-limit",
+    "_inbound_transfer_limit",
+    help="Limit how much data can be received (in bytes)",
+    default=5 * 1024 * 1024 * 1024,  # 5 GiB
+)
+def server(_secret, _ip, _port_range, _wait_timeout, _inbound_transfer_limit):
+    global secret, port_range, ip, wait_timeout, inbound_transfer_limit
     secret = _secret
     port_range = _port_range
     ip = _ip
+    wait_timeout = _wait_timeout
+    inbound_transfer_limit = _inbound_transfer_limit
 
 
 @server.command()
