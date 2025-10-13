@@ -265,6 +265,14 @@ class StreamerDataTransfer(BaseDataTransfer):
     ips: Optional[List[str]] = Field(
         None, description="List of public IP addresses where server can be reached."
     )
+    wait_timeout: Optional[int] = Field(
+        86400,
+        description="How long to wait for a connection before exiting (in seconds)",
+    )
+    inbound_transfer_limit: Optional[int] = Field(
+        5 * 1024 * 1024 * 1024,
+        description="Limit how much data can be received (in bytes)",
+    )
     pass
 
 

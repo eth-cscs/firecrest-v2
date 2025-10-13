@@ -380,6 +380,8 @@ class DataTransferDependency:
                     pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
                     port_range=settings.data_operation.data_transfer.port_range,
                     ips=settings.data_operation.data_transfer.ips,
+                    wait_timeout=settings.data_operation.data_transfer.wait_timeout,
+                    inbound_transfer_limit=settings.data_operation.data_transfer.inbound_transfer_limit,
                 )
 
             case DataTransferType.wormhole:
