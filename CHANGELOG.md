@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.0] - OPEN
+## [2.4.1] - OPEN
+
+### Fixed
+
+- Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
+- Old link to the installation documentation
+
+## [2.4.0]
 
 ### Added
 

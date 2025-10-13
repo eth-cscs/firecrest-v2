@@ -18,7 +18,7 @@ FirecREST is a high performance proxy providing a standardized interface to acce
 
 ### User Guide: [Full Documentation](https://eth-cscs.github.io/firecrest-v2/)
 ### API Reference: [OpenAPI Swagger](https://eth-cscs.github.io/firecrest-v2/openapi/)
-### K8s Deployment: [Helm Charts](https://eth-cscs.github.io/firecrest-v2/setup/deploy/)
+### K8s Deployment: [Helm Charts](https://eth-cscs.github.io/firecrest-v2/setup/install/)
 
 
 # FirecREST v2 Demo
