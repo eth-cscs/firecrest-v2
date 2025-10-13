@@ -29,6 +29,8 @@ class StreamerDatatransfer(DataTransferBase):
         pypi_index_url=None,
         port_range=(50000, 60000),
         ips=None,
+        wait_timeout=86400,
+        inbound_transfer_limit=5 * 1024 * 1024 * 1024,
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
@@ -36,6 +38,8 @@ class StreamerDatatransfer(DataTransferBase):
         self.pypi_index_url = pypi_index_url
         self.port_range = port_range
         self.ips = ips if ips else ["0.0.0.0"]
+        self.wait_timeout = wait_timeout
+        self.inbound_transfer_limit = inbound_transfer_limit
 
     async def upload(
         self,
@@ -56,6 +60,8 @@ class StreamerDatatransfer(DataTransferBase):
             "secret": secret,
             "port_range": f"{start_port} {end_port}",
             "pypi_index_url": self.pypi_index_url,
+            "wait_timeout": self.wait_timeout,
+            "inbound_transfer_limit": self.inbound_transfer_limit,
         }
 
         job_script = _build_script("job_streamer.sh", parameters)
@@ -116,6 +122,8 @@ class StreamerDatatransfer(DataTransferBase):
             "secret": secret,
             "port_range": f"{start_port} {end_port}",
             "pypi_index_url": self.pypi_index_url,
+            "wait_timeout": self.wait_timeout,
+            "inbound_transfer_limit": self.inbound_transfer_limit,
         }
 
         job = JobHelper(
