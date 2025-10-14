@@ -1,6 +1,6 @@
 from lib.datatransfers.datatransfer_base import (
     S3DataTransferDirective,
-    S3DataTransferInfo,  # F401
+    S3DataTransferInfo,  # noqa: F401
     DataTransferOperation,
 )
 
