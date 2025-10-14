@@ -1,5 +1,6 @@
 from lib.datatransfers.datatransfer_base import (
     S3DataTransferDirective,
+    S3DataTransferInfo,
     DataTransferOperation,
 )
 

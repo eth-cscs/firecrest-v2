@@ -9,16 +9,14 @@ from pydantic import Field
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
 from lib.datatransfers.datatransfer_base import DataTransferOperation
-from lib.datatransfers.magic_wormhole.models import WormholeDataTransferDirective
-from lib.datatransfers.s3.models import S3DataTransferDirective
+from lib.datatransfers.magic_wormhole.models import WormholeDataTransferInfo
+from lib.datatransfers.s3.models import S3DataTransferInfo
 from lib.models.base_model import CamelModel
 from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 
 class PostFileUploadRequest(FilesystemRequestBase):
-    transfer_directives: Union[
-        WormholeDataTransferDirective | S3DataTransferDirective
-    ] = Field(
+    transfer_directives: Union[WormholeDataTransferInfo | S3DataTransferInfo] = Field(
         ..., description="Data transfer parameters specific to the transfer method"
     )
 
