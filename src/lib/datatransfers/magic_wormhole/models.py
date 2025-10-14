@@ -1,6 +1,6 @@
 from lib.datatransfers.datatransfer_base import (
     WormholeDataTransferDirective,
-    WormholeDataTransferInfo,
+    WormholeDataTransferInfo,  # F401
     DataTransferOperation,
 )
 
