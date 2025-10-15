@@ -120,8 +120,8 @@ data_operation:
     port_range: [5665, 5666]
     ips:
       - "localhost"
-    wait_timeout: 60
-    inbound_transfer_limit: 1024 # 5G
+    wait_timeout: 43200  # 12h
+    inbound_transfer_limit: 5368709120 # 5GB
   # data_transfer:
   #  service_type: "wormhole"
   #data_transfer:
