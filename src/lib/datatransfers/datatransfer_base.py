@@ -43,14 +43,20 @@ class WormholeDataTransferDirective(DataTransferDirective):
     transfer_method: Literal[DataTransferType.wormhole,]
 
 
+class WormholeDataTransferInfo(DataTransferDirective):
+    transfer_method: Literal[DataTransferType.wormhole,]
+
+
 class S3DataTransferDirective(DataTransferDirective):
     download_url: Optional[str] = None
     parts_upload_urls: Optional[List[str]] = None
     complete_upload_url: Optional[str] = None
     max_part_size: Optional[int] = None
-    file_size: Optional[int] = Field(
-        None, description="Size of the file to upload in bytes"
-    )
+    transfer_method: Literal[DataTransferType.s3,]
+
+
+class S3DataTransferInfo(DataTransferDirective):
+    file_size: int = Field(..., description="Size of the file to upload in bytes")
     transfer_method: Literal[DataTransferType.s3,]
 
 
@@ -59,7 +65,7 @@ class DataTransferLocation(CamelModel):
     system: Optional[str] = None
     path: Optional[str] = None
     transfer_directives: Optional[
-        Union[S3DataTransferDirective | WormholeDataTransferDirective]
+        Union[S3DataTransferInfo | WormholeDataTransferInfo]
     ] = Field(
         None,
         description=("Provide method specific transfer directives"),
