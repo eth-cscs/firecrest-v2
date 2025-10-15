@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installation docs:
     - Helm charts: FirecREST settings are all included in values.yaml file
     - Changed documentation name from Deployment to Install
+- Improved direct upload endpoints size limit checks
 
 ## [2.3.1]
 
