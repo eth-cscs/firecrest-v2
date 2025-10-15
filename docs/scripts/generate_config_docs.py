@@ -53,7 +53,8 @@ def format_type(annotation):
     origin = get_origin(annotation)
     args = get_args(annotation)
 
-    if origin is Union:
+    # Handle both typing.Union and PEP 604 unions
+    if origin in (Union, types.UnionType):
         return " `|` ".join(format_type(a) for a in args)
 
     elif origin in (list, List):
@@ -67,7 +68,7 @@ def format_type(annotation):
         return "`Dict`"
 
     elif hasattr(annotation, "__name__"):
-        if annotation.__name__ == "NoneType":
+        if getattr(annotation, "__name__", None) == "NoneType":
             return "`None`"
         elif inspect.isclass(annotation) and issubclass(annotation, Enum):
             available_options = ", ".join(
@@ -76,7 +77,8 @@ def format_type(annotation):
             return f"`enum str` (Available options: {available_options})"
 
         cname = annotation.__name__
-        if issubclass(annotation, BaseModel):
+
+        if inspect.isclass(annotation) and issubclass(annotation, BaseModel):
             cname = f"[{cname}](#{cname.lower()})"
         else:
             cname = f"`{cname}`"
