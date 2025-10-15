@@ -31,7 +31,7 @@ class QstatJobMetadataCommand(QstatBaseCommand):
         res = payload.get("Jobs", {})
         jobs = []
         for job_id, job_data in res.items():
-            job_id_parsed = int(job_id.split(".")[0])
+            job_id_parsed = job_id.split(".")[0]
             job_info = {
                 "job_id": job_id_parsed,
                 **job_data,

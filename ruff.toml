@@ -11,5 +11,4 @@ ignore = [
     "I001",  # Don't require sorted imports
     "B008",  # Incompatible with FastAPI Dependency declaration
     "B039",  # Do not use mutable data structures for `ContextVar` defaults
-
 ]

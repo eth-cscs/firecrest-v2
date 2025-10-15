@@ -30,6 +30,7 @@ class SacctCommand(SacctCommandBase):
 
     def get_command(self) -> str:
         cmd = [super().get_command()]
+        cmd += ["--noheader"]
         cmd += [
             (
                 "--format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,"
