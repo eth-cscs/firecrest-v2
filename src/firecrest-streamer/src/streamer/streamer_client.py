@@ -51,7 +51,9 @@ async def stream_receive():
             try:
                 async with websockets.connect(
                     uri,
-                    max_size=CHUNK_SIZE,
+                    max_size=int(
+                        CHUNK_SIZE * 1.25
+                    ),  # Allow some overhead for encoding and headers
                     ping_interval=60,
                     ping_timeout=None,
                     additional_headers={"Authorization": f"Bearer {scrt}"},
@@ -91,7 +93,9 @@ async def stream_send():
             try:
                 async with websockets.connect(
                     uri,
-                    max_size=CHUNK_SIZE,
+                    max_size=int(
+                        CHUNK_SIZE * 1.25
+                    ),  # Allow some overhead for encoding and headers
                     ping_interval=60,
                     ping_timeout=None,
                     additional_headers={"Authorization": f"Bearer {scrt}"},
@@ -102,7 +106,7 @@ async def stream_send():
                     chunk_count = 0
                     with open(target, "rb") as f:
                         while chunk := f.read(CHUNK_SIZE):
-                            await websocket.send(chunk)
+                            await websocket.send(chunk, text=False)
                             chunk_count += 1
                             printProgressBar(chunk_count, num_chunks, length=40)
                     await websocket.send("EOF")  # Signal end of file

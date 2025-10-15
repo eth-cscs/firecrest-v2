@@ -73,7 +73,7 @@ async def stream_send(websocket):
                 chunk = f.read(CHUNK_SIZE)
                 if not chunk:
                     break
-                await websocket.send(chunk)
+                await websocket.send(chunk, text=False)
             await websocket.send("EOF")  # signal end of file
         except websockets.ConnectionClosed:
             print("Connection closed unexpectedly.")
@@ -108,7 +108,9 @@ async def stream():
                 stream_receive if operation == Operation.receive else stream_send,
                 ip,
                 port,
-                max_size=CHUNK_SIZE,
+                max_size=int(
+                    CHUNK_SIZE * 1.25
+                ),  # Allow some overhead for encoding and headers
                 ping_interval=60,
                 ping_timeout=None,
                 process_request=process_request,
