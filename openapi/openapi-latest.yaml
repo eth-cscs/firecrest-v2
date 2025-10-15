@@ -55,9 +55,9 @@ components:
       - account: group
         compression: none
         dereference: 'true'
-        match_pattern: '*./[ab].*\.txt'
-        path: /home/user/dir
-        target_path: /home/user/file.tar.gz
+        matchPattern: '*./[ab].*\.txt'
+        sourcePath: /home/user/dir
+        targetPath: /home/user/file.tar.gz
       properties:
         account:
           anyOf:
@@ -104,7 +104,7 @@ components:
     CompressResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: CompressResponse
@@ -127,8 +127,8 @@ components:
       examples:
       - account: group
         dereference: 'true'
-        source_path: /home/user/dir/file.orig
-        target_path: /home/user/dir/file.new
+        sourcePath: /home/user/dir/file.orig
+        targetPath: /home/user/dir/file.new
       properties:
         account:
           anyOf:
@@ -162,23 +162,46 @@ components:
     CopyResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: CopyResponse
       type: object
-    DataOperation:
+    DataOperation-Input:
       properties:
         data_transfer:
           anyOf:
           - discriminator:
               mapping:
-                s3: '#/components/schemas/S3DataTransfer'
-                wormhole: '#/components/schemas/WormholeDataTransfer'
+                s3: '#/components/schemas/S3DataTransfer-Input'
+                wormhole: '#/components/schemas/WormholeDataTransfer-Input'
               propertyName: serviceType
             oneOf:
-            - $ref: '#/components/schemas/S3DataTransfer'
-            - $ref: '#/components/schemas/WormholeDataTransfer'
+            - $ref: '#/components/schemas/S3DataTransfer-Input'
+            - $ref: '#/components/schemas/WormholeDataTransfer-Input'
+          - type: 'null'
+          description: Data transfer service configuration
+          title: Data Transfer
+        max_ops_file_size:
+          default: 5242880
+          description: Maximum file size (in bytes) allowed for direct upload and
+            download. Larger files will go through the staging area.
+          title: Max Ops File Size
+          type: integer
+      title: DataOperation
+      type: object
+    DataOperation-Output:
+      properties:
+        data_transfer:
+          anyOf:
+          - discriminator:
+              mapping:
+                s3: '#/components/schemas/S3DataTransfer-Output'
+                wormhole: '#/components/schemas/WormholeDataTransfer-Output'
+              propertyName: serviceType
+            oneOf:
+            - $ref: '#/components/schemas/S3DataTransfer-Output'
+            - $ref: '#/components/schemas/WormholeDataTransfer-Output'
           - type: 'null'
           description: Data transfer service configuration
           title: Data Transfer
@@ -193,7 +216,7 @@ components:
     DeleteResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: DeleteResponse
@@ -212,7 +235,7 @@ components:
           - $ref: '#/components/schemas/WormholeDataTransferDirective'
           title: Transferdirectives
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: DownloadFileResponse
@@ -221,8 +244,8 @@ components:
       examples:
       - account: group
         compression: none
-        source_path: /home/user/dir/file.tar.gz
-        target_path: /home/user/dir
+        sourcePath: /home/user/dir/file.tar.gz
+        targetPath: /home/user/dir
       properties:
         account:
           anyOf:
@@ -255,7 +278,7 @@ components:
     ExtractResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: ExtractResponse
@@ -531,7 +554,7 @@ components:
         jobs:
           anyOf:
           - items:
-              $ref: '#/components/schemas/JobModel'
+              $ref: '#/components/schemas/JobModel-Output'
             type: array
           - type: 'null'
           title: Jobs
@@ -587,11 +610,11 @@ components:
       properties:
         dataOperation:
           anyOf:
-          - $ref: '#/components/schemas/DataOperation'
+          - $ref: '#/components/schemas/DataOperation-Output'
           - type: 'null'
         systems:
           items:
-            $ref: '#/components/schemas/HPCCluster'
+            $ref: '#/components/schemas/HPCCluster-Output'
           title: Systems
           type: array
       required:
@@ -609,7 +632,65 @@ components:
       - output
       title: GetViewFileResponse
       type: object
-    HPCCluster:
+    HPCCluster-Input:
+      description: 'Definition of an HPC cluster, including SSH access, scheduling,
+        and
+
+        filesystem layout. More info in
+
+        [the systems'' section](../arch/systems//README.md).'
+      properties:
+        datatransferJobsDirectives:
+          description: Custom scheduler flags passed to data transfer jobs (e.g. `-pxfer`
+            for a dedicated partition).
+          items:
+            type: string
+          title: Datatransferjobsdirectives
+          type: array
+        fileSystems:
+          description: List of mounted file systems on the cluster, such as scratch
+            or home directories.
+          items:
+            $ref: '#/components/schemas/FileSystem'
+          title: Filesystems
+          type: array
+        name:
+          description: Unique name for the cluster. This field is case insensitive.
+          title: Name
+          type: string
+        probing:
+          $ref: '#/components/schemas/Probing'
+          description: Probing configuration for monitoring the cluster.
+        scheduler:
+          $ref: '#/components/schemas/Scheduler'
+          description: Job scheduler configuration.
+        serviceAccount:
+          $ref: '#/components/schemas/ServiceAccount'
+          description: Service credentials for internal APIs.
+        servicesHealth:
+          anyOf:
+          - items:
+              anyOf:
+              - $ref: '#/components/schemas/SchedulerServiceHealth'
+              - $ref: '#/components/schemas/FilesystemServiceHealth'
+              - $ref: '#/components/schemas/SSHServiceHealth'
+              - $ref: '#/components/schemas/HealthCheckException'
+            type: array
+          - type: 'null'
+          description: Optional health information for different services in the cluster.
+          title: Serviceshealth
+        ssh:
+          $ref: '#/components/schemas/SSHClientPool'
+          description: SSH configuration for accessing the cluster nodes.
+      required:
+      - name
+      - ssh
+      - scheduler
+      - serviceAccount
+      - probing
+      title: HPCCluster
+      type: object
+    HPCCluster-Output:
       description: 'Definition of an HPC cluster, including SSH access, scheduling,
         and
 
@@ -768,19 +849,19 @@ components:
           - type: 'null'
           description: Standard output file name
           title: Standardoutput
-        working_directory:
+        workingDirectory:
           description: Job working directory
-          title: Working Directory
+          title: Workingdirectory
           type: string
       required:
-      - working_directory
+      - workingDirectory
       title: JobDescriptionModel
       type: object
     JobMetadataModel:
       properties:
         jobId:
           title: Jobid
-          type: integer
+          type: string
         script:
           anyOf:
           - type: string
@@ -805,7 +886,79 @@ components:
       - jobId
       title: JobMetadataModel
       type: object
-    JobModel:
+    JobModel-Input:
+      properties:
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+        allocationNodes:
+          title: Allocationnodes
+          type: integer
+        cluster:
+          title: Cluster
+          type: string
+        group:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Group
+        jobId:
+          title: Jobid
+          type: integer
+        killRequestUser:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Killrequestuser
+        name:
+          title: Name
+          type: string
+        nodes:
+          title: Nodes
+          type: string
+        partition:
+          title: Partition
+          type: string
+        priority:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Priority
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        tasks:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/JobTask'
+            type: array
+          - type: 'null'
+          title: Tasks
+        time:
+          $ref: '#/components/schemas/JobTime'
+        user:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: User
+        workingDirectory:
+          title: Workingdirectory
+          type: string
+      required:
+      - jobId
+      - name
+      - status
+      - time
+      - allocationNodes
+      - cluster
+      - nodes
+      - partition
+      - user
+      - workingDirectory
+      title: JobModel
+      type: object
+    JobModel-Output:
       properties:
         account:
           anyOf:
@@ -952,8 +1105,8 @@ components:
     MoveRequest:
       examples:
       - account: group
-        source_path: /home/user/dir/file.orig
-        target_path: /home/user/dir/file.new
+        sourcePath: /home/user/dir/file.orig
+        targetPath: /home/user/dir/file.new
       properties:
         account:
           anyOf:
@@ -979,7 +1132,7 @@ components:
     MoveResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: MoveResponse
@@ -1146,9 +1299,9 @@ components:
       examples:
       - compression: none
         dereference: 'true'
-        match_pattern: '*./[ab].*\.txt'
-        path: /home/user/dir
-        target_path: /home/user/file.tar.gz
+        matchPattern: '*./[ab].*\.txt'
+        sourcePath: /home/user/dir
+        targetPath: /home/user/file.tar.gz
       properties:
         compression:
           anyOf:
@@ -1189,8 +1342,8 @@ components:
     PostExtractRequest:
       examples:
       - compression: none
-        path: /home/user/dir/file.tar.gz
-        target_path: /home/user/dir
+        sourcePath: /home/user/dir/file.tar.gz
+        targetPath: /home/user/dir
       properties:
         compression:
           anyOf:
@@ -1217,7 +1370,7 @@ components:
     PostFileDownloadRequest:
       examples:
       - account: group
-        path: /home/user/dir/file
+        sourcePath: /home/user/dir/file
       properties:
         account:
           anyOf:
@@ -1267,11 +1420,11 @@ components:
       type: object
     PostFileUploadRequest:
       examples:
-      - path: /home/user/dir/file
-        transfer_directives:
-          account: group
-          file_size: '7340032'
-          transfer_method: s3
+      - account: group
+        sourcePath: /home/user/dir/file
+        transferDirectives:
+          fileSize: '7340032'
+          transferMethod: s3
       properties:
         account:
           anyOf:
@@ -1336,10 +1489,10 @@ components:
             sleep 1
 
             done'
-          standard_error: count_to_100.err
-          standard_input: /dev/null
-          standard_output: count_to_100.out
-          working_directory: '{{home_path}}'
+          standardError: count_to_100.err
+          standardInput: /dev/null
+          standardOutput: count_to_100.out
+          workingDirectory: '{{home_path}}'
       - job:
           account: myproject
           env:
@@ -1347,10 +1500,10 @@ components:
             PATH: /path/to/bin
           name: Example with script path
           script_path: /path/to/batch_file.sh
-          standard_error: count_to_100.err
-          standard_input: /dev/null
-          standard_output: count_to_100.out
-          working_directory: '{{home_path}}'
+          standardError: count_to_100.err
+          standardInput: /dev/null
+          standardOutput: count_to_100.out
+          workingDirectory: '{{home_path}}'
       properties:
         job:
           $ref: '#/components/schemas/JobDescriptionModel'
@@ -1503,7 +1656,89 @@ components:
       - startTime
       title: ReservationModel
       type: object
-    S3DataTransfer:
+    S3DataTransfer-Input:
+      description: Object storage configuration, including credentials, endpoints,
+        and upload behavior.
+      properties:
+        accessKeyId:
+          description: Access key ID for S3-compatible storage.
+          format: password
+          title: Accesskeyid
+          type: string
+          writeOnly: true
+        bucketLifecycleConfiguration:
+          $ref: '#/components/schemas/BucketLifecycleConfiguration'
+          description: Lifecycle policy settings for auto-deleting files after a given
+            number of days.
+        multipart:
+          $ref: '#/components/schemas/MultipartUpload'
+          description: Settings for multipart upload, including chunk size and concurrency.
+        name:
+          description: Name identifier for the storage.
+          title: Name
+          type: string
+        privateUrl:
+          description: Private/internal endpoint URL for the storage.
+          format: password
+          title: Privateurl
+          type: string
+          writeOnly: true
+        probing:
+          anyOf:
+          - $ref: '#/components/schemas/Probing'
+          - type: 'null'
+          description: Configuration for probing storage availability.
+        publicUrl:
+          description: Public/external URL for the storage.
+          title: Publicurl
+          type: string
+        region:
+          description: Region of the storage bucket.
+          title: Region
+          type: string
+        secretAccessKey:
+          description: Secret access key for storage. You can give directly the content
+            or the file path using `'secret_file:/path/to/file'`.
+          format: password
+          title: Secretaccesskey
+          type: string
+          writeOnly: true
+        serviceType:
+          const: s3
+          title: Servicetype
+          type: string
+        servicesHealth:
+          anyOf:
+          - items:
+              anyOf:
+              - $ref: '#/components/schemas/S3ServiceHealth'
+              - $ref: '#/components/schemas/HealthCheckException'
+            type: array
+          - type: 'null'
+          description: Optional health information for different services in the cluster.
+          title: Serviceshealth
+        tenant:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional tenant identifier for multi-tenant setups.
+          title: Tenant
+        ttl:
+          description: Time-to-live (in seconds) for generated URLs.
+          title: Ttl
+          type: integer
+      required:
+      - serviceType
+      - name
+      - privateUrl
+      - publicUrl
+      - accessKeyId
+      - secretAccessKey
+      - region
+      - ttl
+      title: S3DataTransfer
+      type: object
+    S3DataTransfer-Output:
       description: Object storage configuration, including credentials, endpoints,
         and upload behavior.
       properties:
@@ -1838,38 +2073,24 @@ components:
       - pbs
       title: SchedulerType
       type: string
-    TransferJob:
+    ServiceAccount:
+      description: Internal service account credentials.
       properties:
-        jobId:
-          title: Jobid
-          type: integer
-        logs:
-          $ref: '#/components/schemas/TransferJobLogs'
-        system:
-          title: System
+        clientId:
+          description: Service account client ID.
+          title: Clientid
           type: string
-        workingDirectory:
-          title: Workingdirectory
+        secret:
+          description: Service account secret token. You can give directly the content
+            or the file path using `'secret_file:/path/to/file'`.
+          format: password
+          title: Secret
           type: string
+          writeOnly: true
       required:
-      - jobId
-      - system
-      - workingDirectory
-      - logs
-      title: TransferJob
-      type: object
-    TransferJobLogs:
-      properties:
-        errorLog:
-          title: Errorlog
-          type: string
-        outputLog:
-          title: Outputlog
-          type: string
-      required:
-      - outputLog
-      - errorLog
-      title: TransferJobLogs
+      - clientId
+      - secret
+      title: ServiceAccount
       type: object
     UploadFileResponse:
       properties:
@@ -1885,7 +2106,7 @@ components:
           - $ref: '#/components/schemas/WormholeDataTransferDirective'
           title: Transferdirectives
         transferJob:
-          $ref: '#/components/schemas/TransferJob'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
       required:
       - transferJob
       title: UploadFileResponse
@@ -1907,7 +2128,32 @@ components:
       - groups
       title: UserInfoResponse
       type: object
-    WormholeDataTransfer:
+    WormholeDataTransfer-Input:
+      properties:
+        probing:
+          anyOf:
+          - $ref: '#/components/schemas/Probing'
+          - type: 'null'
+          description: Configuration for probing storage availability.
+        serviceType:
+          const: wormhole
+          title: Servicetype
+          type: string
+        servicesHealth:
+          anyOf:
+          - items:
+              anyOf:
+              - $ref: '#/components/schemas/S3ServiceHealth'
+              - $ref: '#/components/schemas/HealthCheckException'
+            type: array
+          - type: 'null'
+          description: Optional health information for different services in the cluster.
+          title: Serviceshealth
+      required:
+      - serviceType
+      title: WormholeDataTransfer
+      type: object
+    WormholeDataTransfer-Output:
       properties:
         probing:
           anyOf:
@@ -1946,6 +2192,39 @@ components:
       required:
       - transferMethod
       title: WormholeDataTransferDirective
+      type: object
+    lib__datatransfers__datatransfer_base__TransferJob:
+      properties:
+        jobId:
+          title: Jobid
+          type: integer
+        logs:
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJobLogs'
+        system:
+          title: System
+          type: string
+        workingDirectory:
+          title: Workingdirectory
+          type: string
+      required:
+      - jobId
+      - system
+      - workingDirectory
+      - logs
+      title: TransferJob
+      type: object
+    lib__datatransfers__datatransfer_base__TransferJobLogs:
+      properties:
+        errorLog:
+          title: Errorlog
+          type: string
+        outputLog:
+          title: Outputlog
+          type: string
+      required:
+      - outputLog
+      - errorLog
+      title: TransferJobLogs
       type: object
   securitySchemes:
     APIAuthDependency:
