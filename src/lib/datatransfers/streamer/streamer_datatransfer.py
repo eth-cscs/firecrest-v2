@@ -29,8 +29,8 @@ class StreamerDatatransfer(DataTransferBase):
         pypi_index_url=None,
         port_range=(50000, 60000),
         ips=None,
-        wait_timeout=86400,
-        inbound_transfer_limit=5 * 1024 * 1024 * 1024,
+        wait_timeout=60 * 60 * 24,  # 24h
+        inbound_transfer_limit=5 * 1024 * 1024 * 1024,  # 5GB
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
@@ -118,7 +118,7 @@ class StreamerDatatransfer(DataTransferBase):
         parameters = {
             "sbatch_directives": _format_directives(self.directives, account),
             "operation": "send",
-            "target_path": target.path,
+            "target_path": source.path,
             "secret": secret,
             "port_range": f"{start_port} {end_port}",
             "pypi_index_url": self.pypi_index_url,

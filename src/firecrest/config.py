@@ -266,7 +266,7 @@ class StreamerDataTransfer(BaseDataTransfer):
         None, description="List of public IP addresses where server can be reached."
     )
     wait_timeout: Optional[int] = Field(
-        86400,
+        60 * 60 * 24,
         description="How long to wait for a connection before exiting (in seconds)",
     )
     inbound_transfer_limit: Optional[int] = Field(
