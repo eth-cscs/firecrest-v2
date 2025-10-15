@@ -40,10 +40,12 @@ async def stream_receive(websocket):
                     break
                 transfer_size += CHUNK_SIZE
                 if transfer_size > inbound_transfer_limit:
-                    print("Inbound transfer limit exceeded. Aborting transfer.")
+                    print(
+                        "Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes Aborting transfer."
+                    )
                     await websocket.close(
                         code=1009,
-                        reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes",
+                        reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes.",
                     )
                     os.remove(target)
                     websocket.server.close()
@@ -157,13 +159,13 @@ async def stream():
     "--wait-timeout",
     "_wait_timeout",
     help="How long to wait for a connection before exiting (in seconds)",
-    default=86400,
+    default=60 * 60 * 24,  # 24h
 )
 @click.option(
     "--inbound-transfer-limit",
     "_inbound_transfer_limit",
     help="Limit how much data can be received (in bytes)",
-    default=5 * 1024 * 1024 * 1024,  # 5 GiB
+    default=5 * 1024 * 1024 * 1024,  # 5GB
 )
 def server(_secret, _ip, _port_range, _wait_timeout, _inbound_transfer_limit):
     global secret, port_range, ip, wait_timeout, inbound_transfer_limit
