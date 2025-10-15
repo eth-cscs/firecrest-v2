@@ -34,11 +34,11 @@ class PostFileUploadRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "path": "/home/user/dir/file",
-                    "transfer_directives": {
-                        "transfer_method": "s3",
-                        "account": "group",
-                        "file_size": "7340032",
+                    "sourcePath": "/home/user/dir/file",
+                    "account": "group",
+                    "transferDirectives": {
+                        "transferMethod": "s3",
+                        "fileSize": "7340032",
                     },
                 }
             ]
@@ -52,7 +52,7 @@ class PostFileDownloadRequest(FilesystemRequestBase):
     )
     model_config = {
         "json_schema_extra": {
-            "examples": [{"path": "/home/user/dir/file", "account": "group"}]
+            "examples": [{"sourcePath": "/home/user/dir/file", "account": "group"}]
         }
     }
 
@@ -97,8 +97,8 @@ class CopyRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "source_path": "/home/user/dir/file.orig",
-                    "target_path": "/home/user/dir/file.new",
+                    "sourcePath": "/home/user/dir/file.orig",
+                    "targetPath": "/home/user/dir/file.new",
                     "account": "group",
                     "dereference": "true",
                 }
@@ -124,8 +124,8 @@ class MoveRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "source_path": "/home/user/dir/file.orig",
-                    "target_path": "/home/user/dir/file.new",
+                    "sourcePath": "/home/user/dir/file.orig",
+                    "targetPath": "/home/user/dir/file.new",
                     "account": "group",
                 }
             ]
@@ -157,9 +157,9 @@ class CompressRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "path": "/home/user/dir",
-                    "target_path": "/home/user/file.tar.gz",
-                    "match_pattern": "*./[ab].*\\.txt",
+                    "sourcePath": "/home/user/dir",
+                    "targetPath": "/home/user/file.tar.gz",
+                    "matchPattern": "*./[ab].*\\.txt",
                     "dereference": "true",
                     "account": "group",
                     "compression": "none",
@@ -188,8 +188,8 @@ class ExtractRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "source_path": "/home/user/dir/file.tar.gz",
-                    "target_path": "/home/user/dir",
+                    "sourcePath": "/home/user/dir/file.tar.gz",
+                    "targetPath": "/home/user/dir",
                     "account": "group",
                     "compression": "none",
                 }

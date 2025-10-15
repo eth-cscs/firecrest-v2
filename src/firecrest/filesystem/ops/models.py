@@ -184,9 +184,9 @@ class PostCompressRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "path": "/home/user/dir",
-                    "target_path": "/home/user/file.tar.gz",
-                    "match_pattern": "*./[ab].*\\.txt",
+                    "sourcePath": "/home/user/dir",
+                    "targetPath": "/home/user/file.tar.gz",
+                    "matchPattern": "*./[ab].*\\.txt",
                     "dereference": "true",
                     "compression": "none",
                 }
@@ -207,8 +207,8 @@ class PostExtractRequest(FilesystemRequestBase):
         "json_schema_extra": {
             "examples": [
                 {
-                    "path": "/home/user/dir/file.tar.gz",
-                    "target_path": "/home/user/dir",
+                    "sourcePath": "/home/user/dir/file.tar.gz",
+                    "targetPath": "/home/user/dir",
                     "compression": "none",
                 }
             ]
