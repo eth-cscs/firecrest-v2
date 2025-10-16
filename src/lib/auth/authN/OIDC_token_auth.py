@@ -35,8 +35,8 @@ class OIDCTokenAuth(AuthenticationService):
             try:
                 cert = s.get(url, timeout=2)
                 keys += cert.json()["keys"]
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Unable to fetch public keys from {url}: {e}")
 
         for key in keys:
             identifier = key.get("kid", None) or key.get("x5t", None)

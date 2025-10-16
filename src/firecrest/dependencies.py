@@ -103,8 +103,11 @@ class ServiceAvailabilityDependency:
             try:
                 json = asyncio.run(request.json())
                 path = FilesystemRequestBase(**json).path
-            except Exception:
-                pass
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Unable to decode request and retreive the required path or source_path parameter.",
+                ) from e
 
         if path is None:
             raise HTTPException(
