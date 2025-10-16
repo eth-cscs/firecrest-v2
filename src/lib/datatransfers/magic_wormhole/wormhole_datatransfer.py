@@ -1,4 +1,5 @@
 # helpers
+import secrets
 from lib.datatransfers.datatransfer_base import (
     DataTransferLocation,
     DataTransferOperation,
@@ -16,7 +17,6 @@ from lib.datatransfers.magic_wormhole.models import (
     WormholeDataTransferOperation,
 )
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
-import random
 
 SPACE_WORDS = [
     # Space travel / locations
@@ -55,8 +55,8 @@ SPACE_WORDS = [
 
 
 def generate_wormhole_code(words=SPACE_WORDS, n_words=3):
-    channel = random.randint(1, 99)  # channel number
-    chosen = [random.choice(words) for _ in range(n_words)]
+    channel = secrets.randbelow(98) + 1  # channel number between 1 and 99
+    chosen = [secrets.choice(words) for _ in range(n_words)]
     return f"{channel}-{'-'.join(chosen)}"
 
 
