@@ -378,8 +378,9 @@ class DataTransferDependency:
                     work_dir=work_dir,
                     system_name=system_name,
                     pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
+                    host=settings.data_operation.data_transfer.host,
                     port_range=settings.data_operation.data_transfer.port_range,
-                    ips=settings.data_operation.data_transfer.ips,
+                    public_ips=settings.data_operation.data_transfer.public_ips,
                     wait_timeout=settings.data_operation.data_transfer.wait_timeout,
                     inbound_transfer_limit=settings.data_operation.data_transfer.inbound_transfer_limit,
                 )

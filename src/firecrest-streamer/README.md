@@ -70,6 +70,7 @@ streamer server --secret [your-secret-string] receive --path [destination-path]
 ### Run from source
 
 ```bash
+pip install -r requirements.txt
 cd src
 python -m streamer server --secret [your-secret-string] send --path [file-to-send]
 python -m streamer receive --coordinates [secret-coordinates] --path [destination-path]

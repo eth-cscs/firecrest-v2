@@ -28,7 +28,8 @@ class StreamerDatatransfer(DataTransferBase):
         system_name,
         pypi_index_url=None,
         port_range=(50000, 60000),
-        ips=None,
+        public_ips=None,
+        host="localhost",
         wait_timeout=60 * 60 * 24,  # 24h
         inbound_transfer_limit=5 * 1024 * 1024 * 1024,  # 5GB
     ):
@@ -37,7 +38,8 @@ class StreamerDatatransfer(DataTransferBase):
         self.system_name = system_name
         self.pypi_index_url = pypi_index_url
         self.port_range = port_range
-        self.ips = ips if ips else ["localhost"]
+        self.public_ips = public_ips if public_ips else ["localhost"]
+        self.host = host
         self.wait_timeout = wait_timeout
         self.inbound_transfer_limit = inbound_transfer_limit
 
@@ -59,6 +61,8 @@ class StreamerDatatransfer(DataTransferBase):
             "target_path": target.path,
             "secret": secret,
             "port_range": f"{start_port} {end_port}",
+            "public_ips": self.public_ips,
+            "host": self.host,
             "pypi_index_url": self.pypi_index_url,
             "wait_timeout": self.wait_timeout,
             "inbound_transfer_limit": self.inbound_transfer_limit,
@@ -87,7 +91,7 @@ class StreamerDatatransfer(DataTransferBase):
 
         coordinates = {
             "ports": [start_port, end_port],
-            "ips": self.ips,
+            "ips": self.public_ips,
             "secret": secret,
         }
         encoded = base64.urlsafe_b64encode(
@@ -120,6 +124,7 @@ class StreamerDatatransfer(DataTransferBase):
             "operation": "send",
             "target_path": source.path,
             "secret": secret,
+            "public_ips": self.public_ips,
             "port_range": f"{start_port} {end_port}",
             "pypi_index_url": self.pypi_index_url,
             "wait_timeout": self.wait_timeout,
@@ -140,7 +145,7 @@ class StreamerDatatransfer(DataTransferBase):
 
         coordinates = {
             "ports": [start_port, end_port],
-            "ips": self.ips,
+            "ips": self.public_ips,
             "secret": secret,
         }
         encoded = base64.urlsafe_b64encode(

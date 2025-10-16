@@ -259,10 +259,13 @@ class StreamerDataTransfer(BaseDataTransfer):
     pypi_index_url: Optional[str] = Field(
         None, description="Optional local PyPI index URL for installing dependencies."
     )
+    host: Optional[str] = Field(
+        None, description="The interface to use for listening incoming connections"
+    )
     port_range: Tuple[int, int] = Field(
         (5665, 5675), description="Port range for establishing connections."
     )
-    ips: Optional[List[str]] = Field(
+    public_ips: Optional[List[str]] = Field(
         None, description="List of public IP addresses where server can be reached."
     )
     wait_timeout: Optional[int] = Field(

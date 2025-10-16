@@ -19,7 +19,4 @@ pip install firecrest-streamer {% if pypi_index_url is not none %} --index-url {
 
 echo $(date -u) "Starting firecrest streamer in {{operation}} mode..."
 
-streamer server --secret {{secret}} --ip 0.0.0.0 --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{target_path}}
-
-
-
+streamer server --secret {{secret}} --host {{host}} {% for ip in public_ips %} --public-ips {{ip}} {% endfor %} --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{target_path}}

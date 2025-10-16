@@ -117,8 +117,9 @@ data_operation:
   max_ops_file_size: 1048576 # 1M
   data_transfer:
     service_type: "streamer"
+    host: "0.0.0.0"
     port_range: [5665, 5666]
-    ips:
+    public_ips:
       - "localhost"
     wait_timeout: 43200  # 12h
     inbound_transfer_limit: 5368709120 # 5GB
