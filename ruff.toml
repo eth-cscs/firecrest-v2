@@ -13,6 +13,5 @@ ignore = [
     "B008",  # Incompatible with FastAPI Dependency declaration
     "B039",  # Do not use mutable data structures for `ContextVar` defaults
     "S110",  # Allow unlogged exceptions.
-    "S311",  # Allow standard pseudo-random generators for security purposes. #TODO: fix this and remove from ignore
     "S101",  # Allow use of `assert` detected
 ]
