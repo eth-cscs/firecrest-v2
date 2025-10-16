@@ -22,7 +22,8 @@ operation: Operation = None
 target: str = None
 secret: str = None
 port_range: tuple[int, int] = None
-ip: str = None
+ips: list[str] = None
+host: str = None
 wait_timeout: int = None
 inbound_transfer_limit: int = None
 timeout_handle: asyncio.Handle = None
@@ -100,13 +101,13 @@ def process_request(connection, request):
 
 
 async def stream():
-    global secret, port_range, ip, wait_timeout, timeout_handle
+    global secret, port_range, ips, host, wait_timeout, timeout_handle
     start_port, end_port = port_range
     for port in range(start_port, end_port + 1):
         try:
             async with serve(
                 stream_receive if operation == Operation.receive else stream_send,
-                ip,
+                host,
                 port,
                 max_size=int(
                     CHUNK_SIZE * 1.25
@@ -115,10 +116,10 @@ async def stream():
                 ping_timeout=None,
                 process_request=process_request,
             ) as server:
-                print(f"Server is listening on ws://{ip}:{port}")
+                print(f"Server is listening on ws://{host}:{port}")
                 coordinates = {
                     "ports": [start_port, end_port],
-                    "ips": [ip],
+                    "ips": ips,
                     "secret": secret,
                 }
                 encoded = base64.urlsafe_b64encode(
@@ -145,9 +146,16 @@ async def stream():
     required=True,
 )
 @click.option(
-    "--ip",
-    "_ip",
-    help="The IP to use for listening incoming connections",
+    "--public-ips",
+    "_ips",
+    help="A list of public IPs where the streamer server might run.",
+    default=["localhost"],
+    multiple=True,
+)
+@click.option(
+    "--host",
+    "_host",
+    help="The interface to use for listening incoming connections",
     default="localhost",
 )
 @click.option(
@@ -169,11 +177,12 @@ async def stream():
     help="Limit how much data can be received (in bytes)",
     default=5 * 1024 * 1024 * 1024,  # 5GB
 )
-def server(_secret, _ip, _port_range, _wait_timeout, _inbound_transfer_limit):
-    global secret, port_range, ip, wait_timeout, inbound_transfer_limit
+def server(_secret, _ips, _host, _port_range, _wait_timeout, _inbound_transfer_limit):
+    global secret, port_range, ips, wait_timeout, inbound_transfer_limit, host
     secret = _secret
     port_range = _port_range
-    ip = _ip
+    ips = _ips
+    host = _host
     wait_timeout = _wait_timeout
     inbound_transfer_limit = _inbound_transfer_limit
 
