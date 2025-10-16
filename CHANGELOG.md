@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
+- Updated documentation for large data upload
 
 ## [2.4.0]
 
