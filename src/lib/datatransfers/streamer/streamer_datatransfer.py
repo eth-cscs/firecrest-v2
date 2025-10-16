@@ -125,6 +125,7 @@ class StreamerDatatransfer(DataTransferBase):
             "target_path": source.path,
             "secret": secret,
             "public_ips": self.public_ips,
+            "host": self.host,
             "port_range": f"{start_port} {end_port}",
             "pypi_index_url": self.pypi_index_url,
             "wait_timeout": self.wait_timeout,
