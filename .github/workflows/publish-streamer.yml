@@ -31,6 +31,7 @@ jobs:
           cd src/firecrest-streamer
           python - << 'EOF'
           import toml, json, requests, sys
+          from packaging.version import Version
           data = toml.load("pyproject.toml")
           project = data.get("project", {})
           name = project.get("name")
@@ -43,7 +44,7 @@ jobs:
           if r.status_code == 200:
               pypi_ver = r.json()["info"]["version"]
               print(f"PyPI version: {pypi_ver}")
-              newer = vparse(local_ver) > vparse(pypi_ver)
+              newer = Version(local_ver) > Version(pypi_ver)
           else:
               print("Package not found on PyPI — will publish as new.")
               newer = True
