@@ -1,4 +1,4 @@
-name: Publish new version of Firecrest Streamer
+name: Publish Firecrest Streamer
 
 on:
   push:
@@ -53,13 +53,13 @@ jobs:
           EOF
 
       - name: Build package
-        if: steps.check_pypi.outputs.should_publish == 'true'
+        if: steps.check_version.outputs.should_publish == 'true'
         run: |
           cd src/firecrest-streamer
           python -m build
 
       - name: Publish to PyPI
-        if: steps.check_pypi.outputs.should_publish == 'true'
+        if: steps.check_version.outputs.should_publish == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: src/firecrest-streamer/dist
