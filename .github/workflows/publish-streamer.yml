@@ -1,0 +1,64 @@
+name: Publish new version of Firecrest Streamer
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+          - "src/firecrest-streamer/pyproject.toml"
+          - "src/firecrest-streamer/src/**"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build toml requests
+
+      - name: Check PyPI for latest version
+        id: check_version
+        run: |
+          cd src/firecrest-streamer
+          python - << 'EOF'
+          import toml, json, requests, sys
+          data = toml.load("pyproject.toml")
+          project = data.get("project", {})
+          name = project.get("name")
+          version = project.get("version")
+          print(f"Package name: {name}, version: {version}")
+          
+          url = f"https://pypi.org/pypi/firecrest-streamer/json"
+          r = requests.get(url)
+
+          if r.status_code == 200:
+              pypi_ver = r.json()["info"]["version"]
+              print(f"PyPI version: {pypi_ver}")
+              newer = vparse(local_ver) > vparse(pypi_ver)
+          else:
+              print("Package not found on PyPI — will publish as new.")
+              newer = True
+          print(f"::set-output name=should_publish::{str(newer).lower()}")
+          EOF
+
+      - name: Build package
+        if: steps.check_pypi.outputs.should_publish == 'true'
+        run: |
+          cd src/firecrest-streamer
+          python -m build
+
+      - name: Publish to PyPI
+        if: steps.check_pypi.outputs.should_publish == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: src/firecrest-streamer/dist
+          password: ${{ secrets.PYPI_API_TOKEN }}
