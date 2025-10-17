@@ -1,6 +1,6 @@
 [project]
 name = "firecrest-streamer"
-version = "0.0.17"
+version = "0.0.18"
 authors = [
   { name="Elia Palme", email="elia.palme@cscs.ch" },
 ]

@@ -6,6 +6,7 @@ on:
     paths:
           - "src/firecrest-streamer/pyproject.toml"
           - "src/firecrest-streamer/src/**"
+          - ".github/workflows/publish-streamer.yml"
 
 jobs:
   publish:
