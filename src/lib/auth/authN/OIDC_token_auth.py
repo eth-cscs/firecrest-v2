@@ -20,9 +20,10 @@ class OIDCTokenAuth(AuthenticationService):
 
     public_keys = {}
 
-    def __init__(self, public_certs: List[str] = None, username_claim: str = None):
+    def __init__(self, public_certs: List[str] = None, username_claim: str = None, jwk_algorithm: str = None):
 
         self.username_claim = username_claim
+        self.jwk_algorithm = jwk_algorithm
 
         keys = []
         s = requests.Session()
@@ -40,8 +41,33 @@ class OIDCTokenAuth(AuthenticationService):
 
         for key in keys:
             identifier = key.get("kid", None) or key.get("x5t", None)
+            algorithm = key.get("alg", None)
+            algo_map = {
+                "RSA":"RS256",
+                "oct":"HS256",
+                "EC": {"None":"ES256", "P-256":"ES256", "P-384":"ES384", "P-521":"ES512", "secp256k1":"ES256K"},
+                "OKP":{"Ed25519":"EdDSA"}
+            }
+
+            if not algorithm:
+                if self.jwk_algorithm:
+                    algorithm = self.jwk_algorithm
+                else:
+                    kty = key.get("kty", "None")
+                    crv = key.get("crv", "None")
+
+                    try:
+                        if isinstance(algo_map[kty], str):
+                            algorithm = algo_map[kty]
+                        else:
+                            algorithm = algo_map[kty][crv]
+                    except KeyError as e:
+                        raise ValueError(
+                            "Unsupported kty or crv values. Configure jwk_algorithm to skip auto-detection."
+                        ) from e
+
             if identifier:
-                self.public_keys[identifier] = jwk.construct(key)
+                self.public_keys[identifier] = jwk.construct(key, algorithm=algorithm)
 
     def auth_from_token(self, access_token: str):
         token_header = jwt.get_unverified_header(access_token)

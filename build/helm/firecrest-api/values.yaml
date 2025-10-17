@@ -101,6 +101,11 @@ firecrest:
       ##    username_claim: "username"
       # username_claim: "preferred_username"
 
+      ## jwk_algorithm: Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key.
+      ## example:
+      ##    jwk_algorithm: "RS512"
+      # jwk_algorithm: "RS256"
+
     ## Authorization settings via OpenFGA
     # authorization:
       ##   url: endpoint to query the AuthZ service

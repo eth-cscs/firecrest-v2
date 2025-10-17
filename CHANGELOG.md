@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.1] - OPEN
 
+### Added
+
+- Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
 ### Fixed
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
