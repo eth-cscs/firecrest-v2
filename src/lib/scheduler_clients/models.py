@@ -7,7 +7,7 @@
 from typing import List, Optional, Dict
 from lib.models import CamelModel
 
-from pydantic import Field
+from pydantic import Field, AliasChoices
 
 
 class SchedPing(CamelModel):
@@ -58,7 +58,7 @@ class JobModel(CamelModel):
 
 
 class JobMetadataModel(CamelModel):
-    job_id: int
+    job_id: str
     script: Optional[str] = None
     standard_input: Optional[str] = None
     standard_output: Optional[str] = None
@@ -71,7 +71,8 @@ class JobDescriptionModel(CamelModel):
         default=None, description="Charge job resources to specified account"
     )
     current_working_directory: str = Field(
-        alias="working_directory", description="Job working directory"
+        validation_alias=AliasChoices("workingDirectory", "working_directory"),
+        description="Job working directory",
     )
     standard_input: Optional[str] = Field(
         default=None, description="Standard input file name"

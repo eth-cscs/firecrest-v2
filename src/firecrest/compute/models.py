@@ -25,10 +25,10 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                     "job": {
                         "name": "Example with inline script",
                         "account": "myproject",
-                        "working_directory": "{{home_path}}",
-                        "standard_input": "/dev/null",
-                        "standard_output": "count_to_100.out",
-                        "standard_error": "count_to_100.err",
+                        "workingDirectory": "{{home_path}}",
+                        "standardInput": "/dev/null",
+                        "standardOutput": "count_to_100.out",
+                        "standardError": "count_to_100.err",
                         "env": {
                             "LD_LIBRARY_PATH": "/path/to/library",
                             "PATH": "/path/to/bin",
@@ -40,10 +40,10 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                     "job": {
                         "name": "Example with script path",
                         "account": "myproject",
-                        "working_directory": "{{home_path}}",
-                        "standard_input": "/dev/null",
-                        "standard_output": "count_to_100.out",
-                        "standard_error": "count_to_100.err",
+                        "workingDirectory": "{{home_path}}",
+                        "standardInput": "/dev/null",
+                        "standardOutput": "count_to_100.out",
+                        "standardError": "count_to_100.err",
                         "env": {
                             "LD_LIBRARY_PATH": "/path/to/library",
                             "PATH": "/path/to/bin",

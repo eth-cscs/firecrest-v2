@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import sys
 from fastapi import (
     Depends,
     File,
@@ -582,10 +581,19 @@ async def get_download(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     base64 = Base64Command(path)
+
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(base64)
+        file_content = b64decode(output)
+
+        if len(file_content) > OPS_SIZE_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File to download is too large.",
+            )
+
         return Response(
-            content=b64decode(output), media_type="application/octet-stream"
+            content=file_content, media_type="application/octet-stream"
         )
 
 
@@ -616,10 +624,11 @@ async def post_upload(
     base64 = Base64Command(f"{path}/{file.filename}", decode=True)
 
     raw_content = file.file.read()
-    if sys.getsizeof(raw_content) > OPS_SIZE_LIMIT:
+
+    if len(raw_content) > OPS_SIZE_LIMIT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="Uploaded file is too large.",
+            detail="File to upload is too large.",
         )
 
     # Note about overwrite

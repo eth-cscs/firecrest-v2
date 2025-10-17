@@ -58,6 +58,7 @@ class StatCommand(BaseCommandWithTimeout):
                     "ctime",
                 ],
                 stdout.split(),
+                strict=True,
             )
         )
         output["mode"] = int(output["mode"], base=16)
