@@ -36,8 +36,8 @@ jobs:
           data = toml.load("pyproject.toml")
           project = data.get("project", {})
           name = project.get("name")
-          version = project.get("version")
-          print(f"Package name: {name}, version: {version}")
+          local_ver = project.get("version")
+          print(f"Package name: {name}, version: {local_ver}")
           
           url = f"https://pypi.org/pypi/firecrest-streamer/json"
           r = requests.get(url)
