@@ -198,6 +198,7 @@ class BaseDataTransfer(CamelModel):
     service_type: Literal[
         DataTransferType.s3,
         DataTransferType.wormhole,
+        DataTransferType.streamer,
     ] = Field(None, description="Type of data transfer service.")
 
     probing: Optional[Probing] = Field(
@@ -247,6 +248,34 @@ class S3DataTransfer(BaseDataTransfer):
 
 class WormholeDataTransfer(BaseDataTransfer):
     service_type: Literal[DataTransferType.wormhole]
+    pypi_index_url: Optional[str] = Field(
+        None, description="Optional local PyPI index URL for installing dependencies."
+    )
+    pass
+
+
+class StreamerDataTransfer(BaseDataTransfer):
+    service_type: Literal[DataTransferType.streamer]
+    pypi_index_url: Optional[str] = Field(
+        None, description="Optional local PyPI index URL for installing dependencies."
+    )
+    host: Optional[str] = Field(
+        None, description="The interface to use for listening incoming connections"
+    )
+    port_range: Tuple[int, int] = Field(
+        (5665, 5675), description="Port range for establishing connections."
+    )
+    public_ips: Optional[List[str]] = Field(
+        None, description="List of public IP addresses where server can be reached."
+    )
+    wait_timeout: Optional[int] = Field(
+        60 * 60 * 24,
+        description="How long to wait for a connection before exiting (in seconds)",
+    )
+    inbound_transfer_limit: Optional[int] = Field(
+        5 * 1024 * 1024 * 1024,
+        description="Limit how much data can be received (in bytes)",
+    )
     pass
 
 
@@ -258,7 +287,9 @@ class DataOperation(BaseModel):
             "download. Larger files will go through the staging area."
         ),
     )
-    data_transfer: Optional[S3DataTransfer | WormholeDataTransfer] = Field(
+    data_transfer: Optional[
+        S3DataTransfer | WormholeDataTransfer | StreamerDataTransfer
+    ] = Field(
         None,
         description=("Data transfer service configuration"),
         discriminator="service_type",

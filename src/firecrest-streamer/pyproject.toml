@@ -1,0 +1,34 @@
+[project]
+name = "firecrest-streamer"
+version = "0.0.16"
+authors = [
+  { name="Elia Palme", email="elia.palme@cscs.ch" },
+]
+description = "A simple file streamer over websockets."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "click",
+    "websockets",
+    "asyncio"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/eth-cscs/firecrest-v2"
+Issues = "https://github.com/eth-cscs/firecrest-v2/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/streamer"]
+
+[project.scripts]
+streamer = "streamer.__main__:cli"

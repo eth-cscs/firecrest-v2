@@ -1,0 +1,5 @@
+click
+asyncio
+websockets
+build
+twine
