@@ -10,11 +10,12 @@
 
 echo $(date -u) "Ingress/Outgress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-python3 -m venv .venv
+latest_python=$(compgen -c python | grep -E '^python[0-9.]+$' | sort -V | tail -1)
+echo "Most recent Python version detected is: $latest_python"
+
+$latest_python -m venv .venv
 source .venv/bin/activate
 pip install firecrest-streamer {% if pypi_index_url is not none %} --index-url {{pypi_index_url}}  {% endif %}
-
-
 
 
 echo $(date -u) "Starting firecrest streamer in {{operation}} mode..."
