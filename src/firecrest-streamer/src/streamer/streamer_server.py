@@ -33,27 +33,32 @@ async def stream_receive(websocket):
     global operation, target, inbound_transfer_limit
     print("Client connected.")
     transfer_size = 0
-    with open(target, "wb") as f:
-        try:
-            async for message in websocket:
-                if message == "EOF":
-                    print("File transfer complete.")
-                    break
-                transfer_size += CHUNK_SIZE
-                if transfer_size > inbound_transfer_limit:
-                    print(
-                        "Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes Aborting transfer."
-                    )
-                    await websocket.close(
-                        code=1009,
-                        reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes.",
-                    )
-                    os.remove(target)
-                    websocket.server.close()
-                    return
-                f.write(message)
-        except websockets.ConnectionClosed:
-            print("Connection closed unexpectedly.")
+    try:
+        with open(target, "xb") as f:
+            try:
+                async for message in websocket:
+                    if message == "EOF":
+                        print("File transfer complete.")
+                        break
+                    transfer_size += CHUNK_SIZE
+                    if transfer_size > inbound_transfer_limit:
+                        print(
+                            "Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes Aborting transfer."
+                        )
+                        await websocket.close(
+                            code=1009,
+                            reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes.",
+                        )
+                        os.remove(target)
+                        websocket.server.close()
+                        return
+                    f.write(message)
+            except websockets.ConnectionClosed:
+                print("Connection closed unexpectedly.")
+    except FileExistsError:
+        print(f"File {target} already exists. Aborting to prevent overwrite.")
+        websocket.server.close()
+        return
     print(f"File {target} received successfully.")
     websocket.server.close()
 
