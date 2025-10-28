@@ -40,7 +40,6 @@ SIZE_POOL_AIOHTTP = 100
 
 def _slurm_headers(username: str, jwt_token: str, username_claim: str):
     token_claims = jwt.get_unverified_claims(jwt_token)
-    print(f"Claim username is {username_claim}")
     if username_claim not in token_claims:
         raise SlurmAuthTokenError(f"Claim '{username_claim}' is missing in auth token.")
     return {
