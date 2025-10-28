@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
+
+### Changed
+
+- Firecrest Streamer no longer allows to overwrite existing files.
+
 ### Fixed
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
