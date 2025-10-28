@@ -23,8 +23,13 @@ available_algorithms = {
 
 class ChecksumCommand(BaseCommandWithTimeout):
 
-    def __init__(self, target_path: str = None, algorithm: str = "SHA256") -> None:
-        super().__init__()
+    def __init__(
+            self,
+            target_path: str = None,
+            algorithm: str = "SHA256",
+            command_timeout: int = 5
+    ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.selected_algorithm = algorithm
         self.target_path = target_path
 

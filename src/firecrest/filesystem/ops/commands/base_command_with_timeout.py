@@ -6,9 +6,6 @@ from firecrest.filesystem.ops.commands.base_command_error_handling import (
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
-UTILITIES_TIMEOUT = 5
-
-
 class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
 
     def error_handling(self, stderr: str, exit_status: int):
@@ -27,11 +24,12 @@ class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
 
 class BaseCommandWithTimeout(BaseCommand, BaseCommandWithTimeoutErrorHandling):
 
-    def __init__(self) -> None:
+    def __init__(self, command_timeout: int = 5) -> None:
         super().__init__()
+        self.command_timeout = command_timeout
 
     def get_command(self) -> str:
-        return f"timeout {UTILITIES_TIMEOUT}"
+        return f"timeout {self.command_timeout}"
 
     @abstractmethod
     def parse_output(self, stdout: str, stderr: str, exit_status: int):

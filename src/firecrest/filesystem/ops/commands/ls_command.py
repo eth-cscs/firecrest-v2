@@ -17,9 +17,16 @@ class LsCommand(LsBaseCommand):
         recursive: bool = False,
         dereference: bool = False,
         no_recursion: bool = False,
+        command_timeout: int = 5
     ) -> None:
         super().__init__(
-            target_path, show_hidden, numeric_uid, recursive, dereference, no_recursion
+            target_path,
+            show_hidden,
+            numeric_uid,
+            recursive,
+            dereference,
+            no_recursion,
+            command_timeout
         )
 
     def get_command(self) -> str:

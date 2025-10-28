@@ -24,8 +24,9 @@ class LsBaseCommand(BaseCommandWithTimeout):
         recursion: bool = False,
         dereference: bool = False,
         no_recursion: bool = False,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.no_recursion = no_recursion
         self.show_hidden = show_hidden
