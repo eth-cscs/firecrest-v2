@@ -38,11 +38,11 @@ SIZE_POOL_AIOHTTP = 100
 # returncode:200
 #
 
-
-def _slurm_headers(username: str, jwt_token: str):
+def _slurm_headers(username: str, jwt_token: str, username_claim: str):
     token_claims = jwt.get_unverified_claims(jwt_token)
-    if "username" not in token_claims:
-        raise SlurmAuthTokenError("Claim 'username' is missing in auth token.")
+    print(f"Claim username is {username_claim}")
+    if username_claim not in token_claims:
+        raise SlurmAuthTokenError(f"Claim '{username_claim}' is missing in auth token.")
     return {
         "Content-Type": "application/json",
         "X-SLURM-USER-NAME": username,
@@ -78,10 +78,17 @@ class SlurmRestClient(SlurmBaseClient):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def __init__(self, api_url: str, api_version: str, timeout: int):
+    def __init__(
+        self,
+        api_url: str,
+        api_version: str,
+        timeout: int,
+        username_claim: str
+    ):
         self.api_url = api_url
         self.api_version = api_version
         self.timeout = timeout
+        self.username_claim = username_claim
 
     async def submit_job(
         self,
@@ -92,7 +99,7 @@ class SlurmRestClient(SlurmBaseClient):
 
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
 
         # Note: starting from version "0.0.39" (included) the environment field is of type list
         if Version(self.api_version) >= Version("0.0.39") and isinstance(
@@ -144,7 +151,7 @@ class SlurmRestClient(SlurmBaseClient):
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurmdb/v{self.api_version}/job/{job_id}"
         async with client.get(
             url=url,
@@ -180,7 +187,7 @@ class SlurmRestClient(SlurmBaseClient):
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs"
         async with client.get(
             url=url,
@@ -208,7 +215,7 @@ class SlurmRestClient(SlurmBaseClient):
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/job/{job_id}"
         async with client.delete(
             url=url,
@@ -223,7 +230,7 @@ class SlurmRestClient(SlurmBaseClient):
     async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/nodes"
         async with client.get(
             url=url,
@@ -243,7 +250,7 @@ class SlurmRestClient(SlurmBaseClient):
     ) -> List[SlurmReservations] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/reservations"
         async with client.get(
             url=url,
@@ -266,7 +273,7 @@ class SlurmRestClient(SlurmBaseClient):
     ) -> List[SlurmPartitions] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/partitions"
         async with client.get(
             url=url,
@@ -287,7 +294,7 @@ class SlurmRestClient(SlurmBaseClient):
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
-        headers = _slurm_headers(username, jwt_token)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/ping"
         async with client.get(
             url=url,
