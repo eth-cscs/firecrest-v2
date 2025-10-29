@@ -58,24 +58,30 @@ async def stream_receive():
                     ping_timeout=None,
                     additional_headers={"Authorization": f"Bearer {scrt}"},
                 ) as websocket:
-                    with open(target, "wb") as f:
-                        chunk_count = 0
-                        async for message in websocket:
-                            if welcome is None:
-                                welcome = json.loads(message.decode("utf-8"))
-                                print(
-                                    f"Transfering {sizeof_fmt(welcome['file_size'])}..."
+                    try:
+                        with open(target, "xb") as f:
+                            chunk_count = 0
+                            async for message in websocket:
+                                if welcome is None:
+                                    welcome = json.loads(message.decode("utf-8"))
+                                    print(
+                                        f"Transfering {sizeof_fmt(welcome['file_size'])}..."
+                                    )
+                                    continue
+                                if message == "EOF":
+                                    break
+                                f.write(message)
+                                chunk_count += 1
+                                printProgressBar(
+                                    chunk_count, welcome["num_chunks"], length=40
                                 )
-                                continue
-                            if message == "EOF":
-                                break
-                            f.write(message)
-                            chunk_count += 1
-                            printProgressBar(
-                                chunk_count, welcome["num_chunks"], length=40
-                            )
-                    print("File received successfully.")
-                    return
+                        print("File received successfully.")
+                        return
+                    except FileExistsError:
+                        print(
+                            f"File {target} already exists. Aborting to prevent overwrite."
+                        )
+                        return
             except (
                 OSError,
                 websockets.exceptions.InvalidStatus,
