@@ -33,8 +33,9 @@ class TarCommand(BaseCommandWithTimeout):
         dereference: bool = False,
         compression: CompressionType = CompressionType.gzip,
         operation: Operation = Operation.compress,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.source_path = source_path
         self.match_pattern = match_pattern

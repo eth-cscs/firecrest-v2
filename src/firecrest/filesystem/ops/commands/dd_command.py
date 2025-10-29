@@ -17,9 +17,13 @@ OPS_SIZE_LIMIT = settings.data_operation.max_ops_file_size
 class DdCommand(BaseCommandWithTimeout):
 
     def __init__(
-        self, target_path: str = None, size: int = None, offset: int = 0
+        self,
+        target_path: str = None,
+        size: int = None,
+        offset: int = 0,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
 
         self.target_path = target_path
         self.size = OPS_SIZE_LIMIT if (size is None or size > OPS_SIZE_LIMIT) else size

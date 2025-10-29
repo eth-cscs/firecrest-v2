@@ -14,10 +14,16 @@ from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 
 class MkdirCommand(BaseCommandWithTimeout):
 
-    def __init__(self, target_path: str = None, parent: bool = False) -> None:
+    def __init__(
+            self,
+            target_path: str = None,
+            parent: bool = False,
+            command_timeout: int = 5
+    ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.parent = parent
-        self.ls_command = LsBaseCommand(target_path, no_recursion=True)
+        self.ls_command = LsBaseCommand(target_path, no_recursion=True, command_timeout=command_timeout)
 
     def get_command(self) -> str:
         options = ""

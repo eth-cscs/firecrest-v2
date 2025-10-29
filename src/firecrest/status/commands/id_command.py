@@ -12,8 +12,9 @@ class IdCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
 
     def get_command(
         self,

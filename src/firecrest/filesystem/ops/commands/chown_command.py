@@ -13,12 +13,17 @@ from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 class ChownCommand(BaseCommandWithTimeout):
 
     def __init__(
-        self, target_path: str = None, owner: str = None, group: str = None
+        self,
+        target_path: str = None,
+        owner: str = None,
+        group: str = None,
+        command_timeout: int = 5
     ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.owner = owner
         self.group = group
-        self.ls_command = LsBaseCommand(target_path, no_recursion=True)
+        self.ls_command = LsBaseCommand(target_path, no_recursion=True, command_timeout=command_timeout)
 
     def get_command(self) -> str:
 

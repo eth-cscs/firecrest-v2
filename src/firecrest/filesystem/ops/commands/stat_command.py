@@ -14,8 +14,13 @@ ID = 0
 
 class StatCommand(BaseCommandWithTimeout):
 
-    def __init__(self, target_path: str = None, dereference: bool = False) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        target_path: str = None,
+        dereference: bool = False,
+        command_timeout: int = 5
+    ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.dereference = dereference
 

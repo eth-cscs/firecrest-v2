@@ -16,8 +16,9 @@ class TailCommand(BaseCommandWithTimeout):
         file_bytes: str | None = None,
         lines: str | None = None,
         skip_heading: bool = False,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.file_bytes = file_bytes
         self.lines = lines

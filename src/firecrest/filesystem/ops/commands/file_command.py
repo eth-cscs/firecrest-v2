@@ -16,8 +16,9 @@ class FileCommand(BaseCommandWithTimeout):
     def __init__(
         self,
         target_path: str = None,
+        command_timeout: int = 5
     ) -> None:
-        super().__init__()
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
 
     def get_command(self) -> str:

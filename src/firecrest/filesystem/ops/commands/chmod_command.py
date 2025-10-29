@@ -12,10 +12,16 @@ from firecrest.filesystem.ops.commands.ls_base_command import LsBaseCommand
 
 class ChmodCommand(BaseCommandWithTimeout):
 
-    def __init__(self, target_path: str = None, mode: str = None) -> None:
+    def __init__(
+            self,
+            target_path: str = None,
+            mode: str = None,
+            command_timeout: int = 5
+    ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.mode = mode
-        self.ls_command = LsBaseCommand(target_path, no_recursion=True)
+        self.ls_command = LsBaseCommand(target_path, no_recursion=True, command_timeout=command_timeout)
 
     def get_command(self) -> str:
         return f"{super().get_command()} chmod -v '{self.mode}' -- '{self.target_path}' && {self.ls_command.get_command()}"
