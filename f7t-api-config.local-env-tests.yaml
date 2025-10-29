@@ -67,9 +67,9 @@ clusters:
   service_account:
     client_id: "firecrest-api"
     secret: ""
-  probing:
-    interval: 60
-    timeout: 10
+  # probing:
+  #   interval: 60
+  #   timeout: 10
   datatransfer_jobs_directives:
     - "#PBS -l nodes=1:ppn=1"
     - "#PBS -l walltime=00:15:00"

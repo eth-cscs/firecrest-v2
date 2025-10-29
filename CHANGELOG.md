@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
+- `probing` configuration is optional now for the `clusters` settings
 
 ## [2.4.0]
 
