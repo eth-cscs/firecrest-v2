@@ -26,6 +26,7 @@ class SlurmClient(SlurmBaseClient):
         api_version: str | None,
         api_url: str | None,
         timeout: int | None,
+        username_claim: str | None
     ):
 
         self.ssh_client = ssh_client
@@ -33,11 +34,13 @@ class SlurmClient(SlurmBaseClient):
         self.timeout = timeout
         self.slurm_version = slurm_version
         self.api_version = api_version
+        self.username_claim = username_claim
 
         self.slurm_cli_client = SlurmCliClient(ssh_client, slurm_version)
 
         if self.api_url:
-            self.slurm_rest_client = SlurmRestClient(api_url, api_version, timeout)
+            self.slurm_rest_client = SlurmRestClient(api_url, api_version,
+                                                     timeout, username_claim)
             self.slurm_default_client = self.slurm_rest_client
         else:
             self.slurm_default_client = self.slurm_cli_client
