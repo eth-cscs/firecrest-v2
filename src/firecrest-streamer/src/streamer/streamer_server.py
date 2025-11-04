@@ -1,10 +1,8 @@
 import asyncio
 import base64
 from enum import Enum
-import hashlib
 import http
 import json
-import os
 import signal
 import websockets
 from websockets.asyncio.server import serve
