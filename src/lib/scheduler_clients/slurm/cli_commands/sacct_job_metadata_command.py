@@ -17,6 +17,9 @@ class SacctJobMetadataCommand(SacctCommandBase):
         cmd += ["--format='JobID,JobName,StdIn,StdOut,StdErr,WorkDir'"]
         return " ".join(cmd)
 
+    def expand_var(jobd_id: str, var: str) -> str:
+        return f"{var}".replace("%j", jobd_id)
+
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:
             raise SlurmError(
@@ -33,9 +36,27 @@ class SacctJobMetadataCommand(SacctCommandBase):
                 {
                     "jobId": job_info[0],
                     "jobName": job_info[1],
-                    "standardInput": os.path.join(job_info[5], job_info[2]),
-                    "standardOutput": os.path.join(job_info[5], job_info[3]),
-                    "standardError": os.path.join(job_info[5], job_info[4]),
+                    "standardInput": (
+                        os.path.join(
+                            job_info[5], self.expand_var(job_info[0], job_info[2])
+                        )
+                        if job_info[2] != ""
+                        else None
+                    ),
+                    "standardOutput": (
+                        os.path.join(
+                            job_info[5], self.expand_var(job_info[0], job_info[3])
+                        )
+                        if job_info[3] != ""
+                        else None
+                    ),
+                    "standardError": (
+                        os.path.join(
+                            job_info[5], self.expand_var(job_info[0], job_info[4])
+                        )
+                        if job_info[4] != ""
+                        else None
+                    ),
                 }
             )
         if len(jobs) == 0:
