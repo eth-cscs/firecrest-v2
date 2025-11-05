@@ -14,11 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Firecrest Streamer no longer allows to overwrite existing files.
+- Get jobs shows jobs up to one week.
 
 ### Fixed
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
+- Stdout, stderr path are now fully expanded
 
 ## [2.4.0]
 
