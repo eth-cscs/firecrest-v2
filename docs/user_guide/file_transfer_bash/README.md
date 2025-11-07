@@ -1,4 +1,4 @@
-# File Transfer with Bash
+# Upload Large Data Transfer with Bash
 
 ## Uploading large files using S3 multipart protocol
 
@@ -10,39 +10,47 @@ Once all parts have been uploaded, the user must call the provided complete uplo
 
 The first step is to determine the size of your large file, expressed in bytes. A reliable method is to use the command: `stat --printf "%s" "$LARGE_FILE_NAME"`.
 
-Then call the `/filesystem/{system}/transfer/upload` endpoint as following.
+Then call the [`/filesystem/{system}/transfer/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post) endpoint as following.
 
 !!! example "Call to transfer/upload to activate the multipart protocol"
     ```bash
     curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
-    --header "Content-Type: application/json" \
-    --header "Authorization: Bearer $ACCESS_TOKEN" \
-    --data "{
-        \"path\":\"${DESTINATION_PATH}\",
-        \"fileName\":\"${LARGE_FILE_NAME}\",
-        \"fileSize\":\"${LARGE_FILE_SIZE_IN_BYTES}\"
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer $ACCESS_TOKEN" \
+        --data "{
+            \"path\":\"${DESTINATION_PATH}\",
+            \"fileName\":\"${DATA_FILE}\",
+            \"transferDirectives\": {
+                \"fileSize\":\"${UPLOAD_FILE_SIZE}\",
+                \"transferMethod\":\"s3\"
+        }
     }"
     ```
 
-The JSON response from this call follows the structure shown below. FirecREST calculates the number of parts the file must be split into, based on the provided file size and the `maxPartSize` setting. Each part is assigned a number from <i>1</i> to <i>n</i> and must be uploaded using the presigned URLs listed in `partsUploadUrls`. Once all parts have been successfully uploaded, the presigned URL in `completeUploadUrl` is used to finalize the upload sequence and initiate the transfer of the complete data file from S3 to its final destination.
+The JSON response from this call follows the structure shown below. FirecREST calculates the number of parts the file must be split into, based on the provided file size and the `maxPartSize` setting. Each part is assigned a number from *1* to *n* and must be uploaded using the presigned URLs listed in `partsUploadUrls`. Once all parts have been successfully uploaded, the presigned URL in `completeUploadUrl` is used to finalize the upload sequence and initiate the transfer of the complete data file from S3 to its final destination.
 
-!!! example "FirecREST response from `/filesystem/{system}/transfer/upload` endpoint"
+!!! example "FirecREST response from [`/filesystem/{system}/transfer/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post) endpoint"
     ```json
     {
-    "transferJob": {
-        "jobId": nnnnnnnnn,
-        "system": "SYSTEM",
-        "workingDirectory": "/xxxxxxxxx",
-        "logs": {
-            "outputLog": "/xxxxxxxx.log",
-            "errorLog": "/xxxxxxxxx.log"
+        "transferJob": {
+            "jobId": nnnnnnnnn,
+            "system": "SYSTEM",
+            "workingDirectory": "/path/to/wordir",
+            "logs": {
+                "outputLog": "/path/to/output.log",
+                "errorLog": "/path/to/error.log"
+            }
+        },
+        "transferDirectives": {
+            "transfer_method": "s3",
+            "parts_upload_urls": [
+                "https://part01-url",
+                "https://part02-url",
+                "https://part03-url",
+            ],
+            "complete_upload_url": "https://upload-complete-url",
+            "max_part_size": 1073741824
         }
-    },
-    "partsUploadUrls": [
-        "https://part1-url", "https://part2-url", "https://part3-url"
-    ],
-    "completeUploadUrl": "https://upload-complete-url",
-    "maxPartSize": 1073741824
     }
     ```
 Extract the most useful information from the response using `jq`_
@@ -121,9 +129,9 @@ Complete the upload by calling the presigned `completeUploadUrl` as in the examp
     curl -f --show-error -i -w "%{http_code}" -H "Content-Type: application/xml" -d "$complete_upload_xml" -X POST $complete_upload_url
     ```
 
-## Script examples
+### Script examples
 
-### Using split
+#### Using `split` command
 
 To run the [example](examples/multipart_upload_split.sh) you need first to set up the `environment file` using the provided [env-template](examples/env-template) file.
 Set the field in the template as described int the [user guide](../README.md) to match your deployment and save the template as a new file.
@@ -137,8 +145,7 @@ Launch the script as in the example
 
 The script uploads `your_data_fil.zip` to the designated cluster. Note that the `split` command generates all temporary part files beforehand, so <b>your local disk must have at least as much free space as the total size of the data being uploaded</b>.
 
-
-### Using dd
+#### Using `dd` command
 
 To run the [example](examples/multipart_upload_dd.sh) you need first to set up the `environment file` using the provided [env-template](examples/env-template) file.
 Set the field in the template as described int the [user guide](../README.md) to match your deployment and save the template as a new file.
