@@ -76,11 +76,7 @@ class DataTransferLocation(CamelModel):
     system: Optional[str] = None
     path: Optional[str] = None
     transfer_directives: Optional[
-        Union[
-            S3DataTransferDirective
-            | WormholeDataTransferDirective
-            | StreamerDataTransferDirective
-        ]
+        Union[S3DataTransferInfo | WormholeDataTransferInfo | StreamerDataTransferInfo]
     ] = Field(
         None,
         description=("Provide method specific transfer directives"),
