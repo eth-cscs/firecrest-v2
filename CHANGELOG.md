@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Firecrest Streamer no longer allows to overwrite existing files.
+- Get jobs shows jobs up to one week.
 - Firecrest streamer improved error handling, including remote errors.
 - SLURM RESTAPI now validates the username claim on the access token from the `auth` configuration.
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
 - Timeout value for commands executed via `filesystems/ops` and `status` is now configured with command execution timeout setting
+- Stdout, stderr path are now fully expanded
 - `probing` configuration is optional now for the `clusters` settings
 
 ## [2.4.0]
