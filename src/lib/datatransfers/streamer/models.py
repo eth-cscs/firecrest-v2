@@ -1,5 +1,6 @@
 from lib.datatransfers.datatransfer_base import (
     StreamerDataTransferDirective,
+    StreamerDataTransferInfo,  # noqa: F401
     DataTransferOperation,
 )
 

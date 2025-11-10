@@ -45,6 +45,10 @@ class StreamerDataTransferDirective(DataTransferDirective):
     transfer_method: Literal[DataTransferType.streamer,]
 
 
+class StreamerDataTransferInfo(DataTransferDirective):
+    transfer_method: Literal[DataTransferType.streamer,]
+
+
 class WormholeDataTransferDirective(DataTransferDirective):
     wormhole_code: Optional[str] = None
     transfer_method: Literal[DataTransferType.wormhole,]
