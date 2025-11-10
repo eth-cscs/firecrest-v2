@@ -7,10 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.1] - OPEN
 
+### Added
+
+- Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
+- Firecrest streamer now computes checksums to validate data transfer
+
+### Changed
+
+- Firecrest Streamer no longer allows to overwrite existing files.
+- Get jobs shows jobs up to one week.
+- Firecrest streamer improved error handling, including remote errors.
+- SLURM RESTAPI now validates the username claim on the access token from the `auth` configuration.
+
 ### Fixed
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
+- Timeout value for commands executed via `filesystems/ops` and `status` is now configured with command execution timeout setting
+- Stdout, stderr path are now fully expanded
+- `probing` configuration is optional now for the `clusters` settings
 
 ## [2.4.0]
 
@@ -25,11 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed Slurm sacct integration and data parsing. 
+
 - Docker Compose startup: Added dependency for Slurm to wait for Keycloak health check before starting, preventing JWT certificate download failures.
 - Upload and Download transfer endpoints now require to specify transfer directives
 - Installation docs:
     - Helm charts: FirecREST settings are all included in values.yaml file
     - Changed documentation name from Deployment to Install
+- Improved direct upload endpoints size limit checks
 
 ## [2.3.1]
 

@@ -37,6 +37,10 @@ class Oidc(CamelModel):
         "preferred_username",
         description="Name of the JWT claim containing the username (e.g. sub, preferred_username, etc.)",
     )
+    jwk_algorithm: Optional[str] = Field(
+        None,
+        description="Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key."
+    )
 
 
 class LoadFileSecretStr(SecretStr):

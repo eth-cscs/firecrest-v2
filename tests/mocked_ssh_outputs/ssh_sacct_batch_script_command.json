@@ -1,5 +1,5 @@
 {
-    "stdout": "Batch Script for 6\n--------------------------------------------------------------------------------\n#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone\nBatch Script for 7\n--------------------------------------------------------------------------------\n#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
+    "stdout": "Batch Script for 6\n--------------------------------------------------------------------------------\n#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndoneBatch Script for 7\n--------------------------------------------------------------------------------\n#!/bin/bash\nfor i in {1..100}\ndo\necho $i\nsleep 1\ndone",
     "stderr": "",
     "exit_code": 0,
     "command":"sacct --user=test-user --jobs='1' --noheader --parsable2 --batch-script"

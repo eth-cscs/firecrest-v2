@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import sys
 from fastapi import (
     Depends,
     File,
@@ -104,7 +103,11 @@ async def put_chmod(
 ):
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    chmod = ChmodCommand(target_path=request_model.path, mode=request_model.mode)
+    chmod = ChmodCommand(
+        target_path=request_model.path,
+        mode=request_model.mode,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(
         username=username, jwt_token=access_token
     ) as client:
@@ -137,6 +140,7 @@ async def put_chown(
         target_path=request_model.path,
         owner=request_model.owner,
         group=request_model.group,
+        command_timeout=system.ssh.timeout.command_execution
     )
 
     async with ssh_client.get_client(
@@ -183,7 +187,13 @@ async def get_ls(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    ls = LsCommand(path, show_hidden, numeric_uid, recursive, dereference)
+    ls = LsCommand(
+        path,
+        show_hidden,
+        numeric_uid,
+        recursive,
+        dereference,
+        command_timeout=system.ssh.timeout.command_execution)
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(ls)
         return {"output": output}
@@ -239,7 +249,13 @@ async def get_head(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    head = HeadCommand(path, file_bytes, lines, skip_trailing)
+    head = HeadCommand(
+        path,
+        file_bytes,
+        lines,
+        skip_trailing,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     if lines and file_bytes:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -319,7 +335,12 @@ async def get_view(
             detail=f"`size` value must be less than {OPS_SIZE_LIMIT} bytes",
         )
 
-    view = DdCommand(path, size, offset)
+    view = DdCommand(
+        path,
+        size,
+        offset,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(view)
         return {"output": output}
@@ -370,7 +391,13 @@ async def get_tail(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    tail = TailCommand(path, file_bytes, lines, skip_heading)
+    tail = TailCommand(
+        path,
+        file_bytes,
+        lines,
+        skip_heading,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     if lines and file_bytes:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -418,7 +445,10 @@ async def get_checksum(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
-    checksum = ChecksumCommand(path)
+    checksum = ChecksumCommand(
+        path,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(checksum)
         return {"output": output}
@@ -445,7 +475,10 @@ async def get_file(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    file = FileCommand(path)
+    file = FileCommand(
+        path,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(file)
         return {"output": output}
@@ -473,7 +506,11 @@ async def get_stat(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    stat = StatCommand(path, dereference)
+    stat = StatCommand(
+        path,
+        dereference,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(stat)
         return {"output": output}
@@ -499,7 +536,10 @@ async def delete_rm(
 ) -> None:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    rm = RmCommand(path)
+    rm = RmCommand(
+        path,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         await client.execute(rm)
         return None
@@ -527,7 +567,11 @@ async def post_mkdir(
 
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    mkdir = MkdirCommand(target_path=request_model.path, parent=request_model.parent)
+    mkdir = MkdirCommand(
+        target_path=request_model.path,
+        parent=request_model.parent,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(mkdir)
         return {"output": output}
@@ -554,7 +598,11 @@ async def post_symlink(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    symlink = SymlinkCommand(request_model.path, request_model.link_path)
+    symlink = SymlinkCommand(
+        request_model.path,
+        request_model.link_path,
+        command_timeout=system.ssh.timeout.command_execution
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(symlink)
         return {"output": output}
@@ -581,11 +629,23 @@ async def get_download(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    base64 = Base64Command(path)
+    base64 = Base64Command(
+        path,
+        command_timeout=system.ssh.timeout.command_execution
+    )
+
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(base64)
+        file_content = b64decode(output)
+
+        if len(file_content) > OPS_SIZE_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="File to download is too large.",
+            )
+
         return Response(
-            content=b64decode(output), media_type="application/octet-stream"
+            content=file_content, media_type="application/octet-stream"
         )
 
 
@@ -613,13 +673,18 @@ async def post_upload(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    base64 = Base64Command(f"{path}/{file.filename}", decode=True)
+    base64 = Base64Command(
+        path=f"{path}/{file.filename}",
+        decode=True,
+        command_timeout=system.ssh.timeout.command_execution
+    )
 
     raw_content = file.file.read()
-    if sys.getsizeof(raw_content) > OPS_SIZE_LIMIT:
+
+    if len(raw_content) > OPS_SIZE_LIMIT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="Uploaded file is too large.",
+            detail="File to upload is too large.",
         )
 
     # Note about overwrite
@@ -648,6 +713,10 @@ async def post_compress(
         Path(alias="system_name", description="Target system"),
         Depends(SSHClientDependency()),
     ],
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        use_cache=False,
+    ),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
@@ -658,6 +727,7 @@ async def post_compress(
         dereference=request_model.dereference,
         compression=request_model.compression,
         operation=TarCommand.Operation.compress,
+        command_timeout=system.ssh.timeout.command_execution
     )
 
     async with ssh_client.get_client(username, access_token) as client:
@@ -679,6 +749,10 @@ async def post_extract(
         Path(alias="system_name", description="Target system"),
         Depends(SSHClientDependency()),
     ],
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        use_cache=False,
+    ),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
@@ -687,6 +761,7 @@ async def post_extract(
         request_model.target_path,
         compression=request_model.compression,
         operation=TarCommand.Operation.extract,
+        command_timeout=system.ssh.timeout.command_execution
     )
 
     async with ssh_client.get_client(username, access_token) as client:

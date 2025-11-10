@@ -29,13 +29,20 @@ class DataTransferType(str, Enum):
 
     s3 = "s3"
     wormhole = "wormhole"
+    streamer = "streamer"
 
 
 class DataTransferDirective(CamelModel):
     transfer_method: Literal[
         DataTransferType.s3,
         DataTransferType.wormhole,
+        DataTransferType.streamer,
     ]
+
+
+class StreamerDataTransferDirective(DataTransferDirective):
+    coordinates: Optional[str] = None
+    transfer_method: Literal[DataTransferType.streamer,]
 
 
 class WormholeDataTransferDirective(DataTransferDirective):
@@ -65,7 +72,11 @@ class DataTransferLocation(CamelModel):
     system: Optional[str] = None
     path: Optional[str] = None
     transfer_directives: Optional[
-        Union[S3DataTransferInfo | WormholeDataTransferInfo]
+        Union[
+            S3DataTransferDirective
+            | WormholeDataTransferDirective
+            | StreamerDataTransferDirective
+        ]
     ] = Field(
         None,
         description=("Provide method specific transfer directives"),
@@ -78,7 +89,9 @@ class DataTransferLocation(CamelModel):
 class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
     transfer_directives: Union[
-        S3DataTransferDirective | WormholeDataTransferDirective
+        S3DataTransferDirective
+        | WormholeDataTransferDirective
+        | StreamerDataTransferDirective
     ] = Field(
         None,
         description=("Provide method specific transfer directives"),

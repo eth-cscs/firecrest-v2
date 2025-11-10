@@ -5,11 +5,11 @@ select = [
     "F",  # Pyflakes errors (similar to Flake8)
     "B",  # Bugbear rules (Prospector and Flake8 compatible)
     "I",  # Import-related errors
+    "S",  # Bandit security linter rules
 ]
 ignore = [
     "E501",  # Ignore line length errors (optional)
     "I001",  # Don't require sorted imports
     "B008",  # Incompatible with FastAPI Dependency declaration
     "B039",  # Do not use mutable data structures for `ContextVar` defaults
-
 ]

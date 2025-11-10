@@ -121,14 +121,11 @@ class SlurmCliClient(SlurmBaseClient):
 
         cmd_result_i: int = 0
 
-        # check if job was found
-        if not results[cmd_result_i]:
-            return None
-
         # fallback to sacct command if scontrol failed to retrieve job info
         if not isinstance(results[cmd_result_i], list) and len(results) == 4:
             cmd_result_i = 2
 
+        # check if job was found
         if results[cmd_result_i] is None:
             return None
         if isinstance(results[cmd_result_i], Exception):
@@ -136,6 +133,9 @@ class SlurmCliClient(SlurmBaseClient):
 
         jobs = []
         for i in range(len(results[cmd_result_i])):
+            # if script info is not available, continue
+            if i >= len(results[cmd_result_i + 1]):
+                continue
             jobs.append(
                 SlurmJobMetadata(
                     **{**results[cmd_result_i][i], **results[cmd_result_i + 1][i]}
