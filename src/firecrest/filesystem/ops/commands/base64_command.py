@@ -11,8 +11,13 @@ from firecrest.filesystem.ops.commands.base_command_with_timeout import (
 
 class Base64Command(BaseCommandWithTimeout):
 
-    def __init__(self, path: str | None = None, decode: bool = False) -> None:
-        super().__init__()
+    def __init__(
+            self,
+            path: str | None = None,
+            decode: bool = False,
+            command_timeout: int = 5
+            ) -> None:
+        super().__init__(command_timeout=command_timeout)
         self.path = path
         self.decode = decode
 
