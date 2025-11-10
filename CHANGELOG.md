@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Firecrest Streamer no longer allows to overwrite existing files.
 - Get jobs shows jobs up to one week.
+- SLURM RESTAPI now validates the username claim on the access token from the `auth` configuration.
 
 ### Fixed
 
