@@ -12,11 +12,8 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 from lib.scheduler_clients.models import JobDescriptionModel
-from lib.datatransfers.magic_wormhole.models import (
-    WormholeDataTransferDirective,
-    WormholeDataTransferOperation,
-)
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.datatransfers.magic_wormhole.models import WormholeTransferResponse
 
 SPACE_WORDS = [
     # Space travel / locations
@@ -113,9 +110,9 @@ class WormholeDatatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        directives = WormholeDataTransferDirective(**{"transfer_method": "wormhole"})
+        directives = WormholeTransferResponse(**{"transfer_method": "wormhole"})
 
-        return WormholeDataTransferOperation(
+        return DataTransferOperation(
             transferJob=transferJob,
             transfer_directives=directives,
         )
@@ -154,11 +151,11 @@ class WormholeDatatransfer(DataTransferBase):
             jwt_token=access_token,
         )
 
-        directives = WormholeDataTransferDirective(
+        directives = WormholeTransferResponse(
             **{"wormhole_code": wormhole_code, "transfer_method": "wormhole"}
         )
 
-        return WormholeDataTransferOperation(
+        return DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,
