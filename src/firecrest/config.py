@@ -488,7 +488,7 @@ class Settings(BaseSettings):
     app_debug: bool = Field(
         False, description="Enable debug mode for the FastAPI application."
     )
-    app_version: Literal["2.x.x"] = "2.x.x"
+    app_version: Literal["2.4.1"] = "2.4.1"
     apis_root_path: str = Field(
         "",
         description="Base path prefix for exposing the APIs.",
