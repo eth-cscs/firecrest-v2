@@ -86,6 +86,7 @@ services:
     volumes:
         # ssh config
         - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
+        - ./src/firecrest-streamer:/app/firecrest-streamer
     healthcheck:
         test: ["CMD", "scontrol", "ping"]
         interval: 1s
