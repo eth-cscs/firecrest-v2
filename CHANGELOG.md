@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
 - Firecrest streamer now computes checksums to validate data transfer
+- Firecrest streamer transfer end-point returns immediet errors if target paths have issues.
 
 ### Changed
 

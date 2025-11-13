@@ -1,6 +1,8 @@
 # helpers
 import base64
 import json
+
+from fastapi import HTTPException, status
 from lib.datatransfers.datatransfer_base import (
     DataTransferLocation,
     DataTransferOperation,
@@ -14,6 +16,7 @@ from lib.datatransfers.datatransfer_base import (
 import secrets
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from lib.datatransfers.streamer.models import StreamerTransferResponse
 
 
@@ -31,6 +34,7 @@ class StreamerDatatransfer(DataTransferBase):
         host="localhost",
         wait_timeout=60 * 60 * 24,  # 24h
         inbound_transfer_limit=5 * 1024 * 1024 * 1024,  # 5GB
+        ssh_client=None,
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
@@ -41,6 +45,7 @@ class StreamerDatatransfer(DataTransferBase):
         self.host = host
         self.wait_timeout = wait_timeout
         self.inbound_transfer_limit = inbound_transfer_limit
+        self.ssh_client = ssh_client
 
     async def upload(
         self,
@@ -66,6 +71,21 @@ class StreamerDatatransfer(DataTransferBase):
             "wait_timeout": self.wait_timeout,
             "inbound_transfer_limit": self.inbound_transfer_limit,
         }
+
+        if self.ssh_client:
+            stat = StatCommand(target.path, True)
+            try:
+                async with self.ssh_client.get_client(username, access_token) as client:
+                    _ = await client.execute(stat)
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail=f"Target file '{target.path}' already exists.",
+                    )
+            except HTTPException as e:
+                if e.status_code == status.HTTP_404_NOT_FOUND:
+                    pass  # This is the expected case
+                else:
+                    raise e
 
         job_script = _build_script("job_streamer.sh", parameters)
         job = JobHelper(
@@ -130,6 +150,16 @@ class StreamerDatatransfer(DataTransferBase):
             "wait_timeout": self.wait_timeout,
             "inbound_transfer_limit": self.inbound_transfer_limit,
         }
+
+        if self.ssh_client:
+            # Optional check if source file exists
+            try:
+                stat = StatCommand(source.path, True)
+                async with self.ssh_client.get_client(username, access_token) as client:
+                    _ = await client.execute(stat)
+            except HTTPException as e:
+                if e.status_code == status.HTTP_404_NOT_FOUND:
+                    raise e
 
         job = JobHelper(
             f"{self.work_dir}/{username}",
