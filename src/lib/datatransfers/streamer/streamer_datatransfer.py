@@ -154,9 +154,13 @@ class StreamerDatatransfer(DataTransferBase):
 
         if self.ssh_client:
             # Optional check if source file exists
-            stat = StatCommand(source.path, True)
-            async with self.ssh_client.get_client(username, access_token) as client:
-                _ = await client.execute(stat)
+            try:
+                stat = StatCommand(source.path, True)
+                async with self.ssh_client.get_client(username, access_token) as client:
+                    _ = await client.execute(stat)
+            except HTTPException as e:
+                if e.status_code == status.HTTP_404_NOT_FOUND:
+                    raise e
 
         job = JobHelper(
             f"{self.work_dir}/{username}",
