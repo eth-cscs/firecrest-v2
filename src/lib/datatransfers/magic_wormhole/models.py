@@ -1,8 +1,15 @@
+from typing import Literal, Optional
 from lib.datatransfers.datatransfer_base import (
-    WormholeDataTransferDirective,
-    DataTransferOperation,
+    DataTransferResponse,
+    DataTransferRequest,
+    DataTransferType,
 )
 
 
-class WormholeDataTransferOperation(DataTransferOperation):
-    transfer_directives: WormholeDataTransferDirective
+class WormholeTransferResponse(DataTransferResponse):
+    wormhole_code: Optional[str] = None
+    transfer_method: Literal[DataTransferType.wormhole,]
+
+
+class WormholeTransferRequest(DataTransferRequest):
+    transfer_method: Literal[DataTransferType.wormhole,]
