@@ -30,7 +30,7 @@ class PostFileUploadRequest(FilesystemRequestBase):
     )
 
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
     model_config = {
         "json_schema_extra": {
@@ -55,7 +55,7 @@ class PostFileDownloadRequest(FilesystemRequestBase):
         ..., description="Data transfer parameters specific to the transfer method"
     )
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
     model_config = {
         "json_schema_extra": {
@@ -99,14 +99,15 @@ class DownloadFileResponse(DataTransferOperation):
 class CopyRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the copy operation")
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
-    dereference: Optional[bool] = Field(
+    dereference: bool = Field(
         default=False,
         description=(
             "If set to `true`, it follows symbolic links and copies the "
             "files they point to instead of the links themselves."
         ),
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
@@ -133,7 +134,7 @@ class DeleteResponse(CamelModel):
 class MoveRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the move operation")
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
     model_config = {
         "json_schema_extra": {
@@ -155,18 +156,22 @@ class MoveResponse(CamelModel):
 class CompressRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Target path of the compress operation")
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
     match_pattern: Optional[str] = Field(
-        default=None, description="Regex pattern to filter files to compress"
+        default=None,
+        description="Regex pattern to filter files to compress",
+        nullable=True,
     )
-    dereference: Optional[bool] = Field(
+    dereference: bool = Field(
         default=False,
         description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.",
+        nullable=False,
     )
-    compression: Optional[TarCommand.CompressionType] = Field(
+    compression: TarCommand.CompressionType = Field(
         default="gzip",
         description="Defines the type of compression to be used. By default gzip is used.",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
@@ -193,11 +198,12 @@ class ExtractRequest(FilesystemRequestBase):
         ..., description="Path to the directory where to extract the compressed file"
     )
     account: Optional[str] = Field(
-        default=None, description="Name of the account in the scheduler"
+        default=None, description="Name of the account in the scheduler", nullable=True
     )
-    compression: Optional[TarCommand.CompressionType] = Field(
+    compression: TarCommand.CompressionType = Field(
         default="gzip",
         description="Defines the type of compression to be used. By default gzip is used.",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
