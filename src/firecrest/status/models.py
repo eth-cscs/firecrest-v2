@@ -6,6 +6,8 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from pydantic import Field
+
 # configs
 from firecrest.config import HPCCluster, DataOperation
 
@@ -25,7 +27,7 @@ class GetLiveness(CamelModel):
 
 class GetSystemsResponse(CamelModel):
     systems: List[HPCCluster]
-    data_operation: Optional[DataOperation] = None
+    data_operation: Optional[DataOperation] = Field(default=None, nullable=True)
 
 
 class GetNodesResponse(CamelModel):
