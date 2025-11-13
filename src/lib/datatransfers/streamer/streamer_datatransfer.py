@@ -8,7 +8,6 @@ from lib.datatransfers.datatransfer_base import (
     DataTransferOperation,
     DataTransferBase,
     JobHelper,
-    StreamerDataTransferDirective,
     TransferJob,
     TransferJobLogs,
     _build_script,
@@ -17,8 +16,8 @@ from lib.datatransfers.datatransfer_base import (
 import secrets
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
-from lib.datatransfers.streamer.models import StreamerDataTransferOperation
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
+from lib.datatransfers.streamer.models import StreamerTransferResponse
 
 
 class StreamerDatatransfer(DataTransferBase):
@@ -118,11 +117,11 @@ class StreamerDatatransfer(DataTransferBase):
             json.dumps(coordinates).encode("utf-8")
         ).decode("utf-8")
 
-        directives = StreamerDataTransferDirective(
+        directives = StreamerTransferResponse(
             **{"coordinates": encoded, "transfer_method": "streamer"}
         )
 
-        return StreamerDataTransferOperation(
+        return DataTransferOperation(
             transferJob=transferJob,
             transfer_directives=directives,
         )
@@ -183,11 +182,11 @@ class StreamerDatatransfer(DataTransferBase):
             json.dumps(coordinates).encode("utf-8")
         ).decode("utf-8")
 
-        directives = StreamerDataTransferDirective(
+        directives = StreamerTransferResponse(
             **{"coordinates": encoded, "transfer_method": "streamer"}
         )
 
-        return StreamerDataTransferOperation(
+        return DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,

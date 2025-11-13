@@ -159,6 +159,7 @@ async def test_download(
     request_body = {
         "sourcePath": "/home/test1/data.big",
         "account": "fireuser",
+        "transfer_directives": {"transfer_method": "s3"},
     }
     # mocking s3 server response
     with Stubber(s3_client) as stubber:
