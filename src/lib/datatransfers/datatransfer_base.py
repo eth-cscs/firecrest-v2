@@ -4,7 +4,7 @@ import uuid
 from enum import Enum
 from jinja2 import Environment, FileSystemLoader
 from importlib import resources as imp_resources
-from typing import Literal, Union
+from typing import Literal
 from lib.models.base_model import CamelModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.datatransfers import scripts
