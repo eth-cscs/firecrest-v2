@@ -84,9 +84,13 @@ class PbsClient(SchedulerBaseClient):
         )
 
     async def get_job(
-        self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True
+        self,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+        allusers: bool = True,
     ) -> List[PbsJob] | None:
-        qstat = QstatCommand(username, [job_id] if job_id else None, allusers)
+        qstat = QstatCommand(username, [job_id], allusers)
         result = await self.__executed_ssh_cmd(username, jwt_token, qstat)
         # Apply PBS model
         if result:
@@ -104,11 +108,14 @@ class PbsClient(SchedulerBaseClient):
         return result
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False
+        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
     ) -> List[PbsJob] | None:
-        return await self.get_job(
-            job_id=None, username=username, allusers=allusers, jwt_token=jwt_token
-        )
+        qstat = QstatCommand(username, None, allusers, account)
+        result = await self.__executed_ssh_cmd(username, jwt_token, qstat)
+        # Apply PBS model
+        if result:
+            result = [PbsJob.model_validate(job) for job in result]
+        return result
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         qdel = QdelCommand(username=username, job_id=job_id)
