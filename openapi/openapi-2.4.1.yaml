@@ -104,7 +104,7 @@ components:
     CompressResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       title: CompressResponse
@@ -162,7 +162,7 @@ components:
     CopyResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       title: CopyResponse
@@ -195,7 +195,7 @@ components:
     DeleteResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       title: DeleteResponse
@@ -210,7 +210,7 @@ components:
           description: Data transfer parameters specific to the transfer method
           title: Transferdirectives
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       - transferDirectives
@@ -254,7 +254,7 @@ components:
     ExtractResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       title: ExtractResponse
@@ -979,7 +979,7 @@ components:
     MoveResponse:
       properties:
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       title: MoveResponse
@@ -1982,7 +1982,7 @@ components:
           description: Data transfer parameters specific to the transfer method
           title: Transferdirectives
         transferJob:
-          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJob'
+          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJob'
       required:
       - transferJob
       - transferDirectives
@@ -2061,20 +2061,7 @@ components:
       - transferMethod
       title: WormholeTransferResponse
       type: object
-    firecrest__filesystem__transfer__models__TransferJobLogs:
-      properties:
-        errorLog:
-          title: Errorlog
-          type: string
-        outputLog:
-          title: Outputlog
-          type: string
-      required:
-      - outputLog
-      - errorLog
-      title: TransferJobLogs
-      type: object
-    lib__datatransfers__datatransfer_base__TransferJob:
+    firecrest__filesystem__transfer__models__TransferJob:
       properties:
         jobId:
           title: Jobid
@@ -2093,6 +2080,19 @@ components:
       - workingDirectory
       - logs
       title: TransferJob
+      type: object
+    firecrest__filesystem__transfer__models__TransferJobLogs:
+      properties:
+        errorLog:
+          title: Errorlog
+          type: string
+        outputLog:
+          title: Outputlog
+          type: string
+      required:
+      - outputLog
+      - errorLog
+      title: TransferJobLogs
       type: object
   securitySchemes:
     APIAuthDependency:
