@@ -40,10 +40,10 @@ class PbsJobDescription(JobDescriptionModel):
 
 class PbsJobMetadata(JobMetadataModel):
     standard_output: Optional[str] = Field(
-        validation_alias=AliasChoices("Error_Path"), default=None
+        validation_alias=AliasChoices("Error_Path"), default=None, nullable=True
     )
     standard_error: Optional[str] = Field(
-        validation_alias=AliasChoices("Output_Path"), default=None
+        validation_alias=AliasChoices("Output_Path"), default=None, nullable=True
     )
 
     @field_validator("standard_output", "standard_error", mode="before")
