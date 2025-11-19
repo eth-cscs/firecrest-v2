@@ -1218,6 +1218,8 @@ components:
       examples:
       - account: group
         sourcePath: /home/user/dir/file
+        transferDirectives:
+           transferMethod: s3
       properties:
         account:
           anyOf:
