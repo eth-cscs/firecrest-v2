@@ -39,4 +39,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 # Run the app with uvicorn
-CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "firecrest.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000", "--log-level", "debug"]
