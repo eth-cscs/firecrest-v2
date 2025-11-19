@@ -5,6 +5,7 @@
 
 import json
 import aiohttp
+import ssl
 from fastapi import status
 from socket import AF_INET
 from typing import Optional, List
@@ -66,8 +67,13 @@ class SlurmRestClient(SlurmBaseClient):
             connector = aiohttp.TCPConnector(
                 family=AF_INET, limit_per_host=SIZE_POOL_AIOHTTP
             )
+
+            ssl_ctx = ssl.create_default_context()
+            ssl_ctx.check_hostname = False
+            ssl_ctx.verify_mode = ssl.CERT_NONE
+
             cls.aiohttp_client = aiohttp.ClientSession(
-                timeout=timeout, connector=connector
+                timeout=timeout, connector=connector, ssl=ssl_ctx
             )
         return cls.aiohttp_client
 
