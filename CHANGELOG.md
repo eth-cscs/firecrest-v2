@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Timeout value for commands executed via `filesystems/ops` and `status` is now configured with command execution timeout setting
 - Stdout, stderr path are now fully expanded
 - `probing` configuration is optional now for the `clusters` settings
+- Updated documentation for large data upload
 
 ## [2.4.0]
 
