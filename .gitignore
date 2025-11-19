@@ -184,3 +184,4 @@ tmp
 ### UI App
 /docs/use_cases/UI-client-credentials/log
 /docs/use_cases/UI-client-credentials/src/config.py
+src/firecrest-streamer/.pypirc

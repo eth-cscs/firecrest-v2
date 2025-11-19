@@ -1,4 +1,5 @@
 # helpers
+import secrets
 from lib.datatransfers.datatransfer_base import (
     DataTransferLocation,
     DataTransferOperation,
@@ -11,12 +12,8 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 from lib.scheduler_clients.models import JobDescriptionModel
-from lib.datatransfers.magic_wormhole.models import (
-    WormholeDataTransferDirective,
-    WormholeDataTransferOperation,
-)
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
-import random
+from lib.datatransfers.magic_wormhole.models import WormholeTransferResponse
 
 SPACE_WORDS = [
     # Space travel / locations
@@ -55,8 +52,8 @@ SPACE_WORDS = [
 
 
 def generate_wormhole_code(words=SPACE_WORDS, n_words=3):
-    channel = random.randint(1, 99)  # channel number
-    chosen = [random.choice(words) for _ in range(n_words)]
+    channel = secrets.randbelow(98) + 1  # channel number between 1 and 99
+    chosen = [secrets.choice(words) for _ in range(n_words)]
     return f"{channel}-{'-'.join(chosen)}"
 
 
@@ -68,10 +65,12 @@ class WormholeDatatransfer(DataTransferBase):
         directives,
         work_dir,
         system_name,
+        pypi_index_url=None,
     ):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.work_dir = work_dir
         self.system_name = system_name
+        self.pypi_index_url = pypi_index_url
 
     async def upload(
         self,
@@ -88,7 +87,7 @@ class WormholeDatatransfer(DataTransferBase):
             "sbatch_directives": _format_directives(self.directives, account),
             "target_path": target.path,
             "wormhole_code": source.transfer_directives.wormhole_code,
-            "pypi_index_url": "https://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple",
+            "pypi_index_url": self.pypi_index_url,
         }
 
         job_script = _build_script("job_wormhole_receive.sh", parameters)
@@ -111,9 +110,9 @@ class WormholeDatatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        directives = WormholeDataTransferDirective(**{"transfer_method": "wormhole"})
+        directives = WormholeTransferResponse(**{"transfer_method": "wormhole"})
 
-        return WormholeDataTransferOperation(
+        return DataTransferOperation(
             transferJob=transferJob,
             transfer_directives=directives,
         )
@@ -152,11 +151,11 @@ class WormholeDatatransfer(DataTransferBase):
             jwt_token=access_token,
         )
 
-        directives = WormholeDataTransferDirective(
+        directives = WormholeTransferResponse(
             **{"wormhole_code": wormhole_code, "transfer_method": "wormhole"}
         )
 
-        return WormholeDataTransferOperation(
+        return DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,

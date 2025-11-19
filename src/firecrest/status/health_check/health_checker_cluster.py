@@ -36,6 +36,7 @@ class ClusterHealthChecker:
             self.token_decoder = OIDCTokenAuth(
                 settings.auth.authentication.public_certs,
                 username_claim=settings.auth.authentication.username_claim,
+                jwk_algorithm=settings.auth.authentication.jwk_algorithm,
             )
         else:
             self.token_decoder = token_decoder

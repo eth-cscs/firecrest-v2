@@ -20,9 +20,9 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 # dependencies
-from lib.datatransfers.s3.models import S3DataTransferDirective, S3DataTransferOperation
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.datatransfers.s3.models import S3TransferResponse
 
 
 async def _generate_presigned_url(
@@ -180,7 +180,7 @@ class S3Datatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
-        directives = S3DataTransferDirective(
+        directives = S3TransferResponse(
             **{
                 "partsUploadUrls": post_external_upload_urls,
                 "completeUploadUrl": complete_external_multipart_upload_url,
@@ -189,7 +189,7 @@ class S3Datatransfer(DataTransferBase):
             }
         )
 
-        return S3DataTransferOperation(
+        return DataTransferOperation(
             transferJob=transferJob, transfer_directives=directives
         )
 
@@ -290,11 +290,11 @@ class S3Datatransfer(DataTransferBase):
                 self.ttl,
             )
 
-        directives = S3DataTransferDirective(
+        directives = S3TransferResponse(
             **{"download_url": get_download_url, "transfer_method": "s3"}
         )
 
-        return S3DataTransferOperation(
+        return DataTransferOperation(
             transferJob=TransferJob(
                 job_id=job_id,
                 system=self.system_name,

@@ -26,8 +26,11 @@ class SacctCommandBase(BaseCommand):
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
             cmd += [f"--jobs='{str_job_ids}'"]
+        else:
+            cmd += [
+                "--starttime=now-7days"
+            ]  # up to one week ago, default is since midnight today
         cmd += ["--parsable2"]
-
         return " ".join(cmd)
 
     @abstractmethod

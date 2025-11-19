@@ -151,7 +151,6 @@ class SSHClientPool:
         keep_alive: int = 5,
     ):
         self.clients: Dict[str, SSHClient] = {}
-        assert idle_timeout > execute_timeout
         self.host = host
         self.port = port
         self.proxy_host = proxy_host
@@ -165,6 +164,9 @@ class SSHClientPool:
         self.max_clients = max_clients
         self.idle_timeout = idle_timeout
         self.keep_alive = keep_alive
+
+        if idle_timeout <= execute_timeout:
+            raise ValueError("idle_timeout must be greater than execute_timeout")
 
     def prune_connection_pool(self):
         for client in self.clients.values():

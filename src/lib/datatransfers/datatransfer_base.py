@@ -4,7 +4,7 @@ import uuid
 from enum import Enum
 from jinja2 import Environment, FileSystemLoader
 from importlib import resources as imp_resources
-from typing import Literal, Union
+from typing import Literal
 from lib.models.base_model import CamelModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.datatransfers import scripts
@@ -29,38 +29,30 @@ class DataTransferType(str, Enum):
 
     s3 = "s3"
     wormhole = "wormhole"
+    streamer = "streamer"
 
 
 class DataTransferDirective(CamelModel):
     transfer_method: Literal[
         DataTransferType.s3,
         DataTransferType.wormhole,
+        DataTransferType.streamer,
     ]
 
 
-class WormholeDataTransferDirective(DataTransferDirective):
-    wormhole_code: Optional[str] = None
-    transfer_method: Literal[DataTransferType.wormhole,]
+class DataTransferResponse(DataTransferDirective):
+    pass
 
 
-class S3DataTransferDirective(DataTransferDirective):
-    download_url: Optional[str] = None
-    parts_upload_urls: Optional[List[str]] = None
-    complete_upload_url: Optional[str] = None
-    max_part_size: Optional[int] = None
-    file_size: Optional[int] = Field(
-        None, description="Size of the file to upload in bytes"
-    )
-    transfer_method: Literal[DataTransferType.s3,]
+class DataTransferRequest(DataTransferDirective):
+    pass
 
 
 class DataTransferLocation(CamelModel):
     host: Optional[str] = None
     system: Optional[str] = None
     path: Optional[str] = None
-    transfer_directives: Optional[
-        Union[S3DataTransferDirective | WormholeDataTransferDirective]
-    ] = Field(
+    transfer_directives: Optional[DataTransferRequest] = Field(
         None,
         description=("Provide method specific transfer directives"),
         discriminator="transfer_method",
@@ -71,9 +63,7 @@ class DataTransferLocation(CamelModel):
 
 class DataTransferOperation(CamelModel):
     transfer_job: TransferJob
-    transfer_directives: Union[
-        S3DataTransferDirective | WormholeDataTransferDirective
-    ] = Field(
+    transfer_directives: DataTransferResponse = Field(
         None,
         description=("Provide method specific transfer directives"),
         discriminator="transfer_method",

@@ -58,6 +58,7 @@ services:
     ports:
       - "${F7T_HOST_IP:-127.0.0.1}:8000:5000"
       - "${F7T_HOST_IP:-127.0.0.1}:5678:5678"
+      
 
   slurm:
     image: slurm
@@ -80,9 +81,12 @@ services:
     ports:
       - "${F7T_HOST_IP:-127.0.0.1}:6820:6820"
       - "${F7T_HOST_IP:-127.0.0.1}:2222:22"
+      - "${F7T_HOST_IP:-127.0.0.1}:5665:5665"
+      - "${F7T_HOST_IP:-127.0.0.1}:5666:5666"
     volumes:
         # ssh config
         - ./build/docker/slurm-cluster/ssh/sshd_config_base:/etc/ssh/sshd_config
+        - ./src/firecrest-streamer:/app/firecrest-streamer
     healthcheck:
         test: ["CMD", "scontrol", "ping"]
         interval: 1s

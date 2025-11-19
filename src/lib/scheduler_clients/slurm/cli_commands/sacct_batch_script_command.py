@@ -30,7 +30,11 @@ class SacctBatchScriptCommand(SacctCommandBase):
             jobs.append(
                 {
                     "jobId": blocks[i].strip(),
-                    "script": blocks[i + 1].strip(),
+                    "script": (
+                        blocks[i + 1].strip()
+                        if blocks[i + 1].strip() != "NONE"
+                        else None
+                    ),
                 }
             )
         if len(jobs) == 0:
