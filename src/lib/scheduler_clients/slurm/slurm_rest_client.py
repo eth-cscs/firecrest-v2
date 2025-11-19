@@ -63,17 +63,17 @@ class SlurmRestClient(SlurmBaseClient):
     @classmethod
     async def get_aiohttp_client(cls) -> aiohttp.ClientSession:
         if cls.aiohttp_client is None:
-            timeout = aiohttp.ClientTimeout(total=60)
-            connector = aiohttp.TCPConnector(
-                family=AF_INET, limit_per_host=SIZE_POOL_AIOHTTP
-            )
 
             ssl_ctx = ssl.create_default_context()
             ssl_ctx.check_hostname = False
             ssl_ctx.verify_mode = ssl.CERT_NONE
 
+            timeout = aiohttp.ClientTimeout(total=60)
+            connector = aiohttp.TCPConnector(
+                family=AF_INET, limit_per_host=SIZE_POOL_AIOHTTP, ssl=ssl_ctx
+            )
             cls.aiohttp_client = aiohttp.ClientSession(
-                timeout=timeout, connector=connector, ssl=ssl_ctx
+                timeout=timeout, connector=connector
             )
         return cls.aiohttp_client
 
