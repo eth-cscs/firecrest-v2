@@ -78,7 +78,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: old-openapi-spec
-        path: ./openapi/openapi.yaml
+        path: ./openapi/openapi-latest.yaml
   api-diff:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
