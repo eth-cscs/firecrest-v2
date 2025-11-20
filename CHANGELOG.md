@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Get jobs now allows to specify the account parameter
+
 ### Changed
 
 ### Fixed

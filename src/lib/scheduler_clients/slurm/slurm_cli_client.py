@@ -83,9 +83,13 @@ class SlurmCliClient(SlurmBaseClient):
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
 
     async def get_job(
-        self, job_id: str | None, username: str, jwt_token: str, allusers: bool = True
+        self,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+        allusers: bool = True,
     ) -> List[SlurmJob] | None:
-        sacct = SacctCommand(username, [job_id] if job_id else None, allusers)
+        sacct = SacctCommand(username, [job_id], allusers)
         jobs = await self.__executed_ssh_cmd(username, jwt_token, sacct)
         if jobs:
             # Apply Slurm model
@@ -145,11 +149,14 @@ class SlurmCliClient(SlurmBaseClient):
         return jobs
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False
+        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
     ) -> List[SlurmJob] | None:
-        return await self.get_job(
-            job_id=None, username=username, jwt_token=jwt_token, allusers=allusers
-        )
+        sacct = SacctCommand(username, None, allusers, account)
+        jobs = await self.__executed_ssh_cmd(username, jwt_token, sacct)
+        if jobs:
+            # Apply Slurm model
+            jobs = [SlurmJob.model_validate(job) for job in jobs]
+        return jobs
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         scancel = ScancelCommand(username, job_id)

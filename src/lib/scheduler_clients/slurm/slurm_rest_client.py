@@ -10,6 +10,7 @@ from socket import AF_INET
 from typing import Optional, List
 from jose import jwt
 from packaging.version import Version
+import urllib
 
 # Exceptions
 from lib.exceptions import SlurmAuthTokenError, SlurmError
@@ -37,6 +38,7 @@ SIZE_POOL_AIOHTTP = 100
 # url: /jobs/xxx
 # returncode:200
 #
+
 
 def _slurm_headers(username: str, jwt_token: str, username_claim: str):
     token_claims = jwt.get_unverified_claims(jwt_token)
@@ -78,11 +80,7 @@ class SlurmRestClient(SlurmBaseClient):
             cls.aiohttp_client = None
 
     def __init__(
-        self,
-        api_url: str,
-        api_version: str,
-        timeout: int,
-        username_claim: str
+        self, api_url: str, api_version: str, timeout: int, username_claim: str
     ):
         self.api_url = api_url
         self.api_version = api_version
@@ -146,7 +144,11 @@ class SlurmRestClient(SlurmBaseClient):
         pass
 
     async def get_job(
-        self, job_id: str, username: str, jwt_token: str, allusers: bool = True
+        self,
+        job_id: str,
+        username: str,
+        jwt_token: str,
+        allusers: bool = True,
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -182,12 +184,14 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False
+        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs"
+        if account:
+            url += f"?{urllib.parse.urlencode({"account": account})}"
         async with client.get(
             url=url,
             headers=headers,
