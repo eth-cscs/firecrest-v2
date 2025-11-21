@@ -54,29 +54,46 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
-            sechedulerCheck = SchedulerHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sechedulerCheck.check()]
-            sshCheck = SSHHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sshCheck.check()]
+            
+            if self.cluster.health_checks is None or self.cluster.health_checks.scheduler.enable:
+                timeout = self.cluster.probing.timeout
+                if self.cluster.health_checks is not None and self.cluster.health_checks.scheduler.timeout != 0:
+                    timeout = self.cluster.health_checks.scheduler.timeout
 
-            for filesystem in self.cluster.file_systems:
-                filesystemCheck = FilesystemHealthCheck(
+                sechedulerCheck = SchedulerHealthCheck(
                     system=self.cluster,
                     auth=auth,
                     token=token,
-                    path=filesystem.path,
-                    timeout=self.cluster.probing.timeout,
+                    timeout=timeout,
                 )
+                checks += [sechedulerCheck.check()]
+                
+            if self.cluster.health_checks is None or self.cluster.health_checks.ssh.enable:
+                timeout = self.cluster.probing.timeout
+                if self.cluster.health_checks is not None and self.cluster.health_checks.ssh.timeout != 0:
+                    timeout = self.cluster.health_checks.ssh.timeout
+
+                sshCheck = SSHHealthCheck(
+                    system=self.cluster,
+                    auth=auth,
+                    token=token,
+                    timeout=timeout,
+                )
+                checks += [sshCheck.check()]
+
+            if self.cluster.health_checks is None or self.cluster.health_checks.filesystems.enable:
+                timeout = self.cluster.probing.timeout
+                if self.cluster.health_checks is not None and self.cluster.health_checks.filesystems.timeout != 0:
+                    timeout = self.cluster.health_checks.filesystems.timeout
+
+                for filesystem in self.cluster.file_systems:
+                    filesystemCheck = FilesystemHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        path=filesystem.path,
+                        timeout=timeout,
+                    )
                 checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)

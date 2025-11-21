@@ -192,6 +192,31 @@ class Probing(CamelModel):
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
+class HealthCheckEnabler(CamelModel):
+    """Health check enable settings."""
+
+    enable: bool = Field(
+        True, description="Enable or disable health check, if missing the specific health check is enabled by default."
+    )
+    timeout: Optional[int] = Field(
+        0, description="Timeout for specific health check, if not specified the default timeout defined in the probing section is used."
+    )
+
+
+class HealthCheckConfiguration(CamelModel):
+    """Health check specific configuration."""
+
+    scheduler: HealthCheckEnabler = Field(
+        ..., description="Scheduler health check configuration."
+    )
+    filesystems: HealthCheckEnabler = Field(
+        ..., description="FileSystems health check configuration."
+    )
+    ssh: HealthCheckEnabler = Field(
+        ..., description="SSH health check configuration."
+    )
+
+
 class BaseDataTransfer(CamelModel):
     """Base data transfer setting"""
 
@@ -370,6 +395,9 @@ class HPCCluster(CamelModel):
     ] = Field(
         None,
         description="Optional health information for different services in the cluster.",
+    )
+    health_checks: Optional[HealthCheckConfiguration] = Field(
+        None, description="Health checks fine grade configuration."
     )
     probing: Optional[Probing] = Field(
         None, description="Probing configuration for monitoring the cluster."

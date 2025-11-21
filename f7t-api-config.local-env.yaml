@@ -42,6 +42,14 @@ clusters:
   service_account:
     client_id: "firecrest-health-check"
     secret: "secret_file:/run/secrets/service_account_client_secret"
+  health_checks:
+    ssh:
+      enable: false
+    scheduler:
+      enable: true
+      timeout: 20
+    filesystems:
+      enable: true
   probing:
     interval: 120
     timeout: 10
@@ -72,6 +80,13 @@ clusters:
   service_account:
     client_id: "firecrest-health-check"
     secret: "secret_file:/run/secrets/service_account_client_secret"
+  health_checks:
+    ssh:
+      enable: true
+    scheduler:
+      enable: false  
+    filesystems:
+      enable: true
   probing:
     interval: 120
     timeout: 5
@@ -105,7 +120,7 @@ clusters:
     interval: 120
     timeout: 10
     startup_grace_period: 300
-    datatransfer_jobs_directives:
+  datatransfer_jobs_directives:
       - "#PBS -l nodes=1:ppn=1"
       - "#PBS -l walltime=00:15:00"
       - "#PBS -V"
