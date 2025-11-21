@@ -45,7 +45,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: "{{ .Values.lifecycle.postStart.command }}"
+                command: ["sh", "-c", "/app/scripts/postStart-script.sh"]
           {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
@@ -73,6 +73,11 @@ spec:
             mountPath: /app/clusters/
             readOnly: true
             {{- end }}
+          {{- if .Values.lifecycle.postStart.enabled }}
+          - name: postStart-script-volume
+            mountPath: /app/scripts/postStart-script.sh
+            readOnly: true
+          {{- end }}
           livenessProbe:
             exec:
               command:
