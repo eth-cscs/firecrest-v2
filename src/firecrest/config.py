@@ -189,32 +189,37 @@ class Probing(CamelModel):
     interval: int = Field(
         ..., description="Interval in seconds between cluster checks."
     )
+
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
-class HealthCheckEnabler(CamelModel):
+class ProbingService(CamelModel):
     """Health check enable settings."""
 
-    enable: bool = Field(
-        True, description="Enable or disable health check, if missing the specific health check is enabled by default."
-    )
     timeout: Optional[int] = Field(
-        0, description="Timeout for specific health check, if not specified the default timeout defined in the probing section is used."
+        0,
+        description="Timeout for specific health check, if not specified the default timeout defined in the probing section is used.",
     )
 
 
-class HealthCheckConfiguration(CamelModel):
-    """Health check specific configuration."""
+class ProbingServices(CamelModel):
+    """Cluster monitoring attributes."""
 
-    scheduler: HealthCheckEnabler = Field(
-        ..., description="Scheduler health check configuration."
+    scheduler: Optional[ProbingService] = Field(
+        None, description="Scheduler health check configuration."
     )
-    filesystems: HealthCheckEnabler = Field(
-        ..., description="FileSystems health check configuration."
+    filesystems: Optional[ProbingService] = Field(
+        None, description="FileSystems health check configuration."
     )
-    ssh: HealthCheckEnabler = Field(
-        ..., description="SSH health check configuration."
+    ssh: Optional[ProbingService] = Field(
+        None, description="SSH health check configuration."
     )
+
+    interval: int = Field(
+        ..., description="Interval in seconds between cluster checks."
+    )
+
+    # timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
 class BaseDataTransfer(CamelModel):
@@ -396,11 +401,8 @@ class HPCCluster(CamelModel):
         None,
         description="Optional health information for different services in the cluster.",
     )
-    health_checks: Optional[HealthCheckConfiguration] = Field(
-        None, description="Health checks fine grade configuration."
-    )
-    probing: Optional[Probing] = Field(
-        None, description="Probing configuration for monitoring the cluster."
+    probing: Optional[ProbingServices] = Field(
+        None, description="Probing configuration for monitoring the cluster's services."
     )
     file_systems: List[FileSystem] = Field(
         default_factory=list,

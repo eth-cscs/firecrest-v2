@@ -54,45 +54,33 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
-            
-            if self.cluster.health_checks is None or self.cluster.health_checks.scheduler.enable:
-                timeout = self.cluster.probing.timeout
-                if self.cluster.health_checks is not None and self.cluster.health_checks.scheduler.timeout != 0:
-                    timeout = self.cluster.health_checks.scheduler.timeout
 
+            if self.cluster.probing.scheduler is not None:
                 sechedulerCheck = SchedulerHealthCheck(
                     system=self.cluster,
                     auth=auth,
                     token=token,
-                    timeout=timeout,
+                    timeout=self.cluster.probing.scheduler.timeout,
                 )
                 checks += [sechedulerCheck.check()]
-                
-            if self.cluster.health_checks is None or self.cluster.health_checks.ssh.enable:
-                timeout = self.cluster.probing.timeout
-                if self.cluster.health_checks is not None and self.cluster.health_checks.ssh.timeout != 0:
-                    timeout = self.cluster.health_checks.ssh.timeout
 
+            if self.cluster.probing.ssh is not None:
                 sshCheck = SSHHealthCheck(
                     system=self.cluster,
                     auth=auth,
                     token=token,
-                    timeout=timeout,
+                    timeout=self.cluster.probing.ssh.timeout,
                 )
                 checks += [sshCheck.check()]
 
-            if self.cluster.health_checks is None or self.cluster.health_checks.filesystems.enable:
-                timeout = self.cluster.probing.timeout
-                if self.cluster.health_checks is not None and self.cluster.health_checks.filesystems.timeout != 0:
-                    timeout = self.cluster.health_checks.filesystems.timeout
-
+            if self.cluster.probing.filesystems is not None:
                 for filesystem in self.cluster.file_systems:
                     filesystemCheck = FilesystemHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
                         path=filesystem.path,
-                        timeout=timeout,
+                        timeout=self.cluster.probing.filesystems.timeout,
                     )
                 checks += [filesystemCheck.check()]
 
