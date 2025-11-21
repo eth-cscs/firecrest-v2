@@ -30,6 +30,12 @@ spec:
           image: "{{ .Values.image }}:{{ .Values.version | default .Chart.AppVersion }}"
           ports:
             - containerPort: {{ .Values.service.port | default 5000 }}
+          {{- if .Values.lifecycle.postStart.enabled }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "/app/scripts/post-start-script.sh"]
+          {{- end }}
           env:
             - name: ENVIRONMENT
               value: {{ .Values.global.environment | default "development" | quote }}
@@ -41,12 +47,6 @@ spec:
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
             {{- end }}
-          {{- if .Values.lifecycle.postStart.enabled }}
-          lifecycle:
-            postStart:
-              exec:
-                command: ["sh", "-c", "/app/scripts/postStart-script.sh"]
-          {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
             mountPath: "/app/configs/firecrest-config.yaml"
@@ -75,8 +75,9 @@ spec:
             {{- end }}
           {{- if .Values.lifecycle.postStart.enabled }}
           - name: post-start-script-volume
-            mountPath: /app/scripts/postStart-script.sh
+            mountPath: /app/scripts/post-start-script.sh
             readOnly: true
+            subPath: post-start-script.sh
           {{- end }}
           livenessProbe:
             exec:
