@@ -74,7 +74,7 @@ spec:
             readOnly: true
             {{- end }}
           {{- if .Values.lifecycle.postStart.enabled }}
-          - name: postStart-script-volume
+          - name: post-start-script-volume
             mountPath: /app/scripts/postStart-script.sh
             readOnly: true
           {{- end }}
