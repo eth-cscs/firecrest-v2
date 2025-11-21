@@ -122,6 +122,14 @@ spec:
           configMap:
             name: firecrest-cluster-configs
           {{- end }}
+        {{- if .Values.lifecycle.postStart.enabled }}
+        - name: post-start-script-volume
+          configMap: 
+            name: {{ .Values.lifecycle.postStart.configMapName }}
+            items:
+              - key: {{ .Values.lifecycle.postStart.configMapKey }}
+                path: post-start-script.sh
+        {{- end }}
             
 ---
 apiVersion: v1
