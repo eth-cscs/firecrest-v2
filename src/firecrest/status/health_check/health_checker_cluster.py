@@ -54,29 +54,34 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
-            sechedulerCheck = SchedulerHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sechedulerCheck.check()]
-            sshCheck = SSHHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sshCheck.check()]
 
-            for filesystem in self.cluster.file_systems:
-                filesystemCheck = FilesystemHealthCheck(
+            if self.cluster.probing.scheduler is not None:
+                sechedulerCheck = SchedulerHealthCheck(
                     system=self.cluster,
                     auth=auth,
                     token=token,
-                    path=filesystem.path,
-                    timeout=self.cluster.probing.timeout,
+                    timeout=self.cluster.probing.scheduler.timeout,
                 )
+                checks += [sechedulerCheck.check()]
+
+            if self.cluster.probing.ssh is not None:
+                sshCheck = SSHHealthCheck(
+                    system=self.cluster,
+                    auth=auth,
+                    token=token,
+                    timeout=self.cluster.probing.ssh.timeout,
+                )
+                checks += [sshCheck.check()]
+
+            if self.cluster.probing.filesystems is not None:
+                for filesystem in self.cluster.file_systems:
+                    filesystemCheck = FilesystemHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        path=filesystem.path,
+                        timeout=self.cluster.probing.filesystems.timeout,
+                    )
                 checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
