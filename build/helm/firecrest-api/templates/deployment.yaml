@@ -34,7 +34,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: ["/bin/sh", "-c", "/app/scripts/post-start-script.sh"]
+                command: ["/bin/sh", "-c", "/app/scripts/post-start-script.sh &> /app/logs/post-start.log || true"]
           {{- end }}
           env:
             - name: ENVIRONMENT
