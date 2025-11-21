@@ -41,6 +41,12 @@ spec:
             - name: UVICORN_LOG_CONFIG
               value: {{ .Values.logConfig }}
             {{- end }}
+          {{- if .Values.lifecycle.postStart.enabled }}
+          lifecycle:
+            postStart:
+              exec:
+                command: "{{ .Values.lifecycle.postStart.command }}"
+          {{- end }}
           volumeMounts:
           - name: firecrest-configs-volume
             mountPath: "/app/configs/firecrest-config.yaml"

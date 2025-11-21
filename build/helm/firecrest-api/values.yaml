@@ -331,6 +331,11 @@ firecrest:
   #logger:
     ## enable_tracing_log: enable tracing logs (boolean). Default: false
     # enable_tracing_log: true
+lifecycle:
+  postStart:
+    enabled: false
+    command: ""
+
 
 ## Volumes to mount config files and secrets into FirecREST pod
 ##  this can be used for storing secrets for:
