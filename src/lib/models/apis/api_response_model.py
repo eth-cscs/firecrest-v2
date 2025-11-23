@@ -7,6 +7,7 @@ import time
 import fastapi
 from enum import Enum
 from typing import Optional, Any, TypeVar
+from pydantic import Field
 from starlette.exceptions import HTTPException
 from fastapi.exceptions import RequestValidationError
 
@@ -39,7 +40,9 @@ class ApResponseErrorType(str, Enum):
 class ApiResponseMeta(CamelModel):
     timestamp: float
     app_version: str
-    auth: Optional[ApiAuthUser | ApiAuthServiceAccount] = None
+    auth: Optional[ApiAuthUser | ApiAuthServiceAccount] = Field(
+        default=None, nullable=True
+    )
 
     @staticmethod
     def build_http_meta(app_version, auth: ApiAuthModel = None):
@@ -58,8 +61,8 @@ class ApiResponseMeta(CamelModel):
 class ApiResponseError(CamelModel):
     error_type: ApResponseErrorType = ApResponseErrorType.error
     message: str
-    data: Optional[dict] = None
-    user: Optional[str] = None
+    data: Optional[dict] = Field(default=None, nullable=True)
+    user: Optional[str] = Field(default=None, nullable=True)
 
     @staticmethod
     def build_http_error(message, error_type=ApResponseErrorType.error, data=None):
