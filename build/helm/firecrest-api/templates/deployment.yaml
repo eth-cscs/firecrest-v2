@@ -131,6 +131,7 @@ spec:
         - name: post-start-script-volume
           configMap: 
             name: {{ .Values.lifecycle.postStart.configMapName }}
+            defaultMode: 0755
             items:
               - key: {{ .Values.lifecycle.postStart.configMapKey }}
                 path: post-start-script.sh
