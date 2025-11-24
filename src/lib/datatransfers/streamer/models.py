@@ -1,8 +1,15 @@
+from typing import Literal, Optional
 from lib.datatransfers.datatransfer_base import (
-    StreamerDataTransferDirective,
-    DataTransferOperation,
+    DataTransferResponse,
+    DataTransferRequest,
+    DataTransferType,
 )
 
 
-class StreamerDataTransferOperation(DataTransferOperation):
-    transfer_directives: StreamerDataTransferDirective
+class StreamerTransferResponse(DataTransferResponse):
+    coordinates: Optional[str] = None
+    transfer_method: Literal[DataTransferType.streamer,]
+
+
+class StreamerTransferRequest(DataTransferRequest):
+    transfer_method: Literal[DataTransferType.streamer,]

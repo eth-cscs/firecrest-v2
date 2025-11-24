@@ -325,6 +325,7 @@ class SchedulerClientDependency:
                     system.scheduler.api_version,
                     system.scheduler.api_url,
                     system.scheduler.timeout,
+                    settings.auth.authentication.username_claim,
                 )
             case SchedulerType.pbs:
                 return PbsClient(
@@ -404,6 +405,7 @@ class DataTransferDependency:
                     public_ips=settings.data_operation.data_transfer.public_ips,
                     wait_timeout=settings.data_operation.data_transfer.wait_timeout,
                     inbound_transfer_limit=settings.data_operation.data_transfer.inbound_transfer_limit,
+                    ssh_client=ssh_client,
                 )
 
             case DataTransferType.wormhole:

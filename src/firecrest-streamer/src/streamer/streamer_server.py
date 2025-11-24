@@ -3,12 +3,11 @@ import base64
 from enum import Enum
 import http
 import json
-import os
 import signal
 import websockets
 from websockets.asyncio.server import serve
 import click
-
+from streamer.streamer_core import stream_send, stream_receive
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
@@ -29,61 +28,23 @@ inbound_transfer_limit: int = None
 timeout_handle: asyncio.Handle = None
 
 
-async def stream_receive(websocket):
+async def server_receive(websocket: websockets.asyncio.server.ServerConnection):
     global operation, target, inbound_transfer_limit
     print("Client connected.")
-    transfer_size = 0
     try:
-        with open(target, "xb") as f:
-            try:
-                async for message in websocket:
-                    if message == "EOF":
-                        print("File transfer complete.")
-                        break
-                    transfer_size += CHUNK_SIZE
-                    if transfer_size > inbound_transfer_limit:
-                        print(
-                            "Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes Aborting transfer."
-                        )
-                        await websocket.close(
-                            code=1009,
-                            reason=f"Inbound transfer limit exceeded, max allowed transfer size: {inbound_transfer_limit} bytes.",
-                        )
-                        os.remove(target)
-                        websocket.server.close()
-                        return
-                    f.write(message)
-            except websockets.ConnectionClosed:
-                print("Connection closed unexpectedly.")
-    except FileExistsError:
-        print(f"File {target} already exists. Aborting to prevent overwrite.")
-        websocket.server.close()
-        return
-    print(f"File {target} received successfully.")
+        await stream_receive(websocket, target, inbound_transfer_limit)
+    except Exception as e:
+        print(f"An error occurred: {e}")
     websocket.server.close()
 
 
-async def stream_send(websocket):
-    global operation, target
+async def server_send(websocket):
+    global target
     print("Client connected.")
-    file_size = os.stat(target).st_size
-    num_chunks = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
-    await websocket.send(
-        json.dumps({"num_chunks": num_chunks, "file_size": file_size}).encode(
-            encoding="utf-8"
-        )
-    )
-    with open(target, "rb") as f:
-        try:
-            while True:
-                chunk = f.read(CHUNK_SIZE)
-                if not chunk:
-                    break
-                await websocket.send(chunk, text=False)
-            await websocket.send("EOF")  # signal end of file
-        except websockets.ConnectionClosed:
-            print("Connection closed unexpectedly.")
-    print(f"File {target} sent successfully.")
+    try:
+        await stream_send(websocket, target)
+    except Exception as e:
+        print(f"An error occurred: {e}")
     websocket.server.close()
 
 
@@ -111,7 +72,7 @@ async def stream():
     for port in range(start_port, end_port + 1):
         try:
             async with serve(
-                stream_receive if operation == Operation.receive else stream_send,
+                server_receive if operation == Operation.receive else server_send,
                 host,
                 port,
                 max_size=int(

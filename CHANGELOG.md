@@ -5,20 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - OPEN
+## [2.4.2] - OPEN
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [2.4.1] 
 
 ### Added
 
 - Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
+- Firecrest streamer now computes checksums to validate data transfer
+- Firecrest streamer transfer end-point returns immediet errors if target paths have issues.
 
 ### Changed
 
 - Firecrest Streamer no longer allows to overwrite existing files.
+- Get jobs shows jobs up to one week.
+- Firecrest streamer improved error handling, including remote errors.
+- SLURM RESTAPI now validates the username claim on the access token from the `auth` configuration.
 
 ### Fixed
 
 - Demo Launcher now is adapted correctly to the `data_operation` setup introduced in `2.4.0`
 - Old link to the installation documentation
+- Timeout value for commands executed via `filesystems/ops` and `status` is now configured with command execution timeout setting
+- Stdout, stderr path are now fully expanded
+- `probing` configuration is optional now for the `clusters` settings
 
 ## [2.4.0]
 
