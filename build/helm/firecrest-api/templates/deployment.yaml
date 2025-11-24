@@ -30,6 +30,12 @@ spec:
           image: "{{ .Values.image }}:{{ .Values.version | default .Chart.AppVersion }}"
           ports:
             - containerPort: {{ .Values.service.port | default 5000 }}
+          {{- if .Values.lifecycle.postStart.enabled }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "/app/scripts/post-start-script.sh > /app/post-start-script.log 2>&1"]
+          {{- end }}
           env:
             - name: ENVIRONMENT
               value: {{ .Values.global.environment | default "development" | quote }}
@@ -67,6 +73,12 @@ spec:
             mountPath: /app/clusters/
             readOnly: true
             {{- end }}
+          {{- if .Values.lifecycle.postStart.enabled }}
+          - name: post-start-script-volume
+            mountPath: /app/scripts/post-start-script.sh
+            readOnly: true
+            subPath: post-start-script.sh
+          {{- end }}
           livenessProbe:
             exec:
               command:
@@ -110,6 +122,15 @@ spec:
           configMap:
             name: firecrest-cluster-configs
           {{- end }}
+        {{- if .Values.lifecycle.postStart.enabled }}
+        - name: post-start-script-volume
+          configMap: 
+            name: {{ .Values.lifecycle.postStart.configMapName }}
+            defaultMode: 0755
+            items:
+              - key: {{ .Values.lifecycle.postStart.configMapKey }}
+                path: post-start-script.sh
+        {{- end }}
             
 ---
 apiVersion: v1

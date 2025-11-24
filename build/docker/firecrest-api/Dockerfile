@@ -20,6 +20,12 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory
 WORKDIR /app
 
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    zip \
+    unzip
+
 # Copy the requirements
 COPY ./requirements.txt ./requirements.txt
 COPY ./requirements-testing.txt ./requirements-testing.txt
