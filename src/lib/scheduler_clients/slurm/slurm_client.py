@@ -21,7 +21,7 @@ class SlurmClient(SlurmBaseClient):
 
     def __init__(
         self,
-        ssh_client: SSHClientPool,
+        ssh_client: SSHClientPool | None,
         slurm_version: str,
         api_version: str | None,
         api_url: str | None,
@@ -50,9 +50,12 @@ class SlurmClient(SlurmBaseClient):
     ) -> int | None:
 
         if job_description.script_path:
-            return await self.slurm_cli_client.submit_job(
-                job_description, username, jwt_token
-            )
+            if self.ssh_client:
+                return await self.slurm_cli_client.submit_job(
+                    job_description, username, jwt_token
+                )
+            else:
+                return None
 
         return await self.slurm_default_client.submit_job(
             job_description, username, jwt_token

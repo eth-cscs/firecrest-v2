@@ -23,6 +23,7 @@ from lib.datatransfers.datatransfer_base import (
 from lib.datatransfers.s3.models import S3DataTransferDirective, S3DataTransferOperation
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.ssh_clients.ssh_client import SSHClientPool
 
 
 async def _generate_presigned_url(
@@ -53,7 +54,7 @@ class S3Datatransfer(DataTransferBase):
         directives,
         s3_client_private,
         s3_client_public,
-        ssh_client,
+        ssh_client: SSHClientPool | None,
         work_dir,
         bucket_lifecycle_configuration,
         max_part_size,
