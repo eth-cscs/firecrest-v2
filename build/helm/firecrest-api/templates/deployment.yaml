@@ -39,7 +39,7 @@ spec:
                   - -c
                   - | 
                     chmod +x /app/scripts/post-start-script.sh
-                    /app/scripts/post-start-script.sh &> /app/scripts/post-start-script.log || true
+                    /app/scripts/post-start-script.sh &> /app/scripts/logs/post-start-script.log || true
           {{- end }}
           env:
             - name: ENVIRONMENT
@@ -81,7 +81,7 @@ spec:
           {{- if .Values.lifecycle.postStart.enabled }}
           - name: post-start-script-volume
             mountPath: /app/scripts/post-start-script.sh
-            readOnly: false
+            readOnly: true
             subPath: post-start-script.sh
           {{- end }}
           livenessProbe:
