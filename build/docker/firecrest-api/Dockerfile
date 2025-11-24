@@ -34,7 +34,7 @@ COPY ./src/firecrest ./firecrest
 COPY ./build/docker/firecrest-api/check_liveness.py ./
 
 # Set up script folder
-RUN mkdir ./scripts && ./scripts/logs
+RUN mkdir ./scripts && mkdir ./scripts/logs
 RUN touch ./scripts/post-start-script.sh && chmod +x ./scripts/post-start-script.sh
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
