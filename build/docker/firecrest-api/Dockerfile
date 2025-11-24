@@ -22,7 +22,9 @@ WORKDIR /app
 
 # Install required dependencies
 RUN apt-get update && apt-get install -y \
-    curl
+    curl \
+    zip \
+    unzip
 
 # Copy the requirements
 COPY ./requirements.txt ./requirements.txt
