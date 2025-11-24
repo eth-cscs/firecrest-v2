@@ -337,6 +337,9 @@ firecrest:
 lifecycle:
   postStart:
     enabled: false
+    # Define the config map name and key where the post-start script is stored
+    # configMapName: 
+    # configMapKey:
 
 
 ## Volumes to mount config files and secrets into FirecREST pod
