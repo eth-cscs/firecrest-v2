@@ -81,7 +81,7 @@ spec:
           {{- if .Values.lifecycle.postStart.enabled }}
           - name: post-start-script-volume
             mountPath: /app/scripts/post-start-script.sh
-            readOnly: true
+            readOnly: false
             subPath: post-start-script.sh
           {{- end }}
           livenessProbe:
