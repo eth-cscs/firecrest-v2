@@ -300,10 +300,27 @@ class SchedulerClientDependency:
         system = ServiceAvailabilityDependency(
             service_type=HealthCheckType.scheduler, ignore_health=self.ignore_health
         )(system_name=system_name)
+
+        is_ssh_healthy = False
+        requires_ssh_healthy = not self.ignore_health
+
+        if requires_ssh_healthy:
+            is_ssh_healthy = next(
+                iter(
+                    [
+                        service.healthy for service in system.servicesHealth if
+                        service.service_type == HealthCheckType.ssh
+                    ]
+                ),
+                False,
+            )
+
         match system.scheduler.type:
             case SchedulerType.slurm:
                 return SlurmClient(
-                    await self._get_ssh_client(system_name),
+                    (None if system.scheduler.api_url and requires_ssh_healthy
+                     and (not is_ssh_healthy) else
+                     await self._get_ssh_client(system_name)),
                     system.scheduler.version,
                     system.scheduler.api_version,
                     system.scheduler.api_url,
