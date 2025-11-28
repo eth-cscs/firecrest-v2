@@ -140,33 +140,45 @@ All asynchronous endpoints are located under  `/transfer` and follow this path s
 ## File transfer
 
 FirecREST provides two methods for transferring files:
-- Small files (up to 5MB by [default](../setup/conf/README.md)) can be uploaded or downloaded directly.
+
+- Small files (up to 5MB by [default](../setup/conf/#dataoperation)) can be uploaded or downloaded directly.
 - Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
 
 Small file transfer endpoints:
 
- - `/filesystem/{system_name}/ops/download`
- - `/filesystem/{system_name}/ops/upload`
+- [`/filesystem/{system_name}/ops/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get)
+- [`/filesystem/{system_name}/ops/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post)
 
 Large file transfer endpoints:
 
- - `/filesystem/{system_name}/transfer/download`
- - `/filesystem/{system_name}/transfer/upload`
+- [`/filesystem/{system_name}/transfer/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post)
+- [`/filesystem/{system_name}/transfer/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post)
 
 ### Downloading Large Files
 
 When requesting a large file download, FirecREST returns a download URL and a `jobId`. Once the remote job is completed, the user can retrieve the file using the provided URL.
 
-### File Transfer with Bash
+### Uploading Large Files
+
+Given that FirecREST utilizes a storage service based on [S3 as staging area](../setup/arch/external_storage/), the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be splitted in chunks, which complicates the file upload.
+
+For this, we have created a set of examples in different programming and scripting languages that we describe following:
+
+#### Large Data Upload with Python3
+
+This is the easiest way of using FirecREST. See [FirecREST SDK section](#firecrest-sdk) below for more information and detailed examples.
+
+#### Large Data Upload with Bash
+
 [Detailed example.](file_transfer_bash/README.md)
 
-### File Transfer with .NET
+#### Large Data Upload with .NET
+
 [Detailed example.](file_transfer_dotnet/README.md)
 
-### Need more examples?
-The complexity of using FirecREST, for example implementing the multipart protocol, can vary depending on the programming language used and how well it aligns with your specific requirements or constraints such as speed, disk space, or else.
+#### Need more examples?
 
-If you need tailored examples for your particular use case, feel free to open an [issue on GitHub](https://github.com/eth-cscs/firecrest-v2/issues/new). We'd be happy to create one for you.
+If you need examples for your particular use case (ie, using a different language than the listed above), feel free to open an [issue on GitHub](https://github.com/eth-cscs/firecrest-v2/issues/new). We'd be happy to create one for you.
 
 ## FirecREST SDK
 
