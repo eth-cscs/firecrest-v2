@@ -1,4 +1,4 @@
-FROM slurm2x:latest
+FROM slurm:latest
 
 RUN apt update -y \
     && apt install -y \
