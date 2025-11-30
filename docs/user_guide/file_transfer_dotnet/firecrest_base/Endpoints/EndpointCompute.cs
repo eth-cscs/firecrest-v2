@@ -54,7 +54,7 @@ namespace firecrest_base.Endpoints
                     if (--counter == 0)
                         throw;
                 }
-                await Task.Delay(1000);
+                await Task.Delay(10000);
             }
 
             // Job completed

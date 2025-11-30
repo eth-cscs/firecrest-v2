@@ -63,7 +63,7 @@ namespace firecrest_base.Endpoints
             return await client.GetStreamAsync(url);
         }
 
-        protected async Task<string> RequestPost(string resource, Dictionary<string, string> formData)
+        protected async Task<string> RequestPost(string resource, Dictionary<string, object> formData)
         {
             HttpClient client = await InitClient();
             string url = $"{FirecRESTurl}/{resource}";

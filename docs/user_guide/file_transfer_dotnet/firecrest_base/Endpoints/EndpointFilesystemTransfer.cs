@@ -19,9 +19,7 @@ namespace firecrest_base.Endpoints
         // Class attributes names are case sensitive and shall match with response fields
         protected class MultipartUploadData
         {
-            public string []? partsUploadUrls { get; set; }
-            public string? completeUploadUrl { get; set; }
-            public long maxPartSize { get; set; }
+            public TransferDirectivesS3? transferDirectives { get; set; }
             public TransferJob? transferJob { get; set; }
         };
 
@@ -51,22 +49,31 @@ namespace firecrest_base.Endpoints
             Console.WriteLine($"Uploading file size: {fileSize}");
 
             // Prepare request
-            Dictionary<string, string> formData = new()
+            Dictionary<string, object> formData = new()
             {
                 { "path",     destinationPath },
-                { "fileName", destinationFileName },
-                { "account",  account },
-                { "fileSize", $"{fileSize}" }
+                { "transfer_directives",  
+                    new Dictionary<string, string>{
+                        { "transfer_method" , "s3" },
+                        { "fileName", destinationFileName },
+                        { "fileSize", $"{fileSize}" }
+                    } 
+                },
+                { "account",  account }
             };
             string response = await RequestPost(url, formData);
             MultipartUploadData? mpu = JsonSerializer.Deserialize<MultipartUploadData>(response);
 
             if (mpu != null)
             {
+                TransferDirectivesS3? transferDirectives = mpu.transferDirectives;
+                if (transferDirectives == null)
+                    throw new Exception("Missing transfer directives in Multipart upload response");
+                
                 // Check memory boundaries
-                if (mpu.maxPartSize > int.MaxValue)
-                    throw new Exception($"Part size [{mpu.maxPartSize} bytes] exceeds memory limit");
-                int maxPartSize = (int)mpu.maxPartSize;
+                if (transferDirectives.max_part_size > int.MaxValue)
+                    throw new Exception($"Part size [{transferDirectives.max_part_size} bytes] exceeds memory limit");
+                int maxPartSize = (int)transferDirectives.max_part_size;
 
                 // Got Multipart transfer presigned URLs, proceed with upload
                 HttpClient client = new();
@@ -77,12 +84,12 @@ namespace firecrest_base.Endpoints
                 int partIndex = 1;
 
                 // Check for URLs in the response
-                if (mpu.partsUploadUrls is null || mpu.completeUploadUrl is null )
+                if (transferDirectives.parts_upload_urls is null || transferDirectives.complete_upload_url is null)
                     throw new Exception("Missing URLs in Multipart upload response");
 
                 // Try to upload parts, sequentially
-                Console.WriteLine($"Uploading {mpu.partsUploadUrls.Length} parts");
-                foreach (string partUrl in mpu.partsUploadUrls)
+                Console.WriteLine($"Uploading {transferDirectives.parts_upload_urls.Length} parts");
+                foreach (string partUrl in transferDirectives.parts_upload_urls)
                 {
                     try
                     {
@@ -104,7 +111,7 @@ namespace firecrest_base.Endpoints
                     throw new Exception("Upload failed");
 
                 // Upload of parts succeeded, complete Multipart protocol.
-                await CompleteMultipartUpload(mpu.completeUploadUrl, client, eTags);
+                await CompleteMultipartUpload(transferDirectives.complete_upload_url, client, eTags);
                 return mpu.transferJob;
             }
             return null;
@@ -159,9 +166,14 @@ namespace firecrest_base.Endpoints
             string url = $"{URL}/download";
 
             // Prepare request data
-            Dictionary<string, string> formData = new()
+            Dictionary<string, object> formData = new()
             {
                 { "sourcePath", sourceFile },
+                { "transfer_directives",
+                    new Dictionary<string, string>{
+                        { "transfer_method" , "s3" }
+                    }
+                },
                 { "account",  account }
             };
 
