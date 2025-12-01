@@ -5,7 +5,7 @@ import os
 
 # storage
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
-
+from fastapi import HTTPException
 
 # helpers
 from lib.datatransfers.datatransfer_base import (
@@ -202,6 +202,12 @@ class S3Datatransfer(DataTransferBase):
         access_token,
         account,
     ) -> DataTransferOperation | None:
+
+        if self.scheduler_client.ssh_client is None:
+            raise HTTPException(
+                status_code=501,
+                detail="Scheduler can't handle this request when configured to use rest connection mode",
+            )
 
         job_id = None
 

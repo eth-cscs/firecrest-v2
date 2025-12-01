@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException
 
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
@@ -58,7 +59,10 @@ class SlurmClient(SlurmBaseClient):
                     job_description, username, jwt_token
                 )
             else:
-                return None
+                raise HTTPException(
+                    status_code=501,
+                    detail="Scheduler can't handle this request when configured to use rest connection mode",
+                )
 
         return await self.slurm_default_client.submit_job(
             job_description, username, jwt_token

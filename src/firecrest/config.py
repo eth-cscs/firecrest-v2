@@ -9,6 +9,7 @@ import pydantic
 import yaml
 from pathlib import Path
 from typing import Any, Dict, Literal, Tuple, Type, Union
+from typing_extensions import Self
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -96,10 +97,19 @@ class FileSystemDataType(str, Enum):
     project = "project"
 
 
+class SchedulerConnectionMode(str, Enum):
+    """Modes to connect to the schedulers present in the system"""
+
+    hybrid = "hybrid"
+    rest = "rest"
+    ssh = "ssh"
+
+
 class Scheduler(CamelModel):
     """Cluster job scheduler configuration."""
 
     type: SchedulerType = Field(..., description="Scheduler type.")
+    connection_mode: Optional[SchedulerConnectionMode] = Field(SchedulerConnectionMode.ssh, description="Scheduler connection mode.")
     version: str = Field(..., description="Scheduler version.")
     api_url: Optional[str] = Field(None, description="REST API endpoint for scheduler.")
     api_version: Optional[str] = Field(None, description="Scheduler API version.")
@@ -108,6 +118,16 @@ class Scheduler(CamelModel):
     )
 
     model_config = ConfigDict(use_enum_values=True)
+
+    @pydantic.model_validator(mode="wrap")
+    def check_scheduler_mode(self, handler) -> Self:
+
+        _self = handler(self)
+
+        if (_self.connection_mode == SchedulerConnectionMode.hybrid or _self.connection_mode == SchedulerConnectionMode.rest) and not _self.api_url:
+            raise ValueError(f"Error configuring scheduler '{_self.type}': `api_url` must be set when using `connection_mode` set to `hybrid` or `rest`")
+
+        return _self
 
 
 class ServiceAccount(CamelModel):
