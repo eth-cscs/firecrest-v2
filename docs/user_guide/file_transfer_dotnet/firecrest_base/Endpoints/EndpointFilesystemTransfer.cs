@@ -43,7 +43,7 @@ namespace firecrest_base.Endpoints
             string url = $"{URL}/upload";
             // Destination file settings
             string destinationFileName = destinationFile.Split('/').Last();
-            string destinationPath = destinationFile[..(destinationFile.Length - destinationFileName.Length - 1)];
+            //string destinationPath = destinationFile[..(destinationFile.Length - destinationFileName.Length - 1)];
             // Get file size
             long fileSize = new FileInfo(sourceFile).Length;
             Console.WriteLine($"Uploading file size: {fileSize}");
@@ -51,7 +51,7 @@ namespace firecrest_base.Endpoints
             // Prepare request
             Dictionary<string, object> formData = new()
             {
-                { "path",     destinationPath },
+                { "path",     destinationFile },
                 { "transfer_directives",  
                     new Dictionary<string, string>{
                         { "transfer_method" , "s3" },
