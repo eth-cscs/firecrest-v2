@@ -79,14 +79,21 @@ async def get_jobs(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
     ],
-    allusers: Annotated[bool, Query(description="If set to `true` returns all jobs visible by the current user, otherwise only the current user owned jobs")] = False
+    allusers: Annotated[
+        bool,
+        Query(
+            description="If set to `true` returns all jobs visible by the current user, otherwise only the current user owned jobs"
+        ),
+    ] = False,
+    account: Annotated[
+        str | None,
+        Query(description="If specified, filter jobs by account name"),
+    ] = None,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(
-        username=username,
-        jwt_token=access_token,
-        allusers=allusers
+        username=username, jwt_token=access_token, allusers=allusers, account=account
     )
     return {"jobs": jobs}
 
@@ -104,14 +111,12 @@ async def get_job(
         SchedulerBaseClient,
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency()),
-    ]    
+    ],
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_job(
-        job_id=job_id,
-        username=username,
-        jwt_token=access_token
+        job_id=job_id, username=username, jwt_token=access_token
     )
     if jobs is None:
         raise HTTPException(
