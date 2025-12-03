@@ -26,7 +26,7 @@ namespace firecrest_base.Endpoints
         // Class attributes names are case sensitive and shall match with response fields
         protected class DownloadData
         {
-            public string? downloadUrl { get; set; }
+            public TransferDirectivesS3? transferDirectives { get; set; }
             public TransferJob? transferJob { get; set; }
         }
 
@@ -41,11 +41,9 @@ namespace firecrest_base.Endpoints
         {
             // Set endpoint address 
             string url = $"{URL}/upload";
-            // Destination file settings
-            string destinationFileName = destinationFile.Split('/').Last();
-            //string destinationPath = destinationFile[..(destinationFile.Length - destinationFileName.Length - 1)];
             // Get file size
             long fileSize = new FileInfo(sourceFile).Length;
+            Console.WriteLine($"Uploading file     : {destinationFile}");
             Console.WriteLine($"Uploading file size: {fileSize}");
 
             // Prepare request
@@ -55,7 +53,6 @@ namespace firecrest_base.Endpoints
                 { "transfer_directives",  
                     new Dictionary<string, string>{
                         { "transfer_method" , "s3" },
-                        { "fileName", destinationFileName },
                         { "fileSize", $"{fileSize}" }
                     } 
                 },
@@ -168,7 +165,7 @@ namespace firecrest_base.Endpoints
             // Prepare request data
             Dictionary<string, object> formData = new()
             {
-                { "sourcePath", sourceFile },
+                { "path", sourceFile },
                 { "transfer_directives",
                     new Dictionary<string, string>{
                         { "transfer_method" , "s3" }
@@ -183,6 +180,7 @@ namespace firecrest_base.Endpoints
             
             // Get Transfer job
             TransferJob? transferJob = downloadData.transferJob ?? throw new Exception("Null transfer job received");
+            TransferDirectivesS3 transferDirectives = downloadData.transferDirectives ?? throw new Exception("Null transfer directives received");
 
             // Wait for transfer job to complete the file copy on S3
             Console.WriteLine($"Monitoring transfer transferJob ID: {transferJob.jobId}");
@@ -193,7 +191,7 @@ namespace firecrest_base.Endpoints
             // Got presigned URL, proceed with download
             Console.WriteLine("Downloading the file from S3");
             using HttpClient client = new();
-            using HttpResponseMessage s3Response = await client.GetAsync(downloadData.downloadUrl, HttpCompletionOption.ResponseHeadersRead);
+            using HttpResponseMessage s3Response = await client.GetAsync(transferDirectives.download_url, HttpCompletionOption.ResponseHeadersRead);
             using Stream downloadStream = await s3Response.Content.ReadAsStreamAsync();
             using FileStream fileStream = File.OpenWrite(destinationFile);
             {

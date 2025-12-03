@@ -12,6 +12,7 @@ namespace firecrest_base.Types
         public string? transfer_method { get; set; }
         public string[]? parts_upload_urls { get; set; }
         public string? complete_upload_url { get; set; }
+        public string? download_url { get; set; }
         public long max_part_size { get; set; }
     }
 }
