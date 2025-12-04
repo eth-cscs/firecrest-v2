@@ -16,7 +16,9 @@ class Oidc(CamelModel):
     """
 
     scopes: Optional[dict] = Field(
-        default_factory=dict, description="Map of OIDC scopes and their purposes."
+        default_factory=dict,
+        description="Map of OIDC scopes and their purposes.",
+        nullable=True,
     )
     token_url: str = Field(
         ...,
@@ -33,13 +35,15 @@ class Oidc(CamelModel):
             "to verify the OIDC token."
         ),
     )
-    username_claim: Optional[str] = Field(
+    username_claim: str = Field(
         "preferred_username",
         description="Name of the JWT claim containing the username (e.g. sub, preferred_username, etc.)",
+        nullable=False,
     )
     jwk_algorithm: Optional[str] = Field(
         None,
-        description="Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key."
+        description="Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key.",
+        nullable=True,
     )
 
 
@@ -73,7 +77,7 @@ class SSHUserKeys(CamelModel):
         ),
     )
     public_cert: Optional[str] = Field(
-        None, description="Optional SSH public certificate."
+        None, description="Optional SSH public certificate.", nullable=True
     )
     passphrase: Optional[LoadFileSecretStr] = Field(
         None,
@@ -81,4 +85,5 @@ class SSHUserKeys(CamelModel):
             "Optional passphrase for the private key. You can give "
             "directly the content or the file path using `'secret_file:/path/to/file'`."
         ),
+        nullable=True,
     )
