@@ -16,6 +16,7 @@ from firecrest.config import (
     HealthCheckType,
     SSHKeysServiceType,
     SchedulerType,
+    SchedulerConnectionMode
 )
 from firecrest.filesystem.models import FilesystemRequestBase
 from firecrest.plugins import settings
@@ -300,10 +301,15 @@ class SchedulerClientDependency:
         system = ServiceAvailabilityDependency(
             service_type=HealthCheckType.scheduler, ignore_health=self.ignore_health
         )(system_name=system_name)
+
         match system.scheduler.type:
             case SchedulerType.slurm:
                 return SlurmClient(
-                    await self._get_ssh_client(system_name),
+                    (
+                        None if system.scheduler.connection_mode == SchedulerConnectionMode.rest
+                        else
+                        await self._get_ssh_client(system_name)
+                    ),
                     system.scheduler.version,
                     system.scheduler.api_version,
                     system.scheduler.api_url,

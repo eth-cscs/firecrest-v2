@@ -16,6 +16,7 @@ clusters:
     max_clients: 500
   scheduler:
     type: "slurm"
+    connection_mode: "hybrid"
     version: "24.11.0"
     api_url: "http://192.168.240.2:6820"
     api_version: "0.0.42"
