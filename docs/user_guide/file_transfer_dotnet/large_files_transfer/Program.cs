@@ -73,6 +73,7 @@ namespace large_files_transfer
                 // Download the uploaded file
                 await efst.Download(uploadFile, downloadFile);
                 Console.WriteLine("Download complete");
+                Console.WriteLine($"Downloaded file: {downloadFile}");
                 hash = ComputePayloadHash(downloadFile);
                 string downloadHash = Convert.ToHexString(hash);
                 Console.WriteLine($"Download Hash {downloadHash}");
