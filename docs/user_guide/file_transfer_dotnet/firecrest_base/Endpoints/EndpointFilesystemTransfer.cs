@@ -49,7 +49,7 @@ namespace firecrest_base.Endpoints
             // Prepare request
             Dictionary<string, object> formData = new()
             {
-                { "path",     destinationFile },
+                { "path",     $"{destinationFile}" },
                 { "transfer_directives",  
                     new Dictionary<string, string>{
                         { "transfer_method" , "s3" },

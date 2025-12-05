@@ -25,6 +25,7 @@ namespace firecrest_base.Endpoints
 
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Accept", "*/*");
+            client.DefaultRequestHeaders.Add("user-agent", "MyCSharpClient/1.0 (Windows 11; .NET 8.0)");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken.Token);
             return client;
         }
