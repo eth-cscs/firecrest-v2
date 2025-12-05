@@ -26,7 +26,12 @@ do
             part_i=1
             headers_file=$(mktemp)
 
-            if [[ -e "$target_file" ]]; then rm "$target_file"; fi
+            if [ -d "$target_file" ]; then
+                echo $(date -u) "Missing target file $target_file, directory received." >&2
+                exit 3
+            fi
+
+            if [[ -f "$target_file" ]]; then rm "$target_file"; fi
 
             while [[ "$download_complete" != "true" ]];
             do
