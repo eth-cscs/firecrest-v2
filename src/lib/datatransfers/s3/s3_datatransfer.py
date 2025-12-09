@@ -215,7 +215,7 @@ class S3Datatransfer(DataTransferBase):
         async with self.ssh_client.get_client(username, access_token) as client:
             stat_output = await client.execute(stat)
 
-        object_name = f"{source.path.split('/')[-1]}_{str(uuid.uuid4())}"
+        object_name = f"{str(uuid.uuid4())}/{os.path.basename(source.path)}"
 
         async with self.s3_client_private:
             try:
