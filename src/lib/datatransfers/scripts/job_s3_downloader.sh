@@ -27,7 +27,8 @@ do
             headers_file=$(mktemp)
 
             if [ -d "$target_file" ]; then
-                echo $(date -u) "Missing target file $target_file, directory received." >&2
+
+                echo $(date -u) "targetPath must point to a file path: $target_file is a directory." >&2
                 exit 3
             fi
 
