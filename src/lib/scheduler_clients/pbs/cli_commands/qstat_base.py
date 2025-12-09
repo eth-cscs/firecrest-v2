@@ -14,14 +14,18 @@ class QstatBaseCommand(BaseCommand):
         username: str = None,
         ids: Optional[List[str]] = None,
         allusers: bool = True,
+        account: str = None,
     ) -> None:
         super().__init__()
         self.username = username
         self.ids = ids if ids else []
         self.allusers = allusers
+        self.account = account
 
     def get_command(self) -> str:
         cmd = ["qstat", "-F", "json", "-f"] + self.ids
+        if self.account:
+            cmd += ["-A", self.account]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
