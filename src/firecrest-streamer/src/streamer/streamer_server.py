@@ -20,8 +20,8 @@ class Operation(Enum):
 
 @dataclass
 class StreamConfig:
-    operation: Operation | None
-    target: str | None
+    operation: str
+    target: str
     secret: str
     port_range: tuple[int, int]
     ips: list[str]
@@ -31,7 +31,7 @@ class StreamConfig:
 
 
 async def stream(config: StreamConfig):
-    timeout_handle: asyncio.Handle | None = None
+    timeout_handle: asyncio.Handle = None
 
     def process_request(connection, request):
         nonlocal timeout_handle
