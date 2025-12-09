@@ -127,6 +127,9 @@ class Scheduler(CamelModel):
         if (_self.connection_mode == SchedulerConnectionMode.hybrid or _self.connection_mode == SchedulerConnectionMode.rest) and not _self.api_url:
             raise ValueError(f"Error configuring scheduler '{_self.type}': `api_url` must be set when using `connection_mode` set to `hybrid` or `rest`")
 
+        if _self.type == SchedulerType.pbs and _self.connection_mode != SchedulerConnectionMode.ssh:
+            raise ValueError("Error configuring scheduler: PBS scheduler only accepts `connection_mode: ssh`")
+
         return _self
 
 

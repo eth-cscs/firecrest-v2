@@ -203,10 +203,10 @@ class S3Datatransfer(DataTransferBase):
         account,
     ) -> DataTransferOperation | None:
 
-        if self.scheduler_client.ssh_client is None:
+        if self.ssh_client is None:
             raise HTTPException(
                 status_code=501,
-                detail="Scheduler can't handle this request when configured to use rest connection mode",
+                detail="Download cannot be performed without SSH enabled",
             )
 
         job_id = None

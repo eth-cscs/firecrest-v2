@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` and `hybrid`)
+- `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
 
 ### Changed
 
