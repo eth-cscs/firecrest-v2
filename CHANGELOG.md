@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Large file download via s3 no loger appends uuid to file name.
 
 ### Fixed
+- File transfer examples with .NET
 
 ## [2.4.1]
 
