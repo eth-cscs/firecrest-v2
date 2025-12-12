@@ -102,4 +102,5 @@ data_operation:
       parallel_runs: 3
       tmp_folder: "tmp"
     probing:
-      interval_check: 60
+      interval: 60
+      timeout: 1000
