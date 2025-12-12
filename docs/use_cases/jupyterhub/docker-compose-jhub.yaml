@@ -14,8 +14,6 @@ services:
       context: .
       dockerfile: $JHUB_DOCKERFILE_DIR/Dockerfile
     ports:
-      - 6820:6820
-      - 2222:22
       - 56123:56123
     depends_on:
       - base

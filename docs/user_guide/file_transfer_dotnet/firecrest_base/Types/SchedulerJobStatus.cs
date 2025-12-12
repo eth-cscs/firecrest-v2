@@ -12,6 +12,6 @@ namespace firecrest_base.Types
         public string? state { get; set; }
         public string? stateReason {  get; set; }
         public int exitCode { get; set; }
-        public int interruptSignal { get; set; }
+        public int? interruptSignal { get; set; }
     }
 }

@@ -5,7 +5,7 @@ import os
 
 # storage
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
-
+from fastapi import HTTPException
 
 # helpers
 from lib.datatransfers.datatransfer_base import (
@@ -22,6 +22,7 @@ from lib.datatransfers.datatransfer_base import (
 # dependencies
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.ssh_clients.ssh_client import SSHClientPool
 from lib.datatransfers.s3.models import S3TransferResponse
 
 
@@ -53,7 +54,7 @@ class S3Datatransfer(DataTransferBase):
         directives,
         s3_client_private,
         s3_client_public,
-        ssh_client,
+        ssh_client: SSHClientPool | None,
         work_dir,
         bucket_lifecycle_configuration,
         max_part_size,
@@ -202,13 +203,19 @@ class S3Datatransfer(DataTransferBase):
         account,
     ) -> DataTransferOperation | None:
 
+        if self.ssh_client is None:
+            raise HTTPException(
+                status_code=501,
+                detail="Download cannot be performed without SSH enabled",
+            )
+
         job_id = None
 
         stat = StatCommand(source.path, True)
         async with self.ssh_client.get_client(username, access_token) as client:
             stat_output = await client.execute(stat)
 
-        object_name = f"{source.path.split('/')[-1]}_{str(uuid.uuid4())}"
+        object_name = f"{str(uuid.uuid4())}/{os.path.basename(source.path)}"
 
         async with self.s3_client_private:
             try:

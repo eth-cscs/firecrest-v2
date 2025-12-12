@@ -63,7 +63,10 @@ response=$(curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/tra
 --data "{
   \"path\":\"${DESTINATION_PATH}\",
   \"fileName\":\"${DATA_FILE}\",
-  \"fileSize\":\"${UPLOAD_FILE_SIZE}\"
+  \"transferDirectives\": {
+      \"fileSize\":\"${UPLOAD_FILE_SIZE}\",
+      \"transferMethod\":\"s3\"
+  }
 }")
 
 # Extract information

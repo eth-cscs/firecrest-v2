@@ -339,6 +339,16 @@ firecrest:
     ## enable_tracing_log: enable tracing logs (boolean). Default: false
     # enable_tracing_log: true
 
+## Post-start lifecycle hook configuration
+## When enabled, it will execute the script located at /app/scripts/postStart-script.sh
+lifecycle:
+  postStart:
+    enabled: false
+    # Define the config map name and key where the post-start script is stored
+    # configMapName: 
+    # configMapKey:
+
+
 ## Volumes to mount config files and secrets into FirecREST pod
 ##  this can be used for storing secrets for:
 ##    - SSHStaticKeys in .firecrest.ssh_credentials
