@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - File target check in S3 file transfer job for external file upload.
-
 - `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
-- Get jobs now allows to specify the account parameter
+- Get jobs now allows to specify the account parameter.
+- Fine grained probing services per cluster.
 
 ### Changed
 
