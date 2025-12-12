@@ -203,23 +203,12 @@ class ProbingService(CamelModel):
 
 
 class ProbingServices(CamelModel):
-    """Cluster monitoring attributes."""
-
-    scheduler: Optional[ProbingService] = Field(
-        None, description="Scheduler health check configuration."
+    services: Optional[list[dict[str, ProbingService]]] = Field(
+        None, description="Services to be checked."
     )
-    filesystems: Optional[ProbingService] = Field(
-        None, description="FileSystems health check configuration."
-    )
-    ssh: Optional[ProbingService] = Field(
-        None, description="SSH health check configuration."
-    )
-
-    interval: int = Field(
+    interval_check: int = Field(
         ..., description="Interval in seconds between cluster checks."
     )
-
-    # timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
 
 
 class BaseDataTransfer(CamelModel):

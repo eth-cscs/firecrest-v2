@@ -34,8 +34,7 @@ clusters:
     client_id: "firecrest-health-check"
     secret: "demo-secret"
   probing:
-    interval: 120
-    timeout: 10
+    interval_check: 120
     startup_grace_period: 300
   file_systems:
     - path: '/users'
@@ -58,5 +57,4 @@ data_operation:
       parallel_runs: 3
       tmp_folder: "tmp"    
     probing:
-      interval: 60
-      timeout: 10
+      interval_check: 60

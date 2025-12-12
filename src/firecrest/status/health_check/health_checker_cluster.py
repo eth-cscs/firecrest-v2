@@ -5,7 +5,7 @@
 
 import asyncio
 import time
-
+import logging
 
 from firecrest.config import HPCCluster, HealthCheckException
 
@@ -54,35 +54,37 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
+            for service in self.cluster.probing.services:
+                 for k in service.keys():
+                    match k:
+                        case 'scheduler':
+                            check = SchedulerHealthCheck(
+                                system=self.cluster,
+                                auth=auth,
+                                token=token,
+                                timeout=service[k].timeout,
+                            )
+                        case 'ssh':
+                            check = SSHHealthCheck(
+                                system=self.cluster,
+                                auth=auth,
+                                token=token,
+                                timeout=service[k].timeout,
+                            )
+                        case 'filesystems':
+                            for filesystem in self.cluster.file_systems:
+                                check = FilesystemHealthCheck(
+                                    system=self.cluster,
+                                    auth=auth,
+                                    token=token,
+                                    path=filesystem.path,
+                                    timeout=service[k].timeout,
+                                )
+                        case _:
+                            check = None
 
-            if self.cluster.probing.scheduler is not None:
-                sechedulerCheck = SchedulerHealthCheck(
-                    system=self.cluster,
-                    auth=auth,
-                    token=token,
-                    timeout=self.cluster.probing.scheduler.timeout,
-                )
-                checks += [sechedulerCheck.check()]
-
-            if self.cluster.probing.ssh is not None:
-                sshCheck = SSHHealthCheck(
-                    system=self.cluster,
-                    auth=auth,
-                    token=token,
-                    timeout=self.cluster.probing.ssh.timeout,
-                )
-                checks += [sshCheck.check()]
-
-            if self.cluster.probing.filesystems is not None:
-                for filesystem in self.cluster.file_systems:
-                    filesystemCheck = FilesystemHealthCheck(
-                        system=self.cluster,
-                        auth=auth,
-                        token=token,
-                        path=filesystem.path,
-                        timeout=self.cluster.probing.filesystems.timeout,
-                    )
-                checks += [filesystemCheck.check()]
+                    if check is not None:
+                        checks += [check.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results

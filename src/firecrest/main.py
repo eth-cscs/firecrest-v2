@@ -118,7 +118,7 @@ async def schedule_tasks(scheduler: AsyncScheduler):
         if cluster.probing:
             await scheduler.add_schedule(
                 ClusterHealthChecker(cluster).check,
-                IntervalTrigger(seconds=cluster.probing.interval),
+                IntervalTrigger(seconds=cluster.probing.interval_check),
                 id=f"check-cluster-{cluster.name}",
             )
     if (
