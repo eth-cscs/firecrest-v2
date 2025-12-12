@@ -2,9 +2,6 @@ FROM golang:1.24
 EXPOSE 2221
 EXPOSE 2280
 
-RUN apt-get update && apt-get install -y git ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
 RUN git clone --depth 1 https://github.com/wayf-dk/sshca.git
 
 WORKDIR /go/sshca
