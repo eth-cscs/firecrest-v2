@@ -2,6 +2,7 @@ FROM golang:1.24
 EXPOSE 2221
 EXPOSE 2280
 
+
 RUN git clone --depth 1 https://github.com/wayf-dk/sshca.git
 
 WORKDIR /go/sshca
