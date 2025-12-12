@@ -10,7 +10,8 @@ aiohttp
 asyncio
 rootpath
 asyncssh
-aiobotocore
+aiobotocore <=2.26.0 # Temporary constraint to avoid compatibility issues with botocore 3.0.0 that introduced breaking changes that makes our tests fail (https://github.com/aio-libs/aiobotocore/commit/1609736045ba4228c421b13badbf9fc097e5ec57)
+boto3
 apscheduler>=4.0.0a4
 requests-file
 aiofiles
