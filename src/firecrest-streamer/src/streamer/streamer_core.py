@@ -1,11 +1,83 @@
 import hashlib
 import json
+import logging
 import os
+from typing import Optional, Protocol
 
 import websockets
 
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
+
+
+class StreamReporter(Protocol):
+    """Reporter interface to decouple streaming output from stdout."""
+
+    def info(self, message: str) -> None: ...
+
+    def warning(self, message: str) -> None: ...
+
+    def error(self, message: str) -> None: ...
+
+    def progress(
+        self,
+        current: int,
+        total: int,
+        prefix: str = "",
+        suffix: str = "",
+        length: int = 40,
+    ) -> None: ...
+
+
+class LoggingReporter:
+    """Default reporter using the Python logging module."""
+
+    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+        self.logger = logger or logging.getLogger(__name__)
+
+    def info(self, message: str) -> None:
+        self.logger.info(message)
+
+    def warning(self, message: str) -> None:
+        self.logger.warning(message)
+
+    def error(self, message: str) -> None:
+        self.logger.error(message)
+
+    def progress(
+        self,
+        current: int,
+        total: int,
+        prefix: str = "",
+        suffix: str = "",
+        length: int = 40,
+    ) -> None:
+        # Logging progress as debug avoids log spam when callers do not care.
+        percent = 100 * (current / float(total))
+        self.logger.debug("%s %.1f%% %s", prefix, percent, suffix)
+
+
+class ConsoleReporter:
+    """Reporter that prints to stdout with a simple progress bar."""
+
+    def info(self, message: str) -> None:
+        print(message)
+
+    def warning(self, message: str) -> None:
+        print(message)
+
+    def error(self, message: str) -> None:
+        print(message)
+
+    def progress(
+        self,
+        current: int,
+        total: int,
+        prefix: str = "",
+        suffix: str = "",
+        length: int = 40,
+    ) -> None:
+        printProgressBar(current, total, prefix=prefix, suffix=suffix, length=length)
 
 
 # Print iterations progress
@@ -36,7 +108,8 @@ def sizeof_fmt(num, suffix="B"):
     return f"{num:.1f}Yi{suffix}"
 
 
-async def stream_send(websocket, target):
+async def stream_send(websocket, target, reporter: Optional[StreamReporter] = None):
+    reporter = reporter or LoggingReporter()
     try:
         with open(target, "rb") as f:
             file_size = os.stat(target).st_size
@@ -52,32 +125,32 @@ async def stream_send(websocket, target):
                         }
                     ).encode(encoding="utf-8")
                 )
-                print(f"Transfering {sizeof_fmt(file_size)}...")
+                reporter.info(f"Transfering {sizeof_fmt(file_size)}...")
                 chunk_count = 0
                 while chunk := f.read(CHUNK_SIZE):
                     await websocket.send(chunk, text=False)
                     hash.update(chunk)
                     chunk_count += 1
-                    printProgressBar(chunk_count, num_chunks, length=40)
+                    reporter.progress(chunk_count, num_chunks, length=40)
                 await websocket.send(
                     json.dumps({"type": "eof", "sha256_hash": hash.hexdigest()}).encode(
                         encoding="utf-8"
                     )
                 )
-                print(f"File {target} sent successfully.")
+                reporter.info(f"File {target} sent successfully.")
                 return True
             except websockets.exceptions.ConnectionClosedError as e:
-                print(f"Remote connection closed with error: {e}")
+                reporter.error(f"Remote connection closed with error: {e}")
                 return False
     except FileNotFoundError:
-        print(f"File {target} not found. Aborting transfer.")
+        reporter.error(f"File {target} not found. Aborting transfer.")
         await websocket.close(
             code=3003,
             reason=json.dumps({"type": "error", "error": "FileNotFoundError"}),
         )
         return False
     except Exception as e:
-        print(f"An error occurred: {e}")
+        reporter.error(f"An error occurred: {e}")
         await websocket.close(
             code=1011,
             reason=json.dumps({"type": "error", "error": type(e).__name__}),
@@ -85,7 +158,10 @@ async def stream_send(websocket, target):
         return False
 
 
-async def stream_receive(websocket, target, size_limit=None):
+async def stream_receive(
+    websocket, target, size_limit=None, reporter: Optional[StreamReporter] = None
+):
+    reporter = reporter or LoggingReporter()
     try:
         init = None
         transfer_size = 0
@@ -95,22 +171,22 @@ async def stream_receive(websocket, target, size_limit=None):
             async for message in websocket:
                 if init is None:
                     init = json.loads(message.decode("utf-8"))
-                    print(f"Transfering {sizeof_fmt(init['file_size'])}...")
+                    reporter.info(f"Transfering {sizeof_fmt(init['file_size'])}...")
                     continue
                 if isinstance(message, str) and message.startswith('{"type":"error"'):
                     error = json.loads(message.decode("utf-8"))
-                    print(f"A remote error occurred: {error['error']}")
+                    reporter.error(f"A remote error occurred: {error['error']}")
                     break
                 if isinstance(message, str) and message.startswith('{"type":"eof"'):
                     if hash.hexdigest() != json.loads(message)["sha256_hash"]:
-                        print("Hash mismatch! File transfer corrupted.")
+                        reporter.error("Hash mismatch! File transfer corrupted.")
                         os.remove(target)
                     else:
-                        print("File received successfully.")
+                        reporter.info("File received successfully.")
                     break
                 transfer_size += CHUNK_SIZE
                 if size_limit is not None and transfer_size > size_limit:
-                    print(
+                    reporter.error(
                         f"Inbound transfer limit exceeded, max allowed transfer size: {size_limit} bytes Aborting transfer."
                     )
                     await websocket.close(
@@ -122,18 +198,18 @@ async def stream_receive(websocket, target, size_limit=None):
                 f.write(message)
                 hash.update(message)
                 chunk_count += 1
-                printProgressBar(chunk_count, init["num_chunks"], length=40)
-            print(f"File {target} received successfully.")
+                reporter.progress(chunk_count, init["num_chunks"], length=40)
+            reporter.info(f"File {target} received successfully.")
             return True
     except FileExistsError:
-        print(f"File {target} already exists. Transfer aborted.")
+        reporter.error(f"File {target} already exists. Transfer aborted.")
         await websocket.close(
             code=3003,
             reason=json.dumps({"type": "error", "error": "FileNotFoundError"}),
         )
         return False
     except Exception as e:
-        print(f"An error occurred: {e}.")
+        reporter.error(f"An error occurred: {e}.")
         await websocket.close(
             code=1011,
             reason=json.dumps({"type": "error", "error": type(e).__name__}),
