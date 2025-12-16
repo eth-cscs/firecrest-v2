@@ -71,7 +71,7 @@ jobs:
         mv openapi.yaml openapi_/openapi-new.yaml
     - name: Fetch old specs from gh-pages
       run: |
-        git fetch origin $GH_PAGES_BRANCH
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
     - name: Move Old OpenAPI file
       run: |
@@ -274,7 +274,7 @@ jobs:
     - name: Push to gh-pages branch
       run: |
         
-        git fetch origin $GH_PAGES_BRANCH
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv gh_/*tgz ./charts/
 
@@ -293,6 +293,8 @@ jobs:
       contents: write
       pages: write
     steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
     - name: Download new spec artifact
       uses: actions/download-artifact@v4
       with:
@@ -305,7 +307,7 @@ jobs:
         mv openapi-specs/openapi-new.yaml openapi_/openapi-${{ env.RELEASE_TAG }}.yaml
     - name: Push to gh-pages branch
       run: |
-        git fetch origin $GH_PAGES_BRANCH
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv openapi_/* ./openapi/
         sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_TAG }}.yaml", name: "${{ env.RELEASE_TAG }}"},|g' openapi/dist/swagger-initializer.js
@@ -353,7 +355,7 @@ jobs:
         git restore docs/setup/conf/README.md
     - name: Merge site with gh-pages branch
       run: |
-        git fetch origin $GH_PAGES_BRANCH
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
         git checkout $GH_PAGES_BRANCH
         mv openapi .openapi
         mv charts .charts
