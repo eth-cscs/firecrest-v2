@@ -55,6 +55,7 @@ services:
     networks:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.10
+    user: "5678:5678"
     ports:
       - "${F7T_HOST_IP:-127.0.0.1}:8000:5000"
       - "${F7T_HOST_IP:-127.0.0.1}:5678:5678"
