@@ -1554,10 +1554,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#file-transfer-with-bash" class="md-nav__link">
+  <a href="#uploading-large-files" class="md-nav__link">
     <span class="md-ellipsis">
       
-        File Transfer with Bash
+        Uploading Large Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Uploading Large Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#large-data-upload-with-python3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large Data Upload with Python3
       
     </span>
   </a>
@@ -1565,10 +1577,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#file-transfer-with-net" class="md-nav__link">
+  <a href="#large-data-upload-with-bash" class="md-nav__link">
     <span class="md-ellipsis">
       
-        File Transfer with .NET
+        Large Data Upload with Bash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#large-data-upload-with-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large Data Upload with .NET
       
     </span>
   </a>
@@ -1583,6 +1606,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1877,28 +1905,34 @@ Using the identity provider to associate a user or project with a client offers 
 </span></code></pre></div>
 </div>
 <h2 id="file-transfer">File transfer<a class="headerlink" href="#file-transfer" title="Permanent link">&para;</a></h2>
-<p>FirecREST provides two methods for transferring files:
-- Small files (up to 5MB by <a href="../setup/conf/">default</a>) can be uploaded or downloaded directly.
-- Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.</p>
+<p>FirecREST provides two methods for transferring files:</p>
+<ul>
+<li>Small files (up to 5MB by <a href="../setup/conf/#dataoperation">default</a>) can be uploaded or downloaded directly.</li>
+<li>Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.</li>
+</ul>
 <p>Small file transfer endpoints:</p>
 <ul>
-<li><code>/filesystem/{system_name}/ops/download</code></li>
-<li><code>/filesystem/{system_name}/ops/upload</code></li>
+<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get"><code>/filesystem/{system_name}/ops/download</code></a></li>
+<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post"><code>/filesystem/{system_name}/ops/upload</code></a></li>
 </ul>
 <p>Large file transfer endpoints:</p>
 <ul>
-<li><code>/filesystem/{system_name}/transfer/download</code></li>
-<li><code>/filesystem/{system_name}/transfer/upload</code></li>
+<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post"><code>/filesystem/{system_name}/transfer/download</code></a></li>
+<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post"><code>/filesystem/{system_name}/transfer/upload</code></a></li>
 </ul>
 <h3 id="downloading-large-files">Downloading Large Files<a class="headerlink" href="#downloading-large-files" title="Permanent link">&para;</a></h3>
 <p>When requesting a large file download, FirecREST returns a download URL and a <code>jobId</code>. Once the remote job is completed, the user can retrieve the file using the provided URL.</p>
-<h3 id="file-transfer-with-bash">File Transfer with Bash<a class="headerlink" href="#file-transfer-with-bash" title="Permanent link">&para;</a></h3>
+<h3 id="uploading-large-files">Uploading Large Files<a class="headerlink" href="#uploading-large-files" title="Permanent link">&para;</a></h3>
+<p>Given that FirecREST utilizes a storage service based on <a href="../setup/arch/external_storage/">S3 as staging area</a>, the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be splitted in chunks, which complicates the file upload.</p>
+<p>For this, we have created a set of examples in different programming and scripting languages that we describe following:</p>
+<h4 id="large-data-upload-with-python3">Large Data Upload with Python3<a class="headerlink" href="#large-data-upload-with-python3" title="Permanent link">&para;</a></h4>
+<p>This is the easiest way of using FirecREST. See <a href="#firecrest-sdk">FirecREST SDK section</a> below for more information and detailed examples.</p>
+<h4 id="large-data-upload-with-bash">Large Data Upload with Bash<a class="headerlink" href="#large-data-upload-with-bash" title="Permanent link">&para;</a></h4>
 <p><a href="file_transfer_bash/">Detailed example.</a></p>
-<h3 id="file-transfer-with-net">File Transfer with .NET<a class="headerlink" href="#file-transfer-with-net" title="Permanent link">&para;</a></h3>
+<h4 id="large-data-upload-with-net">Large Data Upload with .NET<a class="headerlink" href="#large-data-upload-with-net" title="Permanent link">&para;</a></h4>
 <p><a href="file_transfer_dotnet/">Detailed example.</a></p>
-<h3 id="need-more-examples">Need more examples?<a class="headerlink" href="#need-more-examples" title="Permanent link">&para;</a></h3>
-<p>The complexity of using FirecREST, for example implementing the multipart protocol, can vary depending on the programming language used and how well it aligns with your specific requirements or constraints such as speed, disk space, or else.</p>
-<p>If you need tailored examples for your particular use case, feel free to open an <a href="https://github.com/eth-cscs/firecrest-v2/issues/new">issue on GitHub</a>. We'd be happy to create one for you.</p>
+<h4 id="need-more-examples">Need more examples?<a class="headerlink" href="#need-more-examples" title="Permanent link">&para;</a></h4>
+<p>If you need examples for your particular use case (ie, using a different language than the listed above), feel free to open an <a href="https://github.com/eth-cscs/firecrest-v2/issues/new">issue on GitHub</a>. We'd be happy to create one for you.</p>
 <h2 id="firecrest-sdk">FirecREST SDK<a class="headerlink" href="#firecrest-sdk" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/eth-cscs/pyfirecrest">PyFirecREST</a> is a Python library designed to simplify the implementation of FirecREST clients.</p>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>

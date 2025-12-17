@@ -19,7 +19,7 @@
     
     
       
-        <title>File Transfer with Bash - FirecREST v2 Documentation</title>
+        <title>Upload Large Data Transfer with Bash - FirecREST v2 Documentation</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#file-transfer-with-bash" class="md-skip">
+        <a href="#upload-large-data-transfer-with-bash" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              File Transfer with Bash
+              Upload Large Data Transfer with Bash
             
           </span>
         </div>
@@ -1425,12 +1425,7 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#script-examples" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1443,10 +1438,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-split" class="md-nav__link">
+  <a href="#using-split-command" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using split
+        Using split command
       
     </span>
   </a>
@@ -1454,13 +1449,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-dd" class="md-nav__link">
+  <a href="#using-dd-command" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using dd
+        Using dd command
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1502,44 +1502,52 @@
   
 
 
-<h1 id="file-transfer-with-bash">File Transfer with Bash<a class="headerlink" href="#file-transfer-with-bash" title="Permanent link">&para;</a></h1>
+<h1 id="upload-large-data-transfer-with-bash">Upload Large Data Transfer with Bash<a class="headerlink" href="#upload-large-data-transfer-with-bash" title="Permanent link">&para;</a></h1>
 <h2 id="uploading-large-files-using-s3-multipart-protocol">Uploading large files using S3 multipart protocol<a class="headerlink" href="#uploading-large-files-using-s3-multipart-protocol" title="Permanent link">&para;</a></h2>
 <p>For large file uploads, FirecREST provides upload URLs based on the S3 multipart protocol, the number of URLs depends on the file size and on the FirecREST settings. The user must split the file accordingly and upload each part to the assigned URL.</p>
 <p>Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.</p>
 <h3 id="commented-example">Commented example<a class="headerlink" href="#commented-example" title="Permanent link">&para;</a></h3>
 <p>The first step is to determine the size of your large file, expressed in bytes. A reliable method is to use the command: <code>stat --printf "%s" "$LARGE_FILE_NAME"</code>.</p>
-<p>Then call the <code>/filesystem/{system}/transfer/upload</code> endpoint as following.</p>
+<p>Then call the <a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post"><code>/filesystem/{system}/transfer/upload</code></a> endpoint as following.</p>
 <div class="admonition example">
 <p class="admonition-title">Call to transfer/upload to activate the multipart protocol</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>--location<span class="w"> </span>--globoff<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">F7T_URL</span><span class="si">}</span><span class="s2">/filesystem/</span><span class="si">${</span><span class="nv">F7T_SYSTEM</span><span class="si">}</span><span class="s2">/transfer/upload&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>--header<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>--header<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>--data<span class="w"> </span><span class="s2">&quot;{</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="s2">    \&quot;path\&quot;:\&quot;</span><span class="si">${</span><span class="nv">DESTINATION_PATH</span><span class="si">}</span><span class="s2">\&quot;,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="s2">    \&quot;fileName\&quot;:\&quot;</span><span class="si">${</span><span class="nv">LARGE_FILE_NAME</span><span class="si">}</span><span class="s2">\&quot;,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="s2">    \&quot;fileSize\&quot;:\&quot;</span><span class="si">${</span><span class="nv">LARGE_FILE_SIZE_IN_BYTES</span><span class="si">}</span><span class="s2">\&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="s2">}&quot;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span>--header<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--header<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$ACCESS_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span>--data<span class="w"> </span><span class="s2">&quot;{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="s2">        \&quot;path\&quot;:\&quot;</span><span class="si">${</span><span class="nv">DESTINATION_PATH</span><span class="si">}</span><span class="s2">\&quot;,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="s2">        \&quot;fileName\&quot;:\&quot;</span><span class="si">${</span><span class="nv">DATA_FILE</span><span class="si">}</span><span class="s2">\&quot;,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="s2">        \&quot;transferDirectives\&quot;: {</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="s2">            \&quot;fileSize\&quot;:\&quot;</span><span class="si">${</span><span class="nv">UPLOAD_FILE_SIZE</span><span class="si">}</span><span class="s2">\&quot;,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="s2">            \&quot;transferMethod\&quot;:\&quot;s3\&quot;</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="s2">    }</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="s2">}&quot;</span>
 </span></code></pre></div>
 </div>
-<p>The JSON response from this call follows the structure shown below. FirecREST calculates the number of parts the file must be split into, based on the provided file size and the <code>maxPartSize</code> setting. Each part is assigned a number from <i>1</i> to <i>n</i> and must be uploaded using the presigned URLs listed in <code>partsUploadUrls</code>. Once all parts have been successfully uploaded, the presigned URL in <code>completeUploadUrl</code> is used to finalize the upload sequence and initiate the transfer of the complete data file from S3 to its final destination.</p>
+<p>The JSON response from this call follows the structure shown below. FirecREST calculates the number of parts the file must be split into, based on the provided file size and the <code>maxPartSize</code> setting. Each part is assigned a number from <em>1</em> to <em>n</em> and must be uploaded using the presigned URLs listed in <code>partsUploadUrls</code>. Once all parts have been successfully uploaded, the presigned URL in <code>completeUploadUrl</code> is used to finalize the upload sequence and initiate the transfer of the complete data file from S3 to its final destination.</p>
 <div class="admonition example">
-<p class="admonition-title">FirecREST response from <code>/filesystem/{system}/transfer/upload</code> endpoint</p>
+<p class="admonition-title">FirecREST response from <a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post"><code>/filesystem/{system}/transfer/upload</code></a> endpoint</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">&quot;transferJob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">nnnnnnnnn</span><span class="p">,</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">,</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">&quot;workingDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/xxxxxxxxx&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">&quot;logs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="nt">&quot;outputLog&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/xxxxxxxx.log&quot;</span><span class="p">,</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">&quot;errorLog&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/xxxxxxxxx.log&quot;</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">},</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nt">&quot;partsUploadUrls&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="s2">&quot;https://part1-url&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;https://part2-url&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;https://part3-url&quot;</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">],</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="nt">&quot;completeUploadUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://upload-complete-url&quot;</span><span class="p">,</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="nt">&quot;maxPartSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1073741824</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;transferJob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="nt">&quot;jobId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">nnnnnnnnn</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="nt">&quot;system&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SYSTEM&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="nt">&quot;workingDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/wordir&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="nt">&quot;logs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">            </span><span class="nt">&quot;outputLog&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/output.log&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">            </span><span class="nt">&quot;errorLog&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/error.log&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nt">&quot;transferDirectives&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="nt">&quot;transfer_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3&quot;</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">        </span><span class="nt">&quot;parts_upload_urls&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">            </span><span class="s2">&quot;https://part01-url&quot;</span><span class="p">,</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">            </span><span class="s2">&quot;https://part02-url&quot;</span><span class="p">,</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">            </span><span class="s2">&quot;https://part03-url&quot;</span><span class="p">,</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="p">],</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="nt">&quot;complete_upload_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://upload-complete-url&quot;</span><span class="p">,</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">        </span><span class="nt">&quot;max_part_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1073741824</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
 </span></code></pre></div>
 </div>
 <p>Extract the most useful information from the response using <code>jq</code>_
@@ -1613,8 +1621,8 @@
 <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>curl -f --show-error -i -w &quot;%{http_code}&quot; -H &quot;Content-Type: application/xml&quot; -d &quot;$complete_upload_xml&quot; -X POST $complete_upload_url
 </span></code></pre></div>
 </div>
-<h2 id="script-examples">Script examples<a class="headerlink" href="#script-examples" title="Permanent link">&para;</a></h2>
-<h3 id="using-split">Using split<a class="headerlink" href="#using-split" title="Permanent link">&para;</a></h3>
+<h3 id="script-examples">Script examples<a class="headerlink" href="#script-examples" title="Permanent link">&para;</a></h3>
+<h4 id="using-split-command">Using <code>split</code> command<a class="headerlink" href="#using-split-command" title="Permanent link">&para;</a></h4>
 <p>To run the <a href="examples/multipart_upload_split.sh">example</a> you need first to set up the <code>environment file</code> using the provided <a href="examples/env-template">env-template</a> file.
 Set the field in the template as described int the <a href="../">user guide</a> to match your deployment and save the template as a new file.</p>
 <p>Launch the script as in the example</p>
@@ -1624,7 +1632,7 @@ Set the field in the template as described int the <a href="../">user guide</a> 
 </span></code></pre></div>
 </div>
 <p>The script uploads <code>your_data_fil.zip</code> to the designated cluster. Note that the <code>split</code> command generates all temporary part files beforehand, so <b>your local disk must have at least as much free space as the total size of the data being uploaded</b>.</p>
-<h3 id="using-dd">Using dd<a class="headerlink" href="#using-dd" title="Permanent link">&para;</a></h3>
+<h4 id="using-dd-command">Using <code>dd</code> command<a class="headerlink" href="#using-dd-command" title="Permanent link">&para;</a></h4>
 <p>To run the <a href="examples/multipart_upload_dd.sh">example</a> you need first to set up the <code>environment file</code> using the provided <a href="examples/env-template">env-template</a> file.
 Set the field in the template as described int the <a href="../">user guide</a> to match your deployment and save the template as a new file.</p>
 <p>Launch the script as in the example</p>
