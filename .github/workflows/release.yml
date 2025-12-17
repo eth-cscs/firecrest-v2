@@ -295,6 +295,11 @@ jobs:
     steps:
     - name: Checks out repo
       uses: actions/checkout@v4
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Download new spec artifact
       uses: actions/download-artifact@v4
       with:
