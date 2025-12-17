@@ -10,9 +10,46 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  burn-version:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get release version
+        id: get_version
+        run: |
+          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Checkout release tag
+        run: |
+          git checkout tags/${{ env.RELEASE_TAG }} -b release-version-update
+
+      - name: Update version in code
+        run: |
+          # Replace in a specific file — adjust pattern and file path
+          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
+          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" build/demo-launcher/Dockerfile
+          sed -i "s/appVersion: 2\.x\.x/appVersion: ${{ env.RELEASE_TAG }}/g" build/helm/firecrest-api/Chart.yaml
+
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/firecrest/config.py
+          git add build/demo-launcher/Dockerfile
+          git commit -m "Update version to ${{ env.RELEASE_TAG }}"
+          git tag -d ${{ env.RELEASE_TAG }}
+          git tag -f ${{ env.RELEASE_TAG }}
+          git push --force origin refs/tags/${{ env.RELEASE_TAG }}
   generate-openapi-swager:
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
+    needs: burn-version
     env:
         GH_PAGES_BRANCH: gh-pages
     permissions:
@@ -120,46 +157,9 @@ jobs:
               exit 1
             fi
           fi
-  burn-version:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
-    needs: api-diff
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get release version
-        id: get_version
-        run: |
-          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-      - name: Checkout release tag
-        run: |
-          git checkout tags/${{ env.RELEASE_TAG }} -b release-version-update
-
-      - name: Update version in code
-        run: |
-          # Replace in a specific file — adjust pattern and file path
-          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
-          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" build/demo-launcher/Dockerfile
-          sed -i "s/appVersion: 2\.x\.x/appVersion: ${{ env.RELEASE_TAG }}/g" build/helm/firecrest-api/Chart.yaml
-
-
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/firecrest/config.py
-          git add build/demo-launcher/Dockerfile
-          git commit -m "Update version to ${{ env.RELEASE_TAG }}"
-          git tag -d ${{ env.RELEASE_TAG }}
-          git tag -f ${{ env.RELEASE_TAG }}
-          git push --force origin refs/tags/${{ env.RELEASE_TAG }}
   publish-docker-images:
     runs-on: ubuntu-22.04
-    needs: burn-version
+    needs: api-diff
     if: ${{ github.event_name == 'release' }}
     strategy:
       fail-fast: false
@@ -230,7 +230,7 @@ jobs:
   publish-openapi-swager:
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
-    needs: burn-version
+    needs: api-diff
     env:
         GH_PAGES_BRANCH: gh-pages
     permissions:
