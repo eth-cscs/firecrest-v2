@@ -2083,7 +2083,7 @@ components:
           title: Jobid
           type: integer
         logs:
-          $ref: '#/components/schemas/firecrest__filesystem__transfer__models__TransferJobLogs'
+          $ref: '#/components/schemas/lib__datatransfers__datatransfer_base__TransferJobLogs'
         system:
           title: System
           type: string
@@ -2097,7 +2097,7 @@ components:
       - logs
       title: TransferJob
       type: object
-    firecrest__filesystem__transfer__models__TransferJobLogs:
+    lib__datatransfers__datatransfer_base__TransferJobLogs:
       properties:
         errorLog:
           title: Errorlog
