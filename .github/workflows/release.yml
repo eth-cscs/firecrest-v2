@@ -227,9 +227,47 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  publish-helm-charts:
+  publish-openapi-swager:
+    if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     needs: burn-version
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Download new spec artifact
+      uses: actions/download-artifact@v4
+      with:
+          name: openapi-specs
+          path: openapi-specs
+    - name: Move OpenAPI file
+      run: |
+        mkdir openapi_
+        cp openapi-specs/openapi-new.yaml openapi_/openapi-latest.yaml
+        mv openapi-specs/openapi-new.yaml openapi_/openapi-${{ env.RELEASE_TAG }}.yaml
+        rm -rf openapi-specs
+    - name: Push to gh-pages branch
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi_/* ./openapi/
+        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_TAG }}.yaml", name: "${{ env.RELEASE_TAG }}"},|g' openapi/dist/swagger-initializer.js
+        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_TAG }}.yaml openapi/dist/swagger-initializer.js
+        git status -uno
+        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
+  publish-helm-charts:
+    runs-on: ubuntu-latest
+    needs: publish-openapi-swager
     if: ${{ github.event_name == 'release' }}
     env:
         CHART_DIR: build/helm
@@ -283,47 +321,9 @@ jobs:
         git add ./charts/*.tgz ./charts/index.yaml
         git commit -m "New firecrest-api helm chart release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
-  publish-openapi-swager:
-    if: ${{ github.event_name == 'release' }}
-    runs-on: ubuntu-latest
-    needs: burn-version
-    env:
-        GH_PAGES_BRANCH: gh-pages
-    permissions:
-      contents: write
-      pages: write
-    steps:
-    - name: Checks out repo
-      uses: actions/checkout@v4
-    - name: Configure Git User
-      run: |
-        echo "Configured user to '$GITHUB_ACTOR'"
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-    - name: Download new spec artifact
-      uses: actions/download-artifact@v4
-      with:
-          name: openapi-specs
-          path: openapi-specs
-    - name: Move OpenAPI file
-      run: |
-        mkdir openapi_
-        cp openapi-specs/openapi-new.yaml openapi_/openapi-latest.yaml
-        mv openapi-specs/openapi-new.yaml openapi_/openapi-${{ env.RELEASE_TAG }}.yaml
-        rm -rf openapi-specs
-    - name: Push to gh-pages branch
-      run: |
-        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
-        git checkout $GH_PAGES_BRANCH
-        mv openapi_/* ./openapi/
-        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_TAG }}.yaml", name: "${{ env.RELEASE_TAG }}"},|g' openapi/dist/swagger-initializer.js
-        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_TAG }}.yaml openapi/dist/swagger-initializer.js
-        git status -uno
-        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
-        git push -u origin $GH_PAGES_BRANCH
   publish-documentation:
     runs-on: ubuntu-latest
-    needs: publish-openapi-swager
+    needs: publish-helm-charts
     if: ${{ github.event_name == 'release' }}
     env:
         GH_PAGES_BRANCH: gh-pages
