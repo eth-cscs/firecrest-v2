@@ -4,7 +4,14 @@ import click
 import json
 import websockets
 from dataclasses import dataclass
-from streamer.streamer_core import stream_send, stream_receive
+from typing import Optional
+from streamer.streamer_core import (
+    ConsoleReporter,
+    LoggingReporter,
+    StreamReporter,
+    stream_send,
+    stream_receive,
+)
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
@@ -17,7 +24,10 @@ class ClientConfig:
     secret: str
 
 
-async def client_receive(config: ClientConfig):
+async def client_receive(
+    config: ClientConfig, reporter: Optional[StreamReporter] = None
+):
+    reporter = reporter or LoggingReporter()
     try:
         for ip in config.ip_list:
             for port in range(config.port_range[0], config.port_range[1] + 1):
@@ -32,7 +42,9 @@ async def client_receive(config: ClientConfig):
                         ping_timeout=None,
                         additional_headers={"Authorization": f"Bearer {config.secret}"},
                     ) as websocket:
-                        await stream_receive(websocket, config.target)
+                        await stream_receive(
+                            websocket, config.target, reporter=reporter
+                        )
                         return
                 except (
                     OSError,
@@ -40,13 +52,14 @@ async def client_receive(config: ClientConfig):
                     websockets.exceptions.InvalidMessage,
                 ):
                     continue
-        print("Unable to establish connection to any provided IPs/ports.")
+        reporter.error("Unable to establish connection to any provided IPs/ports.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        reporter.error(f"An error occurred: {e}")
         return
 
 
-async def client_send(config: ClientConfig):
+async def client_send(config: ClientConfig, reporter: Optional[StreamReporter] = None):
+    reporter = reporter or LoggingReporter()
     try:
         for ip in config.ip_list:
             for port in range(config.port_range[0], config.port_range[1] + 1):
@@ -61,7 +74,7 @@ async def client_send(config: ClientConfig):
                         ping_timeout=None,
                         additional_headers={"Authorization": f"Bearer {config.secret}"},
                     ) as websocket:
-                        await stream_send(websocket, config.target)
+                        await stream_send(websocket, config.target, reporter=reporter)
                         return
                 except (
                     OSError,
@@ -69,9 +82,9 @@ async def client_send(config: ClientConfig):
                     websockets.exceptions.InvalidMessage,
                 ):
                     continue
-        print("Unable to establish connection to any provided IPs/ports.")
+        reporter.error("Unable to establish connection to any provided IPs/ports.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        reporter.error(f"An error occurred: {e}")
         return
 
 
@@ -100,7 +113,7 @@ def set_coordinates(coordinates) -> ClientConfig:
 def send(path, coordinates):
     config = set_coordinates(coordinates)
     config.target = path
-    asyncio.run(client_send(config))
+    asyncio.run(client_send(config, reporter=ConsoleReporter()))
 
 
 @click.command()
@@ -113,4 +126,4 @@ def send(path, coordinates):
 def receive(path, coordinates):
     config = set_coordinates(coordinates)
     config.target = path
-    asyncio.run(client_receive(config))
+    asyncio.run(client_receive(config, reporter=ConsoleReporter()))
