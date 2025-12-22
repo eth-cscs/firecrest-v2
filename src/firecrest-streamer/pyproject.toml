@@ -4,6 +4,10 @@ version = "0.0.20"
 authors = [
   { name="Elia Palme", email="elia.palme@cscs.ch" },
 ]
+maintainers = [
+  { name="Elia Palme", email="elia.palme@cscs.ch" },
+  { name="Eirini Koutsaniti", email="eirini.koutsaniti@cscs.ch" },
+]
 description = "A simple file streamer over websockets."
 readme = "README.md"
 requires-python = ">=3.8"
