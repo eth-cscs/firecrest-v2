@@ -8,6 +8,7 @@ import websockets
 from enum import Enum
 from dataclasses import dataclass, replace
 from streamer.streamer_core import ConsoleReporter, stream_receive, stream_send
+from typing import List, Tuple
 from websockets.asyncio.server import serve
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
@@ -23,8 +24,8 @@ class StreamConfig:
     operation: str
     target: str
     secret: str
-    port_range: tuple[int, int]
-    ips: list[str]
+    port_range: Tuple[int, int]
+    ips: List[str]
     host: str
     wait_timeout: int
     inbound_transfer_limit: int

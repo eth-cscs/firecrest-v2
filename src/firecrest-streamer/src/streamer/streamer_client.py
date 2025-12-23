@@ -4,7 +4,7 @@ import click
 import json
 import websockets
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 from streamer.streamer_core import (
     ConsoleReporter,
     LoggingReporter,
@@ -19,8 +19,8 @@ CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 @dataclass
 class ClientConfig:
     target: str
-    port_range: list[int]
-    ip_list: list[str]
+    port_range: List[int]
+    ip_list: List[str]
     secret: str
 
 
