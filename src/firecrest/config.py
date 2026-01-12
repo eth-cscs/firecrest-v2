@@ -228,7 +228,7 @@ class ProbingService(CamelModel):
 class ProbingServices(CamelModel):
     """Health check interval and list of services."""
 
-    services: Optional[list[dict[str, ProbingService]]] = Field(
+    services: Optional[dict[str, ProbingService]] = Field(
         None, description="Services to be checked."
     )
     interval_check: int = Field(

@@ -27,10 +27,10 @@ clusters:
   probing:
     interval_check: 60
     services:
-      - scheduler:
-          timeout: 5
-      - filesystems:
-          timeout: 5
+      scheduler:
+        timeout: 5
+      filesystems:
+        timeout: 5
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"
@@ -54,10 +54,10 @@ clusters:
   probing:
     interval_check: 60
     services:
-      - ssh:
-          timeout: 10
-      - filesystems:
-          timeout: 10
+      ssh:
+        timeout: 10
+      filesystems:
+        timeout: 10
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"

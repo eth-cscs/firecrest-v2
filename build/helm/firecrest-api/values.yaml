@@ -237,13 +237,13 @@ firecrest:
       interval_check: 300
       ## list of services to be checked: to disable the check, remove the related service's entry.
       services:
-        - ssh:
+        ssh:
           ## timeout: max time (in seconds) allowed per check
           timeout: 10
-        - scheduler:
+        scheduler:
           ## timeout: max time (in seconds) allowed per check
           timeout: 10
-        - filesystems:
+        filesystems:
           ## timeout: max time (in seconds) allowed per check
           timeout: 10
 

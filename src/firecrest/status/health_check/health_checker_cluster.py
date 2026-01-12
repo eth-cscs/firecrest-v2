@@ -54,38 +54,35 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
-            if self.cluster.probing.services is not None:
-                for service in self.cluster.probing.services:
-                    for k in service.keys():
-                        match k:
-                            case 'scheduler':
-                                check = SchedulerHealthCheck(
-                                    system=self.cluster,
-                                    auth=auth,
-                                    token=token,
-                                    timeout=service[k].timeout,
-                                )
-                            case 'ssh':
-                                check = SSHHealthCheck(
-                                    system=self.cluster,
-                                    auth=auth,
-                                    token=token,
-                                    timeout=service[k].timeout,
-                                )
-                            case 'filesystems':
-                                for filesystem in self.cluster.file_systems:
-                                    check = FilesystemHealthCheck(
-                                        system=self.cluster,
-                                        auth=auth,
-                                        token=token,
-                                        path=filesystem.path,
-                                        timeout=service[k].timeout,
-                                    )
-                            case _:
-                                check = None
 
-                        if check is not None:
-                            checks += [check.check()]
+            if 'scheduler' in self.cluster.probing.services:
+                sechedulerCheck = SchedulerHealthCheck(
+                    system=self.cluster,
+                    auth=auth,
+                    token=token,
+                    timeout=self.cluster.probing.services['scheduler'].timeout,
+                )
+                checks += [sechedulerCheck.check()]
+
+            if 'ssh' in self.cluster.probing.services:
+                sshCheck = SSHHealthCheck(
+                    system=self.cluster,
+                    auth=auth,
+                    token=token,
+                    timeout=self.cluster.probing.services['ssh'].timeout,
+                )
+                checks += [sshCheck.check()]
+
+            if 'filesystems' in self.cluster.probing.services:
+                for filesystem in self.cluster.file_systems:
+                    filesystemCheck = FilesystemHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        path=filesystem.path,
+                        timeout=self.cluster.probing.services['filesystems'].timeout,
+                    )
+                checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
@@ -99,5 +96,5 @@ class ClusterHealthChecker:
             exception.message = error_message
             self.cluster.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
-            # Instead consider printing the exceotion with: traceback.print_exception(ex)
+            # Instead consider printing the exception with: traceback.print_exception(ex)
             raise ex
