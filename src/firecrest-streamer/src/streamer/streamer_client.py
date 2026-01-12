@@ -12,6 +12,7 @@ from streamer.streamer_core import (
     stream_send,
     stream_receive,
 )
+from streamer.streamer_server import Operation
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
@@ -22,12 +23,16 @@ class ClientConfig:
     port_range: List[int]
     ip_list: List[str]
     secret: str
+    operation: Operation = None
 
 
 async def client_receive(
     config: ClientConfig, reporter: Optional[StreamReporter] = None
 ):
     reporter = reporter or LoggingReporter()
+    if config.operation and config.operation != Operation.send:
+        reporter.error("The provided coordinates are not valid for receiving files.")
+        return
     try:
         for ip in config.ip_list:
             for port in range(config.port_range[0], config.port_range[1] + 1):
@@ -60,6 +65,9 @@ async def client_receive(
 
 async def client_send(config: ClientConfig, reporter: Optional[StreamReporter] = None):
     reporter = reporter or LoggingReporter()
+    if config.operation and config.operation != Operation.receive:
+        reporter.error("The provided coordinates are not valid for sending files.")
+        return
     try:
         for ip in config.ip_list:
             for port in range(config.port_range[0], config.port_range[1] + 1):
@@ -92,12 +100,13 @@ def set_coordinates(coordinates) -> ClientConfig:
     try:
         json_str = base64.urlsafe_b64decode(coordinates).decode("utf-8")
         data = json.loads(json_str)
-
+        operation = data.get("operation", None)
         return ClientConfig(
             target="",
             secret=data["secret"],
             port_range=data["ports"],
             ip_list=data["ips"],
+            operation=Operation[operation] if operation else None,
         )
     except (json.JSONDecodeError, KeyError, base64.binascii.Error) as e:
         raise click.ClickException("Invalid coordinates format") from e
