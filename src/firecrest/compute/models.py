@@ -57,15 +57,15 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
 
 
 class GetJobResponse(CamelModel):
-    jobs: Optional[List[JobModel]] = None
+    jobs: Optional[List[JobModel]] = Field(None, nullable=True)
 
 
 class GetJobMetadataResponse(CamelModel):
-    jobs: Optional[List[JobMetadataModel]] = None
+    jobs: Optional[List[JobMetadataModel]] = Field(None, nullable=True)
 
 
 class PostJobSubmissionResponse(CamelModel):
-    job_id: Optional[int] = None
+    job_id: Optional[int] = Field(None, nullable=True)
 
 
 class PostJobAttachRequest(CamelModel):
