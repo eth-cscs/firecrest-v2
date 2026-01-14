@@ -425,7 +425,7 @@ class OpenFGA(CamelModel):
     url: str = Field(..., description="OpenFGA API base URL.")
     timeout: int = Field(
         1,
-        description="Connection timeout in seconds. When `None` the timeout is disabled.",
+        description="Connection timeout in seconds.",
         nullable=False,
     )
     max_connections: int = Field(
