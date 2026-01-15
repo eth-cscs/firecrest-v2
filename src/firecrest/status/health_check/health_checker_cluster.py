@@ -5,7 +5,6 @@
 
 import asyncio
 import time
-import logging
 
 from firecrest.config import HPCCluster, HealthCheckException
 
