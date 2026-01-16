@@ -232,7 +232,7 @@ firecrest:
       secret: ""
 
     ## Cluster monitoring attributes.
-    probing:
+    probing_services:
       ## interval_check: time interval (in seconds) between checks
       interval_check: 300
       ## list of services to be checked: to disable the check, remove the related service's entry.
@@ -332,7 +332,7 @@ firecrest:
       ## Configuration for probing storage availability.
       probing:
         ## Maximum time in seconds allowed per check.
-        interval_check: 60
+        interval: 60
 
   ## Logging configuration options.
   #logger:

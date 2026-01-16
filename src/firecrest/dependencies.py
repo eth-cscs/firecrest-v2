@@ -189,7 +189,7 @@ class ServiceAvailabilityDependency:
                 filter(lambda cluster: cluster.name == system_name, settings.clusters)
             )
             # Check health of requested system
-            if not self.ignore_health and system.probing:
+            if not self.ignore_health and system.probing_services:
                 if self.service_type == HealthCheckType.filesystem:
                     self.__file_system_health(system, request)
                 if self.service_type == HealthCheckType.scheduler:

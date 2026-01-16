@@ -415,7 +415,7 @@ class HPCCluster(CamelModel):
         None,
         description="Optional health information for different services in the cluster.",
     )
-    probing: Optional[ProbingServices] = Field(
+    probing_services: Optional[ProbingServices] = Field(
         None, description="Probing configuration for monitoring the cluster's services."
     )
     file_systems: List[FileSystem] = Field(
