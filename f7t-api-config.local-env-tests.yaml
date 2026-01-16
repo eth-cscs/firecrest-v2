@@ -24,9 +24,13 @@ clusters:
   service_account:
     client_id: "firecrest-api"
     secret: ""
-  probing:
-    interval: 60
-    timeout: 5
+  probing_services:
+    interval_check: 60
+    services:
+      scheduler:
+        timeout: 5
+      filesystems:
+        timeout: 5
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"
@@ -47,9 +51,13 @@ clusters:
   service_account:
     client_id: "firecrest-api"
     secret: ""
-  probing:
-    interval: 60
-    timeout: 10
+  probing_services:
+    interval_check: 60
+    services:
+      ssh:
+        timeout: 10
+      filesystems:
+        timeout: 10
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"
@@ -69,9 +77,8 @@ clusters:
   service_account:
     client_id: "firecrest-api"
     secret: ""
-  # probing:
-  #   interval: 60
-  #   timeout: 10
+  probing_services:
+    interval_check: 60
   datatransfer_jobs_directives:
     - "#PBS -l nodes=1:ppn=1"
     - "#PBS -l walltime=00:15:00"
@@ -95,6 +102,6 @@ data_operation:
       max_part_size: 1073741824 # 1G
       parallel_runs: 3
       tmp_folder: "tmp"
-    probing:
+    probing_services:
       interval: 60
-      timeout: 10
+      timeout: 1000

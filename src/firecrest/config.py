@@ -212,7 +212,28 @@ class Probing(CamelModel):
     interval: int = Field(
         ..., description="Interval in seconds between cluster checks."
     )
+
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
+
+
+class ProbingService(CamelModel):
+    """Health check enable settings."""
+
+    timeout: Optional[int] = Field(
+        0,
+        description="Timeout for specific health check, if not specified the default timeout defined in the probing section is used.",
+    )
+
+
+class ProbingServices(CamelModel):
+    """Health check interval and list of services."""
+
+    services: Optional[dict[str, ProbingService]] = Field(
+        None, description="Services to be checked."
+    )
+    interval_check: int = Field(
+        ..., description="Interval in seconds between cluster checks."
+    )
 
 
 class BaseDataTransfer(CamelModel):
@@ -394,8 +415,8 @@ class HPCCluster(CamelModel):
         None,
         description="Optional health information for different services in the cluster.",
     )
-    probing: Optional[Probing] = Field(
-        None, description="Probing configuration for monitoring the cluster."
+    probing_services: Optional[ProbingServices] = Field(
+        None, description="Probing configuration for monitoring the cluster's services."
     )
     file_systems: List[FileSystem] = Field(
         default_factory=list,

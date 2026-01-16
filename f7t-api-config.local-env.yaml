@@ -44,9 +44,13 @@ clusters:
     client_id: "firecrest-health-check"
     secret: "secret_file:/run/secrets/service_account_client_secret"
   probing:
-    interval: 120
-    timeout: 10
+    interval_check: 120
     startup_grace_period: 300
+    services:
+      scheduler:
+        timeout: 20
+      filesystems:
+        timeout: 20
   datatransfer_jobs_directives:
     - "#SBATCH --constraint=mc"
     - "#SBATCH --nodes=1"
@@ -75,8 +79,12 @@ clusters:
     client_id: "firecrest-health-check"
     secret: "secret_file:/run/secrets/service_account_client_secret"
   probing:
-    interval: 120
-    timeout: 5
+    interval_check: 120
+    services:
+      ssh:
+        timeout: 5
+      filesystems:
+        timeout: 5
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"
@@ -104,10 +112,16 @@ clusters:
     client_id: "firecrest-health-check"
     secret: "secret_file:/run/secrets/service_account_client_secret"
   probing:
-    interval: 120
-    timeout: 10
+    interval_check: 120
     startup_grace_period: 300
-    datatransfer_jobs_directives:
+    services:
+      ssh:
+        timeout: 10
+      scheduler:
+        timeout: 20
+      filesystems:
+        timeout: 10
+  datatransfer_jobs_directives:
       - "#PBS -l nodes=1:ppn=1"
       - "#PBS -l walltime=00:15:00"
       - "#PBS -V"

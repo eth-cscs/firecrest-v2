@@ -6,7 +6,6 @@
 import asyncio
 import time
 
-
 from firecrest.config import HPCCluster, HealthCheckException
 
 from firecrest.status.health_check.checks.health_check_filesystem import (
@@ -54,29 +53,34 @@ class ClusterHealthChecker:
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
             checks = []
-            sechedulerCheck = SchedulerHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sechedulerCheck.check()]
-            sshCheck = SSHHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sshCheck.check()]
 
-            for filesystem in self.cluster.file_systems:
-                filesystemCheck = FilesystemHealthCheck(
+            if 'scheduler' in self.cluster.probing_services.services:
+                sechedulerCheck = SchedulerHealthCheck(
                     system=self.cluster,
                     auth=auth,
                     token=token,
-                    path=filesystem.path,
-                    timeout=self.cluster.probing.timeout,
+                    timeout=self.cluster.probing_services.services['scheduler'].timeout,
                 )
+                checks += [sechedulerCheck.check()]
+
+            if 'ssh' in self.cluster.probing_services.services:
+                sshCheck = SSHHealthCheck(
+                    system=self.cluster,
+                    auth=auth,
+                    token=token,
+                    timeout=self.cluster.probing_services.services['ssh'].timeout,
+                )
+                checks += [sshCheck.check()]
+
+            if 'filesystems' in self.cluster.probing_services.services:
+                for filesystem in self.cluster.file_systems:
+                    filesystemCheck = FilesystemHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        path=filesystem.path,
+                        timeout=self.cluster.probing_services.services['filesystems'].timeout,
+                    )
                 checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
@@ -91,5 +95,5 @@ class ClusterHealthChecker:
             exception.message = error_message
             self.cluster.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
-            # Instead consider printing the exceotion with: traceback.print_exception(ex)
+            # Instead consider printing the exception with: traceback.print_exception(ex)
             raise ex
