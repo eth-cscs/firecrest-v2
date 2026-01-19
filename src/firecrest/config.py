@@ -418,6 +418,9 @@ class HPCCluster(CamelModel):
     probing_services: Optional[ProbingServices] = Field(
         None, description="Probing configuration for monitoring the cluster's services."
     )
+    last_health_check: Optional[datetime] = Field(
+        None, description="Timestamp of the last health check."
+    )
     file_systems: List[FileSystem] = Field(
         default_factory=list,
         description="List of mounted file systems on the cluster, such as scratch or home directories.",

@@ -85,6 +85,7 @@ class ClusterHealthChecker:
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
+            self.cluster.last_health_check = time.time()
         except Exception as ex:
             error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
