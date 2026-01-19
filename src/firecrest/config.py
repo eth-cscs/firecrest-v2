@@ -415,8 +415,8 @@ class HPCCluster(CamelModel):
         None,
         description="Optional health information for different services in the cluster.",
     )
-    probing_services: Optional[ProbingServices] = Field(
-        None, description="Probing configuration for monitoring the cluster's services."
+    probing_services: ProbingServices = Field(
+        ..., description="Probing configuration for monitoring the cluster's services."
     )
     last_health_check: Optional[datetime] = Field(
         None, description="Timestamp of the last health check."
