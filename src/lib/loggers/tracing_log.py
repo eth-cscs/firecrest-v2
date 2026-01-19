@@ -94,7 +94,8 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
         log_data["x_application"] = request.headers["X-Application-Name"]
         log_data["x_log_client"] = request.headers["X-Log-Client"]
     except Exception as e:
-        print(e)
+        print("Header exception "+str(e))
+        print(request.headers)
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:
