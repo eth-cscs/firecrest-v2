@@ -118,6 +118,9 @@ class PbsJob(JobModel):
     @field_validator("nodes", mode="before")
     @classmethod
     def _parse_nodelist(cls, v):
+        if v is None or v == "":
+            return ""
+
         nodes = []
         for chunk in v.split("+"):
             host = chunk.split("/")[0]  # drop the “/0”
