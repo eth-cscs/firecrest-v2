@@ -90,9 +90,10 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     log_data["status_code"] = status_code
     try: 
         log_data["user_agent"] = request.headers["user-agent"]
-        log_data["x_test"] = request.headers["x-log-test"]
-        log_data["x_application"] = request.headers["x-application-name"]
+        log_data["x_log_application_id"] = request.headers["x-log-application-id"]
+        log_data["x_log_application_name"] = request.headers["x-application-name"]
         log_data["x_log_client"] = request.headers["x-log-client"]
+        log_data["x-log_api_publisher"] = request.headers["x-log-api-publisher"]
     except Exception as e:
         print("Header exception "+str(e))
         print(request.headers)
