@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
+- Handle job arrays in PBS
 
 ## [2.4.1]
 
@@ -57,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed Slurm sacct integration and data parsing. 
+- Fixed Slurm sacct integration and data parsing.
 
 - Docker Compose startup: Added dependency for Slurm to wait for Keycloak health check before starting, preventing JWT certificate download failures.
 - Upload and Download transfer endpoints now require to specify transfer directives
