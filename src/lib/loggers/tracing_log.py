@@ -88,10 +88,13 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
-    log_data["user_agent"] = request.headers["user-agent"]
-    # log_data["x_test"] = request.headers["X-Test"]
-    # log_data["x_application"] = request.headers["X-Application-Name"]
-    # log_data["x_log_client"] = request.headers["X-Log-Client"]
+    try: 
+        log_data["user_agent"] = request.headers["user-agent"]
+        log_data["x_test"] = request.headers["X-Test"]
+        log_data["x_application"] = request.headers["X-Application-Name"]
+        log_data["x_log_client"] = request.headers["X-Log-Client"]
+    except Exception as e:
+        print(e)
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:
