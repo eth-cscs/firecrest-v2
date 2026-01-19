@@ -5,6 +5,7 @@
 
 from lib.exceptions import PbsError
 import json
+import re
 
 
 from lib.scheduler_clients.pbs.cli_commands.qstat_base import QstatBaseCommand
