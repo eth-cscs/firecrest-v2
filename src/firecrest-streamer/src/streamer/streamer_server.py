@@ -21,7 +21,7 @@ class Operation(Enum):
 
 @dataclass
 class StreamConfig:
-    operation: str
+    operation: Operation
     target: str
     secret: str
     port_range: Tuple[int, int]
@@ -97,6 +97,7 @@ async def stream(config: StreamConfig):
                     "ports": [start_port, end_port],
                     "ips": config.ips,
                     "secret": config.secret,
+                    "operation": config.operation.value,
                 }
                 encoded = base64.urlsafe_b64encode(
                     json.dumps(coordinates).encode("utf-8")
