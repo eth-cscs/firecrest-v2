@@ -119,7 +119,9 @@ class PbsJob(JobModel):
     @classmethod
     def _parse_nodelist(cls, v):
         if v is None or v == "":
-            return ""
+            # This string has been chosen to keep compatibility with the
+            # Slurm scheduler.
+            return "None assigned"
 
         nodes = []
         for chunk in v.split("+"):
