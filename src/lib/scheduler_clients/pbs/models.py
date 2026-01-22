@@ -136,6 +136,11 @@ class PbsJob(JobModel):
                 nodes.append(host)
         return ",".join(nodes)
 
+    @field_validator("account", mode="before")
+    @classmethod
+    def cast_account_to_str(cls, v):
+        return str(v)
+
 
 class PbsNode(NodeModel):
     cpus: int = Field(alias=AliasChoices("pcpus"))
