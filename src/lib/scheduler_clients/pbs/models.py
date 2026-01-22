@@ -118,6 +118,11 @@ class PbsJob(JobModel):
     @field_validator("nodes", mode="before")
     @classmethod
     def _parse_nodelist(cls, v):
+        if v is None or v == "":
+            # This string has been chosen to keep compatibility with the
+            # Slurm scheduler.
+            return "None assigned"
+
         nodes = []
         for chunk in v.split("+"):
             host = chunk.split("/")[0]  # drop the “/0”
@@ -130,6 +135,11 @@ class PbsJob(JobModel):
             else:
                 nodes.append(host)
         return ",".join(nodes)
+
+    @field_validator("account", mode="before")
+    @classmethod
+    def cast_account_to_str(cls, v):
+        return str(v)
 
 
 class PbsNode(NodeModel):

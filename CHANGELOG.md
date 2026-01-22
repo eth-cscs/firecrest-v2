@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
+- Fix error for PBS jobs when no nodes are assigned to it.
 - Handle job arrays in PBS
 
 ## [2.4.1]
