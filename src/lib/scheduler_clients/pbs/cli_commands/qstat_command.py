@@ -47,13 +47,11 @@ class QstatCommand(QstatBaseCommand):
             #  "123456[].pbs"
             #  "123456[7].pbs"
             #  "123456[1-10].pbs"
-            base = job_id.split(".", 1)[0]  # "123456[]" or "123456[7]" or "123456"
-            base = re.sub(r"\[.*\]$", "", base)  # -> "123456"
-
-            try:
-                job_id_parsed = int(base)
-            except ValueError as e:
-                raise PbsError(f"Unexpected job id format: {job_id!r}") from e
+            job_id_parsed = job_id.split(".")[0]
+            job_info = {
+                "job_id": job_id_parsed,
+                **job_data,
+            }
 
             job_info = {"job_id": job_id_parsed, **job_data}
             job_info["user"] = job_owner

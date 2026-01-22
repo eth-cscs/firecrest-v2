@@ -40,7 +40,7 @@ class JobTask(CamelModel):
 
 
 class JobModel(CamelModel):
-    job_id: int
+    job_id: str
     name: str
     status: JobStatus
     tasks: Optional[List[JobTask]] = None
