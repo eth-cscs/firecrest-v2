@@ -89,7 +89,6 @@ def tracing_log_middleware(request: Request, username: str, status_code: int) ->
     log_data["resource"] = resource
     log_data["status_code"] = status_code
     log_data["user_agent"] = request.headers["user-agent"]
-
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:

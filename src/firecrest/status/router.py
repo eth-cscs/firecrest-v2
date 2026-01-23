@@ -198,12 +198,4 @@ async def get_liveness() -> Any:
             oldest_check = time_difference
         healthcheck_runs[cluster.name] = cluster.last_health_check
 
-    # for cluster in settings.clusters:
-    #     if cluster.servicesHealth and len(cluster.servicesHealth) > 0:
-    #         timestamp = cluster.servicesHealth[0].last_checked
-    #         time_difference = (datetime.now(timezone.utc) - timestamp).seconds
-    #         if time_difference > oldest_check:
-    #             oldest_check = time_difference
-    #         healthcheck_runs[cluster.name] = cluster.servicesHealth[0].last_checked
-
     return {"healthcheck_runs": healthcheck_runs, "last_update": oldest_check}

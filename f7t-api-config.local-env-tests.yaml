@@ -104,4 +104,4 @@ data_operation:
       tmp_folder: "tmp"
     probing:
       interval: 60
-      timeout: 1000
+      timeout: 10
