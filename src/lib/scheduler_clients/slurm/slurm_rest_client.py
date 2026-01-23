@@ -191,7 +191,7 @@ class SlurmRestClient(SlurmBaseClient):
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs"
         if account:
-            url += f"?{urllib.parse.urlencode({"account": account})}"
+            url += f"?{urllib.parse.urlencode({'account': account})}"
         async with client.get(
             url=url,
             headers=headers,

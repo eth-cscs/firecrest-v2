@@ -5,10 +5,11 @@ import http
 import json
 import signal
 import websockets
-from websockets.asyncio.server import serve
 from enum import Enum
 from dataclasses import dataclass, replace
-from streamer.streamer_core import stream_send, stream_receive
+from streamer.streamer_core import ConsoleReporter, stream_receive, stream_send
+from typing import List, Tuple
+from websockets.asyncio.server import serve
 
 CHUNK_SIZE = 5 * 1024 * 1024  # 5 MiB
 
@@ -20,11 +21,11 @@ class Operation(Enum):
 
 @dataclass
 class StreamConfig:
-    operation: str
+    operation: Operation
     target: str
     secret: str
-    port_range: tuple[int, int]
-    ips: list[str]
+    port_range: Tuple[int, int]
+    ips: List[str]
     host: str
     wait_timeout: int
     inbound_transfer_limit: int
@@ -32,6 +33,7 @@ class StreamConfig:
 
 async def stream(config: StreamConfig):
     timeout_handle: asyncio.Handle = None
+    reporter = ConsoleReporter()
 
     def process_request(connection, request):
         nonlocal timeout_handle
@@ -52,21 +54,24 @@ async def stream(config: StreamConfig):
             timeout_handle.cancel()
 
     async def server_receive(websocket: websockets.asyncio.server.ServerConnection):
-        print("Client connected.")
+        reporter.info("Client connected.")
         try:
             await stream_receive(
-                websocket, config.target, config.inbound_transfer_limit
+                websocket,
+                config.target,
+                config.inbound_transfer_limit,
+                reporter=reporter,
             )
         except Exception as e:
-            print(f"An error occurred: {e}")
+            reporter.error(f"An error occurred: {e}")
         websocket.server.close()
 
     async def server_send(websocket):
-        print("Client connected.")
+        reporter.info("Client connected.")
         try:
-            await stream_send(websocket, config.target)
+            await stream_send(websocket, config.target, reporter=reporter)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            reporter.error(f"An error occurred: {e}")
         websocket.server.close()
 
     start_port, end_port = config.port_range
@@ -87,17 +92,18 @@ async def stream(config: StreamConfig):
                 ping_timeout=None,
                 process_request=process_request,
             ) as server:
-                print(f"Server is listening on ws://{config.host}:{port}")
+                reporter.info(f"Server is listening on ws://{config.host}:{port}")
                 coordinates = {
                     "ports": [start_port, end_port],
                     "ips": config.ips,
                     "secret": config.secret,
+                    "operation": config.operation.value,
                 }
                 encoded = base64.urlsafe_b64encode(
                     json.dumps(coordinates).encode("utf-8")
                 ).decode("utf-8")
 
-                print(f"Use these coordinates to connect: {encoded}", flush=True)
+                reporter.info(f"Use these coordinates to connect: {encoded}")
 
                 loop = asyncio.get_running_loop()
                 loop.add_signal_handler(signal.SIGTERM, server.close)
@@ -105,7 +111,7 @@ async def stream(config: StreamConfig):
                 await server.wait_closed()
             break
         except OSError:
-            print(f"Server unable to bing on port: {port}")
+            reporter.error(f"Server unable to bing on port: {port}")
             continue
 
 

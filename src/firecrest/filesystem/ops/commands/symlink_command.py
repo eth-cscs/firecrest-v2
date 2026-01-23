@@ -21,7 +21,7 @@ class SymlinkCommand(BaseCommandWithTimeout):
         super().__init__(command_timeout=command_timeout)
         self.target_path = target_path
         self.link_path = link_path
-        self.ls_command = LsBaseCommand(target_path, no_recursion=True, command_timeout=command_timeout)
+        self.ls_command = LsBaseCommand(link_path, no_recursion=True, command_timeout=command_timeout)
 
     def get_command(self) -> str:
 
