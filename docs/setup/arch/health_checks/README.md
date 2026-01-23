@@ -11,7 +11,30 @@ As you can see in the figure above, when enabled the periodic health check will 
 1. HPC cluster connectivity (via SSH)
 2. Workload manager and scheduler (via SSH or API calls, depending the service)
 3. Filesystem availability (read only)
-4. Object storage availabitity (S3 interface is reachable or not)
+4. Object storage availability (S3 interface is reachable or not)
+
+## Probing configuration
+
+Health check execution is configured through the `probing` section of the cluster configuration. The supported options are described below.
+
+!!! example "Complete `probing` section in cluster configuration."
+    ```yaml
+  probing:
+    interval_check: 120
+    services:
+      ssh:
+        timeout: 10
+      scheduler:
+        timeout: 20
+      filesystems:
+        timeout: 10
+    ```
+
+Each service listed under the `services` subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. If the entire `services` section is omitted, all health checks for the specific cluster are disabled.
+
+The `interval_check` field defines how often, in seconds, the health checks are executed for the cluster. If not specified, the default interval is 120 seconds. For backward compatibility the `interval` field is still accepted and behaves identically to`interval_check`, however it is deprecated and it should be replaced with the new field.
+
+Note: the `probing` section is mandatory in the configuration, even if empty.
 
 ## Status reports
 

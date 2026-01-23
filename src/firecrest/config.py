@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Literal, Tuple, Type, Union
 from typing_extensions import Self
 from pydantic import (
+    AliasChoices,
     BaseModel,
     ConfigDict,
     Field,
@@ -109,7 +110,9 @@ class Scheduler(CamelModel):
     """Cluster job scheduler configuration."""
 
     type: SchedulerType = Field(..., description="Scheduler type.")
-    connection_mode: Optional[SchedulerConnectionMode] = Field(SchedulerConnectionMode.ssh, description="Scheduler connection mode.")
+    connection_mode: Optional[SchedulerConnectionMode] = Field(
+        SchedulerConnectionMode.ssh, description="Scheduler connection mode."
+    )
     version: str = Field(..., description="Scheduler version.")
     api_url: Optional[str] = Field(None, description="REST API endpoint for scheduler.")
     api_version: Optional[str] = Field(None, description="Scheduler API version.")
@@ -124,11 +127,21 @@ class Scheduler(CamelModel):
 
         _self = handler(self)
 
-        if (_self.connection_mode == SchedulerConnectionMode.hybrid or _self.connection_mode == SchedulerConnectionMode.rest) and not _self.api_url:
-            raise ValueError(f"Error configuring scheduler '{_self.type}': `api_url` must be set when using `connection_mode` set to `hybrid` or `rest`")
+        if (
+            _self.connection_mode == SchedulerConnectionMode.hybrid
+            or _self.connection_mode == SchedulerConnectionMode.rest
+        ) and not _self.api_url:
+            raise ValueError(
+                f"Error configuring scheduler '{_self.type}': `api_url` must be set when using `connection_mode` set to `hybrid` or `rest`"
+            )
 
-        if _self.type == SchedulerType.pbs and _self.connection_mode != SchedulerConnectionMode.ssh:
-            raise ValueError("Error configuring scheduler: PBS scheduler only accepts `connection_mode: ssh`")
+        if (
+            _self.type == SchedulerType.pbs
+            and _self.connection_mode != SchedulerConnectionMode.ssh
+        ):
+            raise ValueError(
+                "Error configuring scheduler: PBS scheduler only accepts `connection_mode: ssh`"
+            )
 
         return _self
 
@@ -212,7 +225,29 @@ class Probing(CamelModel):
     interval: int = Field(
         ..., description="Interval in seconds between cluster checks."
     )
+
     timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
+
+
+class ProbingService(CamelModel):
+    """Health check enable settings."""
+
+    timeout: Optional[int] = Field(
+        10,
+        description="Timeout for specific health check, if not specified the default of 10s is applied.",
+    )
+
+
+class ProbingServices(CamelModel):
+    """Health check interval and list of services."""
+
+    services: Optional[dict[str, ProbingService]] = Field(
+        None, description="Services to be checked."
+    )
+    interval_check: int = Field(
+        120, description="Interval in seconds between cluster checks, if not specified the default of 120s is applied.",
+        validation_alias=AliasChoices("interval_check", "interval") # Backward compatibility
+    )
 
 
 class BaseDataTransfer(CamelModel):
@@ -394,8 +429,11 @@ class HPCCluster(CamelModel):
         None,
         description="Optional health information for different services in the cluster.",
     )
-    probing: Optional[Probing] = Field(
-        None, description="Probing configuration for monitoring the cluster."
+    probing: ProbingServices = Field(
+        ..., description="Probing configuration for monitoring the cluster's services."
+    )
+    last_health_check: Optional[datetime] = Field(
+        None, description="Timestamp of the last health check."
     )
     file_systems: List[FileSystem] = Field(
         default_factory=list,

@@ -57,7 +57,7 @@ FirecREST provides an abstraction to allow different ways of getting SSH credent
 ## SSH Configuration in target systems
 
 !!! info
-    All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high througput regime via API
+    All these configurations are optional, but strongly suggested to increase security (remember that we are allowing machines to machine communication via SSH, we don't want an SSH DoS!) and provide high throughput regime via API
 
 It is recommended to set a specific `Match` section on the [Open SSHD configuration](https://man.openbsd.org/OpenBSD-current/man5/sshd_config.5#Match) for requests from FirecREST:
 
