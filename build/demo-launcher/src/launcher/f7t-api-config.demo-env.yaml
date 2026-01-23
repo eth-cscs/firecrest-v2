@@ -33,7 +33,7 @@ clusters:
   service_account:
     client_id: "firecrest-health-check"
     secret: "demo-secret"
-  probing_services:
+  probing:
     interval_check: 120
     startup_grace_period: 300
   file_systems:

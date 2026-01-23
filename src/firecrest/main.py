@@ -117,7 +117,7 @@ async def schedule_tasks(scheduler: AsyncScheduler):
     for cluster in plugin_settings.clusters:
         await scheduler.add_schedule(
             ClusterHealthChecker(cluster).check,
-            IntervalTrigger(seconds=cluster.probing_services.interval_check),
+            IntervalTrigger(seconds=cluster.probing.interval_check),
             id=f"check-cluster-{cluster.name}",
         )
     if (

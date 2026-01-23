@@ -232,7 +232,7 @@ firecrest:
       secret: ""
 
     ## Cluster monitoring attributes.
-    probing_services:
+    probing:
       ## interval_check: time interval (in seconds) between checks
       interval_check: 300
       ## list of services to be checked: to disable the check, remove the related service's entry.

@@ -54,35 +54,35 @@ class ClusterHealthChecker:
             auth = self.token_decoder.auth_from_token(token["access_token"])
 
             checks = []
-            if self.cluster.probing_services.services is not None:
-                services = self.cluster.probing_services.services
+            if self.cluster.probing.services is not None:
+                services = self.cluster.probing.services
 
-                if 'scheduler' in services:
+                if "scheduler" in services:
                     sechedulerCheck = SchedulerHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
-                        timeout=services['scheduler'].timeout,
+                        timeout=services["scheduler"].timeout,
                     )
                     checks += [sechedulerCheck.check()]
-                    
-                if 'ssh' in services:
+
+                if "ssh" in services:
                     sshCheck = SSHHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
-                        timeout=services['ssh'].timeout,
+                        timeout=services["ssh"].timeout,
                     )
                     checks += [sshCheck.check()]
 
-                if 'filesystems' in services:
+                if "filesystems" in services:
                     for filesystem in self.cluster.file_systems:
                         filesystemCheck = FilesystemHealthCheck(
                             system=self.cluster,
                             auth=auth,
                             token=token,
                             path=filesystem.path,
-                            timeout=services['filesystems'].timeout,
+                            timeout=services["filesystems"].timeout,
                         )
                     checks += [filesystemCheck.check()]
 
