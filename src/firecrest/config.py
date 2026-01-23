@@ -233,8 +233,8 @@ class ProbingService(CamelModel):
     """Health check enable settings."""
 
     timeout: Optional[int] = Field(
-        0,
-        description="Timeout for specific health check, if not specified the default timeout defined in the probing section is used.",
+        10,
+        description="Timeout for specific health check, if not specified the default of 10s is applied.",
     )
 
 
@@ -245,7 +245,7 @@ class ProbingServices(CamelModel):
         None, description="Services to be checked."
     )
     interval_check: int = Field(
-        ..., description="Interval in seconds between cluster checks.",
+        120, description="Interval in seconds between cluster checks, if not specified the default of 120s is applied.",
         validation_alias=AliasChoices("interval_check", "interval") # Backward compatibility
     )
 
