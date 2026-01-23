@@ -331,6 +331,8 @@ firecrest:
 
       ## Configuration for probing storage availability.
       probing:
+        ## timeout: Interval in seconds between cluster checks.
+        timeout: 10
         ## Maximum time in seconds allowed per check.
         interval: 60
 
