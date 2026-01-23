@@ -149,6 +149,11 @@ class SlurmJob(JobModel):
     def _parse_int(cls, v):
         return slurm_int_to_int(v)
 
+    @field_validator("job_id", mode="before")
+    @classmethod
+    def cast_slurm_jobid_to_str(cls, v):
+        return str(v)
+
 
 class SlurmNode(NodeModel):
     pass
