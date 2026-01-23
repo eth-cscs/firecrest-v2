@@ -52,36 +52,39 @@ class ClusterHealthChecker:
                 grant_type="client_credentials",
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
+
             checks = []
+            if self.cluster.probing_services.services is not None:
+                services = self.cluster.probing_services.services
 
-            if 'scheduler' in self.cluster.probing_services.services:
-                sechedulerCheck = SchedulerHealthCheck(
-                    system=self.cluster,
-                    auth=auth,
-                    token=token,
-                    timeout=self.cluster.probing_services.services['scheduler'].timeout,
-                )
-                checks += [sechedulerCheck.check()]
-
-            if 'ssh' in self.cluster.probing_services.services:
-                sshCheck = SSHHealthCheck(
-                    system=self.cluster,
-                    auth=auth,
-                    token=token,
-                    timeout=self.cluster.probing_services.services['ssh'].timeout,
-                )
-                checks += [sshCheck.check()]
-
-            if 'filesystems' in self.cluster.probing_services.services:
-                for filesystem in self.cluster.file_systems:
-                    filesystemCheck = FilesystemHealthCheck(
+                if 'scheduler' in services:
+                    sechedulerCheck = SchedulerHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
-                        path=filesystem.path,
-                        timeout=self.cluster.probing_services.services['filesystems'].timeout,
+                        timeout=services['scheduler'].timeout,
                     )
-                checks += [filesystemCheck.check()]
+                    checks += [sechedulerCheck.check()]
+                    
+                if 'ssh' in services:
+                    sshCheck = SSHHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        timeout=services['ssh'].timeout,
+                    )
+                    checks += [sshCheck.check()]
+
+                if 'filesystems' in services:
+                    for filesystem in self.cluster.file_systems:
+                        filesystemCheck = FilesystemHealthCheck(
+                            system=self.cluster,
+                            auth=auth,
+                            token=token,
+                            path=filesystem.path,
+                            timeout=services['filesystems'].timeout,
+                        )
+                    checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
