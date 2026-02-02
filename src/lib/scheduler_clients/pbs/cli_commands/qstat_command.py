@@ -51,8 +51,6 @@ class QstatCommand(QstatBaseCommand):
                 "job_id": job_id_parsed,
                 **job_data,
             }
-
-            job_info = {"job_id": job_id_parsed, **job_data}
             job_info["user"] = job_owner
             jobs.append(job_info)
 
