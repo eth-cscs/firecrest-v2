@@ -70,13 +70,6 @@ class DataTransferOperation(CamelModel):
         discriminator="transfer_method",
     )
 
-    class Config:
-        json_encoders = {
-            DataTransferDirective: lambda d: {
-                k: v for k, v in d.__dict__.items() if v is not None
-            }
-        }
-
 
 class JobHelper:
     job_param = None
