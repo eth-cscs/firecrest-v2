@@ -17,7 +17,7 @@ class SacctJobMetadataCommand(SacctCommandBase):
         cmd += ["--format='JobID,JobName,StdIn,StdOut,StdErr,WorkDir'"]
         return " ".join(cmd)
 
-    def expand_var(job_id: str, var: str) -> str:
+    def expand_var(self, job_id: str, var: str) -> str:
         return f"{var}".replace("%j", job_id)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

@@ -59,7 +59,13 @@ class PostFileDownloadRequest(FilesystemRequestBase):
     )
     model_config = {
         "json_schema_extra": {
-            "examples": [{"sourcePath": "/home/user/dir/file", "account": "group"}]
+            "examples": [
+                {
+                    "sourcePath": "/home/user/dir/file",
+                    "account": "group",
+                    "transferDirectives": {"transferMethod": "s3"},
+                }
+            ]
         }
     }
 

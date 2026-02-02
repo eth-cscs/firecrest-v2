@@ -6,7 +6,6 @@
 import asyncio
 import time
 
-
 from firecrest.config import HPCCluster, HealthCheckException
 
 from firecrest.status.health_check.checks.health_check_filesystem import (
@@ -53,34 +52,43 @@ class ClusterHealthChecker:
                 grant_type="client_credentials",
             )
             auth = self.token_decoder.auth_from_token(token["access_token"])
-            checks = []
-            sechedulerCheck = SchedulerHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sechedulerCheck.check()]
-            sshCheck = SSHHealthCheck(
-                system=self.cluster,
-                auth=auth,
-                token=token,
-                timeout=self.cluster.probing.timeout,
-            )
-            checks += [sshCheck.check()]
 
-            for filesystem in self.cluster.file_systems:
-                filesystemCheck = FilesystemHealthCheck(
-                    system=self.cluster,
-                    auth=auth,
-                    token=token,
-                    path=filesystem.path,
-                    timeout=self.cluster.probing.timeout,
-                )
-                checks += [filesystemCheck.check()]
+            checks = []
+            if self.cluster.probing.services is not None:
+                services = self.cluster.probing.services
+
+                if "scheduler" in services:
+                    sechedulerCheck = SchedulerHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        timeout=services["scheduler"].timeout,
+                    )
+                    checks += [sechedulerCheck.check()]
+
+                if "ssh" in services:
+                    sshCheck = SSHHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        timeout=services["ssh"].timeout,
+                    )
+                    checks += [sshCheck.check()]
+
+                if "filesystems" in services:
+                    for filesystem in self.cluster.file_systems:
+                        filesystemCheck = FilesystemHealthCheck(
+                            system=self.cluster,
+                            auth=auth,
+                            token=token,
+                            path=filesystem.path,
+                            timeout=services["filesystems"].timeout,
+                        )
+                    checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
+            self.cluster.last_health_check = time.time()
         except Exception as ex:
             error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
@@ -91,5 +99,5 @@ class ClusterHealthChecker:
             exception.message = error_message
             self.cluster.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
-            # Instead consider printing the exceotion with: traceback.print_exception(ex)
+            # Instead consider printing the exception with: traceback.print_exception(ex)
             raise ex

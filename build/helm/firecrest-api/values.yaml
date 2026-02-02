@@ -233,10 +233,19 @@ firecrest:
 
     ## Cluster monitoring attributes.
     probing:
-      ## interval: (in seconds) between checks
-      interval: 300
-      ## timeout: max time (in seconds) allowed per check
-      timeout: 10
+      ## interval_check: time interval (in seconds) between checks
+      interval_check: 300
+      ## list of services to be checked: to disable the check, remove the related service's entry.
+      services:
+        ssh:
+          ## timeout: max time (in seconds) allowed per check
+          timeout: 10
+        scheduler:
+          ## timeout: max time (in seconds) allowed per check
+          timeout: 10
+        filesystems:
+          ## timeout: max time (in seconds) allowed per check
+          timeout: 10
 
     ## List of mounted file systems on the cluster, such as scratch or home directories.
     file_systems:
@@ -331,6 +340,16 @@ firecrest:
   #logger:
     ## enable_tracing_log: enable tracing logs (boolean). Default: false
     # enable_tracing_log: true
+
+## Post-start lifecycle hook configuration
+## When enabled, it will execute the script located at /app/scripts/postStart-script.sh
+lifecycle:
+  postStart:
+    enabled: false
+    # Define the config map name and key where the post-start script is stored
+    # configMapName: 
+    # configMapKey:
+
 
 ## Volumes to mount config files and secrets into FirecREST pod
 ##  this can be used for storing secrets for:

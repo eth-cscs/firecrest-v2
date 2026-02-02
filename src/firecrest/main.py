@@ -115,12 +115,11 @@ async def lifespan(app: FastAPI):
 
 async def schedule_tasks(scheduler: AsyncScheduler):
     for cluster in plugin_settings.clusters:
-        if cluster.probing:
-            await scheduler.add_schedule(
-                ClusterHealthChecker(cluster).check,
-                IntervalTrigger(seconds=cluster.probing.interval),
-                id=f"check-cluster-{cluster.name}",
-            )
+        await scheduler.add_schedule(
+            ClusterHealthChecker(cluster).check,
+            IntervalTrigger(seconds=cluster.probing.interval_check),
+            id=f"check-cluster-{cluster.name}",
+        )
     if (
         settings.data_operation.data_transfer
         and settings.data_operation.data_transfer.probing

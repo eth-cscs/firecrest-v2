@@ -46,11 +46,120 @@ jobs:
           git tag -d ${{ env.RELEASE_TAG }}
           git tag -f ${{ env.RELEASE_TAG }}
           git push --force origin refs/tags/${{ env.RELEASE_TAG }}
-
-
+  generate-openapi-swager:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: burn-version
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+    - name: Get release version
+      id: get_version
+      run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    - name: Checkout release tag
+      run: |
+        git fetch --tags --all --force
+        git checkout tags/${{ env.RELEASE_TAG }}
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Update version in code
+      run: |
+          # Replace in a specific file — adjust pattern and file path
+          sed -i "s/2\.x\.x/${{ env.RELEASE_TAG }}/g" src/firecrest/config.py
+    - name: Setup files and folders
+      run: |
+        mv src/lib lib
+        mv src/firecrest firecrest
+        touch f7t-api-config.local-env-empty.yaml
+        echo "apis_root_path: \"\"" >> f7t-api-config.local-env-empty.yaml
+        echo "doc_servers:" >> f7t-api-config.local-env-empty.yaml
+        echo "  - url: \"http://localhost:8000\"" >> f7t-api-config.local-env-empty.yaml
+        echo "    description: \"Local environment\"" >> f7t-api-config.local-env-empty.yaml
+        echo "auth:" >> f7t-api-config.local-env-empty.yaml
+        echo "  authentication:" >> f7t-api-config.local-env-empty.yaml
+        echo "    scopes:  {}" >> f7t-api-config.local-env-empty.yaml
+        echo "    tokenUrl:  \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token\"" >> f7t-api-config.local-env-empty.yaml
+        echo "    publicCerts:" >> f7t-api-config.local-env-empty.yaml
+        echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
+        echo "ssh_credentials: {type: "SSHStaticKeys", keys:{}}" >> f7t-api-config.local-env-empty.yaml
+        echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
+    - name: Generate OpenAPI file
+      uses: column-st/fastapi-openapi-specs-action@v1.0.2
+      with:
+        installDependencies: pip install -r requirements.txt
+        moduleDir: firecrest
+        fileName: main
+        appName: app
+        fastapiVersioning: v1
+        outputName: openapi
+        outputExtension: yaml
+        yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
+    - name: Move New OpenAPI file
+      run: |
+        mkdir openapi_
+        mv openapi.yaml openapi_/openapi-new.yaml
+    - name: Fetch old specs from gh-pages
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+    - name: Move Old OpenAPI file
+      run: |
+        mv ./openapi/openapi-latest.yaml openapi_/openapi-old.yaml
+    - name: Upload new spec as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openapi-specs
+        path: openapi_
+  api-diff:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    needs: generate-openapi-swager
+    steps:
+      - name: Checkout current commit
+        uses: actions/checkout@v4
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Determine if this is a patch release
+        id: semver
+        run: |
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.version.outputs.version }}"
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+      - name: Download new spec artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-specs
+          path: openapi-specs
+      - name: Run oasdiff-action (detect breaking changes)
+        id: oasdiff
+        uses: oasdiff/oasdiff-action/breaking@main
+        with:
+          base: openapi-specs/openapi-old.yaml
+          revision: openapi-specs/openapi-new.yaml
+      - name: Block patch releases if breaking changes exist
+        run: |
+          echo ${{ steps.oasdiff.outputs}}
+          if [[ "${{ steps.semver.outputs.patch }}" != "0" ]]; then
+            if [[ "${{ steps.oasdiff.outputs.breaking }}" == "true" ]]; then
+              echo "❌ Breaking API change detected — PATCH releases cannot include breaking changes."
+              exit 1
+            fi
+          fi
   publish-docker-images:
     runs-on: ubuntu-22.04
-    needs: burn-version
+    needs: api-diff
     if: ${{ github.event_name == 'release' }}
     strategy:
       fail-fast: false
@@ -118,10 +227,51 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  
+  publish-openapi-swager:
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    needs: api-diff
+    env:
+        GH_PAGES_BRANCH: gh-pages
+    permissions:
+      contents: write
+      pages: write
+    steps:
+    - name: Checks out repo
+      uses: actions/checkout@v4
+    - name: Configure Git User
+      run: |
+        echo "Configured user to '$GITHUB_ACTOR'"
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Get release version
+      id: get_version
+      run: |
+          echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    - name: Download new spec artifact
+      uses: actions/download-artifact@v4
+      with:
+          name: openapi-specs
+          path: openapi-specs
+    - name: Move OpenAPI file
+      run: |
+        mkdir openapi_
+        cp openapi-specs/openapi-new.yaml openapi_/openapi-latest.yaml
+        mv openapi-specs/openapi-new.yaml openapi_/openapi-${{ env.RELEASE_TAG }}.yaml
+        rm -rf openapi-specs
+    - name: Push to gh-pages branch
+      run: |
+        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
+        git checkout $GH_PAGES_BRANCH
+        mv openapi_/* ./openapi/
+        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_TAG }}.yaml", name: "${{ env.RELEASE_TAG }}"},|g' openapi/dist/swagger-initializer.js
+        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_TAG }}.yaml openapi/dist/swagger-initializer.js
+        git status -uno
+        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
+        git push -u origin $GH_PAGES_BRANCH
   publish-helm-charts:
     runs-on: ubuntu-latest
-    needs: burn-version
+    needs: publish-openapi-swager
     if: ${{ github.event_name == 'release' }}
     env:
         CHART_DIR: build/helm
@@ -175,11 +325,10 @@ jobs:
         git add ./charts/*.tgz ./charts/index.yaml
         git commit -m "New firecrest-api helm chart release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH
-
   publish-documentation:
     runs-on: ubuntu-latest
-    needs: publish-openapi-swager
-    if: ${{ always() }}
+    needs: publish-helm-charts
+    if: ${{ github.event_name == 'release' }}
     env:
         GH_PAGES_BRANCH: gh-pages
     permissions:
@@ -233,72 +382,4 @@ jobs:
       run: |
         git add .
         git commit -m "New documentation release (${{ github.ref_name }})"
-        git push -u origin $GH_PAGES_BRANCH
-
-  publish-openapi-swager:
-    if: ${{ github.event_name == 'release' }}
-    runs-on: ubuntu-latest
-    needs: burn-version
-    env:
-        GH_PAGES_BRANCH: gh-pages
-    permissions:
-      contents: write
-      pages: write
-    steps:
-    - name: Checks out repo
-      uses: actions/checkout@v4
-    - name: Get release version
-      id: get_version
-      run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    - name: Checkout release tag
-      run: |
-        git fetch --tags --all --force
-        git checkout tags/${{ env.RELEASE_TAG }}
-    - name: Configure Git User
-      run: |
-        echo "Configured user to '$GITHUB_ACTOR'"
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-    - name: Setup files and folders
-      run: |
-        mv src/lib lib
-        mv src/firecrest firecrest
-        touch f7t-api-config.local-env-empty.yaml
-        echo "apis_root_path: \"\"" >> f7t-api-config.local-env-empty.yaml
-        echo "doc_servers:" >> f7t-api-config.local-env-empty.yaml
-        echo "  - url: \"http://localhost:8000\"" >> f7t-api-config.local-env-empty.yaml
-        echo "    description: \"Local environment\"" >> f7t-api-config.local-env-empty.yaml
-        echo "auth:" >> f7t-api-config.local-env-empty.yaml
-        echo "  authentication:" >> f7t-api-config.local-env-empty.yaml
-        echo "    scopes:  {}" >> f7t-api-config.local-env-empty.yaml
-        echo "    tokenUrl:  \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token\"" >> f7t-api-config.local-env-empty.yaml
-        echo "    publicCerts:" >> f7t-api-config.local-env-empty.yaml
-        echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
-        echo "ssh_credentials: {type: "SSHStaticKeys", keys:{}}" >> f7t-api-config.local-env-empty.yaml
-        echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
-    - name: Generate OpenAPI file
-      uses: column-st/fastapi-openapi-specs-action@v1.0.2
-      with:
-        installDependencies: pip install -r requirements.txt
-        moduleDir: firecrest
-        fileName: main
-        appName: app
-        fastapiVersioning: v1
-        outputName: openapi
-        outputExtension: yaml
-        yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
-    - name: Move OpenAPI file
-      run: |
-        mkdir openapi_
-        cp openapi.yaml openapi_/openapi-latest.yaml
-        mv openapi.yaml openapi_/openapi-${{ env.RELEASE_TAG }}.yaml
-    - name: Push to gh-pages branch
-      run: |
-        git fetch origin $GH_PAGES_BRANCH:$GH_PAGES_BRANCH
-        git checkout $GH_PAGES_BRANCH
-        mv openapi_/* ./openapi/
-        sed -i -e 's|//add-newones-here|//add-newones-here\n      {url: "https://eth-cscs.github.io/firecrest-v2/openapi/openapi-${{ env.RELEASE_TAG }}.yaml", name: "${{ env.RELEASE_TAG }}"},|g' openapi/dist/swagger-initializer.js
-        git add openapi/openapi-latest.yaml openapi/openapi-${{ env.RELEASE_TAG }}.yaml openapi/dist/swagger-initializer.js
-        git status -uno
-        git commit -m "New firecrest-api openAPI doc release (${{ github.ref_name }})"
         git push -u origin $GH_PAGES_BRANCH

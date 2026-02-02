@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException
 
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
@@ -21,12 +22,12 @@ class SlurmClient(SlurmBaseClient):
 
     def __init__(
         self,
-        ssh_client: SSHClientPool,
+        ssh_client: SSHClientPool | None,
         slurm_version: str,
         api_version: str | None,
         api_url: str | None,
         timeout: int | None,
-        username_claim: str | None
+        username_claim: str | None,
     ):
 
         self.ssh_client = ssh_client
@@ -36,11 +37,15 @@ class SlurmClient(SlurmBaseClient):
         self.api_version = api_version
         self.username_claim = username_claim
 
-        self.slurm_cli_client = SlurmCliClient(ssh_client, slurm_version)
+        self.slurm_cli_client = None
+
+        if ssh_client:
+            self.slurm_cli_client = SlurmCliClient(ssh_client, slurm_version)
 
         if self.api_url:
-            self.slurm_rest_client = SlurmRestClient(api_url, api_version,
-                                                     timeout, username_claim)
+            self.slurm_rest_client = SlurmRestClient(
+                api_url, api_version, timeout, username_claim
+            )
             self.slurm_default_client = self.slurm_rest_client
         else:
             self.slurm_default_client = self.slurm_cli_client
@@ -53,9 +58,15 @@ class SlurmClient(SlurmBaseClient):
     ) -> int | None:
 
         if job_description.script_path:
-            return await self.slurm_cli_client.submit_job(
-                job_description, username, jwt_token
-            )
+            if self.slurm_cli_client:
+                return await self.slurm_cli_client.submit_job(
+                    job_description, username, jwt_token
+                )
+            else:
+                raise HTTPException(
+                    status_code=501,
+                    detail="Scheduler can't handle this request when configured to use rest connection mode",
+                )
 
         return await self.slurm_default_client.submit_job(
             job_description, username, jwt_token
@@ -76,14 +87,22 @@ class SlurmClient(SlurmBaseClient):
         )
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False
+        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
     ) -> List[SlurmJob] | None:
-        return await self.slurm_default_client.get_jobs(username, jwt_token, allusers)
+        return await self.slurm_default_client.get_jobs(
+            username, jwt_token, allusers, account
+        )
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
     ) -> List[SlurmJobMetadata]:
-        return await self.slurm_cli_client.get_job_metadata(job_id, username, jwt_token)
+        if self.slurm_cli_client:
+            return await self.slurm_cli_client.get_job_metadata(job_id, username, jwt_token)
+        else:
+            raise HTTPException(
+                    status_code=501,
+                    detail="Scheduler can't handle this request when configured to use rest connection mode",
+                )
 
     async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         return await self.slurm_default_client.get_nodes(username, jwt_token)

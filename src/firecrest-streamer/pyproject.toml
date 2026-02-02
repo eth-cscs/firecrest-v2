@@ -1,8 +1,12 @@
 [project]
 name = "firecrest-streamer"
-version = "0.0.19"
+version = "0.0.21"
 authors = [
   { name="Elia Palme", email="elia.palme@cscs.ch" },
+]
+maintainers = [
+  { name="Elia Palme", email="elia.palme@cscs.ch" },
+  { name="Eirini Koutsaniti", email="eirini.koutsaniti@cscs.ch" },
 ]
 description = "A simple file streamer over websockets."
 readme = "README.md"

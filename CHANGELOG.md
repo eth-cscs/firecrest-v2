@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - OPEN
+## [2.4.2] - OPEN
+
+### Added
+- File target check in S3 file transfer job for external file upload.
+- `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
+- Get jobs now allows to specify the account parameter.
+- Fine grained probing services per cluster.
+
+### Changed
+
+- Large file download via s3 no loger appends uuid to file name.
+
+### Fixed
+- File transfer examples with .NET
+- Fix error for PBS jobs when no nodes are assigned to it.
+
+## [2.4.1]
 
 ### Added
 
@@ -27,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Timeout value for commands executed via `filesystems/ops` and `status` is now configured with command execution timeout setting
 - Stdout, stderr path are now fully expanded
 - `probing` configuration is optional now for the `clusters` settings
+- Updated documentation for large data upload
 
 ## [2.4.0]
 
@@ -41,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed Slurm sacct integration and data parsing. 
+- Fixed Slurm sacct integration and data parsing.
 
 - Docker Compose startup: Added dependency for Slurm to wait for Keycloak health check before starting, preventing JWT certificate download failures.
 - Upload and Download transfer endpoints now require to specify transfer directives
