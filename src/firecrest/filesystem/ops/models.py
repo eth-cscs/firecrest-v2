@@ -21,7 +21,7 @@ class ContentUnit(str, Enum):
 class File(CamelModel):
     name: str
     type: str
-    link_target: Optional[str]
+    link_target: Optional[str] = Field(None, nullable=True)
     user: str
     group: str
     permissions: str
@@ -64,37 +64,37 @@ class PatchFile(CamelModel):
 
 
 class PatchFileMetadataRequest(CamelModel):
-    new_filename: Optional[str] = None
-    new_permissions: Optional[str] = None
-    new_owner: Optional[str] = None
+    new_filename: Optional[str] = Field(None, nullable=True)
+    new_permissions: Optional[str] = Field(None, nullable=True)
+    new_owner: Optional[str] = Field(None, nullable=True)
 
 
 class GetDirectoryLsResponse(CamelModel):
-    output: Optional[list[File]]
+    output: Optional[list[File]] = Field(None, nullable=True)
 
 
 class GetFileHeadResponse(CamelModel):
-    output: Optional[FileContent]
+    output: Optional[FileContent] = Field(None, nullable=True)
 
 
 class GetFileTailResponse(CamelModel):
-    output: Optional[FileContent]
+    output: Optional[FileContent] = Field(None, nullable=True)
 
 
 class GetFileChecksumResponse(CamelModel):
-    output: Optional[FileChecksum]
+    output: Optional[FileChecksum] = Field(None, nullable=True)
 
 
 class GetFileTypeResponse(CamelModel):
-    output: Optional[str] = Field(example="directory")
+    output: Optional[str] = Field(None, example="directory", nullable=True)
 
 
 class GetFileStatResponse(CamelModel):
-    output: Optional[FileStat]
+    output: Optional[FileStat] = Field(None, nullable=True)
 
 
 class PatchFileMetadataResponse(CamelModel):
-    output: Optional[PatchFile]
+    output: Optional[PatchFile] = Field(None, nullable=True)
 
 
 class PutFileChmodRequest(FilesystemRequestBase):
@@ -107,15 +107,19 @@ class PutFileChmodRequest(FilesystemRequestBase):
 
 
 class PutFileChmodResponse(CamelModel):
-    output: Optional[File]
+    output: Optional[File] = Field(None, nullable=True)
 
 
 class PutFileChownRequest(FilesystemRequestBase):
-    owner: Optional[str] = Field(
-        default="", description="User name of the new user owner of the file"
+    owner: str = Field(
+        default="",
+        description="User name of the new user owner of the file",
+        nullable=False,
     )
-    group: Optional[str] = Field(
-        default="", description="Group name of the new group owner of the file"
+    group: str = Field(
+        default="",
+        description="Group name of the new group owner of the file",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
@@ -131,13 +135,14 @@ class PutFileChownRequest(FilesystemRequestBase):
 
 
 class PutFileChownResponse(CamelModel):
-    output: Optional[File]
+    output: Optional[File] = Field(None, nullable=True)
 
 
 class PostMakeDirRequest(FilesystemRequestBase):
-    parent: Optional[bool] = Field(
+    parent: bool = Field(
         default=False,
         description="If set to `true` creates all its parent directories if they do not already exist",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
@@ -156,29 +161,33 @@ class PostFileSymlinkRequest(FilesystemRequestBase):
 
 
 class PostFileSymlinkResponse(CamelModel):
-    output: Optional[File]
+    output: Optional[File] = Field(None, nullable=True)
 
 
 class GetViewFileResponse(CamelModel):
-    output: Optional[str]
+    output: Optional[str] = Field(None, nullable=True)
 
 
 class PostMkdirResponse(CamelModel):
-    output: Optional[File]
+    output: Optional[File] = Field(None, nullable=True)
 
 
 class PostCompressRequest(FilesystemRequestBase):
     target_path: str = Field(..., description="Path to the compressed file")
     match_pattern: Optional[str] = Field(
-        default=None, description="Regex pattern to filter files to compress"
+        default=None,
+        description="Regex pattern to filter files to compress",
+        nullable=True,
     )
-    dereference: Optional[bool] = Field(
+    dereference: bool = Field(
         default=False,
         description="If set to `true`, it follows symbolic links and archive the files they point to instead of the links themselves.",
+        nullable=False,
     )
-    compression: Optional[TarCommand.CompressionType] = Field(
+    compression: TarCommand.CompressionType = Field(
         default="gzip",
         description="Defines the type of compression to be used. By default gzip is used.",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {
@@ -199,9 +208,10 @@ class PostExtractRequest(FilesystemRequestBase):
     target_path: str = Field(
         ..., description="Path to the directory where to extract the compressed file"
     )
-    compression: Optional[TarCommand.CompressionType] = Field(
+    compression: TarCommand.CompressionType = Field(
         default="gzip",
         description="Defines the type of compression to be used. By default gzip is used.",
+        nullable=False,
     )
     model_config = {
         "json_schema_extra": {

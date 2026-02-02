@@ -52,13 +52,19 @@ class SlurmJobDescription(JobDescriptionModel):
 
 class SlurmJobMetadata(JobMetadataModel):
     standard_input: Optional[str] = Field(
-        validation_alias=AliasChoices("StdIn", "standardInput"), default=None
+        validation_alias=AliasChoices("StdIn", "standardInput"),
+        default=None,
+        nullable=True,
     )
     standard_output: Optional[str] = Field(
-        validation_alias=AliasChoices("StdOut", "standardOutput"), default=None
+        validation_alias=AliasChoices("StdOut", "standardOutput"),
+        default=None,
+        nullable=True,
     )
     standard_error: Optional[str] = Field(
-        validation_alias=AliasChoices("StdErr", "standardError"), default=None
+        validation_alias=AliasChoices("StdErr", "standardError"),
+        default=None,
+        nullable=True,
     )
 
 
@@ -119,7 +125,7 @@ class JobTaskSlurm(JobTask):
 class SlurmJob(JobModel):
 
     tasks: Optional[List[JobTaskSlurm]] = Field(
-        validation_alias=AliasChoices("steps"), default=None
+        validation_alias=AliasChoices("steps"), default=None, nullable=True
     )
     time: JobTimeSlurm
 

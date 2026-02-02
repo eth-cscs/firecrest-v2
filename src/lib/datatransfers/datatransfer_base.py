@@ -49,13 +49,14 @@ class DataTransferRequest(DataTransferDirective):
 
 
 class DataTransferLocation(CamelModel):
-    host: Optional[str] = None
-    system: Optional[str] = None
-    path: Optional[str] = None
+    host: Optional[str] = Field(default=None, nullable=True)
+    system: Optional[str] = Field(default=None, nullable=True)
+    path: Optional[str] = Field(default=None, nullable=True)
     transfer_directives: Optional[DataTransferRequest] = Field(
         None,
         description=("Provide method specific transfer directives"),
         discriminator="transfer_method",
+        nullable=True,
     )
 
     model_config = ConfigDict(use_enum_values=True)
