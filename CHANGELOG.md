@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.5.0] - OPEN
 
 ### Added
+
+### Changed
+
+### Fixed
+
+- Fix error for PBS jobs when no nodes are assigned to it.
+- Handle job arrays in PBS
+
+## [2.4.2]
+
+### Added
+
 - File target check in S3 file transfer job for external file upload.
 - `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
 - Get jobs now allows to specify the account parameter.
@@ -19,8 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
-- Fix error for PBS jobs when no nodes are assigned to it.
-- Handle job arrays in PBS
 
 ## [2.4.1]
 
