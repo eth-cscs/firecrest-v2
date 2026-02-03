@@ -1,14 +1,31 @@
 # Data Transfer
 
-## Architecture
-FirecREST enables users to upload and download large data files of [up to 5TB each](https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html), utilizing S3 buckets as a data buffer. 
+## Motivation
+
+There are 2 endpoints that performs data transfer (upload and download) using FirecREST:
+
+1. `filesystem/<system>/ops/upload[|download]`, which is meant for small files data transfer, which blocks the interface of FirecREST, and
+2. `filesystem/<system>/transfer/upload[|download]`, which is designed to handle large data transfer, using another API or transfer service to perform the operation, which doesn't block FirecREST API.
+
+In this section we discuss the latter.
+
+## Types of data transfer using FirecREST
+
+FirecREST presents various types of data transfer that can be selected using the [Data Operation](../../../setup/conf/#dataoperation) configuration.
+
+### `S3DataTransfer`
+
+!!! Note
+    Configuration for S3 Data Transfer can be found in this [link](../../../setup/conf/#s3datatransfer)
+
+FirecREST enables users to upload and download large data files of [up to 5TB each](https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html), utilizing S3 buckets as a data buffer.
 Users requesting data uploads or downloads to the HPC infrastructure receive [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html) to transfer data to or from the S3 storage.
 
 Ownership of buckets and data remains with the FirecREST service account, but FirecREST creates one [bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#CoreConcepts) per user. Each file transferred (uploaded or downloaded) is stored in a unique identified [data object](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html) into the user's bucket. Data objects within the buckets are retained for a configurable period, managed through S3's [lifecycle expiration](https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-expire-general-considerations.html) functionality. This expiration period, expressed in days, can be specified using the [`bucket_lifecycle_configuration`](../../../setup/conf/README.md#bucketlifecycleconfiguration) parameter.
 
 The S3 storage can be either on-premises or cloud-based. In any case it is required an valid service account having sufficient permissions to handle buckets creation and the generation of presigned URLs.
 
-### External Data Upload
+#### `S3DataTransfer` Upload
 
 Uploading data from the extern of the HPC infrastructure requires users to apply the [multipart upload protocol](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html), therefore the data file shall be divided into parts. The size limit of each part is defined in the response of FirecREST to the upload call. 
 
@@ -20,7 +37,7 @@ After the user completes the upload process, an already scheduled job transfers 
 
 The diagram below illustrates the sequence of calls required to correctly process an upload.
 
-![external storage upload](../../../assets/img/external_storage_upload.svg)
+![external storage upload](../../../assets/img/external_storage_s3_upload.svg)
 
 1. The user calls API resource `transfer/upload` of endpoint `filesystem` with the parameters
     - `path`: destination of the file in the HPC cluster
@@ -40,8 +57,7 @@ The diagram below illustrates the sequence of calls required to correctly proces
 6. The data transfer job detects the upload completion
 7. The data transfer job downloads the incoming data from S3 to the destination specified by the user
 
-
-### Download Data From Extern
+#### `S3DataTransfer` Download
 
 Exporting large data file from the HPC cluster to external systems begins with a user's request to download data. FirecREST returns a presigned URL to access the S3 object and then it schedules a job to upload the data to an S3 object into the user's data bucket. The user must wait until the upload process within the HPC infrastructure is fully complete before accessing the data on S3.
 
@@ -51,7 +67,7 @@ Once the presigned URL is provided by FirecREST, users can access the S3 bucket 
 
 The diagram below illustrates the sequence of calls required to correctly process a download.
 
-![external storage upload](../../../assets/img/external_storage_download.svg)
+![external storage upload](../../../assets/img/external_storage_s3_download.svg)
 
 1. The user calls API resource `transfer/download` of the `filesystem` endpoint providing the following parameter
     - `path`: source of the file in the HPC cluster
@@ -64,4 +80,52 @@ The diagram below illustrates the sequence of calls required to correctly proces
 
 Although single-file download is an option, S3 supports [HTTP Range Request](https://www.rfc-editor.org/rfc/rfc9110.html#name-range-requests), which can be used to parallelly download chunks of a file stored in the S3 bucket.
 
+### `StreamerDataTransfer`
 
+!!! Note
+    Configuration for Streamer Data Transfer can be found in this [link](../../../setup/conf/#streamerdatatransfer)
+
+When requested, FirecREST creates a scheduler job that opens a [websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) on a port from a range of available ports on a compute node of the cluster. 
+
+Once opened, this websocket is able to receive or transmit chunks of data using the [`firecrest-streamer`](https://pypi.org/project/firecrest-streamer/) Python library, which is developed and maintained by FirecREST team.
+
+#### Features
+
+When compared to the `S3DataTransfer`, this method has a number of advantages:
+
+- Data transfer is perfomed as point-to-point between the user and the target remote filesystem
+- The staging area is no longer needed, which prevents writing the data twice for one operation
+- There is no limit on the amount of data to be transferred, this is an improvement compared with the 5TB of `S3DataTransfer`
+- There is no need for splitting the file before the upload when it's larger than 5 GB
+- To avoid that an idle transfer occupies a shared resource such as a compute node, an `wait_timeout` parameter can be configured. Once this timeout is achieved, the job is cancelled automatically.
+- Additionally, to prevent that the data transferred exceeds the capacity supported by the HPC centre, the parameter `inbound_transfer_limit` limits the amount of data that can be received.
+
+#### Limitations
+
+It's important to mention that using this data transfer type assumes that the compute nodes were the websocket are opened has public IP or DNS address and the range of ports selected for the data streaming are opened to external networks as well.
+
+Additionally, users must use the `firecrest-streamer` python library (or CLI tool) in order to perform the data transfer.
+
+#### `StreamerDataTransfer` Download and Upload
+
+![streamer transfer](../../../assets/img/external_storage_streamer.svg)
+
+1. User calls the API resource `transfer/download` or `transfer/upload`, requesting the data transfer of a file.
+2. FirecREST creates a data transfer job using the scheduler and launching the `firecrest-streamer` server.
+3. This server opens an available port (from the range of ports that are configured) and returns an unique "coordinate", which acts as a shared secret between the server and the user client
+4. FirecREST response holds the "coordinates" to perform the poit-to-point data transfer between the user and the remote filesystem
+5. Using the `firecrest-streamer` client, the user performs the upload or download. 
+
+### `WormholeDataTransfer`
+
+!!! Note
+    Configuration for Wormhole Data Transfer can be found in this [link](../../../setup/conf/#wormholedatatransfer)
+
+This data transfer type enables [Magic Wormhole](https://magic-wormhole.readthedocs.io/en/latest/) integration for data transfer through FirecREST.
+
+The idea behind is the same as with the [StreamerDataTransfer]: a job is created on the scheduler and it creates a Magic Wormhole server that can `receive` or `send` chunks of data using a Magic Wormhole Relay Server and a Rendezvous Server.
+
+!!! Note
+    For more information on Magic Wormhole servers, refer to this [link](https://magic-wormhole.readthedocs.io/en/latest/welcome.html#relays)
+
+As with the Streamer data transfer type, users must use a python client or a CLI, in this case provided by the developers of Magic Wormhole, in order to provide point-to-point communication between client and server.
