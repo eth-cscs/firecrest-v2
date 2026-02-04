@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.2] - OPEN
+## [2.5.0]
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Returns an error if the `transfer_method` chosen for large data transfer is not available.
+
+## [2.4.2]
 
 ### Added
 - File target check in S3 file transfer job for external file upload.
