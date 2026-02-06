@@ -158,4 +158,8 @@ data_operation:
   #    probing:
   #      interval: 60
   #      timeout: 10
-  
+# logger:
+#   enable_tracing_log: true
+#   request_headers_to_trace:
+#     - input: "user-agent" 
+#       output: "user_agent"
