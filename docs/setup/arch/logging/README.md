@@ -145,6 +145,8 @@ When tracing logs are enabled, you can record a list of specific headers from in
     logger:
         enable_tracing_log: true
         request_headers_to_trace:
+        - input: "user-agent"    
+          output: "user_agent"
         - input: "x-header-1"
           output: "log-field-1"
         - input: "x-header-2"
