@@ -87,10 +87,11 @@ def tracing_log_middleware(request: Request, username: str, status_code: int, he
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
-    log = logging.getLogger('uvicorn.error')
+    
     for header in headers_to_trace:
         if header['input'] in request.headers:
             log_data[header['output']] = request.headers[header['input']]
+    
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:

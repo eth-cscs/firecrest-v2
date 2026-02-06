@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Documentation about `streamer` and `wormhole` data trasnfer methods
+- Documentation about `streamer` and `wormhole` data transfer methods
+- Customizable Response's headers tracing log
 
 ### Changed
 
@@ -26,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Large file download via s3 no loger appends uuid to file name.
+- Large file download via s3 no logger appends uuid to file name.
 
 ### Fixed
 - File transfer examples with .NET
@@ -38,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Auto-selection of expected signature algorithm when alg attribute is not set in IdP JWKs endpoint.
 - Firecrest streamer now computes checksums to validate data transfer
-- Firecrest streamer transfer end-point returns immediet errors if target paths have issues.
+- Firecrest streamer transfer end-point returns immediate errors if target paths have issues.
 
 ### Changed
 
@@ -60,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Compress and Extract end-points now support multiple compresion types (none, bz2, gzip, and xz).
+- Compress and Extract end-points now support multiple compression types (none, bz2, gzip, and xz).
 - Support for Magic Wormhole data transfer method
 
 ### Changed
@@ -128,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Show nodes from hidden partitions using SLURM CLI
+- Show nodes from hidden partitions using Slurm CLI
 - Fixed reservation start and end datatime parsing.
 - Handles instances where no Job exit status is provided.
 - Fixed unnecessary user keys retrieval with SSH connection pool.
