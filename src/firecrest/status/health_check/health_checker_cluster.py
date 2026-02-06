@@ -84,7 +84,7 @@ class ClusterHealthChecker:
                             path=filesystem.path,
                             timeout=services["filesystems"].timeout,
                         )
-                    checks += [filesystemCheck.check()]
+                        checks += [filesystemCheck.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results

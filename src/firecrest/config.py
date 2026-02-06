@@ -114,10 +114,16 @@ class Scheduler(CamelModel):
         SchedulerConnectionMode.ssh, description="Scheduler connection mode."
     )
     version: str = Field(..., description="Scheduler version.")
-    api_url: Optional[str] = Field(None, description="REST API endpoint for scheduler.")
-    api_version: Optional[str] = Field(None, description="Scheduler API version.")
-    timeout: Optional[int] = Field(
-        10, description="Timeout in seconds for scheduler communication with the API."
+    api_url: Optional[str] = Field(
+        None, description="REST API endpoint for scheduler.", nullable=True
+    )
+    api_version: Optional[str] = Field(
+        None, description="Scheduler API version.", nullable=True
+    )
+    timeout: int = Field(
+        10,
+        description="Timeout in seconds for scheduler communication with the API.",
+        nullable=False,
     )
 
     model_config = ConfigDict(use_enum_values=True)
@@ -176,15 +182,17 @@ class BaseServiceHealth(CamelModel):
         ..., description="Type of the service being checked."
     )
     last_checked: Optional[datetime] = Field(
-        None, description="Timestamp of the last health check."
+        None, description="Timestamp of the last health check.", nullable=True
     )
     latency: Optional[float] = Field(
-        None, description="Service response latency in seconds."
+        None, description="Service response latency in seconds.", nullable=True
     )
-    healthy: Optional[bool] = Field(
-        False, description="True if the service is healthy."
+    healthy: bool = Field(
+        False, description="True if the service is healthy.", nullable=False
     )
-    message: Optional[str] = Field(None, description="Optional status message.")
+    message: Optional[str] = Field(
+        None, description="Optional status message.", nullable=True
+    )
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -198,7 +206,9 @@ class SchedulerServiceHealth(BaseServiceHealth):
 class FilesystemServiceHealth(BaseServiceHealth):
     """Health check for a mounted file system."""
 
-    path: Optional[str] = Field(None, description="Path of the monitored file system.")
+    path: Optional[str] = Field(
+        None, description="Path of the monitored file system.", nullable=True
+    )
 
 
 class SSHServiceHealth(BaseServiceHealth):
@@ -260,11 +270,14 @@ class BaseDataTransfer(CamelModel):
     ] = Field(None, description="Type of data transfer service.")
 
     probing: Optional[Probing] = Field(
-        None, description="Configuration for probing storage availability."
+        None,
+        description="Configuration for probing storage availability.",
+        nullable=True,
     )
     servicesHealth: Optional[List[S3ServiceHealth | HealthCheckException]] = Field(
         None,
         description="Optional health information for different services in the cluster.",
+        nullable=True,
     )
 
     model_config = ConfigDict(use_enum_values=True)
@@ -292,7 +305,9 @@ class S3DataTransfer(BaseDataTransfer):
     region: str = Field(..., description="Region of the storage bucket.")
     ttl: int = Field(..., description="Time-to-live (in seconds) for generated URLs.")
     tenant: Optional[str] = Field(
-        None, description="Optional tenant identifier for multi-tenant setups."
+        None,
+        description="Optional tenant identifier for multi-tenant setups.",
+        nullable=True,
     )
     multipart: MultipartUpload = Field(
         default_factory=MultipartUpload,
@@ -307,7 +322,9 @@ class S3DataTransfer(BaseDataTransfer):
 class WormholeDataTransfer(BaseDataTransfer):
     service_type: Literal[DataTransferType.wormhole]
     pypi_index_url: Optional[str] = Field(
-        None, description="Optional local PyPI index URL for installing dependencies."
+        None,
+        description="Optional local PyPI index URL for installing dependencies.",
+        nullable=True,
     )
     pass
 
@@ -318,21 +335,27 @@ class StreamerDataTransfer(BaseDataTransfer):
         None, description="Optional local PyPI index URL for installing dependencies."
     )
     host: Optional[str] = Field(
-        None, description="The interface to use for listening incoming connections"
+        None,
+        description="The interface to use for listening incoming connections",
+        nullable=True,
     )
     port_range: Tuple[int, int] = Field(
         (5665, 5675), description="Port range for establishing connections."
     )
     public_ips: Optional[List[str]] = Field(
-        None, description="List of public IP addresses where server can be reached."
+        None,
+        description="List of public IP addresses where server can be reached.",
+        nullable=True,
     )
-    wait_timeout: Optional[int] = Field(
+    wait_timeout: int = Field(
         60 * 60 * 24,
         description="How long to wait for a connection before exiting (in seconds)",
+        nullable=False,
     )
-    inbound_transfer_limit: Optional[int] = Field(
+    inbound_transfer_limit: int = Field(
         5 * 1024 * 1024 * 1024,
         description="Limit how much data can be received (in bytes)",
+        nullable=False,
     )
     pass
 
@@ -351,6 +374,7 @@ class DataOperation(BaseModel):
         None,
         description=("Data transfer service configuration"),
         discriminator="service_type",
+        nullable=True,
     )
 
 
@@ -390,9 +414,11 @@ class SSHClientPool(CamelModel):
     host: str = Field(..., description="SSH target hostname.")
     port: int = Field(..., description="SSH port.")
     proxy_host: Optional[str] = Field(
-        None, description="Optional proxy host for tunneling."
+        None, description="Optional proxy host for tunneling.", nullable=True
     )
-    proxy_port: Optional[int] = Field(None, description="Optional proxy port.")
+    proxy_port: Optional[int] = Field(
+        None, description="Optional proxy port.", nullable=True
+    )
     max_clients: int = Field(
         100, description="Maximum number of concurrent SSH clients."
     )
@@ -428,6 +454,7 @@ class HPCCluster(CamelModel):
     ] = Field(
         None,
         description="Optional health information for different services in the cluster.",
+        nullable=True,
     )
     probing: ProbingServices = Field(
         ..., description="Probing configuration for monitoring the cluster's services."
@@ -455,9 +482,10 @@ class OpenFGA(CamelModel):
     """Authorization settings using OpenFGA."""
 
     url: str = Field(..., description="OpenFGA API base URL.")
-    timeout: Optional[int] = Field(
+    timeout: int = Field(
         1,
-        description="Connection timeout in seconds. When `None` the timeout is disabled.",
+        description="Connection timeout in seconds.",
+        nullable=False,
     )
     max_connections: int = Field(
         100,
@@ -533,6 +561,7 @@ class Auth(CamelModel):
             "Authorization settings via OpenFGA. More info in [the "
             "authorization section](../arch/auth/README.md#authorization)."
         ),
+        nullable=True,
     )
 
 
@@ -561,6 +590,7 @@ class Settings(BaseSettings):
             "documentation see the `servers` parameter in the"
             "[FastAPI docs](https://fastapi.tiangolo.com/reference/fastapi/#fastapi.FastAPI--example)."
         ),
+        nullable=True,
     )
     auth: Auth = Field(
         ..., description="Authentication and authorization config (OIDC, FGA)."
@@ -577,12 +607,13 @@ class Settings(BaseSettings):
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
     )
-    data_operation: Optional[DataOperation] = Field(
+    data_operation: DataOperation = Field(
         DataOperation(),
         description=(
             "Data transfer backend configuration. More details in "
             "[this section](../arch/external_storage/README.md)."
         ),
+        nullable=False,
     )
     logger: Logger = Field(
         default_factory=Logger, description="Logging configuration options."

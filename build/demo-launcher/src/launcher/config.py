@@ -1,11 +1,19 @@
 import sys
 from typing import Dict, List, Optional
 from humps import camelize
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 sys.path.append("../../../src")
 sys.path.append("../")
-from firecrest.config import Settings, HPCCluster, ServiceAccount, SSHClientPool, SSHStaticKeys, DataOperation, BaseDataTransfer
+from firecrest.config import (
+    Settings,
+    HPCCluster,
+    ServiceAccount,
+    SSHClientPool,
+    SSHStaticKeys,
+    DataOperation,
+    BaseDataTransfer,
+)
 
 
 class CamelModel(BaseModel):
@@ -23,8 +31,8 @@ class UnsafeSSHClientPool(SSHClientPool):
 
 class UnsafeSSHStaticKeys(BaseModel):
     private_key: str
-    public_cert: Optional[str] = None
-    passphrase: Optional[str] = None
+    public_cert: Optional[str] = Field(None, nullable=True)
+    passphrase: Optional[str] = Field(None, nullable=True)
 
 
 class UnsafeSSHUserKeys(SSHStaticKeys):

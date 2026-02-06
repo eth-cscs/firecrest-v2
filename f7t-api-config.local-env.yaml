@@ -51,6 +51,8 @@ clusters:
         timeout: 20
       filesystems:
         timeout: 20
+      ssh:
+        timeout: 5
   datatransfer_jobs_directives:
     - "#SBATCH --constraint=mc"
     - "#SBATCH --nodes=1"
@@ -86,7 +88,11 @@ clusters:
       filesystems:
         timeout: 5
       scheduler:
+<<<<<<< catch-data-transfer-method-mismatch
         timeout: 5
+=======
+        timeout: 20
+>>>>>>> master
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"

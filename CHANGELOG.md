@@ -9,11 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+<<<<<<< catch-data-transfer-method-mismatch
 ### Changed
 
 ### Fixed
 
 - Returns an error if the `transfer_method` chosen for large data transfer is not available.
+=======
+- Documentation about `streamer` and `wormhole` data trasnfer methods
+
+### Changed
+
+### Fixed
+- ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
+>>>>>>> master
 
 ## [2.4.2]
 
@@ -29,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
+- Fix error for PBS jobs when no nodes are assigned to it.
 
 ## [2.4.1]
 
@@ -67,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed Slurm sacct integration and data parsing. 
+- Fixed Slurm sacct integration and data parsing.
 
 - Docker Compose startup: Added dependency for Slurm to wait for Keycloak health check before starting, preventing JWT certificate download failures.
 - Upload and Download transfer endpoints now require to specify transfer directives
