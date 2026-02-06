@@ -88,7 +88,7 @@ clusters:
       filesystems:
         timeout: 5
       scheduler:
-        timeout: 20
+        timeout: 5
   datatransfer_jobs_directives:
     - "#SBATCH --nodes=1"
     - "#SBATCH --time=0-00:15:00"

@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Documentation about `streamer` and `wormhole` data trasnfer methods
-
 ### Changed
 
 ### Fixed
+
 - ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
+- Returns an error if the `transfer_method` chosen for large data transfer is not available.
+- Documentation about `streamer` and `wormhole` data trasnfer methods
 
 ## [2.4.2]
 
