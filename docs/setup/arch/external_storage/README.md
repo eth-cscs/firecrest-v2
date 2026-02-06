@@ -87,7 +87,7 @@ Although single-file download is an option, S3 supports [HTTP Range Request](htt
 
 When requested, FirecREST creates a scheduler job that opens a [websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) on a port from a range of available ports on a compute node of the cluster. 
 
-Once opened, this websocket is able to receive or transmit chunks of data using the [`firecrest-streamer`](https://pypi.org/project/firecrest-streamer/) Python library, which is developed and maintained by FirecREST team.
+Once opened, this websocket is able to receive or transmit chunks of data using the [`firecrest-streamer`](https://pypi.org/project/firecrest-streamer/) Python library, which is developed and maintained by the FirecREST team.
 
 #### Features
 
@@ -102,7 +102,7 @@ When compared to the `S3DataTransfer`, this method has a number of advantages:
 
 #### Limitations
 
-It's important to mention that using this data transfer type assumes that the compute nodes were the websocket are opened has public IP or DNS address and the range of ports selected for the data streaming are opened to external networks as well.
+It's important to mention that using this data transfer type assumes that the compute nodes where the websocket are opened has public IP or DNS address and the range of ports selected for the data streaming are opened to external networks as well.
 
 Additionally, users must use the `firecrest-streamer` python library (or CLI tool) in order to perform the data transfer.
 

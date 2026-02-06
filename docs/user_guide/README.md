@@ -187,9 +187,9 @@ Once the remote job is completed, the file is temporary stored in the S3 object 
 
 #### S3 upload
 
-Given that FirecREST utilizes a storage service based on [S3 as staging area](../setup/arch/external_storage/), the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be splitted in chunks, which complicates the file upload.
+Given that FirecREST utilizes a storage service based on [S3 as staging area](../setup/arch/external_storage/), the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be split in chunks, which complicates the file upload.
 
-For this, we have created a set of examples in different programming and scripting languages that we describe following:
+To address this, we have created a set of examples in different programming and scripting languages, described bellow:
 
 - `s3` Upload with Python3: this is the easiest way of using FirecREST. See [FirecREST SDK section](#firecrest-sdk) below for more information and detailed examples.
 
@@ -236,7 +236,7 @@ In order to use the `streamer` transfer method, users must install the [`firecre
 After getting the response, you can use the secret `coordinates` in the execution of the `streamer` command to complete the download to the local system.
 
 !!! warning
-    Keep the secret `coordinates` secured: these are used to uniquely transfer data between a `streamer` client and a specific file in the remote filesystem. If you share the credentials with somebody else, they could move the data in your behalf.
+    Keep the secret `coordinates` secured: these are used to uniquely transfer data between a `streamer` client and a specific file in the remote filesystem. If you share the credentials with somebody else, they could move the data on your behalf.
 
 !!! example "Using `firecrest-streamer` tool to download a file from a remote system"
     ```sh
