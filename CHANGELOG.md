@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
 
 ## [2.4.2]
 
