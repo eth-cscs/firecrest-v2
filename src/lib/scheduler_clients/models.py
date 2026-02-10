@@ -11,25 +11,25 @@ from pydantic import Field, AliasChoices
 
 
 class SchedPing(CamelModel):
-    hostname: Optional[str] = None
-    pinged: Optional[str] = None
-    latency: Optional[int] = None
-    mode: Optional[str] = None
+    hostname: Optional[str] = Field(default=None, nullable=True)
+    pinged: Optional[str] = Field(default=None, nullable=True)
+    latency: Optional[int] = Field(default=None, nullable=True)
+    mode: Optional[str] = Field(default=None, nullable=True)
 
 
 class JobStatus(CamelModel):
     state: str
-    stateReason: Optional[str] = None
-    exitCode: Optional[int] = None
-    interruptSignal: Optional[int] = None
+    stateReason: Optional[str] = Field(default=None, nullable=True)
+    exitCode: Optional[int] = Field(default=None, nullable=True)
+    interruptSignal: Optional[int] = Field(default=None, nullable=True)
 
 
 class JobTime(CamelModel):
-    elapsed: Optional[int] = None
-    start: Optional[int] = None
-    end: Optional[int] = None
-    suspended: Optional[int] = None
-    limit: Optional[int] = None
+    elapsed: Optional[int] = Field(default=None, nullable=True)
+    start: Optional[int] = Field(default=None, nullable=True)
+    end: Optional[int] = Field(default=None, nullable=True)
+    suspended: Optional[int] = Field(default=None, nullable=True)
+    limit: Optional[int] = Field(default=None, nullable=True)
 
 
 class JobTask(CamelModel):
@@ -43,52 +43,59 @@ class JobModel(CamelModel):
     job_id: str
     name: str
     status: JobStatus
-    tasks: Optional[List[JobTask]] = None
+    tasks: Optional[List[JobTask]] = Field(default=None, nullable=True)
     time: JobTime
-    account: Optional[str] = None
+    account: Optional[str] = Field(default=None, nullable=True)
     allocation_nodes: int
     cluster: str
-    group: Optional[str] = None
+    group: Optional[str] = Field(default=None, nullable=True)
     nodes: str
     partition: str
-    kill_request_user: Optional[str] = None
+    kill_request_user: Optional[str] = Field(default=None, nullable=True)
     user: Optional[str]
     working_directory: str
-    priority: Optional[int] = None
+    priority: Optional[int] = Field(default=None, nullable=True)
 
 
 class JobMetadataModel(CamelModel):
     job_id: str
-    script: Optional[str] = None
-    standard_input: Optional[str] = None
-    standard_output: Optional[str] = None
-    standard_error: Optional[str] = None
+    script: Optional[str] = Field(default=None, nullable=True)
+    standard_input: Optional[str] = Field(default=None, nullable=True)
+    standard_output: Optional[str] = Field(default=None, nullable=True)
+    standard_error: Optional[str] = Field(default=None, nullable=True)
 
 
 class JobDescriptionModel(CamelModel):
-    name: Optional[str] = Field(default=None, description="Name for the job")
+    name: Optional[str] = Field(
+        default=None, description="Name for the job", nullable=True
+    )
     account: Optional[str] = Field(
-        default=None, description="Charge job resources to specified account"
+        default=None,
+        description="Charge job resources to specified account",
+        nullable=True,
     )
     current_working_directory: str = Field(
         validation_alias=AliasChoices("workingDirectory", "working_directory"),
         description="Job working directory",
     )
     standard_input: Optional[str] = Field(
-        default=None, description="Standard input file name"
+        default=None, description="Standard input file name", nullable=True
     )
     standard_output: Optional[str] = Field(
-        default=None, description="Standard output file name"
+        default=None, description="Standard output file name", nullable=True
     )
     standard_error: Optional[str] = Field(
-        default=None, description="Standard error file name"
+        default=None, description="Standard error file name", nullable=True
     )
-    environment: Optional[Dict[str, str] | List[str]] = Field(
+    environment: Dict[str, str] | List[str] = Field(
         alias="env",
         default={"F7T_version": "v2.0.0"},
         description="Dictionary of environment variables to set in the job context",
+        nullable=False,
     )
-    constraints: Optional[str] = Field(default=None, description="Job constraints")
+    constraints: Optional[str] = Field(
+        default=None, description="Job constraints", nullable=True
+    )
     script: str = Field(default=None, description="Script for the job")
     script_path: str = Field(
         default=None, description="Path to the job in target system"
@@ -100,22 +107,22 @@ class JobSubmitRequestModel(CamelModel):
 
 
 class NodeModel(CamelModel):
-    sockets: Optional[int] = None
-    cores: Optional[int] = None
-    threads: Optional[int] = None
+    sockets: Optional[int] = Field(default=None, nullable=True)
+    cores: Optional[int] = Field(default=None, nullable=True)
+    threads: Optional[int] = Field(default=None, nullable=True)
     cpus: int
-    cpu_load: Optional[float] = None
-    free_memory: Optional[int] = None
-    features: Optional[str | List[str]] = None
+    cpu_load: Optional[float] = Field(default=None, nullable=True)
+    free_memory: Optional[int] = Field(default=None, nullable=True)
+    features: Optional[str | List[str]] = Field(default=None, nullable=True)
     name: str
-    address: Optional[str] = None
-    hostname: Optional[str] = None
+    address: Optional[str] = Field(default=None, nullable=True)
+    hostname: Optional[str] = Field(default=None, nullable=True)
     state: str | List[str]
-    partitions: Optional[List[str]] = None
-    weight: Optional[int] = None
-    alloc_memory: Optional[int] = None
-    alloc_cpus: Optional[int] = None
-    idle_cpus: Optional[int] = None
+    partitions: Optional[List[str]] = Field(default=None, nullable=True)
+    weight: Optional[int] = Field(default=None, nullable=True)
+    alloc_memory: Optional[int] = Field(default=None, nullable=True)
+    alloc_cpus: Optional[int] = Field(default=None, nullable=True)
+    idle_cpus: Optional[int] = Field(default=None, nullable=True)
 
 
 class ReservationModel(CamelModel):
@@ -123,7 +130,7 @@ class ReservationModel(CamelModel):
     node_list: str
     end_time: int
     start_time: int
-    features: Optional[str] = None
+    features: Optional[str] = Field(default=None, nullable=True)
 
 
 class PartitionModel(CamelModel):

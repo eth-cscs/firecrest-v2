@@ -139,52 +139,133 @@ All asynchronous endpoints are located under  `/transfer` and follow this path s
 
 ## File transfer
 
-FirecREST provides two methods for transferring files:
+FirecREST provides two resources for transferring files:
 
-- Small files (up to 5MB by [default](../setup/conf/#dataoperation)) can be uploaded or downloaded directly.
-- Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
+- [`/filesystem/{system_name}/ops/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get)[`[|upload]`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post) for small files (up to 5MB by [default](../setup/conf/#dataoperation)) that can be uploaded or downloaded directly, and
+- [`/filesystem/{system_name}/transfer/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post)[`[|upload]`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post) for large files that can be transferred depending the `transfer_method` chosen (if configured in the FirecREST instalation).
 
-Small file transfer endpoints:
+    It creates a job in the scheduler to make an asynchronous data transfer managed by the HPC center. Supported values for `transfer_method` are
 
-- [`/filesystem/{system_name}/ops/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get)
-- [`/filesystem/{system_name}/ops/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post)
+    - `s3`: files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.
+    - `streamer`: it's a point-to-point data transfer using the [`firecrest-streamer`](https://pypi.org/project/firecrest-streamer/) client
+    - `wormhole`: it's a point-to-point data transfer using the [`Magic Wormhole`](https://magic-wormhole.readthedocs.io/en/latest/welcome.html) client
 
-Large file transfer endpoints:
+!!! Note
+    Availability of the transfer methods in the FirecREST installation depends on the configuration. You can check the [`status/systems`](https://eth-cscs.github.io/firecrest-v2/openapi/#/status/get_systems_status_systems_get) endpoint to get information about which `data_transfer` method is supported by your HPC provider.
 
-- [`/filesystem/{system_name}/transfer/download`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post)
-- [`/filesystem/{system_name}/transfer/upload`](https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post)
+When requesting a large file download, FirecREST returns a `jobId` and information about how to download the file. This information will be shown depending on the transfer method used:
 
-### Downloading Large Files
+### Using `s3` transfer method
 
-When requesting a large file download, FirecREST returns a download URL and a `jobId`. Once the remote job is completed, the user can retrieve the file using the provided URL.
+#### S3 download
 
-### Uploading Large Files
+Once the remote job is completed, the file is temporary stored in the S3 object storage. Then, users can retrieve the file using the provided `download_url` directly from the S3 interface.
 
-Given that FirecREST utilizes a storage service based on [S3 as staging area](../setup/arch/external_storage/), the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be splitted in chunks, which complicates the file upload.
+!!! example "Download a file using `streamer` transfer method"
+    ```sh
+    $ curl --request POST <firecrest_url>/filesystem/<system>/transfer/download \
+    --header "Authorization: Bearer <token>" --header "Content-Type: application/json" \
+    --data '{
+        "path": "/path/to/remote/file",
+        "transfer_directives": {
+            "transfer_method": "s3"
+        }
+    }'
 
-For this, we have created a set of examples in different programming and scripting languages that we describe following:
+    {
+        "transferJob": {
+            "jobId": <jobId>,
+            "system": "<system>",
+            ...
+        },
+        "transferDirectives": {
+            "transfer_method": "s3",
+            "download_url": "<url>"
+        }
+    }
+    ```
 
-#### Large Data Upload with Python3
+#### S3 upload
 
-This is the easiest way of using FirecREST. See [FirecREST SDK section](#firecrest-sdk) below for more information and detailed examples.
+Given that FirecREST utilizes a storage service based on [S3 as staging area](../setup/arch/external_storage/), the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be split in chunks, which complicates the file upload.
 
-#### Large Data Upload with Bash
+To address this, we have created a set of examples in different programming and scripting languages, described bellow:
 
-[Detailed example.](file_transfer_bash/README.md)
+- `s3` Upload with Python3: this is the easiest way of using FirecREST. See [FirecREST SDK section](#firecrest-sdk) below for more information and detailed examples.
 
-#### Large Data Upload with .NET
+- `s3` Upload with Bash: [Detailed example.](file_transfer_bash/README.md)
 
-[Detailed example.](file_transfer_dotnet/README.md)
+- `s3` Upload with .NET: [Detailed example.](file_transfer_dotnet/README.md)
 
-#### Need more examples?
+!!! info "Need more examples?"
+    If you need examples for your particular S3 use case (ie, using a different language than the listed above), feel free to open an [issue on GitHub](https://github.com/eth-cscs/firecrest-v2/issues/new). We'd be happy to create one for you.
 
-If you need examples for your particular use case (ie, using a different language than the listed above), feel free to open an [issue on GitHub](https://github.com/eth-cscs/firecrest-v2/issues/new). We'd be happy to create one for you.
+### Using `streamer` transfer method
+
+#### Streamer download {#streamer-download}
+
+In order to use the `streamer` transfer method, users must install the [`firecrest-streamer`](https://pypi.org/project/firecrest-streamer/) tool.
+
+!!! example "Download a file using `streamer` transfer method"
+    ```sh
+    $ curl --request POST <firecrest_url>/filesystem/<system>/transfer/download \
+    --header "Authorization: Bearer <token>" --header "Content-Type: application/json" \
+    --data '{
+        "path": "/path/to/remote/file",
+        "transfer_directives": {
+            "transfer_method": "streamer"
+        }
+    }'
+
+    {
+        "transferJob": {
+            "jobId": <jobId>,
+            "system": "<system>",
+            ...
+        },
+        "transferDirectives": {
+            "transfer_method": "streamer",
+            "coordinates": "<coordinates>"
+        }
+    }
+    ```
+
+!!! info
+    The file selected will be available for downloading as long as the job is running in the scheduler. Additionally, users can check the `waitTimeout` and `inboundTransferLimit` parameters in the call to `GET /status/systems` to perform a better data transfer process.
+
+After getting the response, you can use the secret `coordinates` in the execution of the `streamer` command to complete the download to the local system.
+
+!!! warning
+    Keep the secret `coordinates` secured: these are used to uniquely transfer data between a `streamer` client and a specific file in the remote filesystem. If you share the credentials with somebody else, they could move the data on your behalf.
+
+!!! example "Using `firecrest-streamer` tool to download a file from a remote system"
+    ```sh
+    $ streamer receive --coordinates <coordinates> --path /path/to/local/file
+    Transfering 1.0GiB...
+     |████████████████████████████████████████| 100.0%
+    File /path/to/local/file received successfully.
+    ```
+
+#### Streamer upload
+
+Using the same method as for the [download](#streamer-download) you can `send` data to upload files from your local system to the cluster.
+
+After receiving the secrets `coordinates`, you can use the `streamer` to upload the file to the requested target:
+
+!!! example "Upload data using `streamer`"
+    ```bash
+    $ streamer send --coordinates <coordinates> --path /path/to/local/file
+    Transfering 1.0GiB...
+    |████████████████████████████████████████| 100.0%
+    File file sent successfully.
+    ```
 
 ## FirecREST SDK
 
 [PyFirecREST](https://github.com/eth-cscs/pyfirecrest) is a Python library designed to simplify the implementation of FirecREST clients.
 
 ### Installation
+
 To install PyFirecREST, run:
 
 !!! example "Install `pyfirecrest`"

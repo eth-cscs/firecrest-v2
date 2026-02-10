@@ -129,6 +129,11 @@ async def post_upload(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
 
+    if upload_request.transfer_directives.transfer_method.name != settings.data_operation.data_transfer.service_type:
+        raise HTTPException(
+            status_code=400, detail="Requested transfer method is not available."
+        )
+
     source = DataTransferLocation(
         host=None,
         system=None,
@@ -166,6 +171,11 @@ async def post_download(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
+
+    if download_request.transfer_directives.transfer_method.name != settings.data_operation.data_transfer.service_type:
+        raise HTTPException(
+            status_code=400, detail="Requested transfer method is not available."
+        )
 
     source = DataTransferLocation(
         host=None,
