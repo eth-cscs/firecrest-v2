@@ -30,6 +30,7 @@ clusters:
     type: "slurm"
     version: "24.11.0"
     timeout: 10
+    connection_mode: "ssh"
   service_account:
     client_id: "firecrest-health-check"
     secret: "demo-secret"
@@ -37,8 +38,10 @@ clusters:
     - path: '/users'
       data_type: 'users'
       default_work_dir: true
+  probing:
+    interval: 60
   data_operation:
-    max_ops_file_size: 1048576 # 1M
+    max_ops_file_size: 5242880 # 5M
     data_transfer:
       service_type: "s3"
       name: "s3-storage"
