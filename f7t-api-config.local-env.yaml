@@ -53,14 +53,26 @@ clusters:
         timeout: 20
       ssh:
         timeout: 5
-  datatransfer_jobs_directives:
-    - "#SBATCH --constraint=mc"
-    - "#SBATCH --nodes=1"
-    - "#SBATCH --time=0-00:15:00"
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+    - "#SBATCH --constraint=mc"
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    data_transfer:
+      service_type: "streamer"
+      host: "0.0.0.0"
+      port_range: [5665, 5666]
+      public_ips:
+        - "localhost"
+      wait_timeout: 43200  # 12h
+      inbound_transfer_limit: 5368709120 # 5GB
 - name: "cluster-slurm-ssh"
   ssh:
     host: "192.168.240.2"
@@ -89,14 +101,32 @@ clusters:
         timeout: 5
       scheduler:
         timeout: 5
-  datatransfer_jobs_directives:
-    - "#SBATCH --nodes=1"
-    - "#SBATCH --time=0-00:15:00"
-    - "#SBATCH --account={account}"
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    - "#SBATCH --account={account}"
+    data_transfer:
+      service_type: "s3"
+      name: "s3-storage"
+      private_url: "http://192.168.240.19:9000"
+      public_url: "http://localhost:9000"
+      access_key_id: "storage_access_key"
+      secret_access_key: "secret_file:/run/secrets/s3_secret_access_key"
+      region: "us-east-1"
+      ttl: 604800
+      multipart:
+        use_split: false
+        max_part_size: 1073741824 # 1G
+        parallel_runs: 3
+        tmp_folder: "tmp"
 - name: "cluster-pbs"
   ssh:
     host: "192.168.240.4"
@@ -125,24 +155,26 @@ clusters:
         timeout: 20
       filesystems:
         timeout: 10
-  datatransfer_jobs_directives:
-      - "#PBS -l nodes=1:ppn=1"
-      - "#PBS -l walltime=00:15:00"
-      - "#PBS -V"
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
-data_operation:
-  max_ops_file_size: 1048576 # 1M
-  data_transfer:
-    service_type: "streamer"
-    host: "0.0.0.0"
-    port_range: [5665, 5666]
-    public_ips:
-      - "localhost"
-    wait_timeout: 43200  # 12h
-    inbound_transfer_limit: 5368709120 # 5GB
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+      - "#PBS -l nodes=1:ppn=1"
+      - "#PBS -l walltime=00:15:00"
+      - "#PBS -V"
+    data_transfer:
+      service_type: "streamer"
+      host: "0.0.0.0"
+      port_range: [5665, 5666]
+      public_ips:
+        - "localhost"
+      wait_timeout: 43200  # 12h
+      inbound_transfer_limit: 5368709120 # 5GB
   # data_transfer:
   #  service_type: "wormhole"
   #data_transfer:
