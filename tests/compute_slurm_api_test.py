@@ -121,7 +121,7 @@ def test_get_job(client, mocked_get_job_response, slurm_cluster_with_api_config)
         assert response.status_code == 200
         assert response.json() is not None
         jobs_result = GetJobResponse(**response.json())
-        assert jobs_result.jobs[0].job_id == job_id
+        assert jobs_result.jobs[0].job_id == str(job_id)
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )
@@ -156,7 +156,7 @@ def test_case_insensitive_system_name(
         assert response.status_code == 200
         assert response.json() is not None
         jobs_result = GetJobResponse(**response.json())
-        assert jobs_result.jobs[0].job_id == job_id
+        assert jobs_result.jobs[0].job_id == str(job_id)
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )

@@ -16,10 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
 - Returns an error if the `transfer_method` chosen for large data transfer is not available.
 - Documentation about `streamer` and `wormhole` data trasnfer methods
+- Fix error for PBS jobs when no nodes are assigned to it.
+- Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 
 ## [2.4.2]
 
 ### Added
+
 - File target check in S3 file transfer job for external file upload.
 - `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
 - Get jobs now allows to specify the account parameter.
@@ -31,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
-- Fix error for PBS jobs when no nodes are assigned to it.
 
 ## [2.4.1]
 

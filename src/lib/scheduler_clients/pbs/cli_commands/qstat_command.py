@@ -41,7 +41,12 @@ class QstatCommand(QstatBaseCommand):
             if not self.allusers and job_owner != self.username:
                 continue
 
-            job_id_parsed = int(job_id.split(".")[0])
+            # job_id examples:
+            #  "123456.pbs"
+            #  "123456[].pbs"
+            #  "123456[7].pbs"
+            #  "123456[1-10].pbs"
+            job_id_parsed = job_id.split(".")[0]
             job_info = {
                 "job_id": job_id_parsed,
                 **job_data,
