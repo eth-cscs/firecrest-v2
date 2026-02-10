@@ -19,7 +19,6 @@ from base64 import b64decode, b64encode
 # configs
 from firecrest.config import HPCCluster, HealthCheckType
 from firecrest.filesystem.ops.commands.tar_command import TarCommand
-from firecrest.plugins import settings
 
 # dependencies
 from firecrest.dependencies import (
@@ -79,8 +78,6 @@ router = create_router(
     dependencies=[Depends(APIAuthDependency(authorize=True))],
 )
 
-OPS_SIZE_LIMIT = settings.data_operation.max_ops_file_size
-
 
 @router.put(
     "/chmod",
@@ -106,7 +103,7 @@ async def put_chmod(
     chmod = ChmodCommand(
         target_path=request_model.path,
         mode=request_model.mode,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
     async with ssh_client.get_client(
         username=username, jwt_token=access_token
@@ -140,7 +137,7 @@ async def put_chown(
         target_path=request_model.path,
         owner=request_model.owner,
         group=request_model.group,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
 
     async with ssh_client.get_client(
@@ -193,7 +190,8 @@ async def get_ls(
         numeric_uid,
         recursive,
         dereference,
-        command_timeout=system.ssh.timeout.command_execution)
+        command_timeout=system.ssh.timeout.command_execution,
+    )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(ls)
         return {"output": output}
@@ -254,7 +252,7 @@ async def get_head(
         file_bytes,
         lines,
         skip_trailing,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
     if lines and file_bytes:
         raise HTTPException(
@@ -283,7 +281,7 @@ async def get_head(
 
 @router.get(
     "/view",
-    description=f"View file content (up to max {OPS_SIZE_LIMIT} bytes)",
+    description="View file content",
     status_code=status.HTTP_200_OK,
     response_model=GetViewFileResponse,
     response_description="View operation finished successfully",
@@ -305,7 +303,9 @@ async def get_view(
             alias="size",
             description="Value, in bytes, of the size of data to be retrieved from the file.",
         ),
-    ] = OPS_SIZE_LIMIT,
+    ] = 5
+    * 1024
+    * 1024,  # Default to 5 MiB
     offset: Annotated[
         int | None,
         Query(
@@ -329,17 +329,18 @@ async def get_view(
             detail="`size` value must be an integer value greater than 0",
         )
 
-    if size > OPS_SIZE_LIMIT:
+    if size > system.data_operation.max_ops_file_size:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"`size` value must be less than {OPS_SIZE_LIMIT} bytes",
+            detail=f"`size` value must be less than {system.data_operation.max_ops_file_size} bytes",
         )
 
     view = DdCommand(
         path,
         size,
         offset,
-        command_timeout=system.ssh.timeout.command_execution
+        size_limit=system.data_operation.max_ops_file_size,
+        command_timeout=system.ssh.timeout.command_execution,
     )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(view)
@@ -396,7 +397,7 @@ async def get_tail(
         file_bytes,
         lines,
         skip_heading,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
     if lines and file_bytes:
         raise HTTPException(
@@ -446,8 +447,7 @@ async def get_checksum(
     access_token = ApiAuthHelper.get_access_token()
 
     checksum = ChecksumCommand(
-        path,
-        command_timeout=system.ssh.timeout.command_execution
+        path, command_timeout=system.ssh.timeout.command_execution
     )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(checksum)
@@ -475,10 +475,7 @@ async def get_file(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    file = FileCommand(
-        path,
-        command_timeout=system.ssh.timeout.command_execution
-    )
+    file = FileCommand(path, command_timeout=system.ssh.timeout.command_execution)
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(file)
         return {"output": output}
@@ -507,9 +504,7 @@ async def get_stat(
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     stat = StatCommand(
-        path,
-        dereference,
-        command_timeout=system.ssh.timeout.command_execution
+        path, dereference, command_timeout=system.ssh.timeout.command_execution
     )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(stat)
@@ -536,10 +531,7 @@ async def delete_rm(
 ) -> None:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    rm = RmCommand(
-        path,
-        command_timeout=system.ssh.timeout.command_execution
-    )
+    rm = RmCommand(path, command_timeout=system.ssh.timeout.command_execution)
     async with ssh_client.get_client(username, access_token) as client:
         await client.execute(rm)
         return None
@@ -570,7 +562,7 @@ async def post_mkdir(
     mkdir = MkdirCommand(
         target_path=request_model.path,
         parent=request_model.parent,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(mkdir)
@@ -601,7 +593,7 @@ async def post_symlink(
     symlink = SymlinkCommand(
         request_model.path,
         request_model.link_path,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(symlink)
@@ -610,7 +602,7 @@ async def post_symlink(
 
 @router.get(
     "/download",
-    description=f"Download a small file (max {OPS_SIZE_LIMIT} Bytes)",
+    description="Download a small file",
     status_code=status.HTTP_200_OK,
     response_model=None,
     response_description="File downloaded successfully",
@@ -629,29 +621,24 @@ async def get_download(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    base64 = Base64Command(
-        path,
-        command_timeout=system.ssh.timeout.command_execution
-    )
+    base64 = Base64Command(path, command_timeout=system.ssh.timeout.command_execution)
 
     async with ssh_client.get_client(username, access_token) as client:
         output = await client.execute(base64)
         file_content = b64decode(output)
 
-        if len(file_content) > OPS_SIZE_LIMIT:
+        if len(file_content) > system.data_operation.max_ops_file_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail="File to download is too large.",
             )
 
-        return Response(
-            content=file_content, media_type="application/octet-stream"
-        )
+        return Response(content=file_content, media_type="application/octet-stream")
 
 
 @router.post(
     "/upload",
-    description=f"Upload a small file (max {OPS_SIZE_LIMIT} Bytes)",
+    description="Upload a small file",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
     response_description="File uploaded successfully",
@@ -676,12 +663,12 @@ async def post_upload(
     base64 = Base64Command(
         path=f"{path}/{file.filename}",
         decode=True,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
 
     raw_content = file.file.read()
 
-    if len(raw_content) > OPS_SIZE_LIMIT:
+    if len(raw_content) > system.data_operation.max_ops_file_size:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="File to upload is too large.",
@@ -727,7 +714,7 @@ async def post_compress(
         dereference=request_model.dereference,
         compression=request_model.compression,
         operation=TarCommand.Operation.compress,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
 
     async with ssh_client.get_client(username, access_token) as client:
@@ -761,7 +748,7 @@ async def post_extract(
         request_model.target_path,
         compression=request_model.compression,
         operation=TarCommand.Operation.extract,
-        command_timeout=system.ssh.timeout.command_execution
+        command_timeout=system.ssh.timeout.command_execution,
     )
 
     async with ssh_client.get_client(username, access_token) as client:
