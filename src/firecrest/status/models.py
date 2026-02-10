@@ -4,12 +4,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from pydantic import Field
 
 # configs
-from firecrest.config import HPCCluster, DataOperation
+from firecrest.config import HPCCluster
 
 # models
 from lib.models import CamelModel
@@ -27,7 +26,6 @@ class GetLiveness(CamelModel):
 
 class GetSystemsResponse(CamelModel):
     systems: List[HPCCluster]
-    data_operation: Optional[DataOperation] = Field(default=None, nullable=True)
 
 
 class GetNodesResponse(CamelModel):

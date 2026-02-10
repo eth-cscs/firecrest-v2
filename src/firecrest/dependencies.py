@@ -14,9 +14,10 @@ from firecrest.config import (
     DataTransferType,
     HPCCluster,
     HealthCheckType,
+    S3DataTransfer,
     SSHKeysServiceType,
     SchedulerType,
-    SchedulerConnectionMode
+    SchedulerConnectionMode,
 )
 from firecrest.filesystem.models import FilesystemRequestBase
 from firecrest.plugins import settings
@@ -306,9 +307,10 @@ class SchedulerClientDependency:
             case SchedulerType.slurm:
                 return SlurmClient(
                     (
-                        None if system.scheduler.connection_mode == SchedulerConnectionMode.rest
-                        else
-                        await self._get_ssh_client(system_name)
+                        None
+                        if system.scheduler.connection_mode
+                        == SchedulerConnectionMode.rest
+                        else await self._get_ssh_client(system_name)
                     ),
                     system.scheduler.version,
                     system.scheduler.api_version,
@@ -350,12 +352,12 @@ class DataTransferDependency:
     async def _get_scheduler_client(self, system_name):
         return await SchedulerClientDependency()(system_name=system_name)
 
-    def _get_s3_client(self, endpoint_url):
+    def _get_s3_client(self, endpoint_url, data_transfer: S3DataTransfer):
         return get_session().create_client(
             "s3",
-            region_name=settings.data_operation.data_transfer.region,
-            aws_secret_access_key=settings.data_operation.data_transfer.secret_access_key.get_secret_value(),
-            aws_access_key_id=settings.data_operation.data_transfer.access_key_id.get_secret_value(),
+            region_name=data_transfer.region,
+            aws_secret_access_key=data_transfer.secret_access_key.get_secret_value(),
+            aws_access_key_id=data_transfer.access_key_id.get_secret_value(),
             endpoint_url=endpoint_url,
             config=AioConfig(signature_version="s3v4"),
         )
@@ -379,21 +381,22 @@ class DataTransferDependency:
             raise ValueError(
                 f"The system {system_name} has no filesystem defined as default_work_dir"
             )
+        data_transfer = system.data_operation.data_transfer
 
-        match settings.data_operation.data_transfer.service_type:
+        match data_transfer.service_type:
             case DataTransferType.streamer:
 
                 return StreamerDatatransfer(
                     scheduler_client=scheduler_client,
-                    directives=system.datatransfer_jobs_directives,
+                    directives=system.data_operation.datatransfer_jobs_directives,
                     work_dir=work_dir,
                     system_name=system_name,
-                    pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
-                    host=settings.data_operation.data_transfer.host,
-                    port_range=settings.data_operation.data_transfer.port_range,
-                    public_ips=settings.data_operation.data_transfer.public_ips,
-                    wait_timeout=settings.data_operation.data_transfer.wait_timeout,
-                    inbound_transfer_limit=settings.data_operation.data_transfer.inbound_transfer_limit,
+                    pypi_index_url=data_transfer.pypi_index_url,
+                    host=data_transfer.host,
+                    port_range=data_transfer.port_range,
+                    public_ips=data_transfer.public_ips,
+                    wait_timeout=data_transfer.wait_timeout,
+                    inbound_transfer_limit=data_transfer.inbound_transfer_limit,
                     ssh_client=ssh_client,
                 )
 
@@ -401,24 +404,24 @@ class DataTransferDependency:
 
                 return WormholeDatatransfer(
                     scheduler_client=scheduler_client,
-                    directives=system.datatransfer_jobs_directives,
+                    directives=system.data_operation.datatransfer_jobs_directives,
                     work_dir=work_dir,
                     system_name=system_name,
-                    pypi_index_url=settings.data_operation.data_transfer.pypi_index_url,
+                    pypi_index_url=data_transfer.pypi_index_url,
                 )
 
             case DataTransferType.s3:
 
                 async with self._get_s3_client(
-                    settings.data_operation.data_transfer.public_url
+                    data_transfer.public_url, data_transfer
                 ) as s3_client_public:
                     async with self._get_s3_client(
-                        settings.data_operation.data_transfer.private_url.get_secret_value()
+                        data_transfer.private_url.get_secret_value(), data_transfer
                     ) as s3_client_private:
 
                         # This is required because botocore library bucket_name validation is not compliant
                         # with ceph multi tenancy bucket names
-                        if settings.data_operation.data_transfer.tenant:
+                        if data_transfer.tenant:
                             s3_client_public.meta.events.unregister(
                                 "before-parameter-build.s3", validate_bucket_name
                             )
@@ -428,18 +431,18 @@ class DataTransferDependency:
 
                         return S3Datatransfer(
                             scheduler_client=scheduler_client,
-                            directives=system.datatransfer_jobs_directives,
+                            directives=system.data_operation.datatransfer_jobs_directives,
                             s3_client_private=s3_client_private,
                             s3_client_public=s3_client_public,
                             ssh_client=ssh_client,
                             work_dir=work_dir,
-                            bucket_lifecycle_configuration=settings.data_operation.data_transfer.bucket_lifecycle_configuration,
-                            max_part_size=settings.data_operation.data_transfer.multipart.max_part_size,
-                            use_split=settings.data_operation.data_transfer.multipart.use_split,
-                            tmp_folder=settings.data_operation.data_transfer.multipart.tmp_folder,
-                            parallel_runs=settings.data_operation.data_transfer.multipart.parallel_runs,
-                            tenant=settings.data_operation.data_transfer.tenant,
-                            ttl=settings.data_operation.data_transfer.ttl,
+                            bucket_lifecycle_configuration=data_transfer.bucket_lifecycle_configuration,
+                            max_part_size=data_transfer.multipart.max_part_size,
+                            use_split=data_transfer.multipart.use_split,
+                            tmp_folder=data_transfer.multipart.tmp_folder,
+                            parallel_runs=data_transfer.multipart.parallel_runs,
+                            tenant=data_transfer.tenant,
+                            ttl=data_transfer.ttl,
                             system_name=system_name,
                         )
 
