@@ -15,3 +15,9 @@ class WormholeTransferResponse(DataTransferResponse):
 
 class WormholeTransferRequest(DataTransferRequest):
     transfer_method: Literal[DataTransferType.wormhole,]
+
+
+class WormholeTransferUploadRequest(WormholeTransferRequest):
+    wormhole_code: str = Field(
+        nullable=False, description="Wormhole code to use for the transfer"
+    )
