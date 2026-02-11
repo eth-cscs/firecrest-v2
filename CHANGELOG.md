@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation about `streamer` and `wormhole` data trasnfer methods
 - Fix error for PBS jobs when no nodes are assigned to it.
 - Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
+- Remove hardcoded jfrog link from the wormhole download endpoint.
 
 ## [2.4.2]
 
