@@ -138,13 +138,13 @@ On the other hand, if FirecREST is executing a command via the SSH Client, then 
 
 ## Response's header tracing logger
 
-When tracing logs are enabled, you can record a list of specific headers from incoming HTTP requests by configuring the `request_headers_to_trace` field in the logger section of the YAML file.
+When tracing logs are enabled, you can record a list of specific headers from incoming HTTP requests by configuring the `loggable_request_headers` field in the logger section of the YAML file.
 
 !!! example "Configure the Response header tracing logger"
     ```yaml
     logger:
         enable_tracing_log: true
-        request_headers_to_trace:
+        loggable_request_headers:
         - input: "user-agent"    
           output: "user_agent"
         - input: "x-header-1"
@@ -156,5 +156,5 @@ When tracing logs are enabled, you can record a list of specific headers from in
 
 A valid header key in the `input` field tells the logger to extract that header from the incoming HTTP request and inserts it in the JSON log format using the value of the `output` field as key.
 
-If `request_headers_to_trace` is omitted, header tracing is disabled. By default, FirecREST does not log any headers other than those explicitly listed.
+If `loggable_request_headers` is omitted, header tracing is disabled. By default, FirecREST does not log any headers other than those explicitly listed.
 

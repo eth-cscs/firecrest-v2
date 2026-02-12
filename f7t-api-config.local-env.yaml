@@ -164,6 +164,6 @@ data_operation:
   #      timeout: 10
 # logger:
 #   enable_tracing_log: true
-#   request_headers_to_trace:
+#   loggable_request_headers:
 #     - input: "user-agent" 
 #       output: "user_agent"

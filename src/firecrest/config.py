@@ -255,8 +255,11 @@ class ProbingServices(CamelModel):
         None, description="Services to be checked."
     )
     interval_check: int = Field(
-        120, description="Interval in seconds between cluster checks, if not specified the default of 120s is applied.",
-        validation_alias=AliasChoices("interval_check", "interval") # Backward compatibility
+        120,
+        description="Interval in seconds between cluster checks, if not specified the default of 120s is applied.",
+        validation_alias=AliasChoices(
+            "interval_check", "interval"
+        ),  # Backward compatibility
     )
 
 
@@ -570,7 +573,7 @@ class Logger(CamelModel):
         False,
         description="Enable tracing logs.",
     )
-    request_headers_to_trace: Optional[List[dict]] = Field(
+    loggable_request_headers: Optional[List[dict]] = Field(
         [],
         description="Custom HTTP Request's headers to be included in tracing log.",
     )

@@ -341,7 +341,7 @@ firecrest:
     ## enable_tracing_log: enable tracing logs (boolean). Default: false
     # enable_tracing_log: true
     ## enable tracing log of customizable response's headers
-    # request_headers_to_trace:
+    # loggable_request_headers:
     # - input: "header-name-to-trace"
     #   output: "log-field-name"
 
