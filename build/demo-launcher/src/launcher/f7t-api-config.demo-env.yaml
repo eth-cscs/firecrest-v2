@@ -30,12 +30,20 @@ clusters:
     type: "slurm"
     version: "24.11.0"
     timeout: 10
+    connection_mode: "ssh"
   service_account:
     client_id: "firecrest-health-check"
     secret: "demo-secret"
   probing:
     interval_check: 120
     startup_grace_period: 300
+    services:
+      ssh:
+        timeout: 10
+      scheduler:
+        timeout: 10
+      filesystems:
+        timeout: 10        
   file_systems:
     - path: '/users'
       data_type: 'users'
@@ -58,3 +66,4 @@ data_operation:
       tmp_folder: "tmp"    
     probing:
       interval: 60
+      timeout: 5
