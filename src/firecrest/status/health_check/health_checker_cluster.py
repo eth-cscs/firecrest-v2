@@ -21,6 +21,9 @@ from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 from firecrest.plugins import settings
+import ssl
+import certifi
+import os
 
 
 class ClusterHealthChecker:
@@ -42,9 +45,13 @@ class ClusterHealthChecker:
 
     async def check(self) -> None:
         try:
+            ctx = ssl.create_default_context(
+                cafile=os.environ.get("REQUESTS_CA_BUNDLE", certifi.where()),
+            )
             client = AsyncOAuth2Client(
                 self.cluster.service_account.client_id,
                 self.cluster.service_account.secret.get_secret_value(),
+                verify=ctx,
             )
 
             token = await client.fetch_token(
