@@ -88,7 +88,7 @@ async def test_get_job(client, ssh_client, mocked_ssh_qstat_output, pbs_cluster)
         assert response.status_code == 200
         assert response.json() is not None
 
-        assert response.json()["jobs"][0]["jobId"] == 1
+        assert response.json()["jobs"][0]["jobId"] == "1"
         assert response.json()["jobs"][0]["status"]["exitCode"] == 0
 
 

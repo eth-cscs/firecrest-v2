@@ -18,10 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation about `streamer` and `wormhole` data trasnfer methods
 - `buffer_limit` for `/filesystem/<system>/ops/*` operation is now adapted to the value of `settings.data_operation.max_ops_file_size` (it was set to the value by default of 5MB)
 - Updated Demo launcher configuration
+- Fix error for PBS jobs when no nodes are assigned to it.
+- Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
+- Remove hardcoded jfrog link from the wormhole download endpoint.
 
 ## [2.4.2]
 
 ### Added
+
 - File target check in S3 file transfer job for external file upload.
 - `cluster.scheduler.connection_mode` setting to configure how the client connects to the scheduler backend (`ssh`, `rest` or `hybrid`)
 - Get jobs now allows to specify the account parameter.
@@ -33,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - File transfer examples with .NET
-- Fix error for PBS jobs when no nodes are assigned to it.
 
 ## [2.4.1]
 
