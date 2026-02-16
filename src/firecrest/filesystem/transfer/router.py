@@ -13,7 +13,6 @@ from jinja2 import Environment, FileSystemLoader
 
 # plugins
 from firecrest.config import HPCCluster, HealthCheckType
-from firecrest.plugins import settings
 
 # storage
 from firecrest.filesystem.transfer import scripts
@@ -61,8 +60,6 @@ router = create_router(
     tags=["filesystem"],
     dependencies=[Depends(APIAuthDependency(authorize=True))],
 )
-
-OPS_SIZE_LIMIT = settings.data_operation.max_ops_file_size
 
 
 class JobHelper:
@@ -115,7 +112,7 @@ def _format_directives(directives: List[str], account: str):
 
 @router.post(
     "/upload",
-    description=f"Create asynchronous upload operation (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create asynchronous upload operation",
     status_code=status.HTTP_201_CREATED,
     response_model=UploadFileResponse,
     response_description="Upload operation created successfully",
@@ -124,10 +121,22 @@ def _format_directives(directives: List[str], account: str):
 async def post_upload(
     upload_request: PostFileUploadRequest,
     system_name: Annotated[str, Path(description="Target system")],
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler),
+        use_cache=False,
+    ),
     datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
+
+    if (
+        upload_request.transfer_directives.transfer_method.name
+        != system.data_operation.data_transfer.service_type
+    ):
+        raise HTTPException(
+            status_code=400, detail="Requested transfer method is not available."
+        )
 
     source = DataTransferLocation(
         host=None,
@@ -153,7 +162,7 @@ async def post_upload(
 
 @router.post(
     "/download",
-    description=f"Create asynchronous download operation (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create asynchronous download operation",
     status_code=status.HTTP_201_CREATED,
     response_model=DownloadFileResponse,
     response_description="Download operation created successfully",
@@ -161,11 +170,23 @@ async def post_upload(
 )
 async def post_download(
     download_request: PostFileDownloadRequest,
-    system_name: Annotated[str, Path(description="System where the jobs are running")],
+    system_name: Annotated[str, Path(description="Target system")],
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler),
+        use_cache=False,
+    ),
     datatransfer=Depends(DataTransferDependency()),
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
+
+    if (
+        download_request.transfer_directives.transfer_method.name
+        != system.data_operation.data_transfer.service_type
+    ):
+        raise HTTPException(
+            status_code=400, detail="Requested transfer method is not available."
+        )
 
     source = DataTransferLocation(
         host=None,
@@ -191,7 +212,7 @@ async def post_download(
 
 @router.post(
     "/mv",
-    description=f"Create move file or directory operation (`mv`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create move file or directory operation (`mv`)",
     status_code=status.HTTP_201_CREATED,
     response_model=MoveResponse,
     response_description="Move file or directory operation created successfully",
@@ -219,7 +240,7 @@ async def move_mv(
 
     parameters = {
         "sbatch_directives": _format_directives(
-            system.datatransfer_jobs_directives, request.account
+            system.data_operation.datatransfer_jobs_directives, request.account
         ),
         "source_path": request.path,
         "target_path": request.target_path,
@@ -249,7 +270,7 @@ async def move_mv(
 
 @router.post(
     "/cp",
-    description=f"Create copy file or directory operation (`cp`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create copy file or directory operation (`cp`)",
     status_code=status.HTTP_201_CREATED,
     response_model=CopyResponse,
     response_description="Copy file or directory operation created successfully",
@@ -270,7 +291,7 @@ async def post_cp(
 
     parameters = {
         "sbatch_directives": _format_directives(
-            system.datatransfer_jobs_directives, request.account
+            system.data_operation.datatransfer_jobs_directives, request.account
         ),
         "source_path": request.path,
         "target_path": request.target_path,
@@ -310,7 +331,7 @@ async def post_cp(
 
 @router.delete(
     "/rm",
-    description=f"Create remove file or directory operation (`rm`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create remove file or directory operation (`rm`)",
     status_code=status.HTTP_200_OK,
     response_model=DeleteResponse,
     response_description="Remove file or directory operation created successfully",
@@ -340,7 +361,7 @@ async def delete_rm(
 
     parameters = {
         "sbatch_directives": _format_directives(
-            system.datatransfer_jobs_directives, account
+            system.data_operation.datatransfer_jobs_directives, account
         ),
         "path": path,
     }
@@ -368,7 +389,7 @@ async def delete_rm(
 
 @router.post(
     "/compress",
-    description=f"Create compress file or directory operation (`tar`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create compress file or directory operation (`tar`)",
     status_code=status.HTTP_201_CREATED,
     response_model=CompressResponse,
     response_description="Compress file or directory operation created successfully",
@@ -418,7 +439,7 @@ async def compress(
 
     parameters = {
         "sbatch_directives": _format_directives(
-            system.datatransfer_jobs_directives, request.account
+            system.data_operation.datatransfer_jobs_directives, request.account
         ),
         "source_dir": source_dir,
         "source_file": source_file,
@@ -453,7 +474,7 @@ async def compress(
 
 @router.post(
     "/extract",
-    description=f"Create extract file operation (`tar`) (for files larger than {OPS_SIZE_LIMIT} Bytes)",
+    description="Create extract file operation (`tar`)",
     status_code=status.HTTP_201_CREATED,
     response_model=ExtractResponse,
     response_description="Extract file or directory operation created successfully",
@@ -496,7 +517,7 @@ async def extract(
 
     parameters = {
         "sbatch_directives": _format_directives(
-            system.datatransfer_jobs_directives, request.account
+            system.data_operation.datatransfer_jobs_directives, request.account
         ),
         "source_path": request.path,
         "target_path": request.target_path,

@@ -6,7 +6,7 @@
 import asyncio
 import time
 
-from firecrest.config import HPCCluster, HealthCheckException
+from firecrest.config import HPCCluster, HealthCheckException, DataTransferType
 
 from firecrest.status.health_check.checks.health_check_filesystem import (
     FilesystemHealthCheck,
@@ -17,6 +17,10 @@ from firecrest.status.health_check.checks.health_check_scheduler import (
 from firecrest.status.health_check.checks.health_check_ssh import (
     SSHHealthCheck,
 )
+from firecrest.status.health_check.checks.health_check_s3 import (
+    S3HealthCheck,
+)
+
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from authlib.integrations.httpx_client import AsyncOAuth2Client
@@ -85,6 +89,15 @@ class ClusterHealthChecker:
                             timeout=services["filesystems"].timeout,
                         )
                         checks += [filesystemCheck.check()]
+
+                if "storage" in services:
+                    match self.cluster.data_operation.data_transfer.service_type:
+                        case DataTransferType.s3:
+                            s3Check = S3HealthCheck(
+                                data_transfer=self.cluster.data_operation.data_transfer,
+                                timeout=services["storage"].timeout,
+                            )
+                            checks += [s3Check.check()]
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results

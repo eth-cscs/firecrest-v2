@@ -133,7 +133,7 @@ class WormholeDatatransfer(DataTransferBase):
             "sbatch_directives": _format_directives(self.directives, account),
             "source": source.path,
             "wormhole_code": wormhole_code,
-            "pypi_index_url": "https://jfrog.svc.cscs.ch/artifactory/api/pypi/pypi-remote/simple",
+            "pypi_index_url": self.pypi_index_url,
         }
 
         job = JobHelper(

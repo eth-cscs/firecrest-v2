@@ -64,10 +64,16 @@ async def s3_client():
     global global_s3_client
     async with get_session().create_client(
         "s3",
-        region_name=settings.data_operation.data_transfer.region,
-        aws_secret_access_key=settings.data_operation.data_transfer.secret_access_key,
-        aws_access_key_id=settings.data_operation.data_transfer.access_key_id.get_secret_value(),
-        endpoint_url=settings.data_operation.data_transfer.private_url.get_secret_value(),
+        region_name=settings.clusters[0].data_operation.data_transfer.region,
+        aws_secret_access_key=settings.clusters[
+            0
+        ].data_operation.data_transfer.secret_access_key,
+        aws_access_key_id=settings.clusters[
+            0
+        ].data_operation.data_transfer.access_key_id.get_secret_value(),
+        endpoint_url=settings.clusters[
+            0
+        ].data_operation.data_transfer.private_url.get_secret_value(),
         config=AioConfig(signature_version="s3v4"),
     ) as client:
         global_s3_client = client
@@ -111,7 +117,7 @@ class OverrideDataTransferDependency(DataTransferDependency):
         return await OverrideSchedulerClient()(system_name=system_name)
 
     @asynccontextmanager
-    async def _get_s3_client(self, endpoint_url):
+    async def _get_s3_client(self, endpoint_url, data_transfer):
         global global_s3_client
         yield global_s3_client
 

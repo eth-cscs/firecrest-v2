@@ -4,26 +4,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.config import (
+    BaseDataTransfer,
     S3ServiceHealth,
 )
 from aiobotocore.session import get_session
 from aiobotocore.config import AioConfig
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
-from firecrest.plugins import settings
 
 
 class S3HealthCheck(HealthCheckBase):
 
-    def __init__(self, timeout: int):
+    def __init__(self, data_transfer: BaseDataTransfer, timeout: int):
         super().__init__()
         self.timeout = timeout
+        self.data_transfer = data_transfer
 
     def _get_s3_client(self, endpoint_url):
         return get_session().create_client(
             "s3",
-            region_name=settings.data_operation.data_transfer.region,
-            aws_secret_access_key=settings.data_operation.data_transfer.secret_access_key.get_secret_value(),
-            aws_access_key_id=settings.data_operation.data_transfer.access_key_id.get_secret_value(),
+            region_name=self.data_transfer.region,
+            aws_secret_access_key=self.data_transfer.secret_access_key.get_secret_value(),
+            aws_access_key_id=self.data_transfer.access_key_id.get_secret_value(),
             endpoint_url=endpoint_url,
             config=AioConfig(signature_version="s3v4"),
         )
@@ -34,7 +35,7 @@ class S3HealthCheck(HealthCheckBase):
         health.healthy = True
 
         async with self._get_s3_client(
-            settings.data_operation.data_transfer.private_url.get_secret_value()
+            self.data_transfer.private_url.get_secret_value()
         ) as s3_client:
             paginator = s3_client.get_paginator("list_buckets")
             iterator = paginator.paginate(PaginationConfig={"MaxItems": 1})

@@ -257,49 +257,49 @@ firecrest:
         ## default_work_dir: Mark this as the default working directory (ie, for default scheduler logs)
         ## it's a boolean option (true or false)
         default_work_dir: true
-
-    ## datatransfer_jobs_directives: Custom scheduler flags passed to data transfer jobs
-    ## (e.g. -pxfer for a dedicated partition).
-    ## example:
-    ## datatransfer_jobs_directives:
-    ##   - "#SBATCH --partition=xfer"
-    ##   - "#SBATCH --ntasks=1"
-    datatransfer_jobs_directives:
-      - "#SBATCH --ntasks=1"
     
-
-  ## Configuration for data transfers and small operations  
-  data_operation:
-    ## max_ops_file_size: maximum file size (in bytes) allowed for direct upload and download.
-    max_ops_file_size: 5242880 # 5M
-    ## Data transfer service configuration
-    data_transfer:
-      ## service_type: Type of data transfer service (available option "s3")
-      service_type: "s3"
-      ## name: name identifier for the storage.
-      name: "s3-storage"
-      ## private_url: Private/internal endpoint URL for the storage.
-      private_url: ""
-      ## public_url: Public/external endpoint URL for the storage.
-      public_url: ""
-      ## access_key_id: access key ID for S3-compatible storage
-      access_key_id: ""
-      ## secret_access_key: Secret access key for storage. You can give directly the content or the file path using 'secret_file:/path/to/file'
+    ## Configuration for data transfers and small operations  
+    data_operation:
+      ## max_ops_file_size: maximum file size (in bytes) allowed for direct upload and download.
+      max_ops_file_size: 5242880 # 5M
+      ## Data transfer service configuration
+      
+      ## datatransfer_jobs_directives: Custom scheduler flags passed to data transfer jobs
+      ## (e.g. -pxfer for a dedicated partition).
       ## example:
-      ##  secret_access_key: "secret_file:/app/secrets/s3_secret_access_key"
-      secret_access_key: ""
-      ## region: Region of the storage bucket.
-      ## example
-      ## region: "eu-central-1"
-      region: "eu-central-1"
-      ## tenant: Optional tenant identifier for multi-tenant setups.
-      ## example
-      ##  tenant: "firecrest"
-      # tenant: ""
-      ## ttl: Time-to-live (in seconds) for generated URLs.
-      ## example for one day:
-      ##  ttl: 86400
-      ttl: 86400
+      ## datatransfer_jobs_directives:
+      ##   - "#SBATCH --partition=xfer"
+      ##   - "#SBATCH --ntasks=1"
+      datatransfer_jobs_directives:
+        - "#SBATCH --ntasks=1"
+      data_transfer:
+        ## service_type: Type of data transfer service (available option "s3")
+        service_type: "s3"
+        ## name: name identifier for the storage.
+        name: "s3-storage"
+        ## private_url: Private/internal endpoint URL for the storage.
+        private_url: ""
+        ## public_url: Public/external endpoint URL for the storage.
+        public_url: ""
+        ## access_key_id: access key ID for S3-compatible storage
+        access_key_id: ""
+        ## secret_access_key: Secret access key for storage. You can give directly the content or the file path using 'secret_file:/path/to/file'
+        ## example:
+        ##  secret_access_key: "secret_file:/app/secrets/s3_secret_access_key"
+        secret_access_key: ""
+        ## region: Region of the storage bucket.
+        ## example
+        ## region: "eu-central-1"
+        region: "eu-central-1"
+        ## tenant: Optional tenant identifier for multi-tenant setups.
+        ## example
+        ##  tenant: "firecrest"
+        # tenant: ""
+        ## ttl: Time-to-live (in seconds) for generated URLs.
+        ## example for one day:
+        ##  ttl: 86400
+        ttl: 86400
+
 
       ## Configuration for multipart upload behavior.
       # multipart:

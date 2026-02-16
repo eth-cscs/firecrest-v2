@@ -229,16 +229,6 @@ class HealthCheckException(BaseServiceHealth):
     pass
 
 
-class Probing(CamelModel):
-    """Cluster monitoring attributes."""
-
-    interval: int = Field(
-        ..., description="Interval in seconds between cluster checks."
-    )
-
-    timeout: int = Field(..., description="Maximum time in seconds allowed per check.")
-
-
 class ProbingService(CamelModel):
     """Health check enable settings."""
 
@@ -271,17 +261,6 @@ class BaseDataTransfer(CamelModel):
         DataTransferType.wormhole,
         DataTransferType.streamer,
     ] = Field(None, description="Type of data transfer service.")
-
-    probing: Optional[Probing] = Field(
-        None,
-        description="Configuration for probing storage availability.",
-        nullable=True,
-    )
-    servicesHealth: Optional[List[S3ServiceHealth | HealthCheckException]] = Field(
-        None,
-        description="Optional health information for different services in the cluster.",
-        nullable=True,
-    )
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -364,6 +343,10 @@ class StreamerDataTransfer(BaseDataTransfer):
 
 
 class DataOperation(BaseModel):
+    datatransfer_jobs_directives: List[str] = Field(
+        default_factory=list,
+        description="Custom scheduler flags passed to data transfer jobs (e.g. `-pxfer` for a dedicated partition).",
+    )
     max_ops_file_size: int = Field(
         5 * 1024 * 1024,
         description=(
@@ -437,6 +420,12 @@ class HPCCluster(CamelModel):
     [the systems' section](../arch/systems//README.md).
     """
 
+    @pydantic.field_validator("name", mode="before")
+    def to_lowercase(cls, value):
+        if isinstance(value, str):
+            return value.lower()
+        return value
+
     name: str = Field(
         ..., description="Unique name for the cluster. This field is case insensitive."
     )
@@ -452,6 +441,7 @@ class HPCCluster(CamelModel):
             SchedulerServiceHealth
             | FilesystemServiceHealth
             | SSHServiceHealth
+            | S3ServiceHealth
             | HealthCheckException
         ]
     ] = Field(
@@ -469,16 +459,14 @@ class HPCCluster(CamelModel):
         default_factory=list,
         description="List of mounted file systems on the cluster, such as scratch or home directories.",
     )
-    datatransfer_jobs_directives: List[str] = Field(
-        default_factory=list,
-        description="Custom scheduler flags passed to data transfer jobs (e.g. `-pxfer` for a dedicated partition).",
+    data_operation: DataOperation = Field(
+        DataOperation(),
+        description=(
+            "Data transfer backend configuration. More details in "
+            "[this section](../arch/external_storage/README.md)."
+        ),
+        nullable=False,
     )
-
-    @pydantic.field_validator("name", mode="before")
-    def to_lowercase(cls, value):
-        if isinstance(value, str):
-            return value.lower()
-        return value
 
 
 class OpenFGA(CamelModel):
@@ -613,14 +601,6 @@ class Settings(BaseSettings):
     )
     clusters: List[HPCCluster] = Field(
         default_factory=list, description="List of configured HPC clusters."
-    )
-    data_operation: DataOperation = Field(
-        DataOperation(),
-        description=(
-            "Data transfer backend configuration. More details in "
-            "[this section](../arch/external_storage/README.md)."
-        ),
-        nullable=False,
     )
     logger: Logger = Field(
         default_factory=Logger, description="Logging configuration options."
