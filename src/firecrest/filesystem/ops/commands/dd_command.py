@@ -5,13 +5,9 @@
 
 # commands
 
-from firecrest.plugins import settings
-
 from firecrest.filesystem.ops.commands.base_command_with_timeout import (
     BaseCommandWithTimeout,
 )
-
-OPS_SIZE_LIMIT = settings.data_operation.max_ops_file_size
 
 
 class DdCommand(BaseCommandWithTimeout):
@@ -21,12 +17,13 @@ class DdCommand(BaseCommandWithTimeout):
         target_path: str = None,
         size: int = None,
         offset: int = 0,
-        command_timeout: int = 5
+        size_limit: int = None,
+        command_timeout: int = 5,
     ) -> None:
         super().__init__(command_timeout=command_timeout)
 
         self.target_path = target_path
-        self.size = OPS_SIZE_LIMIT if (size is None or size > OPS_SIZE_LIMIT) else size
+        self.size = size_limit if (size is None or size > size_limit) else size
         self.offset = offset
 
         if offset is None:

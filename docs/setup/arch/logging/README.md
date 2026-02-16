@@ -135,3 +135,26 @@ On the other hand, if FirecREST is executing a command via the SSH Client, then 
     2025-04-15 16:59:46,478 - f7t_v2_tracing_log - INFO - {'username': 'fireuser', 'system_name': 'cluster-slurm-ss', 'endpoint': '/status/cluster-slurm-ss/partitions', 'resource': 'status', 'status_code': 404, 'user_agent': 'PostmanRuntime/7.43.2'}
     2025-04-15 16:59:57,159 - f7t_v2_tracing_log - INFO - {'username': 'fireuser', 'system_name': 'cluster-slurm-ssh', 'endpoint': '/status/cluster-slurm-ssh/nodes', 'resource': 'status', 'status_code': 200, 'user_agent': 'PostmanRuntime/7.43.2', 'backend': {'command': "sinfo -N --noheader --format='%z|%c|%O|%e|%f|%N|%o|%n|%T|%R|%w|%v|%m|%C'", 'exit_status': '0'}}
     ```
+
+## Response's header tracing logger
+
+When tracing logs are enabled, you can record a list of specific headers from incoming HTTP requests by configuring the `loggable_request_headers` field in the logger section of the YAML file.
+
+!!! example "Configure the Response header tracing logger"
+    ```yaml
+    logger:
+        enable_tracing_log: true
+        loggable_request_headers:
+        - input: "user-agent"    
+          output: "user_agent"
+        - input: "x-header-1"
+          output: "log-field-1"
+        - input: "x-header-2"
+          output: "log-field-2"
+        - ...
+    ```
+
+A valid header key in the `input` field tells the logger to extract that header from the incoming HTTP request and inserts it in the JSON log format using the value of the `output` field as key.
+
+If `loggable_request_headers` is omitted, header tracing is disabled. By default, FirecREST does not log any headers other than those explicitly listed.
+

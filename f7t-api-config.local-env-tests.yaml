@@ -31,14 +31,32 @@ clusters:
         timeout: 5
       filesystems:
         timeout: 5
-  datatransfer_jobs_directives:
-    - "#SBATCH --nodes=1"
-    - "#SBATCH --time=0-00:15:00"
-    - "#SBATCH --account={account}"
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+    - "#SBATCH --nodes=1"
+    - "#SBATCH --time=0-00:15:00"
+    - "#SBATCH --account={account}"
+    data_transfer:
+      name: "s3-storage"
+      service_type: "s3"
+      private_url: "http://192.168.240.19:9000"
+      public_url: "http://localhost:9000"
+      access_key_id: "storage_access_key"
+      secret_access_key: ""
+      region: "us-east-1"
+      ttl: 604800
+      multipart:
+        use_split: false
+        max_part_size: 1073741824 # 1G
+        parallel_runs: 3
+        tmp_folder: "tmp"
 - name: "cluster-SLURM-ssh"
   ssh:
     host: "192.168.240.2"
@@ -58,13 +76,32 @@ clusters:
         timeout: 10
       filesystems:
         timeout: 10
-  datatransfer_jobs_directives:
-    - "#SBATCH --nodes=1"
-    - "#SBATCH --time=0-00:15:00"
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+      - "#SBATCH --nodes=1"
+      - "#SBATCH --time=0-00:15:00"
+      - "#SBATCH --account={account}"
+    data_transfer:
+      name: "s3-storage"
+      service_type: "s3"
+      private_url: "http://192.168.240.19:9000"
+      public_url: "http://localhost:9000"
+      access_key_id: "storage_access_key"
+      secret_access_key: ""
+      region: "us-east-1"
+      ttl: 604800
+      multipart:
+        use_split: false
+        max_part_size: 1073741824 # 1G
+        parallel_runs: 3
+        tmp_folder: "tmp"
 - name: "cluster-pbs"
   ssh:
     host: "192.168.240.2"
@@ -79,29 +116,34 @@ clusters:
     secret: ""
   probing:
     interval_check: 60
-  datatransfer_jobs_directives:
-    - "#PBS -l nodes=1:ppn=1"
-    - "#PBS -l walltime=00:15:00"
+    services:
+      ssh:
+        timeout: 10
+      filesystems:
+        timeout: 10
+      storage:
+        timeout: 20
   file_systems:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
-data_operation:
-  max_ops_file_size: 1048576 # 1M
-  data_transfer:
-    name: "s3-storage"
-    service_type: "s3"
-    private_url: "http://192.168.240.19:9000"
-    public_url: "http://localhost:9000"
-    access_key_id: "storage_access_key"
-    secret_access_key: ""
-    region: "us-east-1"
-    ttl: 604800
-    multipart:
-      use_split: false
-      max_part_size: 1073741824 # 1G
-      parallel_runs: 3
-      tmp_folder: "tmp"
-    probing:
-      interval: 60
-      timeout: 10
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+      - "#PBS -l nodes=1:ppn=1"
+      - "#PBS -l walltime=00:15:00"
+      - "#PBS -A {account}"
+    data_transfer:
+      name: "s3-storage"
+      service_type: "s3"
+      private_url: "http://192.168.240.19:9000"
+      public_url: "http://localhost:9000"
+      access_key_id: "storage_access_key"
+      secret_access_key: ""
+      region: "us-east-1"
+      ttl: 604800
+      multipart:
+        use_split: false
+        max_part_size: 1073741824 # 1G
+        parallel_runs: 3
+        tmp_folder: "tmp"

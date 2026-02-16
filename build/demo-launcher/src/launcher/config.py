@@ -45,11 +45,6 @@ class UnsafeServiceAccount(ServiceAccount):
     secret: str
 
 
-class UnsafeHPCCluster(HPCCluster):
-    service_account: UnsafeServiceAccount
-    ssh: UnsafeSSHClientPool
-
-
 class UnsafeS3DataTransfer(BaseDataTransfer):
     service_type: str
     name: str
@@ -65,7 +60,12 @@ class UnsafeDataOperation(DataOperation):
     data_transfer: UnsafeS3DataTransfer
 
 
+class UnsafeHPCCluster(HPCCluster):
+    service_account: UnsafeServiceAccount
+    ssh: UnsafeSSHClientPool
+    data_operation: UnsafeDataOperation
+
+
 class UnsafeSettings(Settings):
     ssh_credentials: UnsafeSSHUserKeys
     clusters: List[UnsafeHPCCluster] = []
-    data_operation: UnsafeDataOperation
