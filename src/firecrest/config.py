@@ -561,6 +561,10 @@ class Logger(CamelModel):
         False,
         description="Enable tracing logs.",
     )
+    loggable_request_headers: Optional[List[dict]] = Field(
+        [],
+        description="Custom HTTP Request's headers to be included in tracing log.",
+    )
 
 
 class Settings(BaseSettings):

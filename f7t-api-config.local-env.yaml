@@ -169,3 +169,8 @@ clusters:
       - "#PBS -V"
     data_transfer:
       service_type: "wormhole"
+# logger:
+#   enable_tracing_log: true
+#   loggable_request_headers:
+#     - input: "user-agent" 
+#       output: "user_agent"

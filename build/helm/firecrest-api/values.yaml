@@ -340,6 +340,10 @@ firecrest:
   #logger:
     ## enable_tracing_log: enable tracing logs (boolean). Default: false
     # enable_tracing_log: true
+    ## enable tracing log of customizable response's headers
+    # loggable_request_headers:
+    # - input: "header-name-to-trace"
+    #   output: "log-field-name"
 
 ## Post-start lifecycle hook configuration
 ## When enabled, it will execute the script located at /app/scripts/postStart-script.sh
