@@ -62,7 +62,7 @@ router_liveness = create_router(
     response_description="System list returned successfully",
 )
 async def get_systems() -> Any:
-    return {"systems": settings.clusters, "data_operation": settings.data_operation}
+    return {"systems": settings.clusters}
 
 
 @router_on_systen.get(
@@ -193,7 +193,9 @@ async def get_liveness() -> Any:
         oldest_check = 0
 
     for cluster in settings.clusters:
-        time_difference = (datetime.now(timezone.utc) - cluster.last_health_check).seconds
+        time_difference = (
+            datetime.now(timezone.utc) - cluster.last_health_check
+        ).seconds
         if time_difference > oldest_check:
             oldest_check = time_difference
         healthcheck_runs[cluster.name] = cluster.last_health_check

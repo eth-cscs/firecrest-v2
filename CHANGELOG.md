@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- ***⚠️ Configuration Breaking*** `data_operation` and `data_transfer` settings are now configurable independently for each cluster.
+- ***⚠️ Configuration Breaking*** `datatransfer_jobs_directives` setting is now under `data_operation`.
+
 ### Fixed
 
 - ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).

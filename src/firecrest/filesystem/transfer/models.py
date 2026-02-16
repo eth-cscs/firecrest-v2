@@ -12,6 +12,7 @@ from lib.datatransfers.datatransfer_base import DataTransferOperation
 from lib.datatransfers.magic_wormhole.models import (
     WormholeTransferRequest,
     WormholeTransferResponse,
+    WormholeTransferUploadRequest,
 )
 from lib.datatransfers.s3.models import S3TransferRequest, S3TransferResponse
 from lib.datatransfers.streamer.models import (
@@ -24,7 +25,7 @@ from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 class PostFileUploadRequest(FilesystemRequestBase):
     transfer_directives: Union[
-        WormholeTransferRequest | S3TransferRequest | StreamerTransferRequest
+        WormholeTransferUploadRequest | S3TransferRequest | StreamerTransferRequest
     ] = Field(
         ..., description="Data transfer parameters specific to the transfer method"
     )
