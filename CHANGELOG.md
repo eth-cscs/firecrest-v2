@@ -9,9 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Documentation about `streamer` and `wormhole` data transfer methods
-- Customizable Response's headers tracing log
-
 ### Changed
 
 - ***⚠️ Configuration Breaking*** `data_operation` and `data_transfer` settings are now configurable independently for each cluster.
@@ -25,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix error for PBS jobs when no nodes are assigned to it.
 - Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Remove hardcoded jfrog link from the wormhole download endpoint.
+- Customizable Response's headers tracing log
 
 ## [2.4.2]
 
