@@ -202,7 +202,6 @@ class SSHClientPool:
             known_hosts=None,
             connect_timeout=self.connect_timeout,
             login_timeout=self.login_timeout,
-            window=self.buffer_limit,
         )
 
         return options
