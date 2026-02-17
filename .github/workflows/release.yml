@@ -152,7 +152,9 @@ jobs:
         run: |
           echo ${{ steps.oasdiff.outputs}}
           if [[ "${{ steps.semver.outputs.patch }}" != "0" ]]; then
-            if [[ "${{ steps.oasdiff.outputs.breaking }}" == "true" ]]; then
+            if [[ "${{ steps.oasdiff.outputs.breaking }}" == "No breaking changes" ]]; then
+              echo "✅ No breaking changes found"
+            else
               echo "❌ Breaking API change detected — PATCH releases cannot include breaking changes."
               exit 1
             fi
