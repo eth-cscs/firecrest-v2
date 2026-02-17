@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1413,22 +1413,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#motivation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architecture
+        Motivation
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Architecture">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#types-of-data-transfer-using-firecrest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types of data transfer using FirecREST
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of data transfer using FirecREST">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#external-data-upload" class="md-nav__link">
+  <a href="#s3datatransfer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        External Data Upload
+        S3DataTransfer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="S3DataTransfer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#s3datatransfer-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        S3DataTransfer Upload
       
     </span>
   </a>
@@ -1436,10 +1459,76 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#download-data-from-extern" class="md-nav__link">
+  <a href="#s3datatransfer-download" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Download Data From Extern
+        S3DataTransfer Download
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streamerdatatransfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StreamerDataTransfer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="StreamerDataTransfer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#streamerdatatransfer-download-and-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StreamerDataTransfer Download and Upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wormholedatatransfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WormholeDataTransfer
       
     </span>
   </a>
@@ -1569,18 +1658,31 @@
 
 
 <h1 id="data-transfer">Data Transfer<a class="headerlink" href="#data-transfer" title="Permanent link">&para;</a></h1>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>FirecREST enables users to upload and download large data files of <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">up to 5TB each</a>, utilizing S3 buckets as a data buffer. 
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
+<p>There are 2 endpoints that performs data transfer (upload and download) using FirecREST:</p>
+<ol>
+<li><code>filesystem/&lt;system&gt;/ops/upload[|download]</code>, which is meant for small files data transfer, which blocks the interface of FirecREST, and</li>
+<li><code>filesystem/&lt;system&gt;/transfer/upload[|download]</code>, which is designed to handle large data transfer, using another API or transfer service to perform the operation, which doesn't block FirecREST API.</li>
+</ol>
+<p>In this section we discuss the latter.</p>
+<h2 id="types-of-data-transfer-using-firecrest">Types of data transfer using FirecREST<a class="headerlink" href="#types-of-data-transfer-using-firecrest" title="Permanent link">&para;</a></h2>
+<p>FirecREST presents various types of data transfer that can be selected using the <a href="../../../setup/conf/#dataoperation">Data Operation</a> configuration.</p>
+<h3 id="s3datatransfer"><code>S3DataTransfer</code><a class="headerlink" href="#s3datatransfer" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Configuration for S3 Data Transfer can be found in this <a href="../../../setup/conf/#s3datatransfer">link</a></p>
+</div>
+<p>FirecREST enables users to upload and download large data files of <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">up to 5TB each</a>, utilizing S3 buckets as a data buffer.
 Users requesting data uploads or downloads to the HPC infrastructure receive <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html">presigned URLs</a> to transfer data to or from the S3 storage.</p>
 <p>Ownership of buckets and data remains with the FirecREST service account, but FirecREST creates one <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html#CoreConcepts">bucket</a> per user. Each file transferred (uploaded or downloaded) is stored in a unique identified <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html">data object</a> into the user's bucket. Data objects within the buckets are retained for a configurable period, managed through S3's <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-expire-general-considerations.html">lifecycle expiration</a> functionality. This expiration period, expressed in days, can be specified using the <a href="../../conf/#bucketlifecycleconfiguration"><code>bucket_lifecycle_configuration</code></a> parameter.</p>
 <p>The S3 storage can be either on-premises or cloud-based. In any case it is required an valid service account having sufficient permissions to handle buckets creation and the generation of presigned URLs.</p>
-<h3 id="external-data-upload">External Data Upload<a class="headerlink" href="#external-data-upload" title="Permanent link">&para;</a></h3>
+<h4 id="s3datatransfer-upload"><code>S3DataTransfer</code> Upload<a class="headerlink" href="#s3datatransfer-upload" title="Permanent link">&para;</a></h4>
 <p>Uploading data from the extern of the HPC infrastructure requires users to apply the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html">multipart upload protocol</a>, therefore the data file shall be divided into parts. The size limit of each part is defined in the response of FirecREST to the upload call. </p>
 <p>Tha maximum size of the parts can be configured via the <a href="../../conf/#multipartupload"><code>max_part_size parameter</code></a>. The specified value must be lower than <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">S3's maximum limit</a> of 5GB per part and it is applied to any upload data call. When setting this value, please consider that clients using this protocol to upload parts may need to store them in memory before streaming the data to S3. Therefore, setting a large value for this parameter could impact clients utilizing FirecREST for data uploads. S3 limits the file uploads to <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">5TB</a> with a maximum of <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">10,000 parts</a>. To fully utilize the maximum number of parts for transferring the largest allowable file, each part should be approximately 525 MB. FirecREST's default is set to 1GB per part.</p>
 <p>The user needs to specify the name of the file to be uploaded, the destination path on the HPC cluster and the size of the file, which allows FirecREST to properly generate the set of presigned URLs for uploading each part. </p>
 <p>After the user completes the upload process, an already scheduled job transfers the data from the S3 bucket to its final destination on the HPC cluster, typically in a dedicated storage. To enhance performance, this job should be scheduled on a partition capable of supporting concurrent executions to enable parallel data transfers. The implementation of this partition may vary based on the hardware resources available in the cluster. Utilizing dedicated nodes could further improve responsiveness and improve the overall throughput of the data transfer.</p>
 <p>The diagram below illustrates the sequence of calls required to correctly process an upload.</p>
-<p><img alt="external storage upload" src="../../../assets/img/external_storage_upload.svg" /></p>
+<p><img alt="external storage upload" src="../../../assets/img/external_storage_s3_upload.svg" /></p>
 <ol>
 <li>The user calls API resource <code>transfer/upload</code> of endpoint <code>filesystem</code> with the parameters<ul>
 <li><code>path</code>: destination of the file in the HPC cluster</li>
@@ -1606,12 +1708,12 @@ Users requesting data uploads or downloads to the HPC infrastructure receive <a 
 <li>The data transfer job detects the upload completion</li>
 <li>The data transfer job downloads the incoming data from S3 to the destination specified by the user</li>
 </ol>
-<h3 id="download-data-from-extern">Download Data From Extern<a class="headerlink" href="#download-data-from-extern" title="Permanent link">&para;</a></h3>
+<h4 id="s3datatransfer-download"><code>S3DataTransfer</code> Download<a class="headerlink" href="#s3datatransfer-download" title="Permanent link">&para;</a></h4>
 <p>Exporting large data file from the HPC cluster to external systems begins with a user's request to download data. FirecREST returns a presigned URL to access the S3 object and then it schedules a job to upload the data to an S3 object into the user's data bucket. The user must wait until the upload process within the HPC infrastructure is fully complete before accessing the data on S3.</p>
 <p>To address any potential limitations, FirecREST schedules a job to transfer data to S3 using the multipart upload protocol. This process is entirely transparent to the user and ensures that the S3 object becomes accessible only once the transfer is successfully completed.</p>
 <p>Once the presigned URL is provided by FirecREST, users can access the S3 bucket without any restrictions. The maximum file size allowed for a single download by S3 accommodates even large exported data files, in a single transfer.</p>
 <p>The diagram below illustrates the sequence of calls required to correctly process a download.</p>
-<p><img alt="external storage upload" src="../../../assets/img/external_storage_download.svg" /></p>
+<p><img alt="external storage upload" src="../../../assets/img/external_storage_s3_download.svg" /></p>
 <ol>
 <li>The user calls API resource <code>transfer/download</code> of the <code>filesystem</code> endpoint providing the following parameter<ul>
 <li><code>path</code>: source of the file in the HPC cluster</li>
@@ -1627,6 +1729,47 @@ Users requesting data uploads or downloads to the HPC infrastructure receive <a 
 <li>Once the transfer is complete, the user can access the S3 object in the bucket until the expiration period ends</li>
 </ol>
 <p>Although single-file download is an option, S3 supports <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-range-requests">HTTP Range Request</a>, which can be used to parallelly download chunks of a file stored in the S3 bucket.</p>
+<h3 id="streamerdatatransfer"><code>StreamerDataTransfer</code><a class="headerlink" href="#streamerdatatransfer" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Configuration for Streamer Data Transfer can be found in this <a href="../../../setup/conf/#streamerdatatransfer">link</a></p>
+</div>
+<p>When requested, FirecREST creates a scheduler job that opens a <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">websocket</a> on a port from a range of available ports on a compute node of the cluster. </p>
+<p>Once opened, this websocket is able to receive or transmit chunks of data using the <a href="https://pypi.org/project/firecrest-streamer/"><code>firecrest-streamer</code></a> Python library, which is developed and maintained by the FirecREST team.</p>
+<h4 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h4>
+<p>When compared to the <code>S3DataTransfer</code>, this method has a number of advantages:</p>
+<ul>
+<li>Data transfer is perfomed as point-to-point between the user and the target remote filesystem</li>
+<li>The staging area is no longer needed, which prevents writing the data twice for one operation</li>
+<li>There is no limit on the amount of data to be transferred, this is an improvement compared with the 5TB of <code>S3DataTransfer</code></li>
+<li>There is no need for splitting the file before the upload when it's larger than 5 GB</li>
+<li>To avoid that an idle transfer occupies a shared resource such as a compute node, an <code>wait_timeout</code> parameter can be configured. Once this timeout is achieved, the job is cancelled automatically.</li>
+<li>Additionally, to prevent that the data transferred exceeds the capacity supported by the HPC centre, the parameter <code>inbound_transfer_limit</code> limits the amount of data that can be received.</li>
+</ul>
+<h4 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h4>
+<p>It's important to mention that using this data transfer type assumes that the compute nodes where the websocket are opened has public IP or DNS address and the range of ports selected for the data streaming are opened to external networks as well.</p>
+<p>Additionally, users must use the <code>firecrest-streamer</code> python library (or CLI tool) in order to perform the data transfer.</p>
+<h4 id="streamerdatatransfer-download-and-upload"><code>StreamerDataTransfer</code> Download and Upload<a class="headerlink" href="#streamerdatatransfer-download-and-upload" title="Permanent link">&para;</a></h4>
+<p><img alt="streamer transfer" src="../../../assets/img/external_storage_streamer.svg" /></p>
+<ol>
+<li>User calls the API resource <code>transfer/download</code> or <code>transfer/upload</code>, requesting the data transfer of a file.</li>
+<li>FirecREST creates a data transfer job using the scheduler and launching the <code>firecrest-streamer</code> server.</li>
+<li>This server opens an available port (from the range of ports that are configured) and returns an unique "coordinate", which acts as a shared secret between the server and the user client</li>
+<li>FirecREST response holds the "coordinates" to perform the poit-to-point data transfer between the user and the remote filesystem</li>
+<li>Using the <code>firecrest-streamer</code> client, the user performs the upload or download. </li>
+</ol>
+<h3 id="wormholedatatransfer"><code>WormholeDataTransfer</code><a class="headerlink" href="#wormholedatatransfer" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Configuration for Wormhole Data Transfer can be found in this <a href="../../../setup/conf/#wormholedatatransfer">link</a></p>
+</div>
+<p>This data transfer type enables <a href="https://magic-wormhole.readthedocs.io/en/latest/">Magic Wormhole</a> integration for data transfer through FirecREST.</p>
+<p>The idea behind is the same as with the [StreamerDataTransfer]: a job is created on the scheduler and it creates a Magic Wormhole server that can <code>receive</code> or <code>send</code> chunks of data using a Magic Wormhole Relay Server and a Rendezvous Server.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information on Magic Wormhole servers, refer to this <a href="https://magic-wormhole.readthedocs.io/en/latest/welcome.html#relays">link</a></p>
+</div>
+<p>As with the Streamer data transfer type, users must use a python client or a CLI, in this case provided by the developers of Magic Wormhole, in order to provide point-to-point communication between client and server.</p>
 
 
 
@@ -1682,10 +1825,10 @@ Users requesting data uploads or downloads to the HPC infrastructure receive <a 
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

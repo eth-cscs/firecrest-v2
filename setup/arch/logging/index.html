@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1496,6 +1496,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#responses-header-tracing-logger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response's header tracing logger
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1735,6 +1746,24 @@ The <code>f7t_v2_tracing_log</code> currently supports the following messages:</
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>2025-04-15 16:59:57,159 - f7t_v2_tracing_log - INFO - {&#39;username&#39;: &#39;fireuser&#39;, &#39;system_name&#39;: &#39;cluster-slurm-ssh&#39;, &#39;endpoint&#39;: &#39;/status/cluster-slurm-ssh/nodes&#39;, &#39;resource&#39;: &#39;status&#39;, &#39;status_code&#39;: 200, &#39;user_agent&#39;: &#39;PostmanRuntime/7.43.2&#39;, &#39;backend&#39;: {&#39;command&#39;: &quot;sinfo -N --noheader --format=&#39;%z|%c|%O|%e|%f|%N|%o|%n|%T|%R|%w|%v|%m|%C&#39;&quot;, &#39;exit_status&#39;: &#39;0&#39;}}
 </span></code></pre></div>
 </details>
+<h2 id="responses-header-tracing-logger">Response's header tracing logger<a class="headerlink" href="#responses-header-tracing-logger" title="Permanent link">&para;</a></h2>
+<p>When tracing logs are enabled, you can record a list of specific headers from incoming HTTP requests by configuring the <code>loggable_request_headers</code> field in the logger section of the YAML file.</p>
+<div class="admonition example">
+<p class="admonition-title">Configure the Response header tracing logger</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">logger</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">enable_tracing_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">loggable_request_headers</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user-agent&quot;</span><span class="w">    </span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">      </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user_agent&quot;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;x-header-1&quot;</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;log-field-1&quot;</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">input</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;x-header-2&quot;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">      </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;log-field-2&quot;</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</span></code></pre></div>
+</div>
+<p>A valid header key in the <code>input</code> field tells the logger to extract that header from the incoming HTTP request and inserts it in the JSON log format using the value of the <code>output</code> field as key.</p>
+<p>If <code>loggable_request_headers</code> is omitted, header tracing is disabled. By default, FirecREST does not log any headers other than those explicitly listed.</p>
 
 
 
@@ -1790,10 +1819,10 @@ The <code>f7t_v2_tracing_log</code> currently supports the following messages:</
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

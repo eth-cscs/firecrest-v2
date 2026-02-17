@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1413,6 +1413,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#probing-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Probing configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#status-reports" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1560,8 +1571,27 @@
 <li>HPC cluster connectivity (via SSH)</li>
 <li>Workload manager and scheduler (via SSH or API calls, depending the service)</li>
 <li>Filesystem availability (read only)</li>
-<li>Object storage availabitity (S3 interface is reachable or not)</li>
+<li>Object storage availability (S3 interface is reachable or not)</li>
 </ol>
+<h2 id="probing-configuration">Probing configuration<a class="headerlink" href="#probing-configuration" title="Permanent link">&para;</a></h2>
+<p>Health check execution is configured through the <code>probing</code> section of the cluster configuration. The supported options are described below.</p>
+<div class="admonition example">
+<p class="admonition-title">Complete <code>probing</code> section in cluster configuration.</p>
+<p>```yaml</p>
+</div>
+<p>probing:
+    interval_check: 120
+    services:
+      ssh:
+        timeout: 10
+      scheduler:
+        timeout: 20
+      filesystems:
+        timeout: 10
+    ```</p>
+<p>Each service listed under the <code>services</code> subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. If the entire <code>services</code> section is omitted, all health checks for the specific cluster are disabled.</p>
+<p>The <code>interval_check</code> field defines how often, in seconds, the health checks are executed for the cluster. If not specified, the default interval is 120 seconds. For backward compatibility the <code>interval</code> field is still accepted and behaves identically to<code>interval_check</code>, however it is deprecated and it should be replaced with the new field.</p>
+<p>Note: the <code>probing</code> section is mandatory in the configuration, even if empty.</p>
 <h2 id="status-reports">Status reports<a class="headerlink" href="#status-reports" title="Permanent link">&para;</a></h2>
 <p>When consulting the API endpoint <code>/status/systems</code> you can see the status of health checks on the response JSON. The filed <code>servicesHealth</code> is composed of a list of <code>serviceTypes</code> as listed above.</p>
 <p>The common format includes:</p>
@@ -1767,10 +1797,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

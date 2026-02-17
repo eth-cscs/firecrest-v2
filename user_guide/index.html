@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1543,33 +1543,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#downloading-large-files" class="md-nav__link">
+  <a href="#using-s3-transfer-method" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Downloading Large Files
+        Using s3 transfer method
       
     </span>
   </a>
   
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#uploading-large-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Uploading Large Files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Uploading Large Files">
+    <nav class="md-nav" aria-label="Using s3 transfer method">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#large-data-upload-with-python3" class="md-nav__link">
+  <a href="#s3-download" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Large Data Upload with Python3
+        S3 download
       
     </span>
   </a>
@@ -1577,10 +1566,38 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#large-data-upload-with-bash" class="md-nav__link">
+  <a href="#s3-upload" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Large Data Upload with Bash
+        S3 upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-streamer-transfer-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using streamer transfer method
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using streamer transfer method">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#streamer-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Streamer download
       
     </span>
   </a>
@@ -1588,21 +1605,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#large-data-upload-with-net" class="md-nav__link">
+  <a href="#streamer-upload" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Large Data Upload with .NET
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#need-more-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Need more examples?
+        Streamer upload
       
     </span>
   </a>
@@ -1905,57 +1911,147 @@ Using the identity provider to associate a user or project with a client offers 
 </span></code></pre></div>
 </div>
 <h2 id="file-transfer">File transfer<a class="headerlink" href="#file-transfer" title="Permanent link">&para;</a></h2>
-<p>FirecREST provides two methods for transferring files:</p>
+<p>FirecREST provides two resources for transferring files:</p>
 <ul>
-<li>Small files (up to 5MB by <a href="../setup/conf/#dataoperation">default</a>) can be uploaded or downloaded directly.</li>
-<li>Large files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.</li>
-</ul>
-<p>Small file transfer endpoints:</p>
+<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get"><code>/filesystem/{system_name}/ops/download</code></a><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post"><code>[|upload]</code></a> for small files (up to 5MB by <a href="../setup/conf/#dataoperation">default</a>) that can be uploaded or downloaded directly, and</li>
+<li>
+<p><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post"><code>/filesystem/{system_name}/transfer/download</code></a><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post"><code>[|upload]</code></a> for large files that can be transferred depending the <code>transfer_method</code> chosen (if configured in the FirecREST instalation).</p>
+<p>It creates a job in the scheduler to make an asynchronous data transfer managed by the HPC center. Supported values for <code>transfer_method</code> are</p>
 <ul>
-<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/get_download_filesystem__system_name__ops_download_get"><code>/filesystem/{system_name}/ops/download</code></a></li>
-<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__ops_upload_post"><code>/filesystem/{system_name}/ops/upload</code></a></li>
+<li><code>s3</code>: files must first be transferred to a staging storage system (e.g., S3) before being moved to their final location on the HPC filesystem.</li>
+<li><code>streamer</code>: it's a point-to-point data transfer using the <a href="https://pypi.org/project/firecrest-streamer/"><code>firecrest-streamer</code></a> client</li>
+<li><code>wormhole</code>: it's a point-to-point data transfer using the <a href="https://magic-wormhole.readthedocs.io/en/latest/welcome.html"><code>Magic Wormhole</code></a> client</li>
 </ul>
-<p>Large file transfer endpoints:</p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Availability of the transfer methods in the FirecREST installation depends on the configuration. You can check the <a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/status/get_systems_status_systems_get"><code>status/systems</code></a> endpoint to get information about which <code>data_transfer</code> method is supported by your HPC provider.</p>
+</div>
+<p>When requesting a large file download, FirecREST returns a <code>jobId</code> and information about how to download the file. This information will be shown depending on the transfer method used:</p>
+<h3 id="using-s3-transfer-method">Using <code>s3</code> transfer method<a class="headerlink" href="#using-s3-transfer-method" title="Permanent link">&para;</a></h3>
+<h4 id="s3-download">S3 download<a class="headerlink" href="#s3-download" title="Permanent link">&para;</a></h4>
+<p>Once the remote job is completed, the file is temporary stored in the S3 object storage. Then, users can retrieve the file using the provided <code>download_url</code> directly from the S3 interface.</p>
+<div class="admonition example">
+<p class="admonition-title">Download a file using <code>streamer</code> transfer method</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$<span class="w"> </span>curl<span class="w"> </span>--request<span class="w"> </span>POST<span class="w"> </span>&lt;firecrest_url&gt;/filesystem/&lt;system&gt;/transfer/download<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>--header<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span>--header<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>--data<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s1">    &quot;path&quot;: &quot;/path/to/remote/file&quot;,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s1">    &quot;transfer_directives&quot;: {</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s1">        &quot;transfer_method&quot;: &quot;s3&quot;</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s1">    }</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s1">}&#39;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="o">{</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="s2">&quot;transferJob&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="s2">&quot;jobId&quot;</span>:<span class="w"> </span>&lt;jobId&gt;,
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">        </span><span class="s2">&quot;system&quot;</span>:<span class="w"> </span><span class="s2">&quot;&lt;system&gt;&quot;</span>,
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">        </span>...
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="o">}</span>,
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="s2">&quot;transferDirectives&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">        </span><span class="s2">&quot;transfer_method&quot;</span>:<span class="w"> </span><span class="s2">&quot;s3&quot;</span>,
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">        </span><span class="s2">&quot;download_url&quot;</span>:<span class="w"> </span><span class="s2">&quot;&lt;url&gt;&quot;</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">    </span><span class="o">}</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="o">}</span>
+</span></code></pre></div>
+</div>
+<h4 id="s3-upload">S3 upload<a class="headerlink" href="#s3-upload" title="Permanent link">&para;</a></h4>
+<p>Given that FirecREST utilizes a storage service based on <a href="../setup/arch/external_storage/">S3 as staging area</a>, the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be split in chunks, which complicates the file upload.</p>
+<p>To address this, we have created a set of examples in different programming and scripting languages, described bellow:</p>
 <ul>
-<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_download_filesystem__system_name__transfer_download_post"><code>/filesystem/{system_name}/transfer/download</code></a></li>
-<li><a href="https://eth-cscs.github.io/firecrest-v2/openapi/#/filesystem/post_upload_filesystem__system_name__transfer_upload_post"><code>/filesystem/{system_name}/transfer/upload</code></a></li>
+<li>
+<p><code>s3</code> Upload with Python3: this is the easiest way of using FirecREST. See <a href="#firecrest-sdk">FirecREST SDK section</a> below for more information and detailed examples.</p>
+</li>
+<li>
+<p><code>s3</code> Upload with Bash: <a href="file_transfer_bash/">Detailed example.</a></p>
+</li>
+<li>
+<p><code>s3</code> Upload with .NET: <a href="file_transfer_dotnet/">Detailed example.</a></p>
+</li>
 </ul>
-<h3 id="downloading-large-files">Downloading Large Files<a class="headerlink" href="#downloading-large-files" title="Permanent link">&para;</a></h3>
-<p>When requesting a large file download, FirecREST returns a download URL and a <code>jobId</code>. Once the remote job is completed, the user can retrieve the file using the provided URL.</p>
-<h3 id="uploading-large-files">Uploading Large Files<a class="headerlink" href="#uploading-large-files" title="Permanent link">&para;</a></h3>
-<p>Given that FirecREST utilizes a storage service based on <a href="../setup/arch/external_storage/">S3 as staging area</a>, the upload is limited by the constraints on S3 server. In this case, for files larger than 5GB the file to be uploaded needs to be splitted in chunks, which complicates the file upload.</p>
-<p>For this, we have created a set of examples in different programming and scripting languages that we describe following:</p>
-<h4 id="large-data-upload-with-python3">Large Data Upload with Python3<a class="headerlink" href="#large-data-upload-with-python3" title="Permanent link">&para;</a></h4>
-<p>This is the easiest way of using FirecREST. See <a href="#firecrest-sdk">FirecREST SDK section</a> below for more information and detailed examples.</p>
-<h4 id="large-data-upload-with-bash">Large Data Upload with Bash<a class="headerlink" href="#large-data-upload-with-bash" title="Permanent link">&para;</a></h4>
-<p><a href="file_transfer_bash/">Detailed example.</a></p>
-<h4 id="large-data-upload-with-net">Large Data Upload with .NET<a class="headerlink" href="#large-data-upload-with-net" title="Permanent link">&para;</a></h4>
-<p><a href="file_transfer_dotnet/">Detailed example.</a></p>
-<h4 id="need-more-examples">Need more examples?<a class="headerlink" href="#need-more-examples" title="Permanent link">&para;</a></h4>
-<p>If you need examples for your particular use case (ie, using a different language than the listed above), feel free to open an <a href="https://github.com/eth-cscs/firecrest-v2/issues/new">issue on GitHub</a>. We'd be happy to create one for you.</p>
+<div class="admonition info">
+<p class="admonition-title">Need more examples?</p>
+<p>If you need examples for your particular S3 use case (ie, using a different language than the listed above), feel free to open an <a href="https://github.com/eth-cscs/firecrest-v2/issues/new">issue on GitHub</a>. We'd be happy to create one for you.</p>
+</div>
+<h3 id="using-streamer-transfer-method">Using <code>streamer</code> transfer method<a class="headerlink" href="#using-streamer-transfer-method" title="Permanent link">&para;</a></h3>
+<h4 id="streamer-download">Streamer download<a class="headerlink" href="#streamer-download" title="Permanent link">&para;</a></h4>
+<p>In order to use the <code>streamer</code> transfer method, users must install the <a href="https://pypi.org/project/firecrest-streamer/"><code>firecrest-streamer</code></a> tool.</p>
+<div class="admonition example">
+<p class="admonition-title">Download a file using <code>streamer</code> transfer method</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$<span class="w"> </span>curl<span class="w"> </span>--request<span class="w"> </span>POST<span class="w"> </span>&lt;firecrest_url&gt;/filesystem/&lt;system&gt;/transfer/download<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>--header<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span>--header<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>--data<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s1">    &quot;path&quot;: &quot;/path/to/remote/file&quot;,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s1">    &quot;transfer_directives&quot;: {</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s1">        &quot;transfer_method&quot;: &quot;streamer&quot;</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="s1">    }</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s1">}&#39;</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="o">{</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="s2">&quot;transferJob&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">        </span><span class="s2">&quot;jobId&quot;</span>:<span class="w"> </span>&lt;jobId&gt;,
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">        </span><span class="s2">&quot;system&quot;</span>:<span class="w"> </span><span class="s2">&quot;&lt;system&gt;&quot;</span>,
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">        </span>...
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">    </span><span class="o">}</span>,
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">    </span><span class="s2">&quot;transferDirectives&quot;</span>:<span class="w"> </span><span class="o">{</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">        </span><span class="s2">&quot;transfer_method&quot;</span>:<span class="w"> </span><span class="s2">&quot;streamer&quot;</span>,
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">        </span><span class="s2">&quot;coordinates&quot;</span>:<span class="w"> </span><span class="s2">&quot;&lt;coordinates&gt;&quot;</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">    </span><span class="o">}</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="o">}</span>
+</span></code></pre></div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The file selected will be available for downloading as long as the job is running in the scheduler. Additionally, users can check the <code>waitTimeout</code> and <code>inboundTransferLimit</code> parameters in the call to <code>GET /status/systems</code> to perform a better data transfer process.</p>
+</div>
+<p>After getting the response, you can use the secret <code>coordinates</code> in the execution of the <code>streamer</code> command to complete the download to the local system.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Keep the secret <code>coordinates</code> secured: these are used to uniquely transfer data between a <code>streamer</code> client and a specific file in the remote filesystem. If you share the credentials with somebody else, they could move the data on your behalf.</p>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Using <code>firecrest-streamer</code> tool to download a file from a remote system</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$<span class="w"> </span>streamer<span class="w"> </span>receive<span class="w"> </span>--coordinates<span class="w"> </span>&lt;coordinates&gt;<span class="w"> </span>--path<span class="w"> </span>/path/to/local/file
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Transfering<span class="w"> </span><span class="m">1</span>.0GiB...
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w"> </span><span class="p">|</span>████████████████████████████████████████<span class="p">|</span><span class="w"> </span><span class="m">100</span>.0%
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>File<span class="w"> </span>/path/to/local/file<span class="w"> </span>received<span class="w"> </span>successfully.
+</span></code></pre></div>
+</div>
+<h4 id="streamer-upload">Streamer upload<a class="headerlink" href="#streamer-upload" title="Permanent link">&para;</a></h4>
+<p>Using the same method as for the <a href="#streamer-download">download</a> you can <code>send</code> data to upload files from your local system to the cluster.</p>
+<p>After receiving the secrets <code>coordinates</code>, you can use the <code>streamer</code> to upload the file to the requested target:</p>
+<div class="admonition example">
+<p class="admonition-title">Upload data using <code>streamer</code></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>$<span class="w"> </span>streamer<span class="w"> </span>send<span class="w"> </span>--coordinates<span class="w"> </span>&lt;coordinates&gt;<span class="w"> </span>--path<span class="w"> </span>/path/to/local/file
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Transfering<span class="w"> </span><span class="m">1</span>.0GiB...
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">|</span>████████████████████████████████████████<span class="p">|</span><span class="w"> </span><span class="m">100</span>.0%
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>File<span class="w"> </span>file<span class="w"> </span>sent<span class="w"> </span>successfully.
+</span></code></pre></div>
+</div>
 <h2 id="firecrest-sdk">FirecREST SDK<a class="headerlink" href="#firecrest-sdk" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/eth-cscs/pyfirecrest">PyFirecREST</a> is a Python library designed to simplify the implementation of FirecREST clients.</p>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
 <p>To install PyFirecREST, run:</p>
 <div class="admonition example">
 <p class="admonition-title">Install <code>pyfirecrest</code></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyfirecrest
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>$<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyfirecrest
 </span></code></pre></div>
 </div>
 <p>For more details, visit the <a href="https://pyfirecrest.readthedocs.io">official documentation page</a>.</p>
 <h4 id="list-files-example">List files example<a class="headerlink" href="#list-files-example" title="Permanent link">&para;</a></h4>
 <div class="admonition example">
 <p class="admonition-title">List files with <code>pyfirecrest</code></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">firecrest</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fc</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyAuthorizationClass</span><span class="p">:</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="k">return</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">client</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">v2</span><span class="o">.</span><span class="n">Firecrest</span><span class="p">(</span><span class="n">firecrest_url</span><span class="o">=&lt;</span><span class="n">firecrest_url</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">authorization</span><span class="o">=</span><span class="n">MyAuthorizationClass</span><span class="p">())</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="s2">&quot;cluster&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/test_user&quot;</span><span class="p">)</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">firecrest</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fc</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyAuthorizationClass</span><span class="p">:</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_access_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>        <span class="k">return</span> <span class="o">&lt;</span><span class="n">TOKEN</span><span class="o">&gt;</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">client</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">v2</span><span class="o">.</span><span class="n">Firecrest</span><span class="p">(</span><span class="n">firecrest_url</span><span class="o">=&lt;</span><span class="n">firecrest_url</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">authorization</span><span class="o">=</span><span class="n">MyAuthorizationClass</span><span class="p">())</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="s2">&quot;cluster&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/test_user&quot;</span><span class="p">)</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
 <p>More examples are available at: <a href="https://pyfirecrest.readthedocs.io">pyfirecrest.readthedocs.io</a></p>
@@ -2014,10 +2110,10 @@ Using the identity provider to associate a user or project with a client offers 
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.action.edit", "navigation.indexes", "search.share", "navigation.instant", "navigation.tracking", "navigation.path", "navigation.top"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
