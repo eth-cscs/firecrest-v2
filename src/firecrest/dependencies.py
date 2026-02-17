@@ -259,7 +259,7 @@ class SSHClientDependency:
                 proxy_host=system.ssh.proxy_host,
                 proxy_port=system.ssh.proxy_port,
                 key_provider=self.key_provider,
-                buffer_limit=settings.data_operation.max_ops_file_size,
+                buffer_limit=system.data_operation.max_ops_file_size,
                 connect_timeout=system.ssh.timeout.connection,
                 login_timeout=system.ssh.timeout.login,
                 execute_timeout=system.ssh.timeout.command_execution,
