@@ -14,7 +14,7 @@
         }
     },
     "errors": [],
-    "job_id": 42,
+    "job_id": "42",
     "step_id": "BATCH",
     "job_submit_user_msg": ""
 }
