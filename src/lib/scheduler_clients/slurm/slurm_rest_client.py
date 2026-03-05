@@ -132,7 +132,7 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_submit_result = await response.json()
-        return job_submit_result["job_id"]
+        return str(job_submit_result["job_id"])
 
     async def attach_command(
         self,
