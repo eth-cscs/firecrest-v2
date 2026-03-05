@@ -92,7 +92,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
 
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -140,7 +140,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         pass
 
     async def get_job(

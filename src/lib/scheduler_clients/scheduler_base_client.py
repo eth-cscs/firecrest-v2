@@ -25,7 +25,7 @@ class SchedulerBaseClient(ABC):
         job_description: JobDescriptionModel,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         pass
 
     @abstractmethod
@@ -35,17 +35,13 @@ class SchedulerBaseClient(ABC):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         pass
 
     @abstractmethod
     # Note: returns multiple jobs to deal with job_id duplicates (see Slurm doc)
     async def get_job(
-        self,
-        job_id: str,
-        username: str,
-        jwt_token: str,
-        allusers: bool = True
+        self, job_id: str, username: str, jwt_token: str, allusers: bool = True
     ) -> List[JobModel]:
         pass
 
@@ -58,10 +54,7 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_jobs(
-        self,
-        username: str,
-        jwt_token: str,
-        allusers: bool = False
+        self, username: str, jwt_token: str, allusers: bool = False
     ) -> List[JobModel] | None:
         pass
 
