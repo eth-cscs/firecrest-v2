@@ -81,7 +81,7 @@ class TransferJobLogs(CamelModel):
 
 
 class TransferJob(CamelModel):
-    job_id: int
+    job_id: str
     system: str
     working_directory: str
     logs: TransferJobLogs

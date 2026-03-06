@@ -92,7 +92,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
 
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -132,7 +132,10 @@ class SlurmRestClient(SlurmBaseClient):
             if response.status != status.HTTP_200_OK:
                 await _slurm_unexpected_response(response)
             job_submit_result = await response.json()
-        return job_submit_result["job_id"]
+        job_id = job_submit_result.get("job_id")
+        if job_id is None:
+            return None
+        return str(job_id)
 
     async def attach_command(
         self,
@@ -140,7 +143,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> None:
         pass
 
     async def get_job(

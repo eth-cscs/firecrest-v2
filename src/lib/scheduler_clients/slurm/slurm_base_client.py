@@ -25,7 +25,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         pass
 
     @abstractmethod
@@ -35,7 +35,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         pass
 
     @abstractmethod
