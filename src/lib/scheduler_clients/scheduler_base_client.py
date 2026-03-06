@@ -35,7 +35,7 @@ class SchedulerBaseClient(ABC):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> str | None:
+    ) -> None:
         pass
 
     @abstractmethod
