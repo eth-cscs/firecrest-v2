@@ -34,8 +34,8 @@ components:
     Body_post_upload_filesystem__system_name__ops_upload_post:
       properties:
         file:
+          contentMediaType: application/octet-stream
           description: File to be uploaded as `multipart/form-data`
-          format: binary
           title: File
           type: string
       required:
@@ -1381,7 +1381,7 @@ components:
       properties:
         jobId:
           anyOf:
-          - type: integer
+          - type: string
           - type: 'null'
           nullable: true
           title: Jobid
@@ -2053,7 +2053,7 @@ components:
       properties:
         jobId:
           title: Jobid
-          type: integer
+          type: string
         logs:
           $ref: '#/components/schemas/TransferJobLogs'
         system:
