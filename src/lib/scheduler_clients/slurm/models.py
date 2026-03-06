@@ -124,12 +124,51 @@ class JobTaskSlurm(JobTask):
 
 class SlurmJob(JobModel):
 
+    user: Optional[str] = Field(
+        validation_alias=AliasChoices("user_name", "userName"),
+        default=None,
+        nullable=True,
+    )
+    working_directory: str = Field(
+        validation_alias=AliasChoices(
+            "current_working_directory", "workingDirectory", "currentWorkingDirectory"
+        )
+    )
+    allocation_nodes: int
+
     tasks: Optional[List[JobTaskSlurm]] = Field(
         validation_alias=AliasChoices("steps"), default=None, nullable=True
     )
     time: JobTimeSlurm
 
     def __init__(self, **kwargs):
+        # Remove task field
+        if "tasks" in kwargs:
+            kwargs["tasks"] = None
+
+        # Custom nodes count extraction
+        if "allocation_nodes" not in kwargs and "job_resources" in kwargs:
+            if kwargs["job_resources"] and "nodes" in kwargs["job_resources"]:
+                kwargs["allocation_nodes"] = kwargs["job_resources"]["nodes"]["count"]
+            else:
+                kwargs["allocation_nodes"] = 0
+
+        # Custom time field definition
+        if "time" not in kwargs and "start_time" in kwargs and "end_time" in kwargs:
+            start = slurm_int_to_int(kwargs["start_time"])
+            end = slurm_int_to_int(kwargs["end_time"])
+            limit = slurm_int_to_int(kwargs["time_limit"])
+            suspend_time = slurm_int_to_int(kwargs["suspend_time"])
+
+            if start is not None and end is not None:
+                kwargs["time"] = JobTimeSlurm(
+                    elapsed=None,
+                    start=start,
+                    end=end,
+                    suspended=suspend_time,
+                    limit=limit,
+                )
+
         # Custom status field definition
         if "exit_code" in kwargs:
             interruptSignal = None
@@ -142,8 +181,16 @@ class SlurmJob(JobModel):
                 interruptSignal = kwargs["exit_code"]["signal"]["id"]
 
             kwargs["status"] = JobStatusSlurm(
-                state=kwargs["state"]["current"],
-                stateReason=kwargs["state"]["reason"],
+                state=(
+                    kwargs["job_state"]
+                    if "job_state" in kwargs
+                    else kwargs["state"]["current"]
+                ),
+                stateReason=(
+                    kwargs["state_reason"]
+                    if "state_reason" in kwargs
+                    else kwargs["state"]["reason"]
+                ),
                 exitCode=exitCode,
                 interruptSignal=interruptSignal,
             )
