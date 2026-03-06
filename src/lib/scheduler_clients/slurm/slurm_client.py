@@ -74,7 +74,7 @@ class SlurmClient(SlurmBaseClient):
 
     async def attach_command(
         self, command: str, job_id: str, username: str, jwt_token: str
-    ) -> str | None:
+    ) -> None:
         return await self.slurm_default_client.attach_command(
             command, job_id, username, jwt_token
         )

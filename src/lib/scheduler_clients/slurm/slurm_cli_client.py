@@ -78,7 +78,7 @@ class SlurmCliClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> str | None:
+    ) -> None:
         srun = SrunCommand(command=command, job_id=job_id, overlap=True)
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
 

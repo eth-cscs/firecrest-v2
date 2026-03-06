@@ -140,7 +140,7 @@ class SlurmRestClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> str | None:
+    ) -> None:
         pass
 
     async def get_job(
