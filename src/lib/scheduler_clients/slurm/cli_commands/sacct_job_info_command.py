@@ -59,7 +59,7 @@ class SacctCommand(SacctCommandBase):
 
         if len(jobs) == 0:
             return None
-        return jobs.values()
+        return list(jobs.values())
 
     def _parse_job(self, job_info):
         return {
@@ -79,10 +79,10 @@ class SacctCommand(SacctCommandBase):
             "name": job_info[6],
             "nodes": job_info[7],
             "partition": job_info[8],
-            "priority": job_info[9],
+            "priority": int(job_info[9]) if job_info[9] else None,
             "state": {"current": job_info[10], "reason": job_info[11]},
             "time": {
-                "elapsed": job_info[12],
+                "elapsed": int(job_info[12]) if job_info[12] else None,
                 "submission": _parse_timestamp(job_info[13]),
                 "start": _parse_timestamp(job_info[14]),
                 "end": _parse_timestamp(job_info[15]),
@@ -107,7 +107,7 @@ class SacctCommand(SacctCommandBase):
                 else None
             ),
             "time": {
-                "elapsed": job_info[12],
+                "elapsed": int(job_info[12]) if job_info[12] else None,
                 "submission": _parse_timestamp(job_info[13]),
                 "start": _parse_timestamp(job_info[14]),
                 "end": _parse_timestamp(job_info[15]),

@@ -11,6 +11,8 @@ from packaging.version import Version
 from lib.scheduler_clients.slurm.cli_commands.sacct_batch_script_command import (
     SacctBatchScriptCommand,
 )
+
+from lib.scheduler_clients.slurm.cli_commands.squeue_command import SqueueCommand
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_metadata_command import (
     SacctJobMetadataCommand,
@@ -90,11 +92,23 @@ class SlurmCliClient(SlurmBaseClient):
         allusers: bool = True,
     ) -> List[SlurmJob] | None:
         sacct = SacctCommand(username, [job_id], allusers)
-        jobs = await self.__executed_ssh_cmd(username, jwt_token, sacct)
-        if jobs:
-            # Apply Slurm model
-            jobs = [SlurmJob.model_validate(job) for job in jobs]
-        return jobs
+        squeue = SqueueCommand(username, [job_id], allusers)
+
+        commands = [
+            # sactt has precedence over squeue, as it contains more complete job info, including finished jobs
+            self.__executed_ssh_cmd(username, jwt_token, sacct),
+            self.__executed_ssh_cmd(username, jwt_token, squeue),
+        ]
+        results = await asyncio.gather(*commands, return_exceptions=True)
+        jobs = {}
+        for result in results:
+            if result and isinstance(result, list):
+                for job in result:
+                    job_obj = SlurmJob.model_validate(job)
+                    if job_obj.job_id not in jobs:
+                        jobs[job_obj.job_id] = job_obj
+
+        return list(jobs.values())
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
@@ -152,11 +166,23 @@ class SlurmCliClient(SlurmBaseClient):
         self, username: str, jwt_token: str, allusers: bool = False, account: str = None
     ) -> List[SlurmJob] | None:
         sacct = SacctCommand(username, None, allusers, account)
-        jobs = await self.__executed_ssh_cmd(username, jwt_token, sacct)
-        if jobs:
-            # Apply Slurm model
-            jobs = [SlurmJob.model_validate(job) for job in jobs]
-        return jobs
+        squeue = SqueueCommand(username, None, allusers, account)
+
+        commands = [
+            # sactt has precedence over squeue, as it contains more complete job info, including finished jobs
+            self.__executed_ssh_cmd(username, jwt_token, sacct),
+            self.__executed_ssh_cmd(username, jwt_token, squeue),
+        ]
+        results = await asyncio.gather(*commands, return_exceptions=True)
+        jobs = {}
+        for result in results:
+            if result and isinstance(result, list):
+                for job in result:
+                    job_obj = SlurmJob.model_validate(job)
+                    if job_obj.job_id not in jobs:
+                        jobs[job_obj.job_id] = job_obj
+
+        return list(jobs.values())
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         scancel = ScancelCommand(username, job_id)

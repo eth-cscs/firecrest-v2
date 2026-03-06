@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
-from abc import abstractmethod
 from typing import List
-from lib.ssh_clients.ssh_client import BaseCommand
+from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
+from lib.exceptions import SlurmError
 
 
-class SqueueCommand(BaseCommand):
+class SqueueCommand(SacctCommand):
 
     def __init__(
         self,
@@ -26,18 +26,21 @@ class SqueueCommand(BaseCommand):
 
     def get_command(self) -> str:
         cmd = ["SLURM_TIME_FORMAT='%s' squeue"]
-        if self.allusers:
-            cmd += ["--allusers"]
+        if not self.allusers:
+            cmd += ["--user=" + self.username]  # show only user jobs
         if self.account:
             cmd += [f"--account='{self.account}'"]
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
-            cmd += [f"--jobs='{str_job_ids}'"]
+            cmd += [f"--job='{str_job_ids}'"]
         cmd += [
-            "--Format='JobID,AllocNodes,Cluster,exit_code,GroupId,Account,Name,NodeList,Partition,Priority,State,Reason,TimeUsed,SubmitTime,StartTime,EndTime,TimeLimit,UserName,WorkDir'"
+            "--noheader",
+            # "--Format='JobID,AllocNodes,,,GroupId,Account,Name,NodeList,Partition,Priority,State,Reason,TimeUsed,SubmitTime,StartTime,EndTime,TimeLimit,,UserName,WorkDir'"
+            # Note ElapsedRaw, TimelimitRaw are not available in squeue
+            # Note priority is provided in a different format in squeue and sacct
+            "--format='%i|%D|||%g|%a|%j|%N|%P||%T|%r||%V|%S|%E|||%u|%Z'",
         ]
         return " ".join(cmd)
 
-    @abstractmethod
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
-        pass
+        return super().parse_output(stdout, stderr, exit_status)
