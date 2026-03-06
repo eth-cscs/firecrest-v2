@@ -105,7 +105,7 @@ class SlurmCliClient(SlurmBaseClient):
             if result and isinstance(result, list):
                 for job in result:
                     job_obj = SlurmJob.model_validate(job)
-                    if job_obj.job_id not in jobs:
+                    if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
 
         return list(jobs.values())
@@ -179,7 +179,7 @@ class SlurmCliClient(SlurmBaseClient):
             if result and isinstance(result, list):
                 for job in result:
                     job_obj = SlurmJob.model_validate(job)
-                    if job_obj.job_id not in jobs:
+                    if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
 
         return list(jobs.values())
