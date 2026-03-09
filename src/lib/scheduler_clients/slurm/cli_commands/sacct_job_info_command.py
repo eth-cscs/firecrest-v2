@@ -40,6 +40,9 @@ class SacctCommand(SacctCommandBase):
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
+        if exit_status == 1 and "Invalid job id specified" in stderr:
+            return None
+
         if exit_status != 0:
             raise SlurmError(
                 f"Unexpected Slurm command response. exit_status:{exit_status} std_err:{stderr}"

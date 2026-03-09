@@ -103,6 +103,8 @@ class SlurmCliClient(SlurmBaseClient):
         results = await asyncio.gather(*commands, return_exceptions=True)
         jobs = {}
         for result in results:
+            if result is None:
+                continue
             if isinstance(result, Exception):
                 raise SlurmError("Error executing Slurm command.") from result
             if result and isinstance(result, list):
@@ -111,7 +113,7 @@ class SlurmCliClient(SlurmBaseClient):
                     if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
 
-        return list(jobs.values())
+        return list(jobs.values()) if len(jobs) > 0 else None
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str

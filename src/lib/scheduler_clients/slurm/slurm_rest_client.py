@@ -163,6 +163,8 @@ class SlurmRestClient(SlurmBaseClient):
                 url=url, headers=headers, timeout=timeout
             ) as response:
                 log_backend_http_scheduler(url, response.status)
+                if response.status == status.HTTP_404_NOT_FOUND:
+                    return None
                 if response.status != status.HTTP_200_OK:
                     await _slurm_unexpected_response(response)
                 return await response.json()
@@ -172,8 +174,10 @@ class SlurmRestClient(SlurmBaseClient):
         )
         jobs = {}
         for result in results:
+            if result is None:
+                continue
             if isinstance(result, Exception):
-                raise SlurmError("Error fetching Slurm API data.") from result
+                raise result
             if result and "jobs" in result:
                 # Note: starting from API version v0.0.39 this filter can be set as query param
                 filtered_jobs = list(
@@ -190,7 +194,7 @@ class SlurmRestClient(SlurmBaseClient):
                     job_obj = SlurmJob.model_validate(job)
                     if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
-        return list(jobs.values())
+        return list(jobs.values()) if len(jobs) > 0 else None
 
     async def get_job_metadata(
         self, job_id: str, username: str, jwt_token: str
