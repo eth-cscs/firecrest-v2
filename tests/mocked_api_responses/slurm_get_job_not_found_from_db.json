@@ -1,0 +1,25 @@
+{
+    "meta": {
+        "plugin": {
+            "type": "openapi/dbv0.0.38",
+            "name": "Slurm OpenAPI DB v0.0.38"
+        },
+        "Slurm": {
+            "version": {
+                "major": 22,
+                "micro": 5,
+                "minor": 5
+            },
+            "release": "22.05.5"
+        }
+    },
+    "errors": [
+        {
+            "description": "Nothing found",
+            "error_number": 9003,
+            "error": "Nothing found with query",
+            "source": "slurmdb_jobs_get"
+        }
+    ],
+    "jobs": []
+}

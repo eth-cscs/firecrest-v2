@@ -1,0 +1,6 @@
+{
+    "stdout": "1|1|||users|staff|Count to 100||part01|0.00000000023283|PENDING|Resources|0:00|1773058665|N/A|(null)|5-00:00:00|fireuser|/home/fireuser",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"squeue --noheader --format='%i|%D|||%g|%a|%j|%N|%P||%T|%r||%V|%S|%E|||%u|%Z'"
+}

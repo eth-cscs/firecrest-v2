@@ -1,0 +1,274 @@
+{
+    "meta": {
+        "plugin": {
+            "type": "openapi/dbv0.0.38",
+            "name": "Slurm OpenAPI DB v0.0.38"
+        },
+        "Slurm": {
+            "version": {
+                "major": 22,
+                "micro": 5,
+                "minor": 5
+            },
+            "release": "22.05.5"
+        }
+    },
+    "errors": [],
+    "jobs": [
+        {
+            "account": "test",
+            "comment": {
+                "administrator": null,
+                "job": null,
+                "system": null
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task": null,
+                "task_id": null
+            },
+            "association": {
+                "account": "test",
+                "cluster": "cluster",
+                "partition": null,
+                "user": "test1"
+            },
+            "cluster": "cluster",
+            "constraints": null,
+            "container": null,
+            "derived_exit_code": {
+                "status": "SUCCESS",
+                "return_code": 0
+            },
+            "time": {
+                "elapsed": 0,
+                "eligible": 1710516603,
+                "end": 1710516635,
+                "start": 1710516603,
+                "submission": 1710516603,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": 7200,
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": "SUCCESS",
+                "return_code": 0
+            },
+            "flags": [
+                "CLEAR_SCHEDULING",
+                "STARTED_ON_SCHEDULE"
+            ],
+            "group": "test1",
+            "het": {
+                "job_id": 0,
+                "job_offset": null
+            },
+            "job_id": 42,
+            "name": "test1",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "priority": 4294901718,
+            "qos": "normal",
+            "required": {
+                "CPUs": 1,
+                "memory": 0
+            },
+            "kill_request_user": null,
+            "reservation": {
+                "id": 0,
+                "name": 0
+            },
+            "state": {
+                "current": "COMPLETED",
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "nodes": {
+                        "list": [
+                            "localhost"
+                        ],
+                        "count": 1,
+                        "range": "localhost"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": null,
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": null,
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": null,
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    },
+                    "time": {
+                        "elapsed": 0,
+                        "end": 1710516635,
+                        "start": 1710516635,
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": "SUCCESS",
+                        "return_code": 0
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": null,
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "governor": []
+                    },
+                    "kill_request_user": null,
+                    "state": "COMPLETED",
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": 0
+                        }
+                    },
+                    "step": {
+                        "job_id": 42,
+                        "het": {
+                            "component": null
+                        },
+                        "id": "batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    }
+                }
+            ],
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": null,
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": null,
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": null,
+                        "id": 3,
+                        "count": null
+                    },
+                    {
+                        "type": "node",
+                        "name": null,
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": null,
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": null,
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": null,
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": null,
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": null,
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "user": "test-user",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/test1"
+        }
+    ]
+}
