@@ -6,7 +6,6 @@
 # commands
 from typing import List
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
-from lib.exceptions import SlurmError
 
 
 class SqueueCommand(SacctCommand):
