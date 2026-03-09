@@ -6,6 +6,7 @@
 import asyncio
 from typing import List
 from packaging.version import Version
+from lib.exceptions import SlurmError
 
 # models
 from lib.scheduler_clients.slurm.cli_commands.sacct_batch_script_command import (
@@ -102,6 +103,8 @@ class SlurmCliClient(SlurmBaseClient):
         results = await asyncio.gather(*commands, return_exceptions=True)
         jobs = {}
         for result in results:
+            if isinstance(result, Exception):
+                raise SlurmError("Error executing Slurm command.") from result
             if result and isinstance(result, list):
                 for job in result:
                     job_obj = SlurmJob.model_validate(job)
@@ -176,6 +179,8 @@ class SlurmCliClient(SlurmBaseClient):
         results = await asyncio.gather(*commands, return_exceptions=True)
         jobs = {}
         for result in results:
+            if isinstance(result, Exception):
+                raise SlurmError("Error executing Slurm command.") from result
             if result and isinstance(result, list):
                 for job in result:
                     job_obj = SlurmJob.model_validate(job)

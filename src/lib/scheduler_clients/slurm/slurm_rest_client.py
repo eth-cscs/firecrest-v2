@@ -172,6 +172,8 @@ class SlurmRestClient(SlurmBaseClient):
         )
         jobs = {}
         for result in results:
+            if isinstance(result, Exception):
+                raise SlurmError("Error fetching Slurm API data.") from result
             if result and "jobs" in result:
                 # Note: starting from API version v0.0.39 this filter can be set as query param
                 filtered_jobs = list(
@@ -223,6 +225,8 @@ class SlurmRestClient(SlurmBaseClient):
         )
         jobs = {}
         for result in results:
+            if isinstance(result, Exception):
+                raise SlurmError("Error fetching Slurm API data.") from result
             if result and "jobs" in result:
                 # Note: starting from API version v0.0.39 this filter can be set as query param
                 filtered_jobs = list(
