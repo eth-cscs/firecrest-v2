@@ -95,7 +95,7 @@ class SlurmCliClient(SlurmBaseClient):
         squeue = SqueueCommand(username, [job_id], allusers)
 
         commands = [
-            # sactt has precedence over squeue, as it contains more complete job info, including finished jobs
+            # sacct has precedence over squeue, as it contains more complete job info, including finished jobs
             self.__executed_ssh_cmd(username, jwt_token, sacct),
             self.__executed_ssh_cmd(username, jwt_token, squeue),
         ]
@@ -169,7 +169,7 @@ class SlurmCliClient(SlurmBaseClient):
         squeue = SqueueCommand(username, None, allusers, account)
 
         commands = [
-            # sactt has precedence over squeue, as it contains more complete job info, including finished jobs
+            # sacct has precedence over squeue, as it contains more complete job info, including finished jobs
             self.__executed_ssh_cmd(username, jwt_token, sacct),
             self.__executed_ssh_cmd(username, jwt_token, squeue),
         ]
