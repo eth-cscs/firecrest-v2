@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from datetime import datetime, timezone
-from time import time
 from fastapi import Depends, HTTPException, Path, status
 from typing import Annotated, Any
 
@@ -186,23 +185,15 @@ async def get_userinfo(
 )
 async def get_liveness() -> Any:
 
-    oldest_check = -1
     healthcheck_runs = {}
-
-    # if not clusters are configured the health checker is not running
-    if len(settings.clusters) == 0:
-        oldest_check = 0
+    # Initialize oldest_check: if not clusters are configured the health checker is not running
+    oldest_check = 0
 
     for cluster in settings.clusters:
-        if cluster.last_health_check is None:
-            # In the irst run after deployment last health check is not set,
-            # take current time stamp as reference
-            healthcheck_runs[cluster.name] = time.time()
-            oldest_check = 0
-        else:
+        if cluster.last_health_check is not None:
             time_difference = (
                 datetime.now(timezone.utc) - cluster.last_health_check
-            ).seconds
+            ).total_seconds
             if time_difference > oldest_check:
                 oldest_check = time_difference
             healthcheck_runs[cluster.name] = cluster.last_health_check

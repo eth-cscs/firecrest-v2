@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 import time
 
 from firecrest.config import BaseServiceHealth, HPCCluster
@@ -16,15 +17,18 @@ class HealthCheckBase(ABC):
 
     async def check(self) -> BaseServiceHealth:
         health: BaseServiceHealth
-        start_time = time.time()
+        start_time = time.monotonic_ns()
+        start_check = datetime.now(timezone.utc)
+
+        # Execute the check
         try:
             health = await self.execute_check()
         except Exception as ex:
             health = await self.handle_error(ex)
 
-        health.last_checked = time.time()
-        health.latency = time.time() - start_time
-
+        # Compute latency in seconds
+        health.latency = (time.monotonic_ns() - start_time) / 1e9
+        health.last_checked = start_check
         return health
 
     @abstractmethod
