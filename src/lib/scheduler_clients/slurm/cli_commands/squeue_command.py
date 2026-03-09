@@ -31,7 +31,7 @@ class SqueueCommand(SacctCommand):
             cmd += [f"--account='{self.account}'"]
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
-            cmd += [f"--job='{str_job_ids}'"]
+            cmd += [f"--jobs='{str_job_ids}'"]
         cmd += [
             "--noheader",
             # "--Format='JobID,AllocNodes,,,GroupId,Account,Name,NodeList,Partition,Priority,State,Reason,TimeUsed,SubmitTime,StartTime,EndTime,TimeLimit,,UserName,WorkDir'"
