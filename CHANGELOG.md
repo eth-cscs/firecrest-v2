@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Remove hardcoded jfrog link from the wormhole download endpoint.
 - Customizable Response's headers tracing log.
-- Fixed issue with health check liveness at deployment.
+- Fixed issue with health check liveness at deployment time.
 
 ## [2.4.2]
 
