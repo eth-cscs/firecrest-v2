@@ -65,7 +65,7 @@ class GetJobMetadataResponse(CamelModel):
 
 
 class PostJobSubmissionResponse(CamelModel):
-    job_id: Optional[int] = Field(None, nullable=True)
+    job_id: Optional[str] = Field(None, nullable=True)
 
 
 class PostJobAttachRequest(CamelModel):

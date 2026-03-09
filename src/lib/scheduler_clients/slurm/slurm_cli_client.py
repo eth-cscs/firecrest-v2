@@ -69,7 +69,7 @@ class SlurmCliClient(SlurmBaseClient):
         job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
         sbatch = SbatchCommand(job_description=job_description)
         return await self.__executed_ssh_cmd(
             username, jwt_token, sbatch, job_description.script
@@ -81,7 +81,7 @@ class SlurmCliClient(SlurmBaseClient):
         job_id: str,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> None:
         srun = SrunCommand(command=command, job_id=job_id, overlap=True)
         return await self.__executed_ssh_cmd(username, jwt_token, srun)
 

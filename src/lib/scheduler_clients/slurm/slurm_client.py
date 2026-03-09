@@ -55,7 +55,7 @@ class SlurmClient(SlurmBaseClient):
         job_description: SlurmJobDescription,
         username: str,
         jwt_token: str,
-    ) -> int | None:
+    ) -> str | None:
 
         if job_description.script_path:
             if self.slurm_cli_client:
@@ -74,7 +74,7 @@ class SlurmClient(SlurmBaseClient):
 
     async def attach_command(
         self, command: str, job_id: str, username: str, jwt_token: str
-    ) -> int | None:
+    ) -> None:
         return await self.slurm_default_client.attach_command(
             command, job_id, username, jwt_token
         )
@@ -97,12 +97,14 @@ class SlurmClient(SlurmBaseClient):
         self, job_id: str, username: str, jwt_token: str
     ) -> List[SlurmJobMetadata]:
         if self.slurm_cli_client:
-            return await self.slurm_cli_client.get_job_metadata(job_id, username, jwt_token)
+            return await self.slurm_cli_client.get_job_metadata(
+                job_id, username, jwt_token
+            )
         else:
             raise HTTPException(
-                    status_code=501,
-                    detail="Scheduler can't handle this request when configured to use rest connection mode",
-                )
+                status_code=501,
+                detail="Scheduler can't handle this request when configured to use rest connection mode",
+            )
 
     async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
         return await self.slurm_default_client.get_nodes(username, jwt_token)
