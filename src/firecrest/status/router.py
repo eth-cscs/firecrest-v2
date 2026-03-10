@@ -186,7 +186,8 @@ async def get_userinfo(
 async def get_liveness() -> Any:
 
     healthcheck_runs = {}
-    # Initialize oldest_check: if not clusters are configured the health checker is not running
+    # Initialize oldest_check: 0 when no health-check has run yet or
+    # no clusters are configured and the health checker is not running
     oldest_check = 0
 
     for cluster in settings.clusters:
@@ -198,4 +199,4 @@ async def get_liveness() -> Any:
                 oldest_check = time_difference
             healthcheck_runs[cluster.name] = cluster.last_health_check
 
-    return {"healthcheck_runs": healthcheck_runs, "last_update": oldest_check}
+    return {"healthcheck_runs": healthcheck_runs, "last_update": int(oldest_check)}

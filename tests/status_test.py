@@ -218,9 +218,7 @@ async def test_ssh_reservation(
         assert response.status_code == 200
 
 
-async def test_liveness_check(
-        client
-):
+async def test_liveness_check(client):
 
-    response = client.get(f"/status/liveness")
+    response = client.get("/status/liveness")
     assert response.status_code == 200
