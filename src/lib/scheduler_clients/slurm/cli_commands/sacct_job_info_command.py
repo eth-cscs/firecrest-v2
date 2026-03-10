@@ -5,8 +5,37 @@
 
 # commands
 from datetime import datetime
+import re
 from lib.exceptions import SlurmError
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
+
+
+def _dhms_to_seconds(time_str: str) -> int:
+
+    m = re.fullmatch(r"(\d+)-(\d{2}):(\d{2}):(\d{2})", time_str)
+    if m:
+        d, h, m_, s = map(int, m.groups())
+        if h >= 24 or m_ >= 60 or s >= 60:
+            raise ValueError(f"Invalid time values: {time_str}")
+        return d * 86400 + h * 3600 + m_ * 60 + s
+
+    # H:MM:SS
+    m = re.fullmatch(r"(\d+):(\d{2}):(\d{2})", time_str)
+    if m:
+        h, m_, s = map(int, m.groups())
+        if m_ >= 60 or s >= 60:
+            raise ValueError(f"Invalid time values: {time_str}")
+        return h * 3600 + m_ * 60 + s
+
+    # M:SS
+    m = re.fullmatch(r"(\d+):(\d{2})", time_str)
+    if m:
+        m_, s = map(int, m.groups())
+        if s >= 60:
+            raise ValueError(f"Invalid time values: {time_str}")
+        return m_ * 60 + s
+
+    raise ValueError(f"Invalid time format: {time_str}")
 
 
 def _timestr_to_seconds(timestr: str):
@@ -14,7 +43,13 @@ def _timestr_to_seconds(timestr: str):
         time = datetime.strptime(timestr, "%H:%M:%S")
         return time.second + time.minute * 60 + time.hour * 3600
     except ValueError:
-        return None
+        pass
+    try:
+        return _dhms_to_seconds(timestr)
+    except ValueError:
+        pass
+
+    return None
 
 
 def _parse_timestamp(timestr: str):
