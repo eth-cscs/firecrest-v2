@@ -195,6 +195,9 @@ class SlurmRestClient(SlurmBaseClient):
                 )
                 for job in filtered_jobs:
                     job_obj = SlurmJob.model_validate(job)
+                    # Normalise limit from minutes to seconds
+                    if job_obj.time.limit is not None:
+                        job_obj.time.limit *= 60
                     if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
         return list(jobs.values()) if len(jobs) > 0 else None
@@ -248,6 +251,8 @@ class SlurmRestClient(SlurmBaseClient):
                 )
                 for job in filtered_jobs:
                     job_obj = SlurmJob.model_validate(job)
+                    if job_obj.time.limit is not None:
+                        job_obj.time.limit *= 60
                     if job_obj.job_id not in jobs or job_obj.status.state == "PENDING":
                         jobs[job_obj.job_id] = job_obj
         return list(jobs.values())

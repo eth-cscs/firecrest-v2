@@ -38,7 +38,11 @@ def _dhms_to_seconds(time_str: str) -> int:
     raise ValueError(f"Invalid time format: {time_str}")
 
 
-def _timestr_to_seconds(timestr: str):
+def _timestr_to_seconds(timestr: str, minutes_to_seconds: bool = False) -> int:
+    try:
+        return int(timestr) if not minutes_to_seconds else int(timestr) * 60
+    except ValueError:
+        pass
     try:
         time = datetime.strptime(timestr, "%H:%M:%S")
         return time.second + time.minute * 60 + time.hour * 3600
@@ -120,12 +124,14 @@ class SacctCommand(SacctCommandBase):
             "priority": int(job_info[9]) if job_info[9] else None,
             "state": {"current": job_info[10], "reason": job_info[11]},
             "time": {
-                "elapsed": int(job_info[12]) if job_info[12] else None,
+                "elapsed": _timestr_to_seconds(job_info[12]) if job_info[12] else None,
                 "submission": _parse_timestamp(job_info[13]),
                 "start": _parse_timestamp(job_info[14]),
                 "end": _parse_timestamp(job_info[15]),
                 "suspended": _timestr_to_seconds(job_info[16]),
-                "limit": int(job_info[17]) if job_info[17] else None,
+                "limit": (
+                    _timestr_to_seconds(job_info[17], True) if job_info[17] else None
+                ),
             },
             "user": job_info[18],
             "workingDirectory": job_info[19],
