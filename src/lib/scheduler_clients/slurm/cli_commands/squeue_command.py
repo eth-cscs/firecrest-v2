@@ -26,7 +26,7 @@ class SqueueCommand(SacctCommand):
     def get_command(self) -> str:
         cmd = ["SLURM_TIME_FORMAT='%s' squeue"]
         if not self.allusers:
-            cmd += ["--user=" + self.username]  # show only user jobs
+            cmd += [f"--user='{self.username}'"]  # show only user jobs
         if self.account:
             cmd += [f"--account='{self.account}'"]
         if self.job_ids:
