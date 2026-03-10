@@ -37,7 +37,7 @@ class SqueueCommand(SacctCommand):
             # "--Format='JobID,AllocNodes,,,GroupId,Account,Name,NodeList,Partition,Priority,State,Reason,TimeUsed,SubmitTime,StartTime,EndTime,TimeLimit,,UserName,WorkDir'"
             # Note ElapsedRaw, TimelimitRaw are not available in squeue
             # Note priority is provided in a different format in squeue and sacct
-            "--format='%i|%D|||%g|%a|%j|%N|%P||%T|%r||%V|%S|%E|||%u|%Z'",
+            "--format='%i|%D|||%g|%a|%j|%N|%P|%Q|%T|%r|%M|%V|%S|%E||%l|%u|%Z'",
         ]
         return " ".join(cmd)
 
