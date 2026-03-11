@@ -26,10 +26,29 @@ def mocked_ssh_sacct_output():
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_sacct_allusers_output():
-    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_allusers_command.json"
+def mocked_ssh_squeue_output():
+    output_file = impresources.files(mocked_ssh_outputs) / "ssh_squeue_command.json"
     with output_file.open("rb") as output:
         return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_squeue_allusers_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_squeue_allusers_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_sacct_allusers_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_sacct_allusers_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
 
 @pytest.fixture(scope="module")
 def mocked_ssh_sacct_script_output():
@@ -97,10 +116,19 @@ async def test_submit_job(
 
 
 async def test_get_job(
-    client, ssh_client, mocked_ssh_sacct_output, slurm_cluster_with_ssh_config
+    client,
+    ssh_client,
+    mocked_ssh_sacct_output,
+    mocked_ssh_squeue_output,
+    slurm_cluster_with_ssh_config,
 ):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_sacct_output)]):
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_output),
+            MockedCommand(**mocked_ssh_squeue_output),
+        ]
+    ):
         response = client.get(
             "/compute/{cluster_name}/jobs/{job_id}".format(
                 cluster_name=slurm_cluster_with_ssh_config.name, job_id=1
@@ -109,13 +137,22 @@ async def test_get_job(
         assert response.status_code == 200
         assert response.json() is not None
 
-        assert response.json()["jobs"][0]["status"]["exitCode"] == 0        
+        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
 
 
 async def test_get_jobs_allusers(
-    client, ssh_client, mocked_ssh_sacct_allusers_output, slurm_cluster_with_ssh_config
+    client,
+    ssh_client,
+    mocked_ssh_sacct_allusers_output,
+    mocked_ssh_squeue_allusers_output,
+    slurm_cluster_with_ssh_config,
 ):
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_sacct_allusers_output)]):
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_allusers_output),
+            MockedCommand(**mocked_ssh_squeue_allusers_output),
+        ]
+    ):
         response = client.get(
             "/compute/{cluster_name}/jobs?allusers=true".format(
                 cluster_name=slurm_cluster_with_ssh_config.name
