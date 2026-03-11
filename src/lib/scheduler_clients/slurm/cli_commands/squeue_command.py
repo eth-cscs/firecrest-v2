@@ -34,10 +34,7 @@ class SqueueCommand(SacctCommand):
             cmd += [f"--jobs='{str_job_ids}'"]
         cmd += [
             "--noheader",
-            # "--Format='JobID,AllocNodes,,,GroupId,Account,Name,NodeList,Partition,Priority,State,Reason,TimeUsed,SubmitTime,StartTime,EndTime,TimeLimit,,UserName,WorkDir'"
-            # Note ElapsedRaw, TimelimitRaw are not available in squeue
-            # Note priority is provided in a different format in squeue and sacct
-            "--format='%i|%D|||%g|%a|%j|%N|%P|%Q|%T|%r|%M|%V|%S|%E||%l|%u|%Z'",
+            "--Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir'",
         ]
         return " ".join(cmd)
 
