@@ -214,8 +214,11 @@ async def test_ssh_reservation(
         [mock_ssh_client.MockedCommand(**mocked_ssh_reservation_output)]
     ):
         response = client.get(
-            "/status/{cluster_namne}/reservations".format(
-                cluster_namne=slurm_cluster_with_ssh_config.name
-            )
-        )
+            f"/status/{slurm_cluster_with_ssh_config.name}/reservations")
         assert response.status_code == 200
+
+
+async def test_liveness_check(client):
+
+    response = client.get("/status/liveness")
+    assert response.status_code == 200

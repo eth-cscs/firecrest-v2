@@ -4,8 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
-import time
-
+from datetime import datetime, timezone
 from firecrest.config import HPCCluster, HealthCheckException, DataTransferType
 
 from firecrest.status.health_check.checks.health_check_filesystem import (
@@ -101,14 +100,14 @@ class ClusterHealthChecker:
 
             results = await asyncio.gather(*checks, return_exceptions=True)
             self.cluster.servicesHealth = results
-            self.cluster.last_health_check = time.time()
+            self.cluster.last_health_check = datetime.now(timezone.utc)
         except Exception as ex:
             error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__}"
             if len(str(ex)) > 0:
                 error_message = f"Cluster HealthChecker execution failed with error: {ex.__class__.__name__} - {str(ex)}"
             exception = HealthCheckException(service_type="exception")
             exception.healthy = False
-            exception.last_checked = time.time()
+            exception.last_checked = datetime.now(timezone.utc)
             exception.message = error_message
             self.cluster.servicesHealth = [exception]
             # Note: raising the exception might not be handled well by apscheduler.
