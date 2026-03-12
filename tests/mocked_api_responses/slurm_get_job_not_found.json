@@ -1,25 +1,45 @@
 {
+    "jobs": [],
+    "last_backfill": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+    },
+    "last_update": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+    },
     "meta": {
         "plugin": {
-            "type": "openapi/dbv0.0.38",
-            "name": "Slurm OpenAPI DB v0.0.38"
+            "type": "openapi/slurmctld",
+            "name": "Slurm OpenAPI slurmctld",
+            "data_parser": "data_parser/v0.0.40",
+            "accounting_storage": "accounting_storage/slurmdbd"
         },
-        "Slurm": {
+        "client": {
+            "source": "[slurm]:42010(fd:10)",
+            "user": "root",
+            "group": "root"
+        },
+        "command": [],
+        "slurm": {
             "version": {
-                "major": 22,
-                "micro": 5,
-                "minor": 5
+                "major": "24",
+                "micro": "3",
+                "minor": "11"
             },
-            "release": "22.05.5"
+            "release": "24.11.3",
+            "cluster": "cluster"
         }
     },
     "errors": [
         {
-            "description": "Nothing found",
-            "error_number": 9003,
-            "error": "Nothing found with query",
-            "source": "slurmdb_jobs_get"
+            "description": "Unable to query JobId=134",
+            "error_number": 1007,
+            "error": "Protocol authentication error",
+            "source": "_handle_job_get"
         }
     ],
-    "jobs": []
+    "warnings": []
 }
