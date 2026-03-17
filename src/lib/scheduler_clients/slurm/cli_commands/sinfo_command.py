@@ -56,7 +56,7 @@ class SinfoCommand(BaseCommand):
                     "name": node_info[5],
                     "address": node_info[6],
                     "hostname": node_info[7],
-                    "state": node_info[8],
+                    "state": [node_info[8]],
                     "partitions": node_info[9].split(","),
                     "weight": _int_or_none(node_info[10]),
                     "slurmd_version": node_info[11],

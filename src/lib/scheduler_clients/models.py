@@ -117,7 +117,7 @@ class NodeModel(CamelModel):
     name: str
     address: Optional[str] = Field(default=None, nullable=True)
     hostname: Optional[str] = Field(default=None, nullable=True)
-    state: str | List[str]
+    state: List[str]
     partitions: Optional[List[str]] = Field(default=None, nullable=True)
     weight: Optional[int] = Field(default=None, nullable=True)
     alloc_memory: Optional[int] = Field(default=None, nullable=True)

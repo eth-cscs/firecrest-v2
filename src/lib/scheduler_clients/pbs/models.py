@@ -152,6 +152,8 @@ class PbsNode(NodeModel):
         kwargs["hostname"] = kwargs.get("resources_available", {}).get("host", None)
         kwargs["alloc_memory"] = kwargs.get("resources_assigned", {}).get("mem", None)
         kwargs["alloc_cpus"] = kwargs.get("resources_assigned", {}).get("ncpus", 0)
+        if isinstance(kwargs.get("state"), str):
+            kwargs["state"] = [kwargs["state"]]
 
         super().__init__(**kwargs)
 
