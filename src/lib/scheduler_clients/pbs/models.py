@@ -17,10 +17,27 @@ from lib.scheduler_clients.models import (
     JobStatus,
     JobTime,
     NodeModel,
+    NodeState,
     PartitionModel,
     ReservationModel,
     SchedPing,
 )
+
+_PBS_STATE_MAP: dict[str, NodeState] = {
+    "free": NodeState.IDLE,
+    "job-exclusive": NodeState.ALLOCATED,
+    "job-sharing": NodeState.MIXED,
+    "time-shared": NodeState.MIXED,
+    "down": NodeState.DOWN,
+    "offline": NodeState.OFFLINE,
+    "reserve": NodeState.RESERVED,
+    "busy": NodeState.BUSY,
+    "state-unknown": NodeState.UNKNOWN,
+}
+
+
+def _map_pbs_state(raw: str) -> NodeState:
+    return _PBS_STATE_MAP.get(raw.lower(), NodeState.UNKNOWN)
 
 
 def parse_timestamp(value):
@@ -152,8 +169,10 @@ class PbsNode(NodeModel):
         kwargs["hostname"] = kwargs.get("resources_available", {}).get("host", None)
         kwargs["alloc_memory"] = kwargs.get("resources_assigned", {}).get("mem", None)
         kwargs["alloc_cpus"] = kwargs.get("resources_assigned", {}).get("ncpus", 0)
-        if isinstance(kwargs.get("state"), str):
-            kwargs["state"] = [kwargs["state"]]
+        state = kwargs.get("state", [])
+        if isinstance(state, str):
+            state = [state]
+        kwargs["state"] = [_map_pbs_state(s) for s in state]
 
         super().__init__(**kwargs)
 
