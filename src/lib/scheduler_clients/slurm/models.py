@@ -20,10 +20,51 @@ from lib.scheduler_clients.models import (
     JobTask,
     JobTime,
     NodeModel,
+    NodeState,
     PartitionModel,
     ReservationModel,
     SchedPing,
 )
+
+_SLURM_STATE_MAP: dict[str, NodeState] = {
+    "idle": NodeState.IDLE,
+    "allocated": NodeState.ALLOCATED,
+    "alloc": NodeState.ALLOCATED,
+    "mixed": NodeState.MIXED,
+    "mix": NodeState.MIXED,
+    "down": NodeState.DOWN,
+    "fail": NodeState.DOWN,
+    "failing": NodeState.DOWN,
+    "failg": NodeState.DOWN,
+    "drain": NodeState.DRAIN,
+    "drained": NodeState.DRAIN,
+    "draining": NodeState.DRAIN,
+    "drng": NodeState.DRAIN,
+    "completing": NodeState.COMPLETING,
+    "comp": NodeState.COMPLETING,
+    "maint": NodeState.OFFLINE,
+    "reserved": NodeState.RESERVED,
+    "resv": NodeState.RESERVED,
+    "power_down": NodeState.POWERING_DOWN,
+    "pow_dn": NodeState.POWERING_DOWN,
+    "power_up": NodeState.POWERING_UP,
+    "pow_up": NodeState.POWERING_UP,
+    "future": NodeState.UNKNOWN,
+    "futr": NodeState.UNKNOWN,
+    "planned": NodeState.UNKNOWN,
+    "plnd": NodeState.UNKNOWN,
+    "blocked": NodeState.UNKNOWN,
+    "unknown": NodeState.UNKNOWN,
+    "unk": NodeState.UNKNOWN,
+    "perfctrs": NodeState.UNKNOWN,
+    "npc": NodeState.UNKNOWN,
+}
+
+
+def _map_slurm_state(raw: str) -> NodeState:
+    # Strip sinfo suffix flags (*, +, ~, #, %, $, @) and normalize case
+    key = raw.rstrip("*+~#%$@").lower()
+    return _SLURM_STATE_MAP.get(key, NodeState.UNKNOWN)
 
 
 def slurm_int_to_int(v) -> Optional[int]:
@@ -209,7 +250,11 @@ class SlurmJob(JobModel):
 
 
 class SlurmNode(NodeModel):
-    pass
+    def __init__(self, **kwargs):
+        if "state" in kwargs:
+            state = kwargs.get("state", [])
+            kwargs["state"] = [_map_slurm_state(s) for s in state]
+        super().__init__(**kwargs)
 
 
 class SlurmPing(SchedPing):

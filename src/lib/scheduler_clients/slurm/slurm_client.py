@@ -107,7 +107,8 @@ class SlurmClient(SlurmBaseClient):
             )
 
     async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
-        return await self.slurm_default_client.get_nodes(username, jwt_token)
+        res = await self.slurm_default_client.get_nodes(username, jwt_token)
+        return [SlurmNode.model_validate(node) for node in res]
 
     async def get_reservations(
         self, username: str, jwt_token: str
