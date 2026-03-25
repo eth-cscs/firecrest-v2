@@ -4,10 +4,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # models
+from enum import Enum
 from typing import List, Optional, Dict
 from lib.models import CamelModel
 
 from pydantic import Field, AliasChoices
+
+
+class NodeState(str, Enum):
+    IDLE = "IDLE"
+    ALLOCATED = "ALLOCATED"
+    MIXED = "MIXED"
+    DOWN = "DOWN"
+    DRAIN = "DRAIN"
+    OFFLINE = "OFFLINE"
+    RESERVED = "RESERVED"
+    COMPLETING = "COMPLETING"
+    BUSY = "BUSY"
+    POWERING_DOWN = "POWERING_DOWN"
+    POWERING_UP = "POWERING_UP"
+    UNKNOWN = "UNKNOWN"
 
 
 class SchedPing(CamelModel):
@@ -117,7 +133,7 @@ class NodeModel(CamelModel):
     name: str
     address: Optional[str] = Field(default=None, nullable=True)
     hostname: Optional[str] = Field(default=None, nullable=True)
-    state: str | List[str]
+    state: List[NodeState]
     partitions: Optional[List[str]] = Field(default=None, nullable=True)
     weight: Optional[int] = Field(default=None, nullable=True)
     alloc_memory: Optional[int] = Field(default=None, nullable=True)
