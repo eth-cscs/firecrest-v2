@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from time import time
 from typing import List
 from jose import jwt, ExpiredSignatureError, JWTError, jwk
 from fastapi import HTTPException, status
@@ -20,10 +21,11 @@ class OIDCTokenAuth(AuthenticationService):
 
     public_keys = {}
 
-    def __init__(self, public_certs: List[str] = None, username_claim: str = None, jwk_algorithm: str = None):
+    def __init__(self, public_certs: List[str] = None, username_claim: str = None, jwk_algorithm: str = None, min_token_ttl: int = 30):
 
         self.username_claim = username_claim
         self.jwk_algorithm = jwk_algorithm
+        self.min_token_ttl = min_token_ttl
 
         keys = []
         s = requests.Session()
@@ -77,6 +79,15 @@ class OIDCTokenAuth(AuthenticationService):
 
         options = {"verify_signature": True, "verify_aud": False, "verify_exp": True}
         decoded_token = jwt.decode(token=access_token, key=public_key, options=options)
+
+        exp = decoded_token.get("exp")
+        if exp is not None and (exp - time()) < self.min_token_ttl:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Access token expires too soon (less than {self.min_token_ttl}s remaining).",
+                headers={"auth-token": access_token},
+            )
+
         return ApiAuthModel.build_from_oidc_decoded_token(
             decoded_token=decoded_token, username_claim=self.username_claim
         )

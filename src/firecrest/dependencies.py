@@ -58,6 +58,7 @@ class APIAuthDependency(AuthDependency):
                 public_certs=settings.auth.authentication.public_certs,
                 username_claim=settings.auth.authentication.username_claim,
                 jwk_algorithm=settings.auth.authentication.jwk_algorithm,
+                min_token_ttl=settings.auth.authentication.min_token_ttl,
             )
 
         # Init sigleton authZ services
