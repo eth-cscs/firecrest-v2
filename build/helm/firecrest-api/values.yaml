@@ -106,6 +106,13 @@ firecrest:
       ##    jwk_algorithm: "RS512"
       # jwk_algorithm: "RS256"
 
+      ## min_token_ttl: minimum remaining TTL check for incoming OIDC access tokens.
+      ## Rejecting near-expiry tokens helps to avoid downstream failures.
+      ## Default is 30 seconds.
+      ## example:
+      ##   min_token_ttl: 60
+      # min_token_ttl : 30
+
     ## Authorization settings via OpenFGA
     # authorization:
       ##   url: endpoint to query the AuthZ service

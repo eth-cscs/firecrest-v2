@@ -45,6 +45,17 @@ class Oidc(CamelModel):
         description="Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key.",
         nullable=True,
     )
+    min_token_ttl: int = Field(
+        30,
+        description=(
+            "Minimum remaining lifetime (in seconds) required for an access token to be "
+            "accepted. Tokens expiring sooner than this threshold are rejected with HTTP 401 "
+            "to prevent downstream services (e.g. SSH key service) from receiving an "
+            "already-expired token."
+        ),
+        nullable=False,
+        ge=0,
+    )
 
 
 class LoadFileSecretStr(SecretStr):
