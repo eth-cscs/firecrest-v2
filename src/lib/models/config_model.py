@@ -54,6 +54,7 @@ class Oidc(CamelModel):
             "already-expired token."
         ),
         nullable=False,
+        ge=0,
     )
 
 
