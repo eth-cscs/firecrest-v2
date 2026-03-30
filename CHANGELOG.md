@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Nodes status has been normalized across schedulers.
+
 ### Fixed
 
 - Slurm job information is now fetched from both the Slurm DB and the Slurm queue allowing to include ineligible jobs' data.
