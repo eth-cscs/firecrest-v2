@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Configurable minimum remaining TTL check for incoming OIDC access tokens 
+
 ### Changed
 
 - Nodes status has been normalized across schedulers.
