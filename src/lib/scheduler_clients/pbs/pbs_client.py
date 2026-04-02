@@ -27,6 +27,7 @@ from lib.scheduler_clients.pbs.cli_commands.ping_command import PbsPingCommand
 
 # models
 from lib.scheduler_clients.pbs.models import (
+    PbsAccounts,
     PbsJob,
     PbsJobDescription,
     PbsJobMetadata,
@@ -146,6 +147,11 @@ class PbsClient(SchedulerBaseClient):
         # Apply PBS model
         result = [PbsPartition.model_validate(queue) for queue in result]
         return result
+
+    async def get_accounts(
+        self, username: str, jwt_token: str
+    ) -> List[PbsAccounts] | None:
+        return None
 
     async def ping(self, username: str, jwt_token: str) -> List[PbsPing] | None:
         ping_cmd = PbsPingCommand()
