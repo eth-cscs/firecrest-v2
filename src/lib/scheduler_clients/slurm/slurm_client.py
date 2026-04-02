@@ -2,6 +2,7 @@ from typing import List
 from fastapi import HTTPException
 
 from lib.scheduler_clients.slurm.models import (
+    SlurmAccounts,
     SlurmJob,
     SlurmJobDescription,
     SlurmJobMetadata,
@@ -124,6 +125,11 @@ class SlurmClient(SlurmBaseClient):
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         return await self.slurm_default_client.cancel_job(job_id, username, jwt_token)
+
+    async def get_accounts(
+        self, username: str, jwt_token: str
+    ) -> List[SlurmAccounts] | None:
+        return await self.slurm_default_client.get_accounts(username, jwt_token)
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         return await self.slurm_default_client.ping(username, jwt_token)

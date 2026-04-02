@@ -14,6 +14,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmPing,
     SlurmReservations,
     SlurmNode,
+    SlurmAccounts,
 )
 
 
@@ -80,6 +81,12 @@ class SlurmBaseClient(SchedulerBaseClient):
     async def get_partitions(
         self, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
+        pass
+
+    @abstractmethod
+    async def get_accounts(
+        self, username: str, jwt_token: str
+    ) -> List[SlurmAccounts] | None:
         pass
 
     @abstractmethod

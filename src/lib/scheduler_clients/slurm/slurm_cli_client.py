@@ -36,6 +36,7 @@ from lib.scheduler_clients.slurm.cli_commands.scontrol_reservations_command impo
 from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
 from lib.scheduler_clients.slurm.models import (
+    SlurmAccounts,
     SlurmJob,
     SlurmJobDescription,
     SlurmJobMetadata,
@@ -43,6 +44,12 @@ from lib.scheduler_clients.slurm.models import (
     SlurmPing,
     SlurmReservations,
     SlurmNode,
+)
+from lib.scheduler_clients.slurm.cli_commands.sacctmgr_accounts import (
+    SacctmgrAccountsCommand,
+)
+from lib.scheduler_clients.slurm.cli_commands.sacctmgr_default_account import (
+    SacctmgrDefaultAccountCommand,
 )
 
 # clients
@@ -221,6 +228,38 @@ class SlurmCliClient(SlurmBaseClient):
                 SlurmPartitions.model_validate(reservation) for reservation in result
             ]
         return result
+
+    async def get_accounts(
+        self,
+        username: str,
+        jwt_token: str,
+    ) -> List[SlurmAccounts] | None:
+        sacctmgr = SacctmgrAccountsCommand(username)
+        sacctmgr_default = SacctmgrDefaultAccountCommand(username)
+
+        commands = [
+            self.__executed_ssh_cmd(username, jwt_token, sacctmgr),
+            self.__executed_ssh_cmd(username, jwt_token, sacctmgr_default),
+        ]
+        results = await asyncio.gather(*commands, return_exceptions=True)
+        accounts = []
+        for result in results:
+            if result is None:
+                continue
+            if isinstance(result, Exception):
+                raise SlurmError("Error executing Slurm command.") from result
+            if result and isinstance(result, list):
+                for account in result:
+                    accounts.append(
+                        {
+                            "name": account,
+                            "default": True if account == results[1] else False,
+                        }
+                    )
+        if accounts:
+            accounts = [SlurmAccounts.model_validate(account) for account in accounts]
+
+        return accounts if len(accounts) > 0 else None
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         scontrolping = ScontrolPingCommand()

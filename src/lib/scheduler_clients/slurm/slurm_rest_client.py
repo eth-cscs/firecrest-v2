@@ -18,6 +18,7 @@ from lib.exceptions import SlurmAuthTokenError, SlurmError
 
 # Models
 from lib.scheduler_clients.slurm.models import (
+    SlurmAccounts,
     SlurmJob,
     SlurmJobDescription,
     SlurmJobMetadata,
@@ -335,6 +336,39 @@ class SlurmRestClient(SlurmBaseClient):
                 for partition in partition_result["partitions"]
             ]
         return res
+
+    async def get_accounts(
+        self, username: str, jwt_token: str
+    ) -> List[SlurmAccounts] | None:
+        client = await self.get_aiohttp_client()
+        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        headers = _slurm_headers(username, jwt_token, self.username_claim)
+
+        url = f"{self.api_url}/slurmdb/v{self.api_version}/associations?user={username}"
+        async with client.get(
+            url=url,
+            headers=headers,
+            timeout=timeout,
+        ) as response:
+            log_backend_http_scheduler(url, response.status)
+            if response.status != status.HTTP_200_OK:
+                await _slurm_unexpected_response(response)
+            accounts = []
+            result = await response.json()
+            if "associations" in result:
+                for association in result["associations"]:
+                    accounts.append(
+                        {
+                            "name": association["account"],
+                            "default": (True if association["is_default"] else False),
+                        }
+                    )
+            if accounts:
+                accounts = [
+                    SlurmAccounts.model_validate(account) for account in accounts
+                ]
+
+            return accounts if len(accounts) > 0 else None
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         client = await self.get_aiohttp_client()
