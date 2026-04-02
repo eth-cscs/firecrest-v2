@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 
 # models
 from lib.scheduler_clients.models import (
+    AccountsModel,
     JobMetadataModel,
     JobModel,
     JobDescriptionModel,
@@ -70,6 +71,12 @@ class SchedulerBaseClient(ABC):
     async def get_reservations(
         self, username: str, jwt_token: str
     ) -> List[ReservationModel] | None:
+        pass
+
+    @abstractmethod
+    async def get_accounts(
+        self, username: str, jwt_token: str
+    ) -> List[AccountsModel] | None:
         pass
 
     @abstractmethod
