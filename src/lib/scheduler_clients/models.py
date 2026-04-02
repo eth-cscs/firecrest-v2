@@ -154,3 +154,8 @@ class PartitionModel(CamelModel):
     cpus: int | None = None
     total_nodes: int | None = None
     partition: str | List[str]
+
+
+class AccountsModel(CamelModel):
+    name: str
+    default: bool

@@ -11,6 +11,7 @@ from pydantic import AliasChoices, Field, field_validator
 
 # models
 from lib.scheduler_clients.models import (
+    AccountsModel,
     JobDescriptionModel,
     JobMetadataModel,
     JobModel,
@@ -194,6 +195,10 @@ class PbsNode(NodeModel):
 
 
 class PbsPing(SchedPing):
+    pass
+
+
+class PbsAccounts(AccountsModel):
     pass
 
 
