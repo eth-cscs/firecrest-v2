@@ -13,6 +13,7 @@ from pydantic import (
 
 # models
 from lib.scheduler_clients.models import (
+    AccountsModel,
     JobDescriptionModel,
     JobMetadataModel,
     JobModel,
@@ -258,6 +259,10 @@ class SlurmNode(NodeModel):
 
 
 class SlurmPing(SchedPing):
+    pass
+
+
+class SlurmAccounts(AccountsModel):
     pass
 
 

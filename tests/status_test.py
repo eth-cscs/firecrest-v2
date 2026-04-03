@@ -17,7 +17,7 @@ from firecrest.status.models import (
 
 from importlib import resources as impresources
 from tests import mocked_api_responses
-from tests import mock_ssh_client
+from tests.mock_ssh_client import MockedCommand
 
 import pytest
 from aioresponses import aioresponses
@@ -59,6 +59,16 @@ def mocked_ssh_id_recursive_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_reservation_output():
     return load_ssh_output("ssh_scontrol_reservation_command.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_default_account_output():
+    return load_ssh_output("ssh_sacctmgr_default_account.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_accounts_output():
+    return load_ssh_output("ssh_sacctmgr_accounts.json")
 
 
 @pytest.fixture(scope="module")
@@ -195,11 +205,20 @@ def test_systems_reservations(
 
 
 async def test_userinfo(
-    client, ssh_client, mocked_ssh_id_recursive_output, slurm_cluster_with_ssh_config
+    client,
+    ssh_client,
+    mocked_ssh_id_recursive_output,
+    mocked_ssh_default_account_output,
+    mocked_ssh_accounts_output,
+    slurm_cluster_with_ssh_config,
 ):
 
     async with ssh_client.mocked_output(
-        [mock_ssh_client.MockedCommand(**mocked_ssh_id_recursive_output)]
+        [
+            MockedCommand(**mocked_ssh_id_recursive_output),
+            MockedCommand(**mocked_ssh_default_account_output),
+            MockedCommand(**mocked_ssh_accounts_output),
+        ]
     ):
         response = client.get(f"/status/{slurm_cluster_with_ssh_config.name}/userinfo")
         assert response.status_code == 200
@@ -211,10 +230,11 @@ async def test_ssh_reservation(
 ):
 
     async with ssh_client.mocked_output(
-        [mock_ssh_client.MockedCommand(**mocked_ssh_reservation_output)]
+        [MockedCommand(**mocked_ssh_reservation_output)]
     ):
         response = client.get(
-            f"/status/{slurm_cluster_with_ssh_config.name}/reservations")
+            f"/status/{slurm_cluster_with_ssh_config.name}/reservations"
+        )
         assert response.status_code == 200
 
 

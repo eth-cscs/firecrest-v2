@@ -163,6 +163,11 @@ async def get_userinfo(
         Path(alias="system_name", description="Target system"),
         Depends(SSHClientDependency()),
     ],
+    scheduler_client: Annotated[
+        SchedulerBaseClient,
+        Path(alias="system_name", description="Target system"),
+        Depends(SchedulerClientDependency(ignore_health=True)),
+    ] = None,
     system: HPCCluster = Depends(
         ServiceAvailabilityDependency(service_type=HealthCheckType.ssh),
         use_cache=False,
@@ -170,10 +175,17 @@ async def get_userinfo(
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-    id = IdCommand(system.ssh.timeout.command_execution)
-    async with ssh_client.get_client(username, access_token) as (client):
-        output = await client.execute(id)
-        return output
+    try:
+        id = IdCommand(system.ssh.timeout.command_execution)
+        accounts = await scheduler_client.get_accounts(username, access_token)
+        async with ssh_client.get_client(username, access_token) as (client):
+            output = await client.execute(id)
+            output["accounts"] = accounts
+            return output
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)
+        ) from exc
 
 
 @router_liveness.get(
