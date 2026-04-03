@@ -1,0 +1,6 @@
+{
+    "stdout": "staff",
+    "stderr": "",
+    "exit_code": 0,
+    "command": "sacctmgr show user 'test-user' format=defaultaccount -n"
+}

@@ -18,7 +18,7 @@ class SacctmgrDefaultAccountCommand(SacctmgrBaseCommand):
     def get_command(self) -> str:
         cmd = [super().get_command()]
         cmd += ["show"]
-        cmd += [f"user {self.username}"]
+        cmd += [f"user '{self.username}'"]
         cmd += ["format=defaultaccount -n"]
         return " ".join(cmd)
 
