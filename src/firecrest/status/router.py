@@ -178,10 +178,23 @@ async def get_userinfo(
     try:
         id = IdCommand(system.ssh.timeout.command_execution)
         accounts = await scheduler_client.get_accounts(username, access_token)
-        async with ssh_client.get_client(username, access_token) as (client):
-            output = await client.execute(id)
-            output["accounts"] = accounts
-            return output
+        async with ssh_client.get_client(username, access_token) as client:
+            id = await client.execute(id)
+            if isinstance(id, Exception):
+                raise id
+            if isinstance(accounts, Exception):
+                raise accounts
+            if id is not None:
+                user = id["user"]
+                groups = [
+                    {
+                        "name": group["name"],
+                        "id": group["id"],
+                        "default": True if group["name"] == id["group"] else False,
+                    }
+                    for group in id["groups"]
+                ]
+                return {"user": user, "groups": groups, "accounts": accounts}
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc)
