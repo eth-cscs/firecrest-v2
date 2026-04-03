@@ -241,21 +241,30 @@ class SlurmCliClient(SlurmBaseClient):
             self.__executed_ssh_cmd(username, jwt_token, sacctmgr),
             self.__executed_ssh_cmd(username, jwt_token, sacctmgr_default),
         ]
-        results = await asyncio.gather(*commands, return_exceptions=True)
+        accounts_result, default_account_result = await asyncio.gather(
+            *commands, return_exceptions=True
+        )
+
+        if isinstance(accounts_result, Exception):
+            raise SlurmError("Error executing Slurm command.") from accounts_result
+
+        default_account = None
+        if (
+            default_account_result is not None
+            and not isinstance(default_account_result, Exception)
+            and isinstance(default_account_result, str)
+        ):
+            default_account = default_account_result
+
         accounts = []
-        for result in results:
-            if result is None:
-                continue
-            if isinstance(result, Exception):
-                raise SlurmError("Error executing Slurm command.") from result
-            if result and isinstance(result, list):
-                for account in result:
-                    accounts.append(
-                        {
-                            "name": account,
-                            "default": True if account == results[1] else False,
-                        }
-                    )
+        if accounts_result and isinstance(accounts_result, list):
+            for account in accounts_result:
+                accounts.append(
+                    {
+                        "name": account,
+                        "default": account == default_account,
+                    }
+                )
         if accounts:
             accounts = [SlurmAccounts.model_validate(account) for account in accounts]
 
