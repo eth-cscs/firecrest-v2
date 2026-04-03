@@ -3,7 +3,6 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-import asyncio
 from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, Path, status
 from typing import Annotated, Any
