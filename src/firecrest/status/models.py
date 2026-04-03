@@ -50,4 +50,4 @@ class UserInfoResponse(CamelModel):
     user: PosixIdentified
     group: PosixIdentified
     groups: List[PosixIdentified]
-    accounts: Optional[List[AccountsModel]]
+    accounts: Optional[List[AccountsModel]] = None
