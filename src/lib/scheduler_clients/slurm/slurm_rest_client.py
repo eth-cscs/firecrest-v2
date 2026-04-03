@@ -344,7 +344,8 @@ class SlurmRestClient(SlurmBaseClient):
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
 
-        url = f"{self.api_url}/slurmdb/v{self.api_version}/associations?user={username}"
+        query_string = urllib.parse.urlencode({"user": username})
+        url = f"{self.api_url}/slurmdb/v{self.api_version}/associations?{query_string}"
         async with client.get(
             url=url,
             headers=headers,
