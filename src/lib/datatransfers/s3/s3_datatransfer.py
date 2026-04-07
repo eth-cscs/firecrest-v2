@@ -163,7 +163,10 @@ class S3Datatransfer(DataTransferBase):
 
             job_script = _build_script("job_s3_downloader.sh", parameters)
             job = JobHelper(
-                f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
+                f"{self.work_dir}/{username}",
+                job_script,
+                "IngressFileTransfer",
+                account,
             )
 
             job_id = await self.scheduler_client.submit_job(
@@ -281,6 +284,7 @@ class S3Datatransfer(DataTransferBase):
                     parameters,
                 ),
                 "OutgressFileTransfer",
+                account,
             )
             get_download_url = None
             job_id = await self.scheduler_client.submit_job(

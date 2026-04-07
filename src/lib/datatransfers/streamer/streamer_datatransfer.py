@@ -89,7 +89,10 @@ class StreamerDatatransfer(DataTransferBase):
 
         job_script = _build_script("job_streamer.sh", parameters)
         job = JobHelper(
-            f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
+            f"{self.work_dir}/{username}",
+            job_script,
+            "IngressFileTransfer",
+            account,
         )
 
         job_id = await self.scheduler_client.submit_job(
@@ -165,6 +168,7 @@ class StreamerDatatransfer(DataTransferBase):
             f"{self.work_dir}/{username}",
             _build_script("job_streamer.sh", parameters),
             "OutgressFileTransfer",
+            account,
         )
 
         job_id = await self.scheduler_client.submit_job(
