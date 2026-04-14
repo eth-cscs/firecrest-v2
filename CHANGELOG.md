@@ -36,12 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
+- ***⚠️API Breaking*** Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Returns an error if the `transfer_method` chosen for large data transfer is not available.
 - Documentation about `streamer` and `wormhole` data transfer methods.
 - `buffer_limit` for `/filesystem/<system>/ops/*` operation is now adapted to the value of `settings.data_operation.max_ops_file_size` (it was set to the value by default of 5MB).
 - Updated Demo launcher configuration.
 - Fix error for PBS jobs when no nodes are assigned to it.
-- Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Remove hardcoded jfrog link from the wormhole download endpoint.
 - Customizable Response's headers tracing log.
 
