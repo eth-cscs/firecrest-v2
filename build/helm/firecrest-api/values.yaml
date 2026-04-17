@@ -352,6 +352,16 @@ firecrest:
     # - input: "header-name-to-trace"
     #   output: "log-field-name"
 
+## Resources configuration for the FirecREST deployment
+resources:
+  requests:
+    cpu: 4
+    memory: 2Gi
+  limits:
+    cpu: 8
+    memory: 2Gi
+
+
 ## Post-start lifecycle hook configuration
 ## When enabled, it will execute the script located at /app/scripts/postStart-script.sh
 lifecycle:
