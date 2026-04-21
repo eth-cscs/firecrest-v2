@@ -352,6 +352,22 @@ firecrest:
     # - input: "header-name-to-trace"
     #   output: "log-field-name"
 
+## Resources configuration for the FirecREST deployment
+resources:
+  requests:
+    ## Number of CPUs requested by the container to the Kubernetes scheduler to deploy FirecREST. Default: 4
+    cpu: 4
+    ## Amount of memory requested by the container to the Kubernetes scheduler to deploy FirecREST
+    ## Unit: Mi, Gi (e.g. "512Mi", "1Gi"). Default: 2Gi
+    memory: 2Gi
+  limits:
+    ## Maximum number of CPUs the container can use to deploy FirecREST. Exceeding this value causes CPU throttling. Default: 8    
+    cpu: 8
+    ## Maximum memory the FirecREST container can use. Exceeding this value results in container termination (OOMKilled).
+    ## Unit: Mi, Gi (e.g. "512Mi", "1Gi"). Default: 2Gi
+    memory: 2Gi
+
+
 ## Post-start lifecycle hook configuration
 ## When enabled, it will execute the script located at /app/scripts/postStart-script.sh
 lifecycle:

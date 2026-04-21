@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Configurable minimum remaining TTL check for incoming OIDC access tokens
 - UserInfo endpoint now also includes user's account information (only on Slurm)
+- Adds resources requests and limits to helm chart
 
 ### Changed
 
