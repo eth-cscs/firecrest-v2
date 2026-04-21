@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../assets/img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1970,7 +1970,7 @@
 <td><code>app_version</code></td>
 <td><code>Literal</code></td>
 <td>—</td>
-<td><code>'2.5.0'</code></td>
+<td><code>'2.5.1'</code></td>
 </tr>
 <tr>
 <td><code>apis_root_path</code></td>
@@ -2081,6 +2081,12 @@
 <td><code>str</code> <code>|</code> <code>None</code></td>
 <td>Explicitly set the expected JWT signing algorithm if JWKs endpoint doesn't include 'alg' parameter for the signing key.</td>
 <td><code>None</code></td>
+</tr>
+<tr>
+<td><code>min_token_ttl</code></td>
+<td><code>int</code></td>
+<td>Minimum remaining lifetime (in seconds) required for an access token to be accepted. Tokens expiring sooner than this threshold are rejected with HTTP 401 to prevent downstream services (e.g. SSH key service) from receiving an already-expired token.</td>
+<td><code>30</code></td>
 </tr>
 </tbody>
 </table>
