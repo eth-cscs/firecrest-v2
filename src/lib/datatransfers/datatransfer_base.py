@@ -80,6 +80,7 @@ class JobHelper:
         working_dir: str = None,
         script: str = None,
         job_name: str = None,
+        account: str = None,
     ):
         self.working_dir = working_dir
         unique_id = uuid.uuid4()
@@ -92,6 +93,8 @@ class JobHelper:
             "env": {"PATH": "/bin:/usr/bin/:/usr/local/bin/"},
             "script": script,
         }
+        if account is not None:
+            self.job_param["account"] = account
 
 
 def _format_directives(directives: List[str], account: str):
