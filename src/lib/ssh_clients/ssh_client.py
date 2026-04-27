@@ -218,18 +218,21 @@ class SSHClientPool:
         if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
-                logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
-                logger.error(f"\tPrincipals: {cert.principals}")
-                logger.error(
-                    f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
-                )
-                logger.error(f"\tSerial ID: {cert._serial}")
-                logger.error(
-                    f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
-                )
-                logger.error(
-                    f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
-                )
+                if isinstance(cert, asyncssh.SSHCertificate):
+                    logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
+                    logger.error(f"\tPrincipals: {cert.principals}")
+                    logger.error(
+                        f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
+                    )
+                    logger.error(f"\tSerial ID: {cert._serial}")
+                    logger.error(
+                        f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
+                    )
+                    logger.error(
+                        f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
+                    )
+                else:
+                    logger.error("\tNo valid client certificate found.")
             logger.error("[END] Client Certificate debug info")
 
     @asynccontextmanager
@@ -288,4 +291,4 @@ class SSHClientPool:
             except ProtocolError as e:
                 await self.get_ssh_debug_info(options, e.reason)
 
-                raise SSHConnectionError("Unable to establish SSH connection.") from e
+                raise SSHConnectionError("SSH Protocol Error.") from e
