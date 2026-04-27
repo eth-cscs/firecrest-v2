@@ -207,13 +207,15 @@ class SSHClientPool:
         return options
 
     async def get_ssh_debug_info(
-        self, options: asyncssh.SSHClientConnectionOptions, exp_reason: str
+        self,
+        options: asyncssh.SSHClientConnectionOptions = None,
+        exp_reason: str = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
 
         logger.error(f"SSH Server Error: {exp_reason}")
-        if len(options.kwargs["client_certs"]) > 0:
+        if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
                 logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
@@ -235,7 +237,9 @@ class SSHClientPool:
         client: SSHClient = None
 
         async with SSHClientPool.lock:
+            options = None
             try:
+
                 if username in self.clients:
                     client = self.clients[username]
                     if client.is_closed():
