@@ -78,10 +78,10 @@ class SSHClient:
         try:
             async with asyncio.timeout(self.execute_timeout):
                 command_line = command.get_command()
-                process = await self.conn.create_process(command_line)
+                process = await self.conn.create_process(command_line, encoding=None)
 
                 if stdin:
-                    process.stdin.write(stdin)
+                    process.stdin.write(stdin.encode())
                     process.stdin.write_eof()
 
                 stdout_data, stdout_error = await asyncio.gather(
@@ -100,7 +100,9 @@ class SSHClient:
                 # Log command
                 log_backend_command(command_line, process.exit_status)
                 return command.parse_output(
-                    stdout_data, stdout_error, process.exit_status
+                    stdout_data.decode("utf-8", errors="replace"),
+                    stdout_error.decode("utf-8", errors="replace"),
+                    process.exit_status,
                 )
 
         except TimeoutError as e:
