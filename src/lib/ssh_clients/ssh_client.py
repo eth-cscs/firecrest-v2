@@ -7,7 +7,7 @@ import asyncio
 from time import time
 from datetime import datetime
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 import asyncssh
 from asyncssh import (
     ChannelOpenError,
@@ -75,6 +75,7 @@ class SSHClient:
             return exc.partial
 
     async def execute(self, command: BaseCommand, stdin: str = None):
+        process = None
         try:
             async with asyncio.timeout(self.execute_timeout):
                 command_line = command.get_command()
@@ -106,9 +107,10 @@ class SSHClient:
                 )
 
         except TimeoutError as e:
-            process.terminate()
-            process.stdin.write("\x03")
-            process.stdin.write_eof()
+            if process:
+                process.terminate()
+                process.stdin.write("\x03".encode())
+                process.stdin.write_eof()
             raise TimeoutLimitExceeded(
                 "Command execution timeout limit exceeded."
             ) from e
@@ -210,8 +212,8 @@ class SSHClientPool:
 
     async def get_ssh_debug_info(
         self,
-        options: asyncssh.SSHClientConnectionOptions = None,
-        exp_reason: str = None,
+        options: Optional[asyncssh.SSHClientConnectionOptions] = None,
+        exp_reason: Optional[str] = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
