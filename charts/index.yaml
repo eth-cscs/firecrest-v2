@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   firecrest-api:
   - apiVersion: v2
+    appVersion: 2.5.2
+    created: "2026-04-28T11:42:37.787238088Z"
+    description: A Kubernetes Helm chart for FirecREST API
+    digest: 606567b3d8362fc8876f64903cb08fa92334cb8b7169d3ae34248410aef5f3cd
+    name: firecrest-api
+    type: application
+    urls:
+    - https://eth-cscs.github.io/firecrest-v2/charts/firecrest-api-2.5.2.tgz
+    version: 2.5.2
+  - apiVersion: v2
     appVersion: 2.5.1
-    created: "2026-04-21T11:58:38.963825933Z"
+    created: "2026-04-28T11:42:37.786674686Z"
     description: A Kubernetes Helm chart for FirecREST API
     digest: e5d50c6289562ac052f7d67d1683e2509037c566be28bec735da2292a64b5a5e
     name: firecrest-api
@@ -13,7 +23,7 @@ entries:
     version: 2.5.1
   - apiVersion: v2
     appVersion: 2.5.0
-    created: "2026-04-21T11:58:38.963128275Z"
+    created: "2026-04-28T11:42:37.78613081Z"
     description: A Kubernetes Helm chart for FirecREST API
     digest: 2773d1ed2e9b430596e8525688b48fe11ca6bbae1857d277e9d7a8f0938a4a87
     name: firecrest-api
@@ -23,7 +33,7 @@ entries:
     version: 2.5.0
   - apiVersion: v2
     appVersion: 2.4.2
-    created: "2026-04-21T11:58:38.962543706Z"
+    created: "2026-04-28T11:42:37.785534154Z"
     description: A Kubernetes Helm chart for FirecREST API
     digest: 1899dcce871448e2cc416c70e95e413fbe68603ed3bdf2b9c2209426619adcc1
     name: firecrest-api
@@ -33,7 +43,7 @@ entries:
     version: 2.4.2
   - apiVersion: v2
     appVersion: 2.4.1
-    created: "2026-04-21T11:58:38.961287207Z"
+    created: "2026-04-28T11:42:37.785024252Z"
     description: A Kubernetes Helm chart for FirecREST API
     digest: 1e9523c7bb0861bc451c8315bb4b9b1190191a91e8307ec2b25cd311a6ca0fb0
     name: firecrest-api
@@ -43,7 +53,7 @@ entries:
     version: 2.4.1
   - apiVersion: v2
     appVersion: 2.4.0
-    created: "2026-04-21T11:58:38.960748076Z"
+    created: "2026-04-28T11:42:37.784491457Z"
     description: A Kubernetes Helm chart for FirecREST API
     digest: 0d049fd92c2aff4e5707f866a85ce2e61cabcbb3b474475811460ae17d49c9ff
     name: firecrest-api
@@ -53,7 +63,7 @@ entries:
     version: 2.4.0
   - apiVersion: v2
     appVersion: 2.3.1
-    created: "2026-04-21T11:58:38.960209447Z"
+    created: "2026-04-28T11:42:37.783948433Z"
     description: FirecREST APIs (version 2)
     digest: 7d84c53745eebdbd2df2dccb45867850b3a12c33443bbdd5d2cef74689bf75eb
     name: firecrest-api
@@ -63,7 +73,7 @@ entries:
     version: 2.3.1
   - apiVersion: v2
     appVersion: 2.3.0
-    created: "2026-04-21T11:58:38.960099411Z"
+    created: "2026-04-28T11:42:37.783836894Z"
     description: FirecREST APIs (version 2)
     digest: 16aa3782a6ee5b5491f334d064f8624724cba0d81b5e5bf0282d3930b0a0851c
     name: firecrest-api
@@ -73,7 +83,7 @@ entries:
     version: 2.3.0
   - apiVersion: v2
     appVersion: 2.2.9
-    created: "2026-04-21T11:58:38.959987954Z"
+    created: "2026-04-28T11:42:37.783665675Z"
     description: FirecREST APIs (version 2)
     digest: 4a0b1ca4bab1cedf97464fd8fcef6ac845270fde5fca9960cfd7fe3a94af16e0
     name: firecrest-api
@@ -83,7 +93,7 @@ entries:
     version: 2.2.9
   - apiVersion: v2
     appVersion: 2.2.8
-    created: "2026-04-21T11:58:38.959875835Z"
+    created: "2026-04-28T11:42:37.78353973Z"
     description: FirecREST APIs (version 2)
     digest: 09eb7664b3c58f283a2b2f436c944727d728ffe2b2cfdaec4750ddfa4b393de2
     name: firecrest-api
@@ -93,7 +103,7 @@ entries:
     version: 2.2.8
   - apiVersion: v2
     appVersion: 2.2.7
-    created: "2026-04-21T11:58:38.959794483Z"
+    created: "2026-04-28T11:42:37.783419315Z"
     description: FirecREST APIs (version 2)
     digest: 06148b3d5e425917c24d18bb7a5c49f4b4d8b24dda16344e3e4271477fe4deb9
     name: firecrest-api
@@ -103,7 +113,7 @@ entries:
     version: 2.2.7
   - apiVersion: v2
     appVersion: 2.2.6
-    created: "2026-04-21T11:58:38.959711308Z"
+    created: "2026-04-28T11:42:37.78332582Z"
     description: FirecREST APIs (version 2)
     digest: 3e6e252a9f1925ffefb327d0cf52109095cf9abd392f4064bc836957086ea947
     name: firecrest-api
@@ -113,7 +123,7 @@ entries:
     version: 2.2.6
   - apiVersion: v2
     appVersion: 2.2.5
-    created: "2026-04-21T11:58:38.959615013Z"
+    created: "2026-04-28T11:42:37.783214883Z"
     description: FirecREST APIs (version 2)
     digest: 1b4ff150c108e8615dae06e0919c8c46b8b0942f790a735f2b380e80060b160d
     name: firecrest-api
@@ -123,7 +133,7 @@ entries:
     version: 2.2.5
   - apiVersion: v2
     appVersion: 2.2.4
-    created: "2026-04-21T11:58:38.959528944Z"
+    created: "2026-04-28T11:42:37.783118373Z"
     description: FirecREST APIs (version 2)
     digest: dbf02cfd9f2153576fc2a0ddadfb61694260f780e15f9a5770b1b10f8aeeef1b
     name: firecrest-api
@@ -133,7 +143,7 @@ entries:
     version: 2.2.4
   - apiVersion: v2
     appVersion: 2.2.3
-    created: "2026-04-21T11:58:38.959432769Z"
+    created: "2026-04-28T11:42:37.783001144Z"
     description: FirecREST APIs (version 2)
     digest: c931edf0c7a5e1b8c0b7524faf5bb0eccde6a29ca27b8a60508e97961205138c
     name: firecrest-api
@@ -143,7 +153,7 @@ entries:
     version: 2.2.3
   - apiVersion: v2
     appVersion: 2.2.2
-    created: "2026-04-21T11:58:38.959341752Z"
+    created: "2026-04-28T11:42:37.782713867Z"
     description: FirecREST APIs (version 2)
     digest: b39a0572a21642deae599395e40e245c24f9cf9226fccaf5decd566902adb6ab
     name: firecrest-api
@@ -153,7 +163,7 @@ entries:
     version: 2.2.2
   - apiVersion: v2
     appVersion: 2.2.1
-    created: "2026-04-21T11:58:38.959251557Z"
+    created: "2026-04-28T11:42:37.782524213Z"
     description: FirecREST APIs (version 2)
     digest: 9d8c78dea48561173c62a59b9a6a82dfc93428984aec2cba48e40bd1fecaa674
     name: firecrest-api
@@ -163,7 +173,7 @@ entries:
     version: 2.2.1
   - apiVersion: v2
     appVersion: 2.2.0
-    created: "2026-04-21T11:58:38.959133169Z"
+    created: "2026-04-28T11:42:37.782354116Z"
     description: FirecREST APIs (version 2)
     digest: ece5004a442b167965846e573659631acbb63dd0131ef122760fc7f923731110
     name: firecrest-api
@@ -173,7 +183,7 @@ entries:
     version: 2.2.0
   - apiVersion: v2
     appVersion: 2.1.5
-    created: "2026-04-21T11:58:38.959039077Z"
+    created: "2026-04-28T11:42:37.782187093Z"
     description: FirecREST APIs (version 2)
     digest: 172eb31affaac2e2053524a35d32a2eb94a815469d0af76d6c8cac10f1ddea41
     name: firecrest-api
@@ -183,7 +193,7 @@ entries:
     version: 2.1.5
   - apiVersion: v2
     appVersion: 2.1.4
-    created: "2026-04-21T11:58:38.958906438Z"
+    created: "2026-04-28T11:42:37.781792427Z"
     description: FirecREST APIs (version 2)
     digest: 62c98cce2cbe559f7fe1fd47bdeacd057da31e94986e63d186cca3e67e0f7b2d
     name: firecrest-api
@@ -193,7 +203,7 @@ entries:
     version: 2.1.4
   - apiVersion: v2
     appVersion: 2.1.3
-    created: "2026-04-21T11:58:38.95881482Z"
+    created: "2026-04-28T11:42:37.781626096Z"
     description: FirecREST APIs (version 2)
     digest: 5c19c477f9595cd5f27f879e1598a769e0104e86843a27f67c6741c31244008a
     name: firecrest-api
@@ -203,7 +213,7 @@ entries:
     version: 2.1.3
   - apiVersion: v2
     appVersion: 2.1.3-beta.13
-    created: "2026-04-21T11:58:38.958695761Z"
+    created: "2026-04-28T11:42:37.781511091Z"
     description: FirecREST APIs (version 2)
     digest: ccc377c0cd1e7b1e9dc0e5a31213f5c37db3902f675db9731e88c9ef51cf4908
     name: firecrest-api
@@ -211,4 +221,4 @@ entries:
     urls:
     - https://eth-cscs.github.io/firecrest-v2/charts/firecrest-api-2.1.3-beta.13.tgz
     version: 2.1.3-beta.13
-generated: "2026-04-21T11:58:38.958465044Z"
+generated: "2026-04-28T11:42:37.781275942Z"
