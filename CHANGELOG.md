@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.1] - OPEN
+
+## [2.5.2] - OPEN
+
+### Added
+
+
+### Changed
+
+
+### Fixed
+
+- Proper handling of non unicode chars in ssh commands output.
+
+
+## [2.5.1]
 
 ### Added
 
@@ -21,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Slurm job information is now fetched from both the Slurm DB and the Slurm queue allowing to include ineligible jobs' data.
 - Fixed issue with health check liveness at deployment time.
-
-
 
 
 ## [2.5.0]

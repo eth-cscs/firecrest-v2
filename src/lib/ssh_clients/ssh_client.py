@@ -7,7 +7,7 @@ import asyncio
 from time import time
 from datetime import datetime
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 import asyncssh
 from asyncssh import (
     ChannelOpenError,
@@ -75,13 +75,14 @@ class SSHClient:
             return exc.partial
 
     async def execute(self, command: BaseCommand, stdin: str = None):
+        process = None
         try:
             async with asyncio.timeout(self.execute_timeout):
                 command_line = command.get_command()
-                process = await self.conn.create_process(command_line)
+                process = await self.conn.create_process(command_line, encoding=None)
 
                 if stdin:
-                    process.stdin.write(stdin)
+                    process.stdin.write(stdin.encode())
                     process.stdin.write_eof()
 
                 stdout_data, stdout_error = await asyncio.gather(
@@ -100,13 +101,16 @@ class SSHClient:
                 # Log command
                 log_backend_command(command_line, process.exit_status)
                 return command.parse_output(
-                    stdout_data, stdout_error, process.exit_status
+                    stdout_data.decode("utf-8", errors="replace"),
+                    stdout_error.decode("utf-8", errors="replace"),
+                    process.exit_status,
                 )
 
         except TimeoutError as e:
-            process.terminate()
-            process.stdin.write("\x03")
-            process.stdin.write_eof()
+            if process:
+                process.terminate()
+                process.stdin.write("\x03".encode())
+                process.stdin.write_eof()
             raise TimeoutLimitExceeded(
                 "Command execution timeout limit exceeded."
             ) from e
@@ -207,27 +211,32 @@ class SSHClientPool:
         return options
 
     async def get_ssh_debug_info(
-        self, options: asyncssh.SSHClientConnectionOptions, exp_reason: str
+        self,
+        options: Optional[asyncssh.SSHClientConnectionOptions] = None,
+        exp_reason: Optional[str] = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
 
         logger.error(f"SSH Server Error: {exp_reason}")
-        if len(options.kwargs["client_certs"]) > 0:
+        if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
-                logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
-                logger.error(f"\tPrincipals: {cert.principals}")
-                logger.error(
-                    f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
-                )
-                logger.error(f"\tSerial ID: {cert._serial}")
-                logger.error(
-                    f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
-                )
-                logger.error(
-                    f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
-                )
+                if isinstance(cert, asyncssh.SSHCertificate):
+                    logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
+                    logger.error(f"\tPrincipals: {cert.principals}")
+                    logger.error(
+                        f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
+                    )
+                    logger.error(f"\tSerial ID: {cert._serial}")
+                    logger.error(
+                        f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
+                    )
+                    logger.error(
+                        f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
+                    )
+                else:
+                    logger.error("\tNo valid client certificate found.")
             logger.error("[END] Client Certificate debug info")
 
     @asynccontextmanager
@@ -235,7 +244,9 @@ class SSHClientPool:
         client: SSHClient = None
 
         async with SSHClientPool.lock:
+            options = None
             try:
+
                 if username in self.clients:
                     client = self.clients[username]
                     if client.is_closed():
@@ -284,4 +295,4 @@ class SSHClientPool:
             except ProtocolError as e:
                 await self.get_ssh_debug_info(options, e.reason)
 
-                raise SSHConnectionError("Unable to establish SSH connection.") from e
+                raise SSHConnectionError("SSH Protocol Error.") from e
