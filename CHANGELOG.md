@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Unified names for subsystems probing and health status: probing key `filesystems` was renamed to `filesystem` (the old label is deprecated but still valid).
+
 
 ### Fixed
 

@@ -29,7 +29,7 @@ clusters:
     services:
       scheduler:
         timeout: 5
-      filesystems:
+      filesystem:
         timeout: 5
       storage:
         timeout: 20
@@ -74,7 +74,7 @@ clusters:
     services:
       ssh:
         timeout: 10
-      filesystems:
+      filesystem:
         timeout: 10
       storage:
         timeout: 20
@@ -119,7 +119,7 @@ clusters:
     services:
       ssh:
         timeout: 10
-      filesystems:
+      filesystem:
         timeout: 10
       storage:
         timeout: 20

@@ -26,7 +26,7 @@ Health check execution is configured through the `probing` section of the cluste
         timeout: 10
       scheduler:
         timeout: 20
-      filesystems:
+      filesystem:
         timeout: 10
     ```
 

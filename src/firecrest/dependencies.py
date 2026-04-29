@@ -13,7 +13,7 @@ from botocore.handlers import validate_bucket_name
 from firecrest.config import (
     DataTransferType,
     HPCCluster,
-    HealthCheckType,
+    BackendServiceType,
     S3DataTransfer,
     SSHKeysServiceType,
     SchedulerType,
@@ -96,7 +96,7 @@ class APIAuthDependency(AuthDependency):
 
 
 class ServiceAvailabilityDependency:
-    def __init__(self, service_type: HealthCheckType, ignore_health: bool = False):
+    def __init__(self, service_type: BackendServiceType, ignore_health: bool = False):
         self.ignore_health = ignore_health
         self.service_type = service_type
 
@@ -192,11 +192,11 @@ class ServiceAvailabilityDependency:
             )
             # Check health of requested system
             if not self.ignore_health and system.probing.services:
-                if self.service_type == HealthCheckType.filesystem:
+                if self.service_type == BackendServiceType.filesystem:
                     self.__file_system_health(system, request)
-                if self.service_type == HealthCheckType.scheduler:
+                if self.service_type == BackendServiceType.scheduler:
                     self.__scheduler_health(system)
-                if self.service_type == HealthCheckType.ssh:
+                if self.service_type == BackendServiceType.ssh:
                     self.__ssh_health(system)
 
             return system
@@ -247,7 +247,7 @@ class SSHClientDependency:
 
     async def __call__(self, system_name: str):
         system = ServiceAvailabilityDependency(
-            service_type=HealthCheckType.ssh, ignore_health=self.ignore_health
+            service_type=BackendServiceType.ssh, ignore_health=self.ignore_health
         )(system_name=system_name)
 
         async with SSHClientDependency.lock:
@@ -302,7 +302,7 @@ class SchedulerClientDependency:
         system_name: str,
     ):
         system = ServiceAvailabilityDependency(
-            service_type=HealthCheckType.scheduler, ignore_health=self.ignore_health
+            service_type=BackendServiceType.scheduler, ignore_health=self.ignore_health
         )(system_name=system_name)
 
         match system.scheduler.type:
@@ -372,9 +372,9 @@ class DataTransferDependency:
         scheduler_client = await self._get_scheduler_client(system_name)
         ssh_client = await self._get_ssh_client(system_name)
 
-        system = ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler)(
-            system_name=system_name
-        )
+        system = ServiceAvailabilityDependency(
+            service_type=BackendServiceType.scheduler
+        )(system_name=system_name)
         work_dir = next(
             iter([fs.path for fs in system.file_systems if fs.default_work_dir]),
             None,

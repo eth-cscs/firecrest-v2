@@ -5,6 +5,7 @@
 
 from firecrest.config import (
     BaseDataTransfer,
+    BackendServiceType,
     S3ServiceHealth,
 )
 from aiobotocore.session import get_session
@@ -31,7 +32,7 @@ class S3HealthCheck(HealthCheckBase):
 
     async def execute_check(self) -> S3ServiceHealth:
 
-        health = S3ServiceHealth(service_type="s3")
+        health = S3ServiceHealth(service_type=BackendServiceType.external_storage)
         health.healthy = True
 
         async with self._get_s3_client(
@@ -45,7 +46,7 @@ class S3HealthCheck(HealthCheckBase):
         return health
 
     async def handle_error(self, ex: Exception) -> S3ServiceHealth:
-        health = S3ServiceHealth(service_type="s3")
+        health = S3ServiceHealth(service_type=BackendServiceType.external_storage)
         health.healthy = False
         health.message = str(ex)
         return health
