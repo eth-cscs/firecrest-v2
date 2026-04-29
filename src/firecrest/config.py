@@ -106,6 +106,25 @@ class SchedulerConnectionMode(str, Enum):
     ssh = "ssh"
 
 
+class BackendServiceType(str, Enum):
+    """Types of services that can be health-checked."""
+
+    storage = "storage"
+    filesystem = "filesystem"
+    ssh = "ssh"
+    scheduler = "scheduler"
+
+    # Special value used by healtch chercker to identify exceptions, not a real service type
+    exception = "exception"
+
+    # Backward compatibility for old value, to be removed in future versions
+    @classmethod
+    def _missing_(cls, value):
+        if value == "filesystems":
+            return cls.filesystem
+        return None
+
+
 class Scheduler(CamelModel):
     """Cluster job scheduler configuration."""
 
@@ -165,20 +184,10 @@ class ServiceAccount(CamelModel):
     )
 
 
-class HealthCheckType(str, Enum):
-    """Types of services that can be health-checked."""
-
-    scheduler = "scheduler"
-    filesystem = "filesystem"
-    ssh = "ssh"
-    s3 = "s3"
-    exception = "exception"
-
-
 class BaseServiceHealth(CamelModel):
     """Base health status structure for services."""
 
-    service_type: HealthCheckType = Field(
+    service_type: BackendServiceType = Field(
         ..., description="Type of the service being checked."
     )
     last_checked: Optional[datetime] = Field(
@@ -241,7 +250,7 @@ class ProbingService(CamelModel):
 class ProbingServices(CamelModel):
     """Health check interval and list of services."""
 
-    services: Optional[dict[str, ProbingService]] = Field(
+    services: Optional[dict[BackendServiceType, ProbingService]] = Field(
         None, description="Services to be checked."
     )
     interval_check: int = Field(
