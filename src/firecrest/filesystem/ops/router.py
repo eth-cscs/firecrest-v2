@@ -17,7 +17,7 @@ from typing import Any, Annotated
 from base64 import b64decode, b64encode
 
 # configs
-from firecrest.config import HPCCluster, HealthCheckType
+from firecrest.config import HPCCluster, BackendServiceType
 from firecrest.filesystem.ops.commands.tar_command import TarCommand
 
 # dependencies
@@ -49,7 +49,6 @@ from firecrest.filesystem.ops.commands.chmod_command import ChmodCommand
 from firecrest.filesystem.ops.commands.chown_command import ChownCommand
 from firecrest.filesystem.ops.commands.symlink_command import SymlinkCommand
 
-
 # models
 from firecrest.filesystem.ops.models import (
     GetDirectoryLsResponse,
@@ -70,7 +69,6 @@ from firecrest.filesystem.ops.models import (
     PostFileSymlinkRequest,
     PostFileSymlinkResponse,
 )
-
 
 router = create_router(
     prefix="/{system_name}/ops",
@@ -94,7 +92,7 @@ async def put_chmod(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ):
@@ -127,7 +125,7 @@ async def put_chown(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ):
@@ -162,7 +160,7 @@ async def get_ls(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
     show_hidden: Annotated[
@@ -212,7 +210,7 @@ async def get_head(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
     # TODO Should we allow bytes and lines to be strings? The head allows the following:
@@ -294,7 +292,7 @@ async def get_view(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
     size: Annotated[
@@ -362,7 +360,7 @@ async def get_tail(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
     file_bytes: Annotated[
@@ -439,7 +437,7 @@ async def get_checksum(
     ],
     path: Annotated[str, Query(description="Target system")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -469,7 +467,7 @@ async def get_file(
     ],
     path: Annotated[str, Query(description="A file or folder path")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -496,7 +494,7 @@ async def get_stat(
     ],
     path: Annotated[str, Query(description="A file or folder path")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
     dereference: Annotated[bool, Query(description="Follow symbolic links")] = False,
@@ -525,7 +523,7 @@ async def delete_rm(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> None:
@@ -552,7 +550,7 @@ async def post_mkdir(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> None:
@@ -584,7 +582,7 @@ async def post_symlink(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -615,7 +613,7 @@ async def get_download(
     ],
     path: Annotated[str, Query(description="A file to download")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -654,7 +652,7 @@ async def post_upload(
     ],
     file: UploadFile = File(description="File to be uploaded as `multipart/form-data`"),
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -701,7 +699,7 @@ async def post_compress(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -737,7 +735,7 @@ async def post_extract(
         Depends(SSHClientDependency()),
     ],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
