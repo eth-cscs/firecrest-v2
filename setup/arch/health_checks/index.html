@@ -1586,7 +1586,7 @@
         timeout: 10
       scheduler:
         timeout: 20
-      filesystems:
+      filesystem:
         timeout: 10
     ```</p>
 <p>Each service listed under the <code>services</code> subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. If the entire <code>services</code> section is omitted, all health checks for the specific cluster are disabled.</p>
