@@ -250,7 +250,7 @@ firecrest:
         scheduler:
           ## timeout: max time (in seconds) allowed per check
           timeout: 10
-        filesystems:
+        filesystem:
           ## timeout: max time (in seconds) allowed per check
           timeout: 10
 
