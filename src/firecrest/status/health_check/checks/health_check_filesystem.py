@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.config import (
+    BackendServiceType,
     FilesystemServiceHealth,
     HPCCluster,
 )
@@ -27,7 +28,7 @@ class FilesystemHealthCheck(HealthCheckBase):
             system_name=self.system.name
         )
 
-        health = FilesystemServiceHealth(service_type="filesystem")
+        health = FilesystemServiceHealth(service_type=BackendServiceType.filesystem)
         health.healthy = True
         health.path = self.path
 
@@ -43,7 +44,7 @@ class FilesystemHealthCheck(HealthCheckBase):
         return health
 
     async def handle_error(self, ex: Exception) -> FilesystemServiceHealth:
-        health = FilesystemServiceHealth(service_type="filesystem")
+        health = FilesystemServiceHealth(service_type=BackendServiceType.filesystem)
         health.healthy = False
         health.path = self.path
         health.message = str(ex)

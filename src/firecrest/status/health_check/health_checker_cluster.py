@@ -5,7 +5,12 @@
 
 import asyncio
 from datetime import datetime, timezone
-from firecrest.config import HPCCluster, HealthCheckException, DataTransferType
+from firecrest.config import (
+    BackendServiceType,
+    HPCCluster,
+    HealthCheckException,
+    DataTransferType,
+)
 
 from firecrest.status.health_check.checks.health_check_filesystem import (
     FilesystemHealthCheck,
@@ -61,41 +66,41 @@ class ClusterHealthChecker:
             if self.cluster.probing.services is not None:
                 services = self.cluster.probing.services
 
-                if "scheduler" in services:
+                if BackendServiceType.scheduler in services:
                     sechedulerCheck = SchedulerHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
-                        timeout=services["scheduler"].timeout,
+                        timeout=services[BackendServiceType.scheduler].timeout,
                     )
                     checks += [sechedulerCheck.check()]
 
-                if "ssh" in services:
+                if BackendServiceType.ssh in services:
                     sshCheck = SSHHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
-                        timeout=services["ssh"].timeout,
+                        timeout=services[BackendServiceType.ssh].timeout,
                     )
                     checks += [sshCheck.check()]
 
-                if "filesystems" in services:
+                if BackendServiceType.filesystem in services:
                     for filesystem in self.cluster.file_systems:
                         filesystemCheck = FilesystemHealthCheck(
                             system=self.cluster,
                             auth=auth,
                             token=token,
                             path=filesystem.path,
-                            timeout=services["filesystems"].timeout,
+                            timeout=services[BackendServiceType.filesystem].timeout,
                         )
                         checks += [filesystemCheck.check()]
 
-                if "storage" in services:
+                if BackendServiceType.storage in services:
                     match self.cluster.data_operation.data_transfer.service_type:
                         case DataTransferType.s3:
                             s3Check = S3HealthCheck(
                                 data_transfer=self.cluster.data_operation.data_transfer,
-                                timeout=services["storage"].timeout,
+                                timeout=services[BackendServiceType.storage].timeout,
                             )
                             checks += [s3Check.check()]
 
