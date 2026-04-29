@@ -95,12 +95,14 @@ class ClusterHealthChecker:
                         )
                         checks += [filesystemCheck.check()]
 
-                if BackendServiceType.storage in services:
+                if BackendServiceType.external_storage in services:
                     match self.cluster.data_operation.data_transfer.service_type:
                         case DataTransferType.s3:
                             s3Check = S3HealthCheck(
                                 data_transfer=self.cluster.data_operation.data_transfer,
-                                timeout=services[BackendServiceType.storage].timeout,
+                                timeout=services[
+                                    BackendServiceType.external_storage
+                                ].timeout,
                             )
                             checks += [s3Check.check()]
 

@@ -109,7 +109,7 @@ class SchedulerConnectionMode(str, Enum):
 class BackendServiceType(str, Enum):
     """Types of services that can be health-checked."""
 
-    storage = "storage"
+    external_storage = "s3"  # To be renamed to `external_storage` from version 2.6.0
     filesystem = "filesystem"
     ssh = "ssh"
     scheduler = "scheduler"
@@ -117,11 +117,13 @@ class BackendServiceType(str, Enum):
     # Special value used by healtch chercker to identify exceptions, not a real service type
     exception = "exception"
 
-    # Backward compatibility for old value, to be removed in future versions
+    # Backward and forward compatibility to be removed from version 2.6.0
     @classmethod
     def _missing_(cls, value):
         if value == "filesystems":
             return cls.filesystem
+        if value == "storage":
+            return cls.external_storage
         return None
 
 
