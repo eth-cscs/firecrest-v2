@@ -67,13 +67,13 @@ class ClusterHealthChecker:
                 services = self.cluster.probing.services
 
                 if BackendServiceType.scheduler in services:
-                    sechedulerCheck = SchedulerHealthCheck(
+                    schedulerCheck = SchedulerHealthCheck(
                         system=self.cluster,
                         auth=auth,
                         token=token,
                         timeout=services[BackendServiceType.scheduler].timeout,
                     )
-                    checks += [sechedulerCheck.check()]
+                    checks += [schedulerCheck.check()]
 
                 if BackendServiceType.ssh in services:
                     sshCheck = SSHHealthCheck(
