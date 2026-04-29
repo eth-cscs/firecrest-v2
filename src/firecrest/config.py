@@ -114,7 +114,7 @@ class BackendServiceType(str, Enum):
     ssh = "ssh"
     scheduler = "scheduler"
 
-    # Special value used by healtch chercker to identify exceptions, not a real service type
+    # Special value used by the health checker to identify exceptions; not a real service type.
     exception = "exception"
 
     # Backward compatibility for old value, to be removed in future versions
