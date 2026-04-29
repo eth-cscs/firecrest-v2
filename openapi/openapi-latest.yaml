@@ -44,6 +44,16 @@ components:
       - message
       title: ApiResponseError
       type: object
+    BackendServiceType:
+      description: Types of services that can be health-checked.
+      enum:
+      - s3
+      - filesystem
+      - ssh
+      - scheduler
+      - exception
+      title: BackendServiceType
+      type: string
     Body_post_upload_filesystem__system_name__ops_upload_post:
       properties:
         file:
@@ -472,7 +482,7 @@ components:
           nullable: true
           title: Path
         serviceType:
-          $ref: '#/components/schemas/HealthCheckType'
+          $ref: '#/components/schemas/BackendServiceType'
           description: Type of the service being checked.
       required:
       - serviceType
@@ -724,22 +734,12 @@ components:
           nullable: true
           title: Message
         serviceType:
-          $ref: '#/components/schemas/HealthCheckType'
+          $ref: '#/components/schemas/BackendServiceType'
           description: Type of the service being checked.
       required:
       - serviceType
       title: HealthCheckException
       type: object
-    HealthCheckType:
-      description: Types of services that can be health-checked.
-      enum:
-      - scheduler
-      - filesystem
-      - ssh
-      - s3
-      - exception
-      title: HealthCheckType
-      type: string
     JobDescriptionModel:
       properties:
         account:
@@ -1515,6 +1515,8 @@ components:
           anyOf:
           - additionalProperties:
               $ref: '#/components/schemas/ProbingService'
+            propertyNames:
+              $ref: '#/components/schemas/BackendServiceType'
             type: object
           - type: 'null'
           description: Services to be checked.
@@ -1716,7 +1718,7 @@ components:
           nullable: true
           title: Message
         serviceType:
-          $ref: '#/components/schemas/HealthCheckType'
+          $ref: '#/components/schemas/BackendServiceType'
           description: Type of the service being checked.
       required:
       - serviceType
@@ -1845,7 +1847,7 @@ components:
           nullable: true
           title: Message
         serviceType:
-          $ref: '#/components/schemas/HealthCheckType'
+          $ref: '#/components/schemas/BackendServiceType'
           description: Type of the service being checked.
       required:
       - serviceType
@@ -1962,7 +1964,7 @@ components:
           nullable: true
           title: Message
         serviceType:
-          $ref: '#/components/schemas/HealthCheckType'
+          $ref: '#/components/schemas/BackendServiceType'
           description: Type of the service being checked.
       required:
       - serviceType
