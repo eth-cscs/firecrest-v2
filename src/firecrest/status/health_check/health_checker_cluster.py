@@ -56,15 +56,20 @@ class ClusterHealthChecker:
                 self.cluster.service_account.secret.get_secret_value(),
             )
 
-            token = await client.fetch_token(
-                url=settings.auth.authentication.token_url,
-                grant_type="client_credentials",
-            )
-            auth = self.token_decoder.auth_from_token(token["access_token"])
-
             checks = []
             if self.cluster.probing.services is not None:
                 services = self.cluster.probing.services
+
+                if any(s in services for s in (
+                    BackendServiceType.scheduler,
+                    BackendServiceType.ssh,
+                    BackendServiceType.filesystem)
+                ):
+                    token = await client.fetch_token(
+                        url=settings.auth.authentication.token_url,
+                        grant_type="client_credentials",
+                    )
+                    auth = self.token_decoder.auth_from_token(token["access_token"])
 
                 if BackendServiceType.scheduler in services:
                     schedulerCheck = SchedulerHealthCheck(
