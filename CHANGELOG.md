@@ -5,8 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.x.y] - OPEN
 
-## [2.5.2] - OPEN
+### Added
+
+
+### Changed
+
+
+### Fixed
+
+- Only request access token for health check user when needed. This also allows disabling health checks completely, for setups where client credentials authentication is not available.
+
+## [2.5.2]
 
 ### Added
 
