@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, Path, status
 from typing import Annotated, Any
 
 # configs
-from firecrest.config import HPCCluster, HealthCheckType
+from firecrest.config import HPCCluster, BackendServiceType
 from firecrest.status.commands.id_command import IdCommand
 from firecrest.plugins import settings
 
@@ -169,7 +169,7 @@ async def get_userinfo(
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.ssh),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.ssh),
         use_cache=False,
     ),
 ) -> Any:

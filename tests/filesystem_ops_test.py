@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from importlib import resources as impresources
+import re
 from firecrest.filesystem.ops.models import File
 from tests import mocked_ssh_outputs
 import pytest
@@ -15,7 +16,7 @@ from tests.mock_ssh_client import MockedCommand
 def load_ssh_output(file: str):
     output_file = impresources.files(mocked_ssh_outputs) / file
     with output_file.open("rb") as output:
-        return json.load(output)
+        return json.load(output, strict=False)
 
 
 @pytest.fixture(scope="module")
@@ -49,6 +50,11 @@ def mocked_ssh_file_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_file_non_unicode_output():
+    return load_ssh_output("ssh_file_command_with_non_unicode_char.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_head_output():
     return load_ssh_output("ssh_head_command.json")
 
@@ -61,6 +67,7 @@ def mocked_ssh_dd_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_dd_with_size_output():
     return load_ssh_output("ssh_dd_command_with_size.json")
+
 
 @pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
@@ -289,6 +296,24 @@ async def test_file_command(client, ssh_client, mocked_ssh_file_output):
         assert response.json()["output"] == mocked_ssh_file_output["stdout"]
 
 
+async def test_file_no_unicode_command(
+    client, ssh_client, mocked_ssh_file_non_unicode_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_file_non_unicode_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/file?path={path}".format(
+                path="/home/README.md"
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"] == mocked_ssh_file_non_unicode_output["stdout"]
+
+
 async def test_dd_command(client, ssh_client, mocked_ssh_dd_output):
 
     async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_dd_output)]):
@@ -302,9 +327,12 @@ async def test_dd_command(client, ssh_client, mocked_ssh_dd_output):
         assert response.json() is not None
         assert response.json()["output"] == mocked_ssh_dd_output["stdout"]
 
+
 async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_output):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_dd_with_size_output)]):
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_with_size_output)]
+    ):
 
         response = client.get(
             "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}".format(
@@ -464,7 +492,9 @@ async def test_tar_compress_command(client, ssh_client, mocked_ssh_tar_output):
         assert response.status_code == 204
 
 
-async def test_tar_compress_with_pattern_command(client, ssh_client, mocked_ssh_tar_output):
+async def test_tar_compress_with_pattern_command(
+    client, ssh_client, mocked_ssh_tar_output
+):
 
     async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_tar_output)]):
 
@@ -473,7 +503,7 @@ async def test_tar_compress_with_pattern_command(client, ssh_client, mocked_ssh_
             json={
                 "source_path": "/home/files/",
                 "target_path": "/home/compressed.tar.gz",
-                "match_pattern": "./[ab].*\\.txt"
+                "match_pattern": "./[ab].*\\.txt",
             },
         )
         assert response.status_code == 204

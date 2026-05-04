@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from typing import List
-from firecrest.config import HPCCluster, SchedulerServiceHealth
+from firecrest.config import HPCCluster, BackendServiceType, SchedulerServiceHealth
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from lib.scheduler_clients.models import SchedPing
@@ -24,7 +24,7 @@ class SchedulerHealthCheck(HealthCheckBase):
             system_name=self.system.name
         )
 
-        health = SchedulerServiceHealth(service_type="scheduler")
+        health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         pings: List[SchedPing] = await self.scheduler_client.ping(
             self.auth.username, self.token["access_token"]
         )
@@ -36,7 +36,7 @@ class SchedulerHealthCheck(HealthCheckBase):
         error_message = f"{ex.__class__.__name__}"
         if len(str(ex)) > 0:
             error_message = f"{ex.__class__.__name__}: {str(ex)}"
-        health = SchedulerServiceHealth(service_type="scheduler")
+        health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         health.healthy = False
         health.message = error_message
         return health

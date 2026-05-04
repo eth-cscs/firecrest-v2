@@ -3,7 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
-from firecrest.config import HPCCluster, SSHServiceHealth
+from firecrest.config import HPCCluster, BackendServiceType, SSHServiceHealth
 from firecrest.dependencies import SSHClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from firecrest.status.health_check.checks.true_command import TrueCommand
@@ -23,7 +23,7 @@ class SSHHealthCheck(HealthCheckBase):
             system_name=self.system.name
         )
 
-        health = SSHServiceHealth(service_type="ssh")
+        health = SSHServiceHealth(service_type=BackendServiceType.ssh)
         health.healthy = True
 
         self.ssh_client.execute_timeout = self.timeout
@@ -37,7 +37,7 @@ class SSHHealthCheck(HealthCheckBase):
         return health
 
     async def handle_error(self, ex: Exception) -> SSHServiceHealth:
-        health = SSHServiceHealth(service_type="ssh")
+        health = SSHServiceHealth(service_type=BackendServiceType.ssh)
         health.healthy = False
         health.message = str(ex)
         return health

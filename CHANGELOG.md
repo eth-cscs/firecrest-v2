@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
 ## [2.6.0] - OPEN
 
 ### Added
@@ -13,19 +14,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refactored UserInfo response, group and groups objects have been merged.
+- ***⚠️ API Breaking*** Refactored UserInfo response, group and groups objects have been merged.
 
 ### Fixed
 
 
 
 
-## [2.5.1] - OPEN
+
+
+## [2.5.2] - OPEN
+
+### Added
+
+
+### Changed
+
+- Unified names for subsystems probing and health status: probing key `filesystems` was renamed to `filesystem` (the old label is deprecated but still valid).
+
+
+### Fixed
+
+- Proper handling of non unicode chars in ssh commands output.
+
+
+## [2.5.1]
 
 ### Added
 
 - Configurable minimum remaining TTL check for incoming OIDC access tokens
 - UserInfo endpoint now also includes user's account information (only on Slurm)
+- Adds resources requests and limits to helm chart
 
 ### Changed
 
@@ -35,8 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Slurm job information is now fetched from both the Slurm DB and the Slurm queue allowing to include ineligible jobs' data.
 - Fixed issue with health check liveness at deployment time.
-
-
 
 
 ## [2.5.0]
@@ -51,12 +68,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - ***⚠️ API Breaking*** Fix transfer directives serialization, now properties names are properly camelcased (see issue: #162).
+- ***⚠️ API Breaking*** Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Returns an error if the `transfer_method` chosen for large data transfer is not available.
 - Documentation about `streamer` and `wormhole` data transfer methods.
 - `buffer_limit` for `/filesystem/<system>/ops/*` operation is now adapted to the value of `settings.data_operation.max_ops_file_size` (it was set to the value by default of 5MB).
 - Updated Demo launcher configuration.
 - Fix error for PBS jobs when no nodes are assigned to it.
-- Handle job arrays in PBS. Job IDs will be strings, and not integers anymore in the API responses.
 - Remove hardcoded jfrog link from the wormhole download endpoint.
 - Customizable Response's headers tracing log.
 

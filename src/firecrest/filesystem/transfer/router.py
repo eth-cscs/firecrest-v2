@@ -10,9 +10,8 @@ from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
 from jinja2 import Environment, FileSystemLoader
 
-
 # plugins
-from firecrest.config import HPCCluster, HealthCheckType
+from firecrest.config import HPCCluster, BackendServiceType
 
 # storage
 from firecrest.filesystem.transfer import scripts
@@ -53,7 +52,6 @@ from firecrest.filesystem.transfer.models import (
     ExtractRequest,
     ExtractResponse,
 )
-
 
 router = create_router(
     prefix="/{system_name}/transfer",
@@ -122,7 +120,7 @@ async def post_upload(
     upload_request: PostFileUploadRequest,
     system_name: Annotated[str, Path(description="Target system")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.scheduler),
         use_cache=False,
     ),
     datatransfer=Depends(DataTransferDependency()),
@@ -172,7 +170,7 @@ async def post_download(
     download_request: PostFileDownloadRequest,
     system_name: Annotated[str, Path(description="Target system")],
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.scheduler),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.scheduler),
         use_cache=False,
     ),
     datatransfer=Depends(DataTransferDependency()),
@@ -222,7 +220,7 @@ async def move_mv(
     system_name: Annotated[str, Path(description="System where the jobs are running")],
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -280,7 +278,7 @@ async def post_cp(
     system_name: Annotated[str, Path(description="System where the jobs are running")],
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -342,7 +340,7 @@ async def delete_rm(
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
     account: Optional[str] = None,
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -399,7 +397,7 @@ async def compress(
     system_name: Annotated[str, Path(description="System where the jobs are running")],
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:
@@ -484,7 +482,7 @@ async def extract(
     system_name: Annotated[str, Path(description="System where the jobs are running")],
     scheduler_client: SlurmRestClient = Depends(SchedulerClientDependency()),
     system: HPCCluster = Depends(
-        ServiceAvailabilityDependency(service_type=HealthCheckType.filesystem),
+        ServiceAvailabilityDependency(service_type=BackendServiceType.filesystem),
         use_cache=False,
     ),
 ) -> Any:

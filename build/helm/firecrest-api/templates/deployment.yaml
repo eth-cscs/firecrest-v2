@@ -30,6 +30,13 @@ spec:
           image: "{{ .Values.image }}:{{ .Values.version | default .Chart.AppVersion }}"
           ports:
             - containerPort: {{ .Values.service.port | default 5000 }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | default "4" }}
+              memory: {{ .Values.resources.requests.memory | default "2Gi" }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | default "8" }}
+              memory: {{ .Values.resources.limits.memory | default "2Gi" }}
           {{- if .Values.lifecycle.postStart.enabled }}
           lifecycle:
             postStart:

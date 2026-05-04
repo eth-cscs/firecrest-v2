@@ -6,6 +6,6 @@ Bootstrap-Flask==2.4.2
 Flask-Session==0.8.0
 Flask-SocketIO==5.5.1
 flask_sslify == 0.1.5
-PyJWT[crypto] == 2.10.1
+PyJWT[crypto] >= 2.12.0
 pyfirecrest == 3.0.1
 Jinja2 == 3.1.6

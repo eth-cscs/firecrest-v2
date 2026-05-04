@@ -1,0 +1,7 @@
+{
+    "stdout": "Unicode text, non unicode text in brackets []",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"file -b -- '/home/README.md'"
+}
+

@@ -42,7 +42,7 @@ clusters:
         timeout: 10
       scheduler:
         timeout: 10
-      filesystems:
+      filesystem:
         timeout: 10        
   file_systems:
     - path: '/users'
