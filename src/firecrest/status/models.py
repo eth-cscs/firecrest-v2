@@ -46,8 +46,13 @@ class PosixIdentified(CamelModel):
     name: str
 
 
+class PosixGroupIdentified(CamelModel):
+    id: str
+    name: str
+    default: bool
+
+
 class UserInfoResponse(CamelModel):
     user: PosixIdentified
-    group: PosixIdentified
-    groups: List[PosixIdentified]
+    groups: List[PosixGroupIdentified]
     accounts: Optional[List[AccountsModel]] = None
