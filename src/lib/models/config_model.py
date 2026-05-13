@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from pydantic import SecretStr, Field
 from lib.models.base_model import CamelModel
+from lib.models.token_endpoint_auth_method import TokenEndpointAuthMethod
 
 
 class Oidc(CamelModel):
@@ -27,6 +28,15 @@ class Oidc(CamelModel):
             "obtain access tokens for the service account that will do the "
             "health checks."
         ),
+    )
+    token_endpoint_auth_method: Optional[TokenEndpointAuthMethod] = Field(
+        TokenEndpointAuthMethod.client_secret_post,
+        description=(
+            "Authentication method for the token endpoint. This is used to "
+            "specify how the client credentials are sent when fetching the "
+            "token for the health checks."
+        ),
+        nullable=False,
     )
     public_certs: List[str] = Field(
         default_factory=list,

@@ -5,8 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - OPEN
 
-## [2.5.2] - OPEN
+### Added
+
+- Configuration setting `token_endpoint_auth_method` to authenticate the health-check client following [OIDC client authentication standards](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication). By default is defined as `client_secret_post`
+
+### Changed
+
+### Fixed
+
+## [2.5.2]
 
 ### Added
 
