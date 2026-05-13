@@ -2,9 +2,9 @@ auth:
   authentication:
     scopes:  {}
     tokenUrl:  "http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/token"
-    token_endpoint_auth_method: "client_secret_basic"
+    tokenEndpointAuthMethod: "client_secret_basic"
     publicCerts: []
-    username_claim: "sub"
+    usernameClaim: "sub"
 ssh_credentials:
   type: "SSHService"
   url: "http://192.168.240.20:5000"

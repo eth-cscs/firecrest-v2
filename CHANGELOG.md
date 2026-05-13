@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Configuration setting `token_endpoint_auth_method` to authenticate the health-check client following [OIDC client authentication standards](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication). By default is defined as `client_secret_post`
+- Configuration setting `token_endpoint_auth_method` to authenticate the health-check client following [OIDC client authentication standards](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication). The default is defined as `client_secret_basic`
 
 ### Changed
 

@@ -54,7 +54,7 @@ class ClusterHealthChecker:
             client = AsyncOAuth2Client(
                 self.cluster.service_account.client_id,
                 self.cluster.service_account.secret.get_secret_value(),
-                token_endpoint_auth_method=settings.auth.authentication.token_endpoint_auth_method,
+                token_endpoint_auth_method=settings.auth.authentication.token_endpoint_auth_method.value,
             )
 
             token = await client.fetch_token(
