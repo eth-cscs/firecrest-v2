@@ -6,7 +6,7 @@ auth:
   authentication:
     scopes:  {}
     tokenUrl:  "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token"
-    # tokenEndpointAuthMethod: "client_secret_post"
+    tokenEndpointAuthMethod: "client_secret_post"
     publicCerts:
         - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"
     usernameClaim: "sub"
