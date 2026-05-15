@@ -29,14 +29,14 @@ class Oidc(CamelModel):
             "health checks."
         ),
     )
-    token_endpoint_auth_method: Optional[TokenEndpointAuthMethod] = Field(
+    token_endpoint_auth_method: TokenEndpointAuthMethod = Field(
         TokenEndpointAuthMethod.client_secret_basic,
         description=(
             "Authentication method for the token endpoint. This is used to "
             "specify how the client credentials are sent when fetching the "
-            "token for the health checks. By default is 'client_secret_basic'"
+            "token for the health checks. Defaults to 'client_secret_basic'."
         ),
-        nullable=True,
+        nullable=False,
     )
     public_certs: List[str] = Field(
         default_factory=list,

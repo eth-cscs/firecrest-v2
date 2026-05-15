@@ -7,5 +7,5 @@ from enum import Enum
 
 
 class TokenEndpointAuthMethod(str, Enum):
-    client_secret_post = "client_secret_post"
-    client_secret_basic = "client_secret_basic"
+    client_secret_post = "client_secret_post"  # noqa: S105 - avoids hardcoded password string, this is a standard OAuth2 authentication method
+    client_secret_basic = "client_secret_basic"  # noqa: S105 - avoids hardcoded password string, this is a standard OAuth2 authentication method
