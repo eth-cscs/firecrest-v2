@@ -88,6 +88,13 @@ firecrest:
       ##     - firecrest
       ## scopes: {}
 
+      ## token_endpoint_auth_method: Authentication method for the token endpoint for the Health Check OIDC/OAuth2 client.
+      ## Methods include "client_secret_basic" and "client_secret_post", in the future other types can be added such as: "client_secret_jwt" and "private_key_jwt".
+      ## Default is "client_secret_basic".
+      ## example: 
+      ##   token_endpoint_auth_method: "client_secret_post"
+      # token_endpoint_auth_method: "client_secret_basic"
+
       ## public_certs: list of public certificate endpoints for IdPs accepted by FirecREST
       ## example:
       ##   public_certs:
