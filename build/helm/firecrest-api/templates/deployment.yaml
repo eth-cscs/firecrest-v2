@@ -93,7 +93,8 @@ spec:
                 - /app/check_liveness.py
             initialDelaySeconds: 30
             periodSeconds: 60
-            failureThreshold: 3          
+            failureThreshold: 3    
+            timeoutSeconds: 6      
 
       volumes:
         - name: firecrest-configs-volume
