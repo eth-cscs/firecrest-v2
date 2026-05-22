@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Aligned livenessProbe timeout with the check_liveness.py script inner timeout value.
+
 ## [2.5.2]
 
 ### Added
