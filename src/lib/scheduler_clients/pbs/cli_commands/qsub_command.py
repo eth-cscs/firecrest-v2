@@ -29,6 +29,10 @@ class QsubCommand(BaseCommand):
 
         if self.job_description.name:
             cmd.append(f"-N '{self.job_description.name}'")
+        if self.job_description.partition:
+            cmd.append(f"-q '{self.job_description.partition}'")
+        if self.job_description.reservation:
+            cmd.append(f"-q '{self.job_description.reservation}'")
         if self.job_description.account:
             cmd.append(f"-P '{self.job_description.account}'")
         if self.job_description.standard_error:
