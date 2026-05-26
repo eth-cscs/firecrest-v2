@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import re
+import shlex
 from lib.exceptions import PbsError
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.ssh_clients.ssh_client import BaseCommand
@@ -23,31 +24,31 @@ class QsubCommand(BaseCommand):
                 f"{key}={value}"
                 for key, value in self.job_description.environment.items()
             ]
-            cmd.append(f"-v {','.join(env_list)}")
+            cmd.append(f"-v {shlex.quote(','.join(env_list))}")
         else:
             cmd.append("-V")
 
         if self.job_description.name:
-            cmd.append(f"-N '{self.job_description.name}'")
+            cmd.append(f"-N {shlex.quote(self.job_description.name)}")
         if self.job_description.partition:
-            cmd.append(f"-q '{self.job_description.partition}'")
+            cmd.append(f"-q {shlex.quote(self.job_description.partition)}")
         if self.job_description.reservation:
-            cmd.append(f"-q '{self.job_description.reservation}'")
+            cmd.append(f"-q {shlex.quote(self.job_description.reservation)}")
         if self.job_description.account:
-            cmd.append(f"-P '{self.job_description.account}'")
+            cmd.append(f"-P {shlex.quote(self.job_description.account)}")
         if self.job_description.standard_error:
-            cmd.append(f"-e '{self.job_description.standard_error}'")
+            cmd.append(f"-e {shlex.quote(self.job_description.standard_error)}")
         if self.job_description.standard_output:
-            cmd.append(f"-o '{self.job_description.standard_output}'")
+            cmd.append(f"-o {shlex.quote(self.job_description.standard_output)}")
 
         # The last argument is the script to run
         if self.job_description.script_path:
-            cmd.append(f" -- {self.job_description.script_path}")
+            cmd.append(f"-- {shlex.quote(self.job_description.script_path)}")
 
         submit_cmd = " ".join(cmd)
         if self.job_description.current_working_directory:
             submit_cmd = (
-                f"cd {self.job_description.current_working_directory} && "
+                f"cd {shlex.quote(self.job_description.current_working_directory)} && "
                 f"{submit_cmd}"
             )
 
