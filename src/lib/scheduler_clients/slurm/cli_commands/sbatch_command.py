@@ -24,6 +24,10 @@ class SbatchCommand(BaseCommand):
         )
         cmd += [f"--export='ALL,{env}'"]
         cmd += [f"--chdir='{self.job_description.current_working_directory}'"]
+        if self.job_description.partition:
+            cmd.append(f"--partition='{self.job_description.partition}'")
+        if self.job_description.reservation:
+            cmd.append(f"--reservation='{self.job_description.reservation}'")
         if self.job_description.account:
             cmd.append(f"--account='{self.job_description.account}'")
         if self.job_description.name:
