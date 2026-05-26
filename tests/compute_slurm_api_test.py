@@ -89,6 +89,8 @@ def test_submit_job(client, mocked_job_submit_response, slurm_cluster_with_api_c
         "job": {
             "name": "test1",
             "working_directory": "/home/test1",
+            "partition": "partition_a",
+            "reservation": "my_reservation",
             "script": "#!/bin/bash\nfactor $(od -N 10 -t uL -An /dev/urandom | tr -d ' ')",
         },
     }
@@ -114,6 +116,8 @@ def test_submit_job(client, mocked_job_submit_response, slurm_cluster_with_api_c
         request_body_slurm_api = {
             "job": {
                 "name": "test1",
+                "reservation": "my_reservation",
+                "partition": "partition_a",
                 "current_working_directory": "/home/test1",
                 "environment": ["F7T_version=v2.0.0"],
                 "script": "#!/bin/bash\nfactor $(od -N 10 -t uL -An /dev/urandom | tr -d ' ')",
