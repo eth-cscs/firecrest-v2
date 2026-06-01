@@ -27,7 +27,7 @@ class OodCore::Job::Adapters::FirecREST::ClusterFile
   def ls
     files = adapter.list_files(path, show_hidden_files: true)
     files
-      .select { |file| file["type"] == "-" || file["type"] == "d" }
+      .select { |file| ["-", "d", "l"].include?(file["type"]) }
       .map do |file|
         {
           id:         path.join(file["name"]),
@@ -119,10 +119,11 @@ class OodCore::Job::Adapters::FirecREST::ClusterFile
   end
 
   def send_file(controller, download:, type:)
-    # Assume file is small, fall back to the large file handling if it is not.
+    # Attempt direct streaming; fall back to a pre-signed URL only when the API
+    # signals the file is too large (HttpError), not for transient errors.
     begin
       send_small_file(controller.response, download: download, type: type)
-    rescue StandardError => e
+    rescue OodCore::Job::Adapters::FirecREST::Batch::HttpError
       send_large_file(controller, download: download, type: type)
     end
   end

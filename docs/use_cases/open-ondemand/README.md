@@ -21,15 +21,15 @@ The adapter source files are included in this directory.
 
 This is the key integration point between OOD and FirecREST. There are two models depending on how OOD is configured:
 
-### Token passthrough (recommended)
+### Token passthrough (not implemented)
 
 When OOD is configured to authenticate users via the same OIDC provider that FirecREST uses, the user's access token obtained at login can be passed directly to FirecREST. This means each request to FirecREST is made under the authenticated user's identity.
 
-This is the preferred model for production: no service account credentials need to be stored in OOD, and FirecREST sees requests under each user's own identity.
+This is the preferred model for production — no service account credentials need to be stored in OOD, and FirecREST sees requests under each user's own identity — but it is not implemented in this proof-of-concept. Implementing it requires OOD to expose the user's OIDC token to the adapter via a mechanism such as `OodAuth`.
 
-### Client credentials (fallback for the POC)
+### Client credentials (implemented)
 
-When OOD and FirecREST use different identity providers, a shared OAuth2 client (service account) can be configured. OOD holds a `client_id` and `client_secret` and exchanges them for a short-lived token on each request.
+When OOD and FirecREST use different identity providers, a shared OAuth2 client (service account) can be configured. OOD holds a `client_id` and `client_secret` and exchanges them for a short-lived token on each request. In this model all users share the same identity toward FirecREST, which may not be suitable for all deployments.
 
 The adapter reads the credentials from environment variables set in `nginx_stage.yml`:
 

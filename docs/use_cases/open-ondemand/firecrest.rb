@@ -53,18 +53,14 @@ module OodCore
           class HttpError < Error; end
           class FileTransferError < Error; end
 
-          # Access tokens re-used while they are valid.
-          @@token = {}
-
-          # Cache username for machine(s).
-          @@user = {}
-
           def initialize(machine: nil, endpoint: nil)
             @machine       = machine && machine.to_s
             @firecrest_uri = endpoint && endpoint.to_s
             @client_id     = ENV['FIRECREST_CLIENT_ID']
             @client_secret = ENV['FIRECREST_CLIENT_SECRET']
             @token_uri     = ENV['FIRECREST_TOKEN_URI']
+            @token_cache   = {}
+            @user_cache    = {}
           end
 
           # ---------- URL helpers ----------
@@ -152,7 +148,7 @@ module OodCore
           # Get the current authenticated username.
           # @return [String] the username
           def user
-            @@user[@machine] ||= begin
+            @user_cache[@machine] ||= begin
               response = http_get(status_url("userinfo"), headers: build_headers, params: {})
               JSON.parse(response.body)["user"]["name"]
             end
@@ -184,36 +180,42 @@ module OodCore
             # from the multipart upload's filename field.
             uri.query = URI.encode_www_form({ path: File.dirname(target_path.to_s) })
 
-            io = if file.is_a?(IO) || file.is_a?(StringIO)
-                   file.rewind
-                   file
-                 else
-                   File.open(file)
-                 end
-
-            upload_io = Multipart::Post::UploadIO.new(io, 'application/octet-stream', File.basename(target_path.to_s))
-            request = Net::HTTP::Post::Multipart.new("#{uri.path}?#{uri.query}", { "file" => upload_io })
-            build_headers.each { |k, v| request[k] = v }
-            request_with_retries(request, uri: uri)
+            opened = !file.is_a?(IO) && !file.is_a?(StringIO)
+            io     = opened ? File.open(file) : (file.rewind; file)
+            begin
+              upload_io = Multipart::Post::UploadIO.new(io, 'application/octet-stream', File.basename(target_path.to_s))
+              request = Net::HTTP::Post::Multipart.new("#{uri.path}?#{uri.query}", { "file" => upload_io })
+              build_headers.each { |k, v| request[k] = v }
+              request_with_retries(request, uri: uri)
+            ensure
+              io.close if opened
+            end
           end
 
           # Stage job files to the cluster as a tar archive.
           def stage(src, dst)
             src_path = File.expand_path(src)
-            files = Dir.glob("#{src_path}/**/*").select { |e| File.file? e }.to_a
-            File.open("#{File.expand_path(src)}.tar", "wb") do |file|
-              Gem::Package::TarWriter.new(file) do |tar|
-                files.each do |f|
-                  rel_file = f.sub(/^#{Regexp::escape(src_path)}\/?/, '')
-                  len = File.stat(f).size
-                  tar.add_file_simple(rel_file, 0700, len) do |io|
-                    IO.copy_stream(f, io)
+            files    = Dir.glob("#{src_path}/**/*").select { |e| File.file? e }.to_a
+            require 'tempfile'
+            tmpfile = Tempfile.new(['ood_stage', '.tar'])
+            begin
+              File.open(tmpfile.path, "wb") do |file|
+                Gem::Package::TarWriter.new(file) do |tar|
+                  files.each do |f|
+                    rel_file = f.sub(/^#{Regexp::escape(src_path)}\/?/, '')
+                    stat     = File.stat(f)
+                    tar.add_file_simple(rel_file, stat.mode & 0777, stat.size) do |io|
+                      IO.copy_stream(f, io)
+                    end
                   end
                 end
               end
+              mkdir(dst.to_s, create_intermediate_dirs: true)
+              upload(dst.to_s, source_path: tmpfile.path)
+            ensure
+              tmpfile.close
+              tmpfile.unlink
             end
-            mkdir(dst.to_s, create_intermediate_dirs: true)
-            upload(dst.to_s, source_path: "#{src_path}.tar")
           end
 
           # View the contents of a file on the cluster.
@@ -335,16 +337,28 @@ module OodCore
 
           # ---------- Transfer job polling ----------
 
-          def wait_transfer_job(transfer_job)
+          def wait_transfer_job(transfer_job, max_wait: 1800)
             job_id    = transfer_job["jobId"]
             error_log = transfer_job.dig("logs", "errorLog")
+            deadline  = Time.now + max_wait
+            wait      = 1
 
             loop do
+              raise FileTransferError, "Transfer job #{job_id} timed out after #{max_wait}s" if Time.now > deadline
+
               job = get_job(job_id)
-              next sleep(1) unless job
+              unless job
+                sleep(wait)
+                wait = [wait * 2, 30].min
+                next
+              end
 
               state = job.dig("status", "state").to_s
-              next sleep(1) unless slurm_state_to_ood_state(state) == :completed
+              unless slurm_state_to_ood_state(state) == :completed
+                sleep(wait)
+                wait = [wait * 2, 30].min
+                next
+              end
 
               if state == "COMPLETED"
                 log_content = head(error_log).to_s
@@ -377,7 +391,7 @@ module OodCore
           end
 
           def token
-            t = @@token[@machine]
+            t = @token_cache[@machine]
             return t if t && !t.expired?
 
             uri  = URI(@token_uri)
@@ -390,7 +404,7 @@ module OodCore
             resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') { |h| h.request(req) }
             raise TokenError, "Failed to obtain token: #{resp.body}" if resp.code.to_i != 200
 
-            @@token[@machine] = Token.new(JSON.parse(resp.body)["access_token"])
+            @token_cache[@machine] = Token.new(JSON.parse(resp.body)["access_token"])
           rescue => e
             raise TokenError, "Token error: #{e.message}"
           end
@@ -440,7 +454,7 @@ module OodCore
             uri.query = URI.encode_www_form(params) unless params.empty?
             req = Net::HTTP::Get.new(uri)
             headers.each { |k, v| req[k] = v }
-            request_with_retries(req, &block)
+            request_with_retries(req, max_retries: max_retries, &block)
           end
 
           def http_post_json(url, headers: {}, data: {}, max_retries: 5)
@@ -449,7 +463,7 @@ module OodCore
             req['Content-Type'] = 'application/json'
             req.body = data.to_json
             headers.each { |k, v| req[k] = v }
-            request_with_retries(req, uri: uri)
+            request_with_retries(req, uri: uri, max_retries: max_retries)
           end
 
           def http_delete(url, headers: {}, params: {}, max_retries: 5)
@@ -457,7 +471,7 @@ module OodCore
             uri.query = URI.encode_www_form(params) unless params.empty?
             req = Net::HTTP::Delete.new(uri)
             headers.each { |k, v| req[k] = v }
-            request_with_retries(req)
+            request_with_retries(req, max_retries: max_retries)
           end
         end
 
@@ -521,7 +535,11 @@ module OodCore
           headers << "#SBATCH --dependency=afternotok:#{afternotok.join(":")}\n" unless afternotok.empty?
           headers << "#SBATCH --dependency=afterany:#{afterany.join(":")}\n"   unless afterany.empty?
 
-          content = "#!/bin/bash -l\n\n#{headers}#{script.content}"
+          content = if script.content.to_s.start_with?('#!')
+                      script.content.to_s.sub(/\A(#![^\n]*\n)/, "\\1\n#{headers}")
+                    else
+                      "#!/bin/bash -l\n\n#{headers}#{script.content}"
+                    end
 
           working_directory = script.output_path ? File.dirname(script.output_path.to_s) : "/tmp"
 
@@ -604,6 +622,9 @@ module OodCore
           connection_info = nil
           begin
             job_name = v["name"].to_s
+            # OOD interactive apps set the job name to "<category>/<app>/<category>/<app>"
+            # (e.g. "sys/jupyter/sys/jupyter"). This pattern identifies those jobs so we
+            # can fetch the connection.yml written by the app at startup.
             if status == :running && /^(?:sys|usr|dev)\/[^\s\/]+\/(?:sys|usr|dev)\/[^\s\/]+$/.match(job_name)
               metadata = @firecrest.get_job_metadata(v["jobId"])
               if metadata && metadata["standardOutput"]
@@ -612,7 +633,7 @@ module OodCore
               end
             end
           rescue => e
-            # Silently ignore errors reading connection info
+            Rails.logger.warn("[FirecREST] Failed to read connection info for job #{v["jobId"]}: #{e.message}")
           end
 
           start_ts = v.dig("time", "start")
@@ -685,7 +706,12 @@ module OodCore
           node_list.to_s.scan(/([^,\[]+)(?:\[([^\]]+)\])?/).map do |prefix, range|
             if range
               range.split(",").map do |x|
-                x =~ /^(\d+)-(\d+)$/ ? ($1..$2).to_a : x
+                if x =~ /^(\d+)-(\d+)$/
+                  width = [$1.length, $2.length].max
+                  ($1.to_i..$2.to_i).map { |n| n.to_s.rjust(width, '0') }
+                else
+                  x
+                end
               end.flatten.map { |n| { name: prefix + n, procs: nil } }
             elsif prefix
               [ { name: prefix, procs: nil } ]

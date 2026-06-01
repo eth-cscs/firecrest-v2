@@ -22,9 +22,8 @@ class OodCore::Job::Adapters::FirecREST::ClusterTransfer < Transfer
     end
   end
 
-  # total number of bytes
   def steps
-    1
+    files.length
   end
 
   def command_str
@@ -47,8 +46,6 @@ class OodCore::Job::Adapters::FirecREST::ClusterTransfer < Transfer
         raise StandardError, "Unknown action: #{action.inspect}"
       end
     rescue => e
-      # TODO: catch more rclone specific errors here, i.e. if the access keys are invalid it would make
-      # sense to not attempt to transfer the rest of the files
       errors.add :base, "Error when transferring #{src}: #{e.message}"
     end
   rescue => e

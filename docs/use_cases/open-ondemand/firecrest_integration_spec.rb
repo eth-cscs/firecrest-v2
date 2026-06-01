@@ -126,21 +126,21 @@ RSpec.describe 'FirecREST v2 adapter integration', :order => :defined do
     end
 
     it 'can submit a job' do
-      $firecrest_job_id = @adapter.submit(@script)
-      expect($firecrest_job_id).to be_a(String)
-      expect($firecrest_job_id).not_to be_empty
-      puts "Submitted job id: #{$firecrest_job_id}"
+      @job_id = @adapter.submit(@script)
+      expect(@job_id).to be_a(String)
+      expect(@job_id).not_to be_empty
+      puts "Submitted job id: #{@job_id}"
     end
 
     it 'can get job info by id' do
-      info = @adapter.info($firecrest_job_id)
+      info = @adapter.info(@job_id)
       expect(info).to be_a(OodCore::Job::Info)
-      expect(info.id).to eq($firecrest_job_id)
+      expect(info.id).to eq(@job_id)
       expect(info.job_name).to eq(@job_name)
     end
 
     it 'can get job status' do
-      status = @adapter.status($firecrest_job_id)
+      status = @adapter.status(@job_id)
       expect(OodCore::Job::Status.states).to include(status)
       expect([:queued, :queued_held, :running]).to include(status.state)
     end
@@ -148,21 +148,21 @@ RSpec.describe 'FirecREST v2 adapter integration', :order => :defined do
     it 'can find the job in info_all' do
       jobs = @adapter.info_all
       expect(jobs).to be_an(Array)
-      expect(jobs.map(&:id)).to include($firecrest_job_id)
+      expect(jobs.map(&:id)).to include(@job_id)
     end
 
     it 'can find the job via info_where_owner' do
       jobs = @adapter.info_where_owner(batch_obj.user)
-      expect(jobs.map(&:id)).to include($firecrest_job_id)
+      expect(jobs.map(&:id)).to include(@job_id)
     end
 
     it 'can delete the job' do
-      expect { @adapter.delete($firecrest_job_id) }.not_to raise_error
+      expect { @adapter.delete(@job_id) }.not_to raise_error
     end
 
     it 'job is gone or completed after deletion' do
       sleep 2
-      status = @adapter.status($firecrest_job_id)
+      status = @adapter.status(@job_id)
       expect([:completed, :undetermined]).to include(status.state)
     end
   end
