@@ -3,12 +3,12 @@ require 'json'
 require 'jwt'
 require 'net/http'
 require 'net/http/post/multipart'
+require 'tempfile'
+require 'time'
+require 'uri'
 require "ood_core/refinements/hash_extensions"
 require "ood_core/refinements/array_extensions"
 require "ood_core/job/adapters/helper"
-require 'time'
-require 'uri'
-
 require 'rubygems/package'
 
 module OodCore
@@ -196,7 +196,6 @@ module OodCore
           def stage(src, dst)
             src_path = File.expand_path(src)
             files    = Dir.glob("#{src_path}/**/*").select { |e| File.file? e }.to_a
-            require 'tempfile'
             tmpfile = Tempfile.new(['ood_stage', '.tar'])
             begin
               File.open(tmpfile.path, "wb") do |file|
@@ -536,7 +535,7 @@ module OodCore
           headers << "#SBATCH --dependency=afterany:#{afterany.join(":")}\n"   unless afterany.empty?
 
           content = if script.content.to_s.start_with?('#!')
-                      script.content.to_s.sub(/\A(#![^\n]*\n)/, "\\1\n#{headers}")
+                      script.content.to_s.sub(/\A(#![^\n]*)(\n?)/, "\\1\n\n#{headers}")
                     else
                       "#!/bin/bash -l\n\n#{headers}#{script.content}"
                     end

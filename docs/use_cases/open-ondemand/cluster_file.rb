@@ -37,13 +37,24 @@ class OodCore::Job::Adapters::FirecREST::ClusterFile
           directory:  file["type"] == "d",
           date:       DateTime.parse(file['lastModified']).to_time.to_i,
           owner:      file["user"],
-          mode:       '', # TODO: parse the mode
+          mode:       parse_mode(file["permissions"]),
           dev:        0
         }
     rescue => e
-      # Ignore file if parsing errors occur
+      Rails.logger.warn("[FirecREST] Skipping file entry in #{path}: #{e.message}")
       nil
     end.compact.sort_by { |p| p[:directory] ? 0 : 1 }
+  end
+
+  def parse_mode(permissions)
+    return 0 unless permissions.is_a?(String) && permissions.length == 9
+    chars = permissions.chars
+    [
+      [chars[0] == 'r', 0400], [chars[1] == 'w', 0200], [chars[2] =~ /[xs]/, 0100],
+      [chars[3] == 'r', 0040], [chars[4] == 'w', 0020], [chars[5] =~ /[xs]/, 0010],
+      [chars[6] == 'r', 0004], [chars[7] == 'w', 0002], [chars[8] =~ /[xt]/, 0001],
+      [chars[2] =~ /[sS]/, 04000], [chars[5] =~ /[sS]/, 02000], [chars[8] =~ /[tT]/, 01000]
+    ].sum { |cond, val| cond ? val : 0 }
   end
 
   def human_size(file)

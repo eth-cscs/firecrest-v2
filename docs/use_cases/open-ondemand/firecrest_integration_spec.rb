@@ -115,21 +115,24 @@ RSpec.describe 'FirecREST v2 adapter integration', :order => :defined do
       skip "Set #{FIRECREST_REQUIRED_ENV.join(', ')} to run FirecREST integration tests" unless firecrest_env_set?
 
       @job_name = 'OOD_TEST_' + (0...8).map { (65 + rand(26)).chr }.join
-      @script = OodCore::Job::Script.new(
+      script = OodCore::Job::Script.new(
         job_name:      @job_name,
         content:       "#!/bin/bash\nsleep 60\n",
         output_path:   "#{@work_dir}/#{@job_name}.out",
         error_path:    "#{@work_dir}/#{@job_name}.err",
         accounting_id: ENV['FIRECREST_ACCOUNT']
       )
-      puts "\nJob name: #{@job_name} (delete manually if tests fail mid-way)\n"
+      @job_id = @adapter.submit(script)
+      puts "\nSubmitted job #{@job_name} → id #{@job_id}\n"
     end
 
-    it 'can submit a job' do
-      @job_id = @adapter.submit(@script)
+    after(:all) do
+      @adapter.delete(@job_id) rescue nil if @job_id && firecrest_env_set?
+    end
+
+    it 'job was submitted and received an id' do
       expect(@job_id).to be_a(String)
       expect(@job_id).not_to be_empty
-      puts "Submitted job id: #{@job_id}"
     end
 
     it 'can get job info by id' do
