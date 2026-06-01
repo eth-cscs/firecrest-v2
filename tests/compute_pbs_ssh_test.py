@@ -64,7 +64,7 @@ async def test_submit_job(client, ssh_client, mocked_ssh_qsub_output, pbs_cluste
             "name": "test1",
             "working_directory": "/home/test1",
             "partition": "partition_a",
-            "reservation": "my_reservation",
+            "reservation": "myreservation",
             "env": {"PATH": "/bin:/usr/bin/:/usr/local/bin/"},
             "script": "#!/bin/bash\nfactor $(od -N 10 -t uL -An /dev/urandom | tr -d ' ')",
         }

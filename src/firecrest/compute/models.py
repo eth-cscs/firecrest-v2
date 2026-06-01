@@ -25,7 +25,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                     "job": {
                         "name": "Example with inline script",
                         "account": "myproject",
-                        "reservation": "my_reservation",
+                        "reservation": "myreservation",
                         "partition": "partition_a",
                         "workingDirectory": "{{home_path}}",
                         "standardInput": "/dev/null",
@@ -42,7 +42,7 @@ class PostJobSubmitRequest(JobSubmitRequestModel):
                     "job": {
                         "name": "Example with script path",
                         "account": "myproject",
-                        "reservation": "my_reservation",
+                        "reservation": "myreservation",
                         "partition": "partition_a",
                         "workingDirectory": "{{home_path}}",
                         "standardInput": "/dev/null",
