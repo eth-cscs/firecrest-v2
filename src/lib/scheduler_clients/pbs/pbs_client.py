@@ -131,7 +131,7 @@ class PbsClient(SchedulerBaseClient):
         return res
 
     async def get_reservations(
-        self, all: bool, username: str, jwt_token: str
+        self, username: str, jwt_token: str
     ) -> List[PbsReservation] | None:
         reservations = RstatReservationsCommand()
         res = await self.__executed_ssh_cmd(username, jwt_token, reservations)
@@ -140,7 +140,7 @@ class PbsClient(SchedulerBaseClient):
         return res
 
     async def get_partitions(
-        self, all: bool, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[PbsPartition] | None:
         queues = PbsPartitionsCommand()
         result = await self.__executed_ssh_cmd(username, jwt_token, queues)

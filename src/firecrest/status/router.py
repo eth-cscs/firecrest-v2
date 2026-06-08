@@ -109,18 +109,12 @@ async def get_system_reservations(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
-    all: Annotated[
-        bool,
-        Query(
-            description="Show all reservations including hidden ones.",
-        ),
-    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:
         reservations = await scheduler_client.get_reservations(
-            all=all, username=username, jwt_token=access_token
+            username=username, jwt_token=access_token
         )
         return {"reservations": reservations}
     except Exception as exc:
@@ -142,18 +136,18 @@ async def get_system_partitions(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
-    all: Annotated[
+    show_hidden: Annotated[
         bool,
         Query(
-            description="Show all partitions including hidden ones.",
+            description="Show hidden partitions (only applies to Slurm scheduler).",
         ),
-    ] = False,
+    ] = True,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:
         partitions = await scheduler_client.get_partitions(
-            all=all, username=username, jwt_token=access_token
+            show_hidden=show_hidden, username=username, jwt_token=access_token
         )
         return {"partitions": partitions}
     except Exception as exc:

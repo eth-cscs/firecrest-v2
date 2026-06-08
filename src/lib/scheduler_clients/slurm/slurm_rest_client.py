@@ -292,7 +292,7 @@ class SlurmRestClient(SlurmBaseClient):
         return nodes_result["nodes"]
 
     async def get_reservations(
-        self, all: bool, username: str, jwt_token: str
+        self, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -311,12 +311,11 @@ class SlurmRestClient(SlurmBaseClient):
             res = [
                 SlurmReservations.model_validate(r)
                 for r in reservation_result["reservations"]
-                if all or "HIDDEN" not in r.get("flags", [])
             ]
         return res
 
     async def get_partitions(
-        self, all: bool, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -335,7 +334,7 @@ class SlurmRestClient(SlurmBaseClient):
             part = [
                 SlurmPartitions.model_validate(partition)
                 for partition in partition_result["partitions"]
-                if all or "HIDDEN" not in partition.get("flags", [])
+                if show_hidden or "HIDDEN" not in partition.flags
             ]
         return part
 

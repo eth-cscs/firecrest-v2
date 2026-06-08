@@ -207,9 +207,9 @@ class SlurmCliClient(SlurmBaseClient):
         return await self.__executed_ssh_cmd(username, jwt_token, sinfo)
 
     async def get_reservations(
-        self, all: bool, username: str, jwt_token: str
+        self, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
-        scontrolreservation = ScontrolReservationCommand(all)
+        scontrolreservation = ScontrolReservationCommand()
         result = await self.__executed_ssh_cmd(username, jwt_token, scontrolreservation)
         # Apply Slurm model
         if result:
@@ -219,9 +219,9 @@ class SlurmCliClient(SlurmBaseClient):
         return result
 
     async def get_partitions(
-        self, all: bool, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        scontrolpartition = ScontrolPartitionCommand(all)
+        scontrolpartition = ScontrolPartitionCommand(show_hidden)
         result = await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
         if result:
             result = [

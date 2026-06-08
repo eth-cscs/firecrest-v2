@@ -69,7 +69,7 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_reservations(
-        self, all: bool, username: str, jwt_token: str
+        self, username: str, jwt_token: str
     ) -> List[ReservationModel] | None:
         pass
 
@@ -81,6 +81,6 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_partitions(
-        self, all: bool, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[PartitionModel] | None:
         pass

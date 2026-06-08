@@ -18,15 +18,9 @@ def _null_to_none(string: str):
 
 class ScontrolReservationCommand(ScontrolBase):
 
-    def __init__(self, all: bool = False) -> None:
-        super().__init__()
-        self.all = all
-
     def get_command(self) -> str:
         cmd = [super().get_command()]
-        if self.all:
-            cmd += ["-a"]
-        cmd += ["show -o reservations"]
+        cmd += ["-a show -o reservations"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
