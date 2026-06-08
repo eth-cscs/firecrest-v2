@@ -10,9 +10,15 @@ import re
 
 class ScontrolPartitionCommand(ScontrolBase):
 
+    def __init__(self, all: bool = False) -> None:
+        super().__init__()
+        self.all = all
+
     def get_command(self) -> str:
         cmd = [super().get_command()]
-        cmd += ["-a show -o partitions"]
+        if self.all:
+            cmd += ["-a"]
+        cmd += ["show -o partitions"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
