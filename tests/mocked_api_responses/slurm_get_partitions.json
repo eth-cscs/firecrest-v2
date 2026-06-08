@@ -82,7 +82,7 @@
             "tres": "cpu=2,mem=1000M,node=1,billing=2"
         },
         {
-            "flags": [],
+            "flags": ["hidden"],
             "preemption_mode": [
                 "disabled"
             ],

@@ -321,6 +321,8 @@ class SlurmRestClient(SlurmBaseClient):
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/partitions"
+        if show_hidden:
+            url += "?flags=all"
         async with client.get(
             url=url,
             headers=headers,
@@ -334,7 +336,8 @@ class SlurmRestClient(SlurmBaseClient):
             part = [
                 SlurmPartitions.model_validate(partition)
                 for partition in partition_result["partitions"]
-                if show_hidden or "HIDDEN" not in partition.flags
+                # not supported in all versions of slurm rest api
+                # if show_hidden or ("hidden" not in partition["flags"])
             ]
         return part
 

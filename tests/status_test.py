@@ -137,7 +137,7 @@ def test_systems_partitions(
         )
 
         response = client.get(
-            "/status/{cluster_namne}/partitions?all=true".format(
+            "/status/{cluster_namne}/partitions".format(
                 cluster_namne=slurm_cluster_with_api_config.name
             )
         )
@@ -178,7 +178,7 @@ def test_systems_reservations(
         )
 
         response = client.get(
-            "/status/{cluster_namne}/reservations?all=true".format(
+            "/status/{cluster_namne}/reservations".format(
                 cluster_namne=slurm_cluster_with_api_config.name
             )
         )
@@ -233,7 +233,7 @@ async def test_ssh_reservation(
         [MockedCommand(**mocked_ssh_reservation_output)]
     ):
         response = client.get(
-            f"/status/{slurm_cluster_with_ssh_config.name}/reservations?all=true"
+            f"/status/{slurm_cluster_with_ssh_config.name}/reservations"
         )
         assert response.status_code == 200
 
