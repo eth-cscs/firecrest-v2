@@ -73,13 +73,13 @@ class SlurmBaseClient(SchedulerBaseClient):
 
     @abstractmethod
     async def get_reservations(
-        self, username: str, jwt_token: str
+        self, all: bool, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
         pass
 
     @abstractmethod
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, all: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         pass
 

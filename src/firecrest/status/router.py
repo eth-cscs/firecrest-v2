@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from datetime import datetime, timezone
-from fastapi import Depends, HTTPException, Path, status
+from fastapi import Depends, HTTPException, Path, Query, status
 from typing import Annotated, Any
 
 # configs
@@ -109,12 +109,18 @@ async def get_system_reservations(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
+    all: Annotated[
+        bool,
+        Query(
+            description="Show all reservations including hidden ones.",
+        ),
+    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:
         reservations = await scheduler_client.get_reservations(
-            username=username, jwt_token=access_token
+            all=all, username=username, jwt_token=access_token
         )
         return {"reservations": reservations}
     except Exception as exc:
@@ -136,12 +142,18 @@ async def get_system_partitions(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
+    all: Annotated[
+        bool,
+        Query(
+            description="Show all partitions including hidden ones.",
+        ),
+    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:
         partitions = await scheduler_client.get_partitions(
-            username=username, jwt_token=access_token
+            all=all, username=username, jwt_token=access_token
         )
         return {"partitions": partitions}
     except Exception as exc:

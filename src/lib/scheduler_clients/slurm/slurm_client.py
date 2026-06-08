@@ -114,14 +114,16 @@ class SlurmClient(SlurmBaseClient):
         return [SlurmNode.model_validate(node) for node in res]
 
     async def get_reservations(
-        self, username: str, jwt_token: str
+        self, all: bool, username: str, jwt_token: str
     ) -> List[SlurmReservations] | None:
-        return await self.slurm_default_client.get_reservations(username, jwt_token)
+        return await self.slurm_default_client.get_reservations(
+            all, username, jwt_token
+        )
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, all: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        return await self.slurm_default_client.get_partitions(username, jwt_token)
+        return await self.slurm_default_client.get_partitions(all, username, jwt_token)
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         return await self.slurm_default_client.cancel_job(job_id, username, jwt_token)
