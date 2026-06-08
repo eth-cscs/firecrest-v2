@@ -191,6 +191,7 @@ def test_systems_reservations(
         assert response.json() is not None
         reservations = GetReservationsResponse(**response.json())
         assert len(reservations.reservations) == 1
+        assert reservations.reservations[0].state == "inactive"
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )
