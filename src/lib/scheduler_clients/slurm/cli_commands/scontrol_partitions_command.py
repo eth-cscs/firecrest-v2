@@ -10,15 +10,13 @@ import re
 
 class ScontrolPartitionCommand(ScontrolBase):
 
-    def __init__(self, all: bool = False) -> None:
+    def __init__(self, show_hidden: bool = False) -> None:
         super().__init__()
-        self.all = all
+        self.show_hidden = show_hidden
 
     def get_command(self) -> str:
         cmd = [super().get_command()]
-        if self.all:
-            cmd += ["-a"]
-        cmd += ["show -o partitions"]
+        cmd += ["-a show -o partitions"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -32,6 +30,7 @@ class ScontrolPartitionCommand(ScontrolBase):
             "State",
             "TotalCPUs",
             "TotalNodes",
+            "Hidden",
         ]
         partitions = []
 
@@ -48,8 +47,8 @@ class ScontrolPartitionCommand(ScontrolBase):
                         f"Could not parse attribute '{attr_name}' in "
                         f"'{partition_str}'"
                     )
-
-            partitions.append(partition)
+            if self.show_hidden or partition.get("Hidden") == "No":
+                partitions.append(partition)
 
         if len(partitions) == 0:
             return None
