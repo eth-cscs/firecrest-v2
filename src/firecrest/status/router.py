@@ -141,7 +141,7 @@ async def get_system_partitions(
         Query(
             description="Show hidden partitions (only applies to Slurm scheduler).",
         ),
-    ] = True,
+    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()

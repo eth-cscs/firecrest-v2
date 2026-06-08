@@ -316,6 +316,6 @@ class SlurmReservations(ReservationModel):
                 self.state = "active"
             else:
                 self.state = "inactive"
-        else:
+        elif not self.state.islower():
             self.state = self.state.lower()
         return self

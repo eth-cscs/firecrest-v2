@@ -47,7 +47,7 @@ class ScontrolPartitionCommand(ScontrolBase):
                         f"Could not parse attribute '{attr_name}' in "
                         f"'{partition_str}'"
                     )
-            if self.show_hidden or partition.get("Hidden").lower() == "no":
+            if self.show_hidden or partition["Hidden"].lower() == "no":
                 partitions.append(partition)
 
         if len(partitions) == 0:
