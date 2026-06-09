@@ -336,10 +336,9 @@ class SlurmRestClient(SlurmBaseClient):
             part = [
                 SlurmPartitions.model_validate(partition)
                 for partition in partition_result["partitions"]
-                # Note: this approach isnot supported in all versions of slurm rest api
-                # Howerver making flags=all static and filtering hidden partitions would ensure
-                # only hidden partitions are not returned.
+                # Note: the following approach only works if the API version is >= v0.0.45
                 # if show_hidden or ("hidden" not in partition["flags"])
+                # For now, filtering happens by omitting the "flags=all" query param and let Slurm filter hidden partitions.
             ]
         return part
 
