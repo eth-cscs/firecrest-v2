@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added partition and reservation override parameters to job submission endpoint.
-- Added parameter to shows hidden partitions (enabled by default).
+- Added parameter to shows hidden partitions.
 - Added reservation status in API response.
 
 ### Changed
