@@ -157,6 +157,7 @@ class ReservationModel(CamelModel):
     end_time: int
     start_time: int
     features: Optional[str] = Field(default=None, nullable=True)
+    state: Optional[str] = Field(default=None, nullable=True)
 
 
 class PartitionModel(CamelModel):

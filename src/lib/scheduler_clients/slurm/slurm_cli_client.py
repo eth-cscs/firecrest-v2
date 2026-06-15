@@ -219,9 +219,9 @@ class SlurmCliClient(SlurmBaseClient):
         return result
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        scontrolpartition = ScontrolPartitionCommand()
+        scontrolpartition = ScontrolPartitionCommand(show_hidden)
         result = await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
         if result:
             result = [

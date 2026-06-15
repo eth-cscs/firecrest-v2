@@ -3,12 +3,14 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from pydantic import (
     AliasChoices,
     Field,
     field_validator,
+    model_validator,
 )
 
 # models
@@ -297,8 +299,23 @@ class SlurmReservations(ReservationModel):
     end_time: int = Field(validation_alias=AliasChoices("endTime", "EndTime"))
     start_time: int = Field(validation_alias=AliasChoices("startTime", "StartTime"))
     features: Optional[str] = Field(validation_alias=AliasChoices("Features"))
+    state: Optional[str] = Field(
+        validation_alias=AliasChoices("state", "State"), default=None, nullable=True
+    )
 
     @field_validator("start_time", "end_time", mode="before")
     @classmethod
     def _parse_time(cls, v):
         return slurm_int_to_int(v)
+
+    @model_validator(mode="after")
+    def set_state(self):
+        if self.state is None:
+            now = int(datetime.now(timezone.utc).timestamp())
+            if self.start_time <= now < self.end_time:
+                self.state = "active"
+            else:
+                self.state = "inactive"
+        elif not self.state.islower():
+            self.state = self.state.lower()
+        return self

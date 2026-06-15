@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from datetime import datetime, timezone
-from fastapi import Depends, HTTPException, Path, status
+from fastapi import Depends, HTTPException, Path, Query, status
 from typing import Annotated, Any
 
 # configs
@@ -136,12 +136,18 @@ async def get_system_partitions(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
+    show_hidden: Annotated[
+        bool,
+        Query(
+            description="Show hidden partitions (only applies to Slurm scheduler).",
+        ),
+    ] = False,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:
         partitions = await scheduler_client.get_partitions(
-            username=username, jwt_token=access_token
+            show_hidden=show_hidden, username=username, jwt_token=access_token
         )
         return {"partitions": partitions}
     except Exception as exc:

@@ -119,9 +119,11 @@ class SlurmClient(SlurmBaseClient):
         return await self.slurm_default_client.get_reservations(username, jwt_token)
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        return await self.slurm_default_client.get_partitions(username, jwt_token)
+        return await self.slurm_default_client.get_partitions(
+            show_hidden, username, jwt_token
+        )
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         return await self.slurm_default_client.cancel_job(job_id, username, jwt_token)

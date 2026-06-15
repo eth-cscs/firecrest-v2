@@ -62,6 +62,11 @@ def mocked_ssh_reservation_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_partitions_output():
+    return load_ssh_output("ssh_scontrol_partitions.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_default_account_output():
     return load_ssh_output("ssh_sacctmgr_default_account.json")
 
@@ -186,6 +191,7 @@ def test_systems_reservations(
         assert response.json() is not None
         reservations = GetReservationsResponse(**response.json())
         assert len(reservations.reservations) == 1
+        assert reservations.reservations[0].state == "inactive"
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )
@@ -236,6 +242,20 @@ async def test_ssh_reservation(
             f"/status/{slurm_cluster_with_ssh_config.name}/reservations"
         )
         assert response.status_code == 200
+
+
+async def test_ssh_partitions(
+    client, ssh_client, mocked_ssh_partitions_output, slurm_cluster_with_ssh_config
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_partitions_output)]
+    ):
+        response = client.get(
+            f"/status/{slurm_cluster_with_ssh_config.name}/partitions?show_hidden=false"
+        )
+        assert response.status_code == 200
+        assert len(response.json()["partitions"]) == 3
 
 
 async def test_liveness_check(client):

@@ -315,12 +315,14 @@ class SlurmRestClient(SlurmBaseClient):
         return res
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/partitions"
+        if show_hidden:
+            url += "?flags=all"
         async with client.get(
             url=url,
             headers=headers,
@@ -331,11 +333,14 @@ class SlurmRestClient(SlurmBaseClient):
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
             # Apply Slurm model
-            res = [
+            part = [
                 SlurmPartitions.model_validate(partition)
                 for partition in partition_result["partitions"]
+                # Note: the following approach only works if the API version is >= v0.0.45
+                # if show_hidden or ("hidden" not in partition["flags"])
+                # For now, filtering happens by omitting the "flags=all" query param and let Slurm filter hidden partitions.
             ]
-        return res
+        return part
 
     async def get_accounts(
         self, username: str, jwt_token: str
