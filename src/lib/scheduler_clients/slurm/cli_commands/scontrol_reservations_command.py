@@ -42,12 +42,12 @@ class ScontrolReservationCommand(ScontrolBase):
             {"name": "Nodes", "pattern": r"Nodes=(\S+)", "type": "str"},
             {
                 "name": "StartTime",
-                "pattern": r"StartTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
+                "pattern": r"StartTime=((\d+)|(\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
                 "type": "datetime",
             },
             {
                 "name": "EndTime",
-                "pattern": r"EndTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
+                "pattern": r"EndTime=((\d+)|(\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
                 "type": "datetime",
             },
             {"name": "Features", "pattern": r"Features=(\S+)", "type": "str"},
@@ -63,6 +63,10 @@ class ScontrolReservationCommand(ScontrolBase):
                 if attr_match:
                     if attribute["type"] == "datetime":
                         date = None
+                        try:
+                            date = datetime.fromtimestamp(int(attr_match.group(1)))
+                        except ValueError:
+                            pass
                         try:
                             date = datetime.fromisoformat(attr_match.group(1))
                         except ValueError:
