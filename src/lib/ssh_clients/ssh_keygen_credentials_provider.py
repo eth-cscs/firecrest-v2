@@ -56,7 +56,7 @@ class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def __init__(self, ssh_keygen_url: str, max_connections: int = 100, app_version: str = ""):
+    def __init__(self, ssh_keygen_url: str, max_connections: int = 100, *, app_version: str):
         self.ssh_keygen_url = ssh_keygen_url
         self.app_version = app_version
         SSHKeygenCredentialsProvider.max_connections = max_connections

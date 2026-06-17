@@ -239,7 +239,7 @@ class SSHClientDependency:
                 self.key_provider = SSHKeygenCredentialsProvider(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
-                    settings.app_version,
+                    app_version=settings.app_version,
                 )
             case SSHKeysServiceType.SSHStaticKeys:
                 self.key_provider = SSHStaticKeysProvider(settings.ssh_credentials.keys)
