@@ -128,6 +128,10 @@ def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def init_request_vars(request: Request, call_next):
         initial_g = types.SimpleNamespace()
+        initial_g.x_request_id = request.headers.get("x-request-id")
+        initial_g.x_client_type = request.headers.get("x-client-type")
+        initial_g.x_client_name = request.headers.get("x-client-name")
+        initial_g.x_client_version = request.headers.get("x-client-version")
         request_vars.request_global.set(initial_g)
         response = await call_next(request)
         return response
