@@ -93,6 +93,15 @@ def test_x_request_id_omitted_when_none():
     assert "x-request-id" not in headers
 
 
+def test_empty_string_client_headers_fall_back_to_defaults():
+    _set_context(x_client_type="", x_client_name="", x_client_version="")
+    headers = _ssh_service_headers("token-abc", APP_VERSION)
+
+    assert headers["x-client-type"] == "api"
+    assert headers["x-client-name"] == "firecrest"
+    assert headers["x-client-version"] == APP_VERSION
+
+
 # ---------------------------------------------------------------------------
 # SSHKeygenCredentialsProvider.get_credentials — integration tests
 # ---------------------------------------------------------------------------
