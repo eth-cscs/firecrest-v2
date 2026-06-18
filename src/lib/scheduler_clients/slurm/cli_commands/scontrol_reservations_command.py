@@ -42,12 +42,12 @@ class ScontrolReservationCommand(ScontrolBase):
             {"name": "Nodes", "pattern": r"Nodes=(\S+)", "type": "str"},
             {
                 "name": "StartTime",
-                "pattern": r"StartTime=((\d+)|(\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
+                "pattern": r"StartTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})|(\d+))",
                 "type": "datetime",
             },
             {
                 "name": "EndTime",
-                "pattern": r"EndTime=((\d+)|(\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))",
+                "pattern": r"EndTime=((\d{1,2} \S+ \d{2}:\d{2})|(\d{2}:\d{2}:\d{2})|(\d{1,2} \S+ \d{4})|(\d{1,4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})|(\d+))",
                 "type": "datetime",
             },
             {"name": "Features", "pattern": r"Features=(\S+)", "type": "str"},
@@ -65,37 +65,41 @@ class ScontrolReservationCommand(ScontrolBase):
                         date = None
                         try:
                             date = datetime.fromtimestamp(int(attr_match.group(1)))
-                        except ValueError:
+                        except (ValueError, OverflowError, OSError):
                             pass
-                        try:
-                            date = datetime.fromisoformat(attr_match.group(1))
-                        except ValueError:
-                            pass
-                        try:
-                            date = datetime.strptime(
-                                datetime.today().strftime("%Y")
-                                + " "
-                                + attr_match.group(1),
-                                "%Y %d %b %H:%M",
-                            )
-                        except ValueError:
-                            pass
-                        try:
-                            date = datetime.strptime(
-                                attr_match.group(1),
-                                "%d %b %Y",
-                            )
-                        except ValueError:
-                            pass
-                        try:
-                            date = datetime.strptime(
-                                datetime.today().strftime("%m/%d/%y")
-                                + " "
-                                + attr_match.group(1),
-                                "%m/%d/%y %H:%M:%S",
-                            )
-                        except ValueError:
-                            pass
+                        if date is None:
+                            try:
+                                date = datetime.fromisoformat(attr_match.group(1))
+                            except (ValueError, OverflowError, OSError):
+                                pass
+                        if date is None:
+                            try:
+                                date = datetime.strptime(
+                                    datetime.today().strftime("%Y")
+                                    + " "
+                                    + attr_match.group(1),
+                                    "%Y %d %b %H:%M",
+                                )
+                            except (ValueError, OverflowError, OSError):
+                                pass
+                        if date is None:
+                            try:
+                                date = datetime.strptime(
+                                    attr_match.group(1),
+                                    "%d %b %Y",
+                                )
+                            except (ValueError, OverflowError, OSError):
+                                pass
+                        if date is None:
+                            try:
+                                date = datetime.strptime(
+                                    datetime.today().strftime("%m/%d/%y")
+                                    + " "
+                                    + attr_match.group(1),
+                                    "%m/%d/%y %H:%M:%S",
+                                )
+                            except (ValueError, OverflowError, OSError):
+                                pass
                         if date is None:
                             raise ValueError("Unable to parse reservation datatime")
 
