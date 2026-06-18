@@ -1,4 +1,4 @@
-fastapi[all]
+fastapi[all]<0.137 # From 0.137 APIRouter has been refactored and is not compatible with astapi-openapi-specs-generator v1.0.2
 uvicorn[standard]
 pyhumps
 python-jose
