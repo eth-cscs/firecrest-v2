@@ -14,6 +14,7 @@ from starlette_context import context
 # The actual tracing logger
 tracing_logger = logging.getLogger("f7t_v2_tracing_log")
 
+
 # Wrapper
 def tracing_log_method(func):
     @wraps(func)
@@ -62,7 +63,9 @@ def log_backend_http_scheduler(url: str, response_status: int) -> None:
 
 
 @tracing_log_method
-def tracing_log_middleware(request: Request, username: str, status_code: int, headers_to_trace: list) -> None:
+def tracing_log_middleware(
+    request: Request, username: str, status_code: int, headers_to_trace: list
+) -> None:
     # Get URL
     url_path = request.scope["path"]
     root_path = request.scope["root_path"]
@@ -87,11 +90,13 @@ def tracing_log_middleware(request: Request, username: str, status_code: int, he
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
-    
+
+    headers_lower = {k.lower(): v for k, v in request.headers.items()}
     for header in headers_to_trace:
-        if header['input'] in request.headers:
-            log_data[header['output']] = request.headers[header['input']]
-    
+        key = header["input"].lower()
+        if key in headers_lower:
+            log_data[header["output"]] = headers_lower[key]
+
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:
