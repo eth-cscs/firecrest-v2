@@ -6,7 +6,7 @@ Authlib
 pydantic
 pydantic-settings >= 2.2.0
 setuptools
-aiohttp
+aiohttp < 3.14 # Temporary fix to avoid aioresponses compatibility issues with aiohttp 3.14 (https://github.com/pnuckowski/aioresponses/pull/288)
 asyncio
 rootpath
 asyncssh
