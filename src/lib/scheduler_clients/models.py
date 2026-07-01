@@ -90,6 +90,16 @@ class JobDescriptionModel(CamelModel):
         description="Charge job resources to specified account",
         nullable=True,
     )
+    reservation: Optional[str] = Field(
+        default=None,
+        description="Reservation to be used for the job",
+        nullable=True,
+    )
+    partition: Optional[str] = Field(
+        default=None,
+        description="Partition to be used for the job",
+        nullable=True,
+    )
     current_working_directory: str = Field(
         validation_alias=AliasChoices("workingDirectory", "working_directory"),
         description="Job working directory",
@@ -147,6 +157,7 @@ class ReservationModel(CamelModel):
     end_time: int
     start_time: int
     features: Optional[str] = Field(default=None, nullable=True)
+    state: Optional[str] = Field(default=None, nullable=True)
 
 
 class PartitionModel(CamelModel):

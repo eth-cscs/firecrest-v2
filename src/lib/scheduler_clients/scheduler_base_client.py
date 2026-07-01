@@ -81,6 +81,6 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[PartitionModel] | None:
         pass
