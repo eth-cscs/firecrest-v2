@@ -23,9 +23,7 @@ This is the key integration point between OOD and FirecREST. There are two model
 
 ### Token passthrough (not implemented)
 
-When OOD is configured to authenticate users via the same OIDC provider that FirecREST uses, the user's access token obtained at login can be passed directly to FirecREST. This means each request to FirecREST is made under the authenticated user's identity.
-
-This is the preferred model for production — no service account credentials need to be stored in OOD, and FirecREST sees requests under each user's own identity — but it is not implemented in this proof-of-concept. Implementing it requires OOD to expose the user's OIDC token to the adapter via a mechanism such as `OodAuth`.
+When OOD and FirecREST share the same OIDC provider, the user's access token obtained at login can be passed directly to FirecREST. Each request is then made under the authenticated user's own identity — no service account credentials need to be stored on the OOD server.
 
 ### Client credentials (implemented)
 
