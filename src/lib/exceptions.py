@@ -20,6 +20,10 @@ class SlurmAuthTokenError(SlurmError):
     pass
 
 
+class SlurmQuotaError(SlurmError):
+    pass
+
+
 class PbsError(SchedulerError):
     """Exception raised for errors related to the PBS scheduler."""
 
@@ -30,5 +34,5 @@ class SSHServiceError(Exception):
     pass
 
 
-class SSHCredentials(Exception):
+class SSHCredentials(SSHServiceError):
     pass

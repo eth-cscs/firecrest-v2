@@ -5,7 +5,6 @@
 
 import uvicorn
 
-
 # plugins
 from firecrest.plugins import settings
 
@@ -17,6 +16,11 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from lib.exceptions import (
+    SSHServiceError,
+    SchedulerError,
+)
+from lib.ssh_clients.ssh_client import SSHClientError
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
@@ -183,9 +187,17 @@ def register_routes(app: FastAPI, settings: config.Settings):
 
 
 def register_exception_handlers(app: FastAPI):
+    # Base classes must be listed explicitly: the `Exception` handler is served by
+    # Starlette's ServerErrorMiddleware, which re-raises after responding. Only handlers
+    # registered here are resolved (by MRO) without re-raising.
     @app.exception_handler(Exception)
+
+    # Explicitly register base classes to avoid re-raising by Starlette's ServerErrorMiddleware
     @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(RequestValidationError)
+    @app.exception_handler(SchedulerError)
+    @app.exception_handler(SSHServiceError)
+    @app.exception_handler(SSHClientError)
     async def http_exception_handler(request, exc):
         return response_error_handler(
             exc=exc,
