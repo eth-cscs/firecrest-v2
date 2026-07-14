@@ -1,0 +1,8 @@
+{
+    "stdout": "",
+    "stderr": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nsbatch: error: Batch job submission failed: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)\n",
+    "exit_code": 1,
+    "swalllow_stdin": true,
+    "command":"sbatch --export=ALL,PATH=/bin:/usr/bin/:/usr/local/bin/ --chdir=/home/test1 --partition=partition_a --reservation=myreservation --job-name=test1"
+}
+

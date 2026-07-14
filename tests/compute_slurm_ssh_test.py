@@ -19,6 +19,15 @@ def mocked_ssh_sbatch_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_sbatch_output_out_of_quota():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_sbatch_command_out_of_quota.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_sacct_output():
     output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_command.json"
     with output_file.open("rb") as output:
@@ -114,6 +123,37 @@ async def test_submit_job(
             json=request_body,
         )
         assert response.status_code == 201
+        assert response.json() is not None
+
+
+async def test_submit_job_out_of_quota(
+    client,
+    ssh_client,
+    mocked_ssh_sbatch_output_out_of_quota,
+    slurm_cluster_with_ssh_config,
+):
+
+    request_body = {
+        "job": {
+            "name": "test1",
+            "working_directory": "/home/test1",
+            "partition": "partition_a",
+            "reservation": "myreservation",
+            "env": {"PATH": "/bin:/usr/bin/:/usr/local/bin/"},
+            "script": "#!/bin/bash\nfactor $(od -N 10 -t uL -An /dev/urandom | tr -d ' ')",
+        }
+    }
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_sbatch_output_out_of_quota)]
+    ):
+        response = client.post(
+            "/compute/{cluster_name}/jobs".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            ),
+            json=request_body,
+        )
+        assert response.status_code == 429
         assert response.json() is not None
 
 
