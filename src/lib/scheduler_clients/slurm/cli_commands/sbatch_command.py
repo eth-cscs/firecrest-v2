@@ -14,7 +14,7 @@ from lib.ssh_clients.ssh_client import BaseCommand
 # Slurm reports accounting/QOS policy violations (submit/job/time/size limits)
 # using error codes that follow the "(QOS|Assoc)(Max|Min)...Limit" naming
 # convention, e.g. QOSMaxSubmitJobPerUserLimit, AssocMaxJobsLimit.
-QUOTA_ERROR_PATTERN = re.compile(r"\b(?:QOS|Assoc)(?:Max|Min)\w*Limit\b")
+QUOTA_ERROR_PATTERN = re.compile(r"\b(?:QOS|Assoc)(?:Max|Min)\w*Limit\b", re.IGNORECASE)
 
 
 class SbatchCommand(BaseCommand):
@@ -29,7 +29,9 @@ class SbatchCommand(BaseCommand):
             f"{key}={value}" for key, value in self.job_description.environment.items()
         )
         cmd += [f"--export={shlex.quote(f'ALL,{env}')}"]
-        cmd += [f"--chdir={shlex.quote(self.job_description.current_working_directory)}"]
+        cmd += [
+            f"--chdir={shlex.quote(self.job_description.current_working_directory)}"
+        ]
         if self.job_description.partition:
             cmd.append(f"--partition={shlex.quote(self.job_description.partition)}")
         if self.job_description.reservation:

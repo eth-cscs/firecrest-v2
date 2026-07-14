@@ -153,8 +153,8 @@ async def test_submit_job_out_of_quota(
             ),
             json=request_body,
         )
-        assert response.status_code == 429
-        assert response.json() is not None
+        assert response.status_code == 403
+        assert "policy" in response.json()["message"]
 
 
 async def test_get_job(

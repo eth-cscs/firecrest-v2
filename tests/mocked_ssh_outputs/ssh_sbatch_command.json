@@ -2,7 +2,7 @@
     "stdout": "Submitted batch job 1",
     "stderr": "",
     "exit_code": 0,
-    "swalllow_stdin": true,
+    "swallow_stdin": true,
     "command":"sbatch --export=ALL,PATH=/bin:/usr/bin/:/usr/local/bin/ --chdir=/home/test1 --partition=partition_a --reservation=myreservation --job-name=test1"
 }
 

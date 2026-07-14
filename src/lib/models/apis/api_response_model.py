@@ -11,7 +11,6 @@ from pydantic import Field
 from starlette.exceptions import HTTPException
 from fastapi.exceptions import RequestValidationError
 
-
 # exceptions
 from lib.exceptions import SchedulerError, SlurmAuthTokenError, SlurmQuotaError
 
@@ -27,7 +26,6 @@ from lib.ssh_clients.ssh_client import (
     SSHConnectionError,
     TimeoutLimitExceeded,
 )
-
 
 T = TypeVar("T", bound=Any)
 
@@ -92,7 +90,7 @@ class ApiResponseError(CamelModel):
             if isinstance(exc, SlurmAuthTokenError):
                 error_status_code = fastapi.status.HTTP_400_BAD_REQUEST
             if isinstance(exc, SlurmQuotaError):
-                error_status_code = fastapi.status.HTTP_429_TOO_MANY_REQUESTS
+                error_status_code = fastapi.status.HTTP_403_FORBIDDEN
         if isinstance(exc, OutputLimitExceeded):
             error_status_code = fastapi.status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
             error_message = str(exc)

@@ -187,7 +187,12 @@ def register_routes(app: FastAPI, settings: config.Settings):
 
 
 def register_exception_handlers(app: FastAPI):
-    @app.exception_handler(Exception)  # warning: does not catch inherited exceptions
+    # Base classes must be listed explicitly: the `Exception` handler is served by
+    # Starlette's ServerErrorMiddleware, which re-raises after responding. Only handlers
+    # registered here are resolved (by MRO) without re-raising.
+    @app.exception_handler(Exception)
+
+    # Explicitly register base classes to avoid re-raising by Starlette's ServerErrorMiddleware
     @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(RequestValidationError)
     @app.exception_handler(SchedulerError)
