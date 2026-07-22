@@ -91,8 +91,8 @@ def tracing_log_middleware(
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
-    log_data["trace_Id"] = get_tracing_data(HeaderKeys.correlation_id)
-    log_data["request_Id"] = get_tracing_data(HeaderKeys.request_id)
+    log_data["trace_id"] = get_tracing_data(HeaderKeys.correlation_id)
+    log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
 
     for header in headers_to_trace:
         if header["input"] in request.headers:
