@@ -234,6 +234,7 @@ class SSHClientDependency:
                 self.key_provider = DeiCSSHCACredentialsProvider(
                     settings.ssh_credentials.url,
                     settings.ssh_credentials.max_connections,
+                    app_version=settings.app_version,
                 )
             case SSHKeysServiceType.SSHService:
                 self.key_provider = SSHKeygenCredentialsProvider(
