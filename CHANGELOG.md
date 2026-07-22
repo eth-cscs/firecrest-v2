@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixes truncation of `workingDirectory` in job responses for running/pending jobs caused by `squeue`'s default 20-character column width.
+- Fixes error handling of downstream services.
 
 ## [2.5.4]
 
