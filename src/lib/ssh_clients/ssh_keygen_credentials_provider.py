@@ -58,13 +58,14 @@ class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def __init__(self, ssh_keygen_url: str, max_connections: int = 100):
+    def __init__(self, ssh_keygen_url: str, max_connections: int = 100, *, app_version: str):
         self.ssh_keygen_url = ssh_keygen_url
+        self.app_version = app_version
         SSHKeygenCredentialsProvider.max_connections = max_connections
 
     async def get_credentials(self, username: str, jwt_token: str):
         client = await self.get_aiohttp_client()
-        headers = _ssh_service_headers(jwt_token)
+        headers = _ssh_service_headers(jwt_token, self.app_version)
 
         post_data = {
             "duration": "1min",
