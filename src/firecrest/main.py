@@ -131,8 +131,10 @@ async def schedule_tasks(scheduler: AsyncScheduler):
 def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def init_request_vars(request: Request, call_next):
-        initial_g = types.SimpleNamespace()
-        request_vars.request_global.set(initial_g)
+        # A fresh namespace per request, bound in this async context, so
+        # per-request state (e.g. auth in api_auth_helper.py) never leaks
+        # across concurrent requests sharing the contextvar's default.
+        request_vars.request_global.set(types.SimpleNamespace())
         response = await call_next(request)
         return response
 

@@ -12,7 +12,7 @@ auth:
     usernameClaim: "sub"
 #ssh_credentials:
 #  type: "SSHCA"
-#  url: "http://deic-sshca:2280/demoCA"
+#  url: "http://192.168.240.22:2280/demoCA"
 #  max_connections: 500
 ssh_credentials:
   type: "SSHStaticKeys"
