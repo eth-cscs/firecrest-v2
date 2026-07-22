@@ -17,7 +17,6 @@ from lib.exceptions import SSHServiceError
 
 
 SSH_KEYGEN_URL = "http://fake-ssh-service"
-APP_VERSION = "2.x.x"
 
 FAKE_SSH_RESPONSE = {
     "sshKey": {
@@ -42,12 +41,12 @@ def _clear_context():
 
 def test_headers_default_when_no_client_headers():
     _clear_context()
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert headers["Authorization"] == "Bearer token-abc"
     assert headers["x-client-type"] == "api"
     assert headers["x-client-name"] == "firecrest"
-    assert headers["x-client-version"] == APP_VERSION
+    assert "x-client-version" not in headers
     assert "x-request-id" not in headers
 
 
@@ -58,7 +57,7 @@ def test_headers_forwarded_when_client_sends_all():
         x_client_name="my-client",
         x_client_version="1.2.3",
     )
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert headers["x-request-id"] == "req-123"
     assert headers["x-client-type"] == "sdk"
@@ -71,35 +70,35 @@ def test_headers_partial_forward_falls_back_to_defaults():
         x_client_type="sdk",
         # x_client_name and x_client_version not set by client
     )
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert headers["x-client-type"] == "sdk"
     assert headers["x-client-name"] == "firecrest"
-    assert headers["x-client-version"] == APP_VERSION
+    assert "x-client-version" not in headers
     assert "x-request-id" not in headers
 
 
 def test_x_request_id_omitted_when_absent():
     _set_context(x_client_type="api")
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert "x-request-id" not in headers
 
 
 def test_x_request_id_omitted_when_none():
     _set_context(x_request_id=None)
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert "x-request-id" not in headers
 
 
 def test_empty_string_client_headers_fall_back_to_defaults():
     _set_context(x_client_type="", x_client_name="", x_client_version="")
-    headers = _ssh_service_headers("token-abc", APP_VERSION)
+    headers = _ssh_service_headers("token-abc")
 
     assert headers["x-client-type"] == "api"
     assert headers["x-client-name"] == "firecrest"
-    assert headers["x-client-version"] == APP_VERSION
+    assert "x-client-version" not in headers
 
 
 # ---------------------------------------------------------------------------
@@ -128,7 +127,7 @@ def _sent_headers(mock_session) -> dict:
 
 async def test_get_credentials_returns_ssh_keys():
     _clear_context()
-    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL, app_version=APP_VERSION)
+    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL)
     mock_session = _make_mock_session(status.HTTP_201_CREATED, FAKE_SSH_RESPONSE)
 
     with patch.object(SSHKeygenCredentialsProvider, "get_aiohttp_client", AsyncMock(return_value=mock_session)):
@@ -140,7 +139,7 @@ async def test_get_credentials_returns_ssh_keys():
 
 async def test_get_credentials_sends_default_monitoring_headers():
     _clear_context()
-    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL, app_version=APP_VERSION)
+    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL)
     mock_session = _make_mock_session(status.HTTP_201_CREATED, FAKE_SSH_RESPONSE)
 
     with patch.object(SSHKeygenCredentialsProvider, "get_aiohttp_client", AsyncMock(return_value=mock_session)):
@@ -149,7 +148,7 @@ async def test_get_credentials_sends_default_monitoring_headers():
     sent = _sent_headers(mock_session)
     assert sent["x-client-type"] == "api"
     assert sent["x-client-name"] == "firecrest"
-    assert sent["x-client-version"] == APP_VERSION
+    assert "x-client-version" not in sent
     assert "x-request-id" not in sent
 
 
@@ -160,7 +159,7 @@ async def test_get_credentials_forwards_client_headers():
         x_client_name="my-app",
         x_client_version="3.0.0",
     )
-    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL, app_version=APP_VERSION)
+    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL)
     mock_session = _make_mock_session(status.HTTP_201_CREATED, FAKE_SSH_RESPONSE)
 
     with patch.object(SSHKeygenCredentialsProvider, "get_aiohttp_client", AsyncMock(return_value=mock_session)):
@@ -175,7 +174,7 @@ async def test_get_credentials_forwards_client_headers():
 
 async def test_get_credentials_raises_on_non_201():
     _clear_context()
-    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL, app_version=APP_VERSION)
+    provider = SSHKeygenCredentialsProvider(SSH_KEYGEN_URL)
     mock_session = _make_mock_session(status.HTTP_500_INTERNAL_SERVER_ERROR, response_body="Internal error")
 
     with patch.object(SSHKeygenCredentialsProvider, "get_aiohttp_client", AsyncMock(return_value=mock_session)):
