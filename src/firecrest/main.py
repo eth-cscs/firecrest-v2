@@ -150,15 +150,26 @@ def register_middlewares(app: FastAPI):
         logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
         try:
-            response = await call_next(request)
-            username = None
-            if hasattr(request.state, "username"):
-                username = request.state.username
-            # Logging from Middleware
+            # Logging from Middleware request
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
                     request,
-                    username,
+                    None,
+                    None,
+                    settings.logger.loggable_request_headers,
+                )
+
+            response = await call_next(request)
+
+            # Logging from Middleware response
+            if settings.logger.enable_tracing_log:
+                tracing_log_middleware(
+                    request,
+                    (
+                        request.state.username
+                        if hasattr(request.state, "username")
+                        else None
+                    ),
                     response.status_code,
                     settings.logger.loggable_request_headers,
                 )
