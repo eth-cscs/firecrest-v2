@@ -55,6 +55,10 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+
+from starlette_context import context
+from starlette_context.header_keys import HeaderKeys
+
 # FirecREST tracing JSON logger
 from lib.loggers.tracing_log import tracing_log_middleware
 
@@ -151,6 +155,7 @@ def register_middlewares(app: FastAPI):
             # Logging from Middleware request
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
+                    "Requesting",
                     request,
                     None,
                     None,
@@ -162,6 +167,7 @@ def register_middlewares(app: FastAPI):
             # Logging from Middleware response
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
+                    "Responding",
                     request,
                     (
                         request.state.username
@@ -212,6 +218,24 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(SSHServiceError)
     @app.exception_handler(SSHClientError)
     async def http_exception_handler(request, exc):
+
+        def get_tracing_data(key: str) -> str:
+            if key in context:
+                return context[key]
+            return ""
+
+        cause_chain = [str(exc)]
+        cause = exc.__cause__
+        while cause is not None:
+            cause_chain.append(str(cause))
+            cause = cause.__cause__
+
+        msg = "\n caused by: ".join(cause_chain)
+        msg += "\n trace_id: " + get_tracing_data(HeaderKeys.correlation_id)
+        msg += "\n request_id: " + get_tracing_data(HeaderKeys.request_id)
+
+        logging.getLogger("uvicorn.error").error(msg)
+
         return response_error_handler(
             exc=exc,
             request=request,
