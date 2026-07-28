@@ -65,7 +65,11 @@ def log_backend_http_scheduler(url: str, response_status: int) -> None:
 
 @tracing_log_method
 def tracing_log_middleware(
-    request: Request, username: str, status_code: int, headers_to_trace: list
+    operation: str,
+    request: Request,
+    username: str,
+    status_code: int,
+    headers_to_trace: list,
 ) -> None:
     # Get URL
     url_path = request.scope["path"]
@@ -88,6 +92,7 @@ def tracing_log_middleware(
     log_data["username"] = username
     if system_name != "":
         log_data["system_name"] = system_name
+    log_data["message"] = f"{operation}: {endpoint}"
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
