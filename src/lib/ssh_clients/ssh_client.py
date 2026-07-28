@@ -218,11 +218,13 @@ class SSHClientPool:
         self,
         options: Optional[asyncssh.SSHClientConnectionOptions] = None,
         exp_reason: Optional[str] = None,
+        username: Optional[str] = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
 
         logger.error(f"SSH Server Error: {exp_reason}")
+        logger.error(f"username: {username}")
         if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
@@ -293,10 +295,10 @@ class SSHClientPool:
             except ConnectionLost as e:
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except PermissionDenied as e:
-                await self.get_ssh_debug_info(options, e.reason)
+                await self.get_ssh_debug_info(options, e.reason, username)
 
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except ProtocolError as e:
-                await self.get_ssh_debug_info(options, e.reason)
+                await self.get_ssh_debug_info(options, e.reason, username)
 
                 raise SSHConnectionError("SSH Protocol Error.") from e
