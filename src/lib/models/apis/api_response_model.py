@@ -59,12 +59,17 @@ class ApiResponseMeta(CamelModel):
 class ApiResponseError(CamelModel):
     error_type: ApResponseErrorType = ApResponseErrorType.error
     message: str
+    caused_by: Optional[list] = Field(default=None, nullable=True)
     data: Optional[dict] = Field(default=None, nullable=True)
     user: Optional[str] = Field(default=None, nullable=True)
 
     @staticmethod
-    def build_http_error(message, error_type=ApResponseErrorType.error, data=None):
-        model = ApiResponseError(error_type=error_type, message=message, data=data)
+    def build_http_error(
+        message, error_type=ApResponseErrorType.error, caused_by=None, data=None
+    ):
+        model = ApiResponseError(
+            error_type=error_type, message=message, caused_by=caused_by, data=data
+        )
         return model
 
     @staticmethod
@@ -124,9 +129,18 @@ class ApiResponseError(CamelModel):
                 error_message += validation_error.get("msg")
             error_data = {"fields": error_data_fields}
             error_message = str(exc).capitalize()
+        cause_chain = [str(exc)]
+        cause = exc.__cause__
+        while cause is not None:
+            cause_chain.append(str(cause))
+            cause = cause.__cause__
+
         return (
             ApiResponseError.build_http_error(
-                error_type=error_type, message=error_message, data=error_data
+                error_type=error_type,
+                message=error_message,
+                caused_by=cause_chain,
+                data=error_data,
             ),
             error_status_code,
         )
