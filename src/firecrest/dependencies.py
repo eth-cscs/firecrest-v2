@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
+import os
 from fastapi import Request, status, HTTPException
 from aiobotocore.config import AioConfig
 from aiobotocore.session import get_session
@@ -119,9 +120,9 @@ class ServiceAvailabilityDependency:
                 detail="All filesystem requests require a path or source_path parameter.",
             )
 
-        valid_path = None
+        norm_path = os.path.normpath(path)
         valid_path = next(
-            (fs.path for fs in system.file_systems if path.startswith(fs.path)),
+            (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/")+"/")),
             None
         )
         if valid_path is None:
