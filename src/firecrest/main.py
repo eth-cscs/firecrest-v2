@@ -245,7 +245,7 @@ def register_exception_handlers(app: FastAPI):
             msg += "\n request_id: " + get_tracing_data(HeaderKeys.request_id)
 
         if response.status_code and response.status_code < 500:
-            logging.getLogger("uvicorn.access").warning(msg)
+            logging.getLogger("uvicorn.error").warning(msg)
         else:
             logging.getLogger("uvicorn.error").error(msg)
 
