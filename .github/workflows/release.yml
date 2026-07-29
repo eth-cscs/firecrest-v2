@@ -98,7 +98,6 @@ jobs:
         moduleDir: firecrest
         fileName: main
         appName: app
-        fastapiVersioning: v1
         outputName: openapi
         outputExtension: yaml
         yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml

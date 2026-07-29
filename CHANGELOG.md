@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.5] - OPEN
 
+
 ### Added
 
-### Changed
+- Trace logs now include both request and response trace.
+
 
 ### Fixed
 
+- Fixes truncation of `workingDirectory` in job responses for running/pending jobs caused by `squeue`'s default 20-character column width.
+- Fixes error handling of downstream services.
+- Fixes log tracing
 - Execute commands when the health check is disabled
+
 
 ## [2.5.4]
 

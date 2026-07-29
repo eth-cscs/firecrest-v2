@@ -6,10 +6,15 @@
 # commands
 import re
 import shlex
-from lib.exceptions import SlurmError
+from lib.exceptions import SlurmError, SlurmQuotaError
 
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.ssh_clients.ssh_client import BaseCommand
+
+# Slurm reports accounting/QOS policy violations (submit/job/time/size limits)
+# using error codes that follow the "(QOS|Assoc)(Max|Min)...Limit" naming
+# convention, e.g. QOSMaxSubmitJobPerUserLimit, AssocMaxJobsLimit.
+QUOTA_ERROR_PATTERN = re.compile(r"\b(?:QOS|Assoc)(?:Max|Min)\w*Limit\b", re.IGNORECASE)
 
 
 class SbatchCommand(BaseCommand):
@@ -24,7 +29,9 @@ class SbatchCommand(BaseCommand):
             f"{key}={value}" for key, value in self.job_description.environment.items()
         )
         cmd += [f"--export={shlex.quote(f'ALL,{env}')}"]
-        cmd += [f"--chdir={shlex.quote(self.job_description.current_working_directory)}"]
+        cmd += [
+            f"--chdir={shlex.quote(self.job_description.current_working_directory)}"
+        ]
         if self.job_description.partition:
             cmd.append(f"--partition={shlex.quote(self.job_description.partition)}")
         if self.job_description.reservation:
@@ -47,6 +54,10 @@ class SbatchCommand(BaseCommand):
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:
+            if QUOTA_ERROR_PATTERN.search(stderr):
+                raise SlurmQuotaError(
+                    f"Job submission rejected: accounting/QOS policy limit exceeded. {stderr.strip()}"
+                )
             raise SlurmError(
                 f"Unexpected Slurm command response. exit_status:{exit_status} std_err:{stderr}"
             )

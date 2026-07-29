@@ -5,7 +5,6 @@
 
 import uvicorn
 
-
 # plugins
 from firecrest.plugins import settings
 
@@ -17,6 +16,11 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from lib.exceptions import (
+    SSHServiceError,
+    SchedulerError,
+)
+from lib.ssh_clients.ssh_client import SSHClientError
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
@@ -127,8 +131,10 @@ async def schedule_tasks(scheduler: AsyncScheduler):
 def register_middlewares(app: FastAPI):
     @app.middleware("http")
     async def init_request_vars(request: Request, call_next):
-        initial_g = types.SimpleNamespace()
-        request_vars.request_global.set(initial_g)
+        # A fresh namespace per request, bound in this async context, so
+        # per-request state (e.g. auth in api_auth_helper.py) never leaks
+        # across concurrent requests sharing the contextvar's default.
+        request_vars.request_global.set(types.SimpleNamespace())
         response = await call_next(request)
         return response
 
@@ -142,15 +148,26 @@ def register_middlewares(app: FastAPI):
         logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
         try:
-            response = await call_next(request)
-            username = None
-            if hasattr(request.state, "username"):
-                username = request.state.username
-            # Logging from Middleware
+            # Logging from Middleware request
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
                     request,
-                    username,
+                    None,
+                    None,
+                    settings.logger.loggable_request_headers,
+                )
+
+            response = await call_next(request)
+
+            # Logging from Middleware response
+            if settings.logger.enable_tracing_log:
+                tracing_log_middleware(
+                    request,
+                    (
+                        request.state.username
+                        if hasattr(request.state, "username")
+                        else None
+                    ),
                     response.status_code,
                     settings.logger.loggable_request_headers,
                 )
@@ -183,9 +200,17 @@ def register_routes(app: FastAPI, settings: config.Settings):
 
 
 def register_exception_handlers(app: FastAPI):
+    # Base classes must be listed explicitly: the `Exception` handler is served by
+    # Starlette's ServerErrorMiddleware, which re-raises after responding. Only handlers
+    # registered here are resolved (by MRO) without re-raising.
     @app.exception_handler(Exception)
+
+    # Explicitly register base classes to avoid re-raising by Starlette's ServerErrorMiddleware
     @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(RequestValidationError)
+    @app.exception_handler(SchedulerError)
+    @app.exception_handler(SSHServiceError)
+    @app.exception_handler(SSHClientError)
     async def http_exception_handler(request, exc):
         return response_error_handler(
             exc=exc,

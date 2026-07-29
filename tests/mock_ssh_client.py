@@ -42,7 +42,7 @@ class MockedCommand(CamelModel):
     stderr: str = None
     exit_code: int = 0
     command: str = None
-    swalllow_stdin: bool = False
+    swallow_stdin: bool = False
 
 
 class MockedSSHClient(SSHClient):
@@ -65,7 +65,7 @@ class MockSSHClientPool(SSHClientPool):
     async def handler(self, process: asyncssh.SSHServerProcess):
 
         for command in self.commands:
-            if command.swalllow_stdin:
+            if command.swallow_stdin:
                 await process.stdin.readline()
                 break
 

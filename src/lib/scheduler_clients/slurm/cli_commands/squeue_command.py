@@ -34,7 +34,7 @@ class SqueueCommand(SacctCommand):
             cmd += [f"--jobs='{str_job_ids}'"]
         cmd += [
             "--noheader",
-            "--Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir'",
+            "--Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'",
         ]
         return " ".join(cmd)
 

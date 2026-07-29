@@ -9,6 +9,8 @@ from fastapi import status
 from socket import AF_INET
 from typing import Optional
 
+from starlette_context import context
+from starlette_context.header_keys import HeaderKeys
 
 # exceptions
 from lib.exceptions import SSHServiceError
@@ -17,11 +19,20 @@ from lib.ssh_clients.ssh_credentials_provider import SSHCredentialsProvider
 SIZE_POOL_AIOHTTP = 100
 
 
-def _ssh_service_headers(jwt_token: str):
-    return {
+def _ssh_service_headers(jwt_token: str, app_version: str) -> dict:
+    headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {jwt_token}",
+        "x-client-type": "api",
+        "x-client-name": "firecrest",
+        "x-client-version": app_version,
     }
+    if context.exists():
+        if HeaderKeys.request_id in context:
+            headers["x-request-id"] = context[HeaderKeys.request_id]
+        if HeaderKeys.correlation_id in context:
+            headers["x-trace-id"] = context[HeaderKeys.correlation_id]
+    return headers
 
 
 class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
@@ -47,13 +58,14 @@ class SSHKeygenCredentialsProvider(SSHCredentialsProvider):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def __init__(self, ssh_keygen_url: str, max_connections: int = 100):
+    def __init__(self, ssh_keygen_url: str, max_connections: int = 100, *, app_version: str):
         self.ssh_keygen_url = ssh_keygen_url
+        self.app_version = app_version
         SSHKeygenCredentialsProvider.max_connections = max_connections
 
     async def get_credentials(self, username: str, jwt_token: str):
         client = await self.get_aiohttp_client()
-        headers = _ssh_service_headers(jwt_token)
+        headers = _ssh_service_headers(jwt_token, self.app_version)
 
         post_data = {
             "duration": "1min",

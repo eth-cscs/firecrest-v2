@@ -173,10 +173,6 @@ services:
       - ./build/minio:/data:delegated
   ssh-ca:
     image: deic-sshca
-    environment:
-      ENVIRONMENT: development
-      SSH_KEYGEN_URL: http://192.168.240.20:5000
-      YAML_CONFIG_FILE: "/app/config/app-config.yaml"
     depends_on:
       keycloak:
         condition: service_healthy

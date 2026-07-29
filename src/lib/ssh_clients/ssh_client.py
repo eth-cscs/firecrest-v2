@@ -37,15 +37,19 @@ class BaseCommand(ABC):
         pass
 
 
-class OutputLimitExceeded(Exception):
+class SSHClientError(Exception):
     pass
 
 
-class TimeoutLimitExceeded(Exception):
+class OutputLimitExceeded(SSHClientError):
     pass
 
 
-class SSHConnectionError(Exception):
+class TimeoutLimitExceeded(SSHClientError):
+    pass
+
+
+class SSHConnectionError(SSHClientError):
     pass
 
 
