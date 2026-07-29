@@ -95,7 +95,7 @@ class ApiResponseError(CamelModel):
             ):
                 cause_chain.append(str(cause))
             cause = cause.__cause__
-        return cause_chain
+        return cause_chain if len(cause_chain) > 0 else None
 
     @staticmethod
     def build_http_error_from_exception(exc: Exception):
