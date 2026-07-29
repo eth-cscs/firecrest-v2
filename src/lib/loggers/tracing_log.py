@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from enum import Enum
 import json
 import re
 import logging
@@ -63,9 +64,14 @@ def log_backend_http_scheduler(url: str, response_status: int) -> None:
     )
 
 
+class Log_operation(Enum):
+    Request = "Requesting"
+    Response = "Responding"
+
+
 @tracing_log_method
 def tracing_log_middleware(
-    operation: str,
+    operation: Log_operation,
     request: Request,
     username: str,
     status_code: int,
@@ -92,7 +98,7 @@ def tracing_log_middleware(
     log_data["username"] = username
     if system_name != "":
         log_data["system_name"] = system_name
-    log_data["message"] = f"{operation}: {endpoint}"
+    log_data["message"] = f"{operation.value}: {endpoint}"
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
     log_data["status_code"] = status_code
