@@ -223,8 +223,7 @@ class SSHClientPool:
 
         logger = logging.getLogger("uvicorn.error")
 
-        logger.error(f"SSH Server Error: {exp_reason}")
-        logger.error(f"username: {username}")
+        logger.error(f"SSH Server Error for {username}: {exp_reason}")
         if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
