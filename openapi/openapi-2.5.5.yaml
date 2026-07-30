@@ -21,6 +21,14 @@ components:
       type: string
     ApiResponseError:
       properties:
+        causedBy:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          nullable: true
+          title: Causedby
         data:
           anyOf:
           - additionalProperties: true
