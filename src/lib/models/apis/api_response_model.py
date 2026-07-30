@@ -12,7 +12,12 @@ from starlette.exceptions import HTTPException
 from fastapi.exceptions import RequestValidationError
 
 # exceptions
-from lib.exceptions import SchedulerError, SlurmAuthTokenError, SlurmQuotaError
+from lib.exceptions import (
+    SSHServiceError,
+    SchedulerError,
+    SlurmAuthTokenError,
+    SlurmQuotaError,
+)
 
 # models
 from lib.models.base_model import CamelModel
@@ -23,6 +28,7 @@ from lib.models.apis.api_auth_model import (
 )
 from lib.ssh_clients.ssh_client import (
     OutputLimitExceeded,
+    SSHClientError,
     SSHConnectionError,
     TimeoutLimitExceeded,
 )
@@ -59,13 +65,37 @@ class ApiResponseMeta(CamelModel):
 class ApiResponseError(CamelModel):
     error_type: ApResponseErrorType = ApResponseErrorType.error
     message: str
+    caused_by: Optional[list[str]] = Field(default=None, nullable=True)
     data: Optional[dict] = Field(default=None, nullable=True)
     user: Optional[str] = Field(default=None, nullable=True)
 
     @staticmethod
-    def build_http_error(message, error_type=ApResponseErrorType.error, data=None):
-        model = ApiResponseError(error_type=error_type, message=message, data=data)
+    def build_http_error(
+        message, error_type=ApResponseErrorType.error, caused_by=None, data=None
+    ):
+        model = ApiResponseError(
+            error_type=error_type, message=message, caused_by=caused_by, data=data
+        )
         return model
+
+    @staticmethod
+    def build_exception_chain(exc: Exception) -> list:
+
+        cause_chain = []
+        cause = exc.__cause__
+        visited = set()
+        while cause is not None:
+            if id(cause) in visited:
+                break
+            visited.add(id(cause))
+            if (
+                isinstance(cause, SchedulerError)
+                or isinstance(cause, SSHServiceError)
+                or isinstance(cause, SSHClientError)
+            ):
+                cause_chain.append(str(cause))
+            cause = cause.__cause__
+        return cause_chain if len(cause_chain) > 0 else None
 
     @staticmethod
     def build_http_error_from_exception(exc: Exception):
@@ -126,7 +156,10 @@ class ApiResponseError(CamelModel):
             error_message = str(exc).capitalize()
         return (
             ApiResponseError.build_http_error(
-                error_type=error_type, message=error_message, data=error_data
+                error_type=error_type,
+                message=error_message,
+                caused_by=ApiResponseError.build_exception_chain(exc=exc),
+                data=error_data,
             ),
             error_status_code,
         )

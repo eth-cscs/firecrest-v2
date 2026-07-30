@@ -55,8 +55,12 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+
+from starlette_context import context
+from starlette_context.header_keys import HeaderKeys
+
 # FirecREST tracing JSON logger
-from lib.loggers.tracing_log import tracing_log_middleware
+from lib.loggers.tracing_log import Log_operation, tracing_log_middleware
 
 # Uvicorn logger
 logger = logging.getLogger(__name__)
@@ -151,6 +155,7 @@ def register_middlewares(app: FastAPI):
             # Logging from Middleware request
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
+                    Log_operation.Request,
                     request,
                     None,
                     None,
@@ -162,6 +167,7 @@ def register_middlewares(app: FastAPI):
             # Logging from Middleware response
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
+                    Log_operation.Response,
                     request,
                     (
                         request.state.username
@@ -212,10 +218,38 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(SSHServiceError)
     @app.exception_handler(SSHClientError)
     async def http_exception_handler(request, exc):
-        return response_error_handler(
+
+        def get_tracing_data(key: str) -> str:
+            if key in context:
+                return context[key]
+            return ""
+
+        cause_chain = [str(exc)]
+        cause = exc.__cause__
+        visited = set()
+        while cause is not None:
+            if id(cause) in visited:
+                break
+            visited.add(id(cause))
+            cause_chain.append(str(cause))
+            cause = cause.__cause__
+
+        response = response_error_handler(
             exc=exc,
             request=request,
         )
+
+        msg = "\n caused by: ".join(cause_chain)
+        if context.exists():
+            msg += "\n trace_id: " + get_tracing_data(HeaderKeys.correlation_id)
+            msg += "\n request_id: " + get_tracing_data(HeaderKeys.request_id)
+
+        if response.status_code and response.status_code < 500:
+            logging.getLogger("uvicorn.error").warning(msg)
+        else:
+            logging.getLogger("uvicorn.error").error(msg)
+
+        return response
 
 
 app = create_app(settings=settings)
