@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
+import os
 from fastapi import Request, status, HTTPException
 from aiobotocore.config import AioConfig
 from aiobotocore.session import get_session
@@ -118,6 +119,18 @@ class ServiceAvailabilityDependency:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="All filesystem requests require a path or source_path parameter.",
             )
+
+        norm_path = os.path.normpath(path)
+        valid_path = next(
+            (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/")+"/")),
+            None
+        )
+        if valid_path is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"The provided path ({path}) does not match any of the defined filesystem paths for the requested system ({system.name}).",
+            )
+
         service = None
         if system.servicesHealth:
             service = next(
@@ -128,12 +141,7 @@ class ServiceAvailabilityDependency:
                 ),
                 None,
             )
-        if service is None:
-            raise HTTPException(
-                status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No filesystem health checker serving the request path was found on {system.name}.",
-            )
-        if not service.healthy:
+        if service and not service.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"The requested filesystem ({service.path} on {system.name}) is unhealthy.",
@@ -149,12 +157,7 @@ class ServiceAvailabilityDependency:
                 ),
                 None,
             )
-        if service is None:
-            raise HTTPException(
-                status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No scheduler health checker for the requested system ({system.name}) was found.",
-            )
-        if not service.healthy:
+        if service and not service.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"The scheduler service for the requested system ({system.name}) is unhealthy.",
@@ -170,12 +173,7 @@ class ServiceAvailabilityDependency:
                 ),
                 None,
             )
-        if service is None:
-            raise HTTPException(
-                status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-                detail=f"No ssh health checker for the requested system ({system.name}) was found.",
-            )
-        if not service.healthy:
+        if service and not service.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"The ssh service for the requested system ({system.name}) is unhealthy.",

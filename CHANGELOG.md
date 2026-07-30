@@ -5,7 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [2.5.5] - OPEN
 
 
@@ -19,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixes truncation of `workingDirectory` in job responses for running/pending jobs caused by `squeue`'s default 20-character column width.
 - Fixes error handling of downstream services.
 - Fixes log tracing
+- Execute commands when the health check is disabled
+
 
 ## [2.5.4]
 
