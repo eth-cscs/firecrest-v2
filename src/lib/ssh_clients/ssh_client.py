@@ -141,8 +141,6 @@ class SSHClient:
 
 class SSHClientPool:
 
-    lock = asyncio.Lock()
-
     def __init__(
         self,
         host: str,
@@ -159,6 +157,8 @@ class SSHClientPool:
         keep_alive: int = 5,
     ):
         self.clients: Dict[str, SSHClient] = {}
+        self.user_locks: Dict[str, asyncio.Lock] = {}
+        self.user_locks_guard = asyncio.Lock()
         self.host = host
         self.port = port
         self.proxy_host = proxy_host
@@ -244,11 +244,18 @@ class SSHClientPool:
                     logger.error("\tNo valid client certificate found.")
             logger.error("[END] Client Certificate debug info")
 
+    async def _get_user_lock(self, username: str) -> asyncio.Lock:
+        async with self.user_locks_guard:
+            if username not in self.user_locks:
+                self.user_locks[username] = asyncio.Lock()
+            return self.user_locks[username]
+
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
         client: SSHClient = None
 
-        async with SSHClientPool.lock:
+        user_lock = await self._get_user_lock(username)
+        async with user_lock:
             options = None
             try:
 
@@ -259,6 +266,8 @@ class SSHClientPool:
                         client = None
 
                 if client is None:
+                    # Note: max_clients is not an hard limit.
+                    # Concurrent requests for different users can exceed this limit.
                     if len(self.clients) >= self.max_clients:
                         raise SSHConnectionError(
                             "SSH connection pool capacity exceeded"
