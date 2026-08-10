@@ -262,7 +262,7 @@ class SSHClientPool:
 
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
-        client: SSHClient
+        client: SSHClient = None
         user_lock = await self._get_user_lock(username)
         async with user_lock:
             options = None
