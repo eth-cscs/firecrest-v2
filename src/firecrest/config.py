@@ -417,7 +417,8 @@ class SSHClientPool(CamelModel):
         None, description="Optional proxy port.", nullable=True
     )
     max_clients: int = Field(
-        100, description="Maximum number of concurrent SSH clients."
+        100,
+        description="Maximum number of concurrent SSH clients (not a hard limit, might be temporarily exceeded under heavy load).",
     )
     timeout: SSHTimeouts = Field(
         default_factory=SSHTimeouts, description="SSH timeout settings."
