@@ -8,6 +8,7 @@ from time import time
 from datetime import datetime
 
 from typing import Any, Dict, Optional
+from xmlrpc import client
 import asyncssh
 from asyncssh import (
     ChannelOpenError,
@@ -157,6 +158,14 @@ class SSHClientPool:
         keep_alive: int = 5,
     ):
         self.clients: Dict[str, SSHClient] = {}
+        # Intentionally unbounded / never pruned: one entry per distinct
+        # authenticated username seen (~100 bytes each), and this API is
+        # not expected to see enough distinct users over its uptime for
+        # that to matter. Safe pruning would need to be race-free against
+        # get_client() below (a lock fetched here but not yet acquired
+        # must not be pruned and replaced with a different lock instance
+        # for the same user, which would allow two tasks into the
+        # critical section at once and leak an entry in self.clients).
         self.user_locks: Dict[str, asyncio.Lock] = {}
         self.user_locks_guard = asyncio.Lock()
         self.host = host
@@ -177,6 +186,7 @@ class SSHClientPool:
             raise ValueError("idle_timeout must be greater than execute_timeout")
 
     def prune_connection_pool(self):
+        # Note: does not prune self.user_locks, see comment on that field.
         for client in self.clients.values():
             if client.is_idle():
                 client.close()
@@ -252,8 +262,7 @@ class SSHClientPool:
 
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
-        client: SSHClient = None
-
+        client: SSHClient
         user_lock = await self._get_user_lock(username)
         async with user_lock:
             options = None
@@ -291,22 +300,22 @@ class SSHClientPool:
                         keep_alive=self.keep_alive,
                     )
                     self.clients[username] = client
-
-                client.reset_idle()
-                yield client
             except TimeoutError as e:
                 raise TimeoutLimitExceeded(
                     "SSH connection timeout limit exceeded."
                 ) from e
-            except ConnectionResetError as e:
-                raise SSHConnectionError("Unable to establish SSH connection.") from e
-            except ConnectionLost as e:
+            except (ConnectionLost, ConnectionResetError) as e:
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except PermissionDenied as e:
                 await self.get_ssh_debug_info(options, e.reason, username)
-
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except ProtocolError as e:
                 await self.get_ssh_debug_info(options, e.reason, username)
-
                 raise SSHConnectionError("SSH Protocol Error.") from e
+        try:
+            client.reset_idle()
+            yield client
+        except ConnectionResetError as e:
+            raise SSHConnectionError("SSH connection Reset.") from e
+        except ProtocolError as e:
+            raise SSHConnectionError("SSH Protocol Error.") from e
