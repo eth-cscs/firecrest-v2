@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.5.5] - OPEN
+
+## [2.5.6] - OPEN
+
+### Added
+
+### Changed
+
+- SSH connection pool locking is now per-user instead of global, reducing unnecessary SSH connection wait times. The max_clients connection pool setting is no longer a hard limit; under a high number of concurrent requests, the limit may be temporarily exceeded.
+
+### Fixed
+
+
+## [2.5.5]
 
 
 ### Added
