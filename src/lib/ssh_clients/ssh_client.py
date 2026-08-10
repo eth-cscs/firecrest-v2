@@ -8,7 +8,6 @@ from time import time
 from datetime import datetime
 
 from typing import Any, Dict, Optional
-from xmlrpc import client
 import asyncssh
 from asyncssh import (
     ChannelOpenError,
@@ -167,7 +166,6 @@ class SSHClientPool:
         # for the same user, which would allow two tasks into the
         # critical section at once and leak an entry in self.clients).
         self.user_locks: Dict[str, asyncio.Lock] = {}
-        self.user_locks_guard = asyncio.Lock()
         self.host = host
         self.port = port
         self.proxy_host = proxy_host
@@ -254,16 +252,13 @@ class SSHClientPool:
                     logger.error("\tNo valid client certificate found.")
             logger.error("[END] Client Certificate debug info")
 
-    async def _get_user_lock(self, username: str) -> asyncio.Lock:
-        async with self.user_locks_guard:
-            if username not in self.user_locks:
-                self.user_locks[username] = asyncio.Lock()
-            return self.user_locks[username]
+    def _get_user_lock(self, username: str) -> asyncio.Lock:
+        return self.user_locks.setdefault(username, asyncio.Lock())
 
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
         client: SSHClient = None
-        user_lock = await self._get_user_lock(username)
+        user_lock = self._get_user_lock(username)
         async with user_lock:
             options = None
             try:
@@ -275,7 +270,7 @@ class SSHClientPool:
                         client = None
 
                 if client is None:
-                    # Note: max_clients is not an hard limit.
+                    # Note: max_clients is not a hard limit.
                     # Concurrent requests for different users can exceed this limit.
                     if len(self.clients) >= self.max_clients:
                         raise SSHConnectionError(
