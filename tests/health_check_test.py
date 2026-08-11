@@ -36,12 +36,6 @@ def mocked_nodes_get_response():
     with response_file.open("r") as response:
         return json.load(response)
 
-@pytest.fixture(scope="module")
-def mocked_unhealthy_filesystem_response():
-    response_file = impresources.files(mocked_api_responses) / "f7t_filesystem_not_healthy.json"
-    with response_file.open("r") as response:
-        return json.load(response)
-
 
 @pytest.fixture(scope="module")
 def mocked_ssh_ls_wrong_path_output():
@@ -140,7 +134,7 @@ async def test_health_check_disabled_ok_with_scheduler(
     )
 
 
-async def test_health_check_disabled_ok_with_filesystem(
+async def test_health_check_disabled_notok_with_filesystem(
         client, ssh_client, mocked_ssh_ls_wrong_path_output,
         slurm_cluster_with_ssh_no_health_check_config,):
 
@@ -164,7 +158,7 @@ async def test_health_check_disabled_ok_with_no_filesystem(
                                  slurm_cluster_with_ssh_no_health_check_config.name)
 
 
-async def test_health_check_disabled_not_ok_transversal(
+async def test_health_check_disabled_not_ok_traversal(
         client, ssh_client,
         slurm_cluster_with_ssh_no_health_check_config,):
 
