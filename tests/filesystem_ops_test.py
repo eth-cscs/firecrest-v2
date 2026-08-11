@@ -10,18 +10,20 @@ from tests import mocked_ssh_outputs
 import pytest
 import json
 
+from tests.helpers import load_ssh_output, helper_test_ls_command
+
 from tests.mock_ssh_client import MockedCommand
 
 
-def load_ssh_output(file: str):
-    output_file = impresources.files(mocked_ssh_outputs) / file
-    with output_file.open("rb") as output:
-        return json.load(output, strict=False)
+# def load_ssh_output(file: str):
+#     output_file = impresources.files(mocked_ssh_outputs) / file
+#     with output_file.open("rb") as output:
+#         return json.load(output, strict=False)
 
 
-@pytest.fixture(scope="module")
-def mocked_ssh_ls_output():
-    return load_ssh_output("ssh_ls_command.json")
+# @pytest.fixture(scope="module")
+# def mocked_ssh_ls_output():
+#     return load_ssh_output("ssh_ls_command.json")
 
 
 @pytest.fixture(scope="module")
@@ -130,19 +132,10 @@ def mocked_ssh_tar_output():
 
 
 async def test_ls_command(client,
-                          ssh_client, mocked_ssh_ls_output,
+                          ssh_client,
                           cluster_name="cluster-slurm-ssh"):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
-
-        response = client.get(
-            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
-                cluster_name=cluster_name, path="/home"
-            )
-        )
-        assert response.status_code == 200
-        assert response.json() is not None
-        assert len(response.json()["output"]) == 4
+    await helper_test_ls_command(client, ssh_client)
 
 
 async def test_ls_recursive_command(client, ssh_client, mocked_ssh_ls_recursive_output):

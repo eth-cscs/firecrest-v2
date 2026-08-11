@@ -11,8 +11,7 @@ import aiohttp
 from firecrest.status.models import (
     GetNodesResponse,
     GetPartitionsResponse,
-    GetReservationsResponse,
-    UserInfoResponse,
+    GetReservationsResponse,    
 )
 
 from importlib import resources as impresources
@@ -24,6 +23,8 @@ from aioresponses import aioresponses
 
 from firecrest.config import HPCCluster, Scheduler
 from tests.filesystem_ops_test import load_ssh_output
+
+from tests.helpers import helper_test_userinfo
 
 
 @pytest.fixture(scope="module")
@@ -213,22 +214,14 @@ def test_systems_reservations(
 async def test_userinfo(
     client,
     ssh_client,
-    mocked_ssh_id_recursive_output,
-    mocked_ssh_default_account_output,
-    mocked_ssh_accounts_output,
     slurm_cluster_with_ssh_config,
 ):
 
-    async with ssh_client.mocked_output(
-        [
-            MockedCommand(**mocked_ssh_id_recursive_output),
-            MockedCommand(**mocked_ssh_default_account_output),
-            MockedCommand(**mocked_ssh_accounts_output),
-        ]
-    ):
-        response = client.get(f"/status/{slurm_cluster_with_ssh_config.name}/userinfo")
-        assert response.status_code == 200
-        assert UserInfoResponse(**response.json()) is not None
+    await helper_test_userinfo(
+        client,
+        ssh_client,
+        cluster_name=slurm_cluster_with_ssh_config.name,        
+    )
 
 
 async def test_ssh_reservation(

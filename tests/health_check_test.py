@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from importlib import resources as impresources
-from xmlrpc import client
 from firecrest.plugins import settings
 import json
 import pytest
@@ -14,21 +13,16 @@ from firecrest.status.health_check.health_checker_cluster import ClusterHealthCh
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
 from tests.mock_ssh_client import MockedCommand
-from tests import mocked_ssh_outputs, mocked_api_responses
-# import test functions from other test files to reuse them in this test
-from tests.compute_slurm_ssh_test import test_get_job
-from tests.filesystem_ops_test import test_ls_command
-from tests.status_test import test_userinfo
-# import mocked ssh outputs
-from tests.compute_slurm_ssh_test import mocked_ssh_sacct_output, mocked_ssh_squeue_output
-from tests.filesystem_ops_test import mocked_ssh_ls_output
-from tests.status_test import mocked_ssh_id_recursive_output, mocked_ssh_default_account_output, mocked_ssh_accounts_output
+from tests import mocked_api_responses
 
-
-def load_ssh_output(file: str):
-    output_file = impresources.files(mocked_ssh_outputs) / file
-    with output_file.open("rb") as output:
-        return json.load(output, strict=False)
+# import helpers functions to avoid duplicating code in tests
+from tests.helpers import (
+    mocked_ssh_ls_output,
+    helper_test_userinfo,
+    helper_test_get_job,
+    helper_test_ls_command,
+    load_ssh_output,
+)
 
 
 @pytest.fixture(scope="module")
@@ -125,29 +119,25 @@ async def test_health_check_disabled(
 async def test_health_check_disabled_ok_with_ssh(
     client,
     ssh_client,
-    mocked_ssh_id_recursive_output,
-    mocked_ssh_default_account_output,
-    mocked_ssh_accounts_output,
-    slurm_cluster_with_ssh_config,
+    slurm_cluster_with_ssh_no_health_check_config,
 ):
 
-    await test_userinfo(client, ssh_client,
-                        mocked_ssh_id_recursive_output,
-                        mocked_ssh_default_account_output,
-                        mocked_ssh_accounts_output,
-                        slurm_cluster_with_ssh_config)
+    await helper_test_userinfo(
+        client,
+        ssh_client,
+        slurm_cluster_with_ssh_no_health_check_config.name
+    )
 
 
 async def test_health_check_disabled_ok_with_scheduler(
-    client, ssh_client, 
-    mocked_ssh_sacct_output,
-    mocked_ssh_squeue_output,
+    client, ssh_client,
     slurm_cluster_with_ssh_no_health_check_config,
 ):
-    await test_get_job(client, ssh_client,
-                       mocked_ssh_sacct_output,
-                       mocked_ssh_squeue_output,
-                       slurm_cluster_with_ssh_no_health_check_config)
+    await helper_test_get_job(
+        client,
+        ssh_client,
+        slurm_cluster_with_ssh_no_health_check_config.name
+    )
 
 
 async def test_health_check_disabled_ok_with_filesystem(
@@ -167,19 +157,18 @@ async def test_health_check_disabled_ok_with_filesystem(
 
 
 async def test_health_check_disabled_ok_with_no_filesystem(
-        client, ssh_client, mocked_ssh_ls_output,
+        client, ssh_client,
         slurm_cluster_with_ssh_no_health_check_config,):
 
-    await test_ls_command(client, ssh_client,
-                          mocked_ssh_ls_output,
-                          slurm_cluster_with_ssh_no_health_check_config.name)
+    await helper_test_ls_command(client, ssh_client,
+                                 slurm_cluster_with_ssh_no_health_check_config.name)
 
 
 async def test_health_check_disabled_not_ok_transversal(
-        client, ssh_client, mocked_ssh_ls_output,
+        client, ssh_client,
         slurm_cluster_with_ssh_no_health_check_config,):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output())]):
 
         response = client.get(
             "/filesystem/{cluster_name}/ops/ls?path={path}".format(

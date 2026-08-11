@@ -9,6 +9,7 @@ from tests import mocked_ssh_outputs
 import json
 
 from tests.mock_ssh_client import MockedCommand
+from tests.helpers import helper_test_get_job, mocked_ssh_sacct_output
 
 
 @pytest.fixture(scope="module")
@@ -25,21 +26,6 @@ def mocked_ssh_sbatch_output_out_of_quota():
     )
     with output_file.open("rb") as output:
         return json.load(output)
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_sacct_output():
-    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_command.json"
-    with output_file.open("rb") as output:
-        return json.load(output)
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_squeue_output():
-    output_file = impresources.files(mocked_ssh_outputs) / "ssh_squeue_command.json"
-    with output_file.open("rb") as output:
-        return json.load(output)
-
 
 @pytest.fixture(scope="module")
 def mocked_ssh_squeue_allusers_output():
@@ -159,27 +145,15 @@ async def test_submit_job_out_of_quota(
 
 async def test_get_job(
     client,
-    ssh_client,
-    mocked_ssh_sacct_output,
-    mocked_ssh_squeue_output,
+    ssh_client,    
     slurm_cluster_with_ssh_config,
 ):
 
-    async with ssh_client.mocked_output(
-        [
-            MockedCommand(**mocked_ssh_sacct_output),
-            MockedCommand(**mocked_ssh_squeue_output),
-        ]
-    ):
-        response = client.get(
-            "/compute/{cluster_name}/jobs/{job_id}".format(
-                cluster_name=slurm_cluster_with_ssh_config.name, job_id=1
-            )
-        )
-        assert response.status_code == 200
-        assert response.json() is not None
-
-        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
+    await helper_test_get_job(
+        client,
+        ssh_client,
+        cluster_name=slurm_cluster_with_ssh_config.name
+    )
 
 
 async def test_get_jobs_allusers(
@@ -209,8 +183,7 @@ async def test_get_jobs_allusers(
 
 async def test_get_job_metadata(
     client,
-    ssh_client,
-    mocked_ssh_sacct_output,
+    ssh_client,    
     mocked_ssh_sacct_script_output,
     mocked_ssh_scontrol_script_output,
     mocked_ssh_scontrol_job_output,
@@ -219,7 +192,7 @@ async def test_get_job_metadata(
 
     async with ssh_client.mocked_output(
         [
-            MockedCommand(**mocked_ssh_sacct_output),
+            MockedCommand(**mocked_ssh_sacct_output()),
             MockedCommand(**mocked_ssh_sacct_script_output),
             MockedCommand(**mocked_ssh_scontrol_script_output),
             MockedCommand(**mocked_ssh_scontrol_job_output),
