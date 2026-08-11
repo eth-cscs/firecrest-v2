@@ -22,9 +22,8 @@ import pytest
 from aioresponses import aioresponses
 
 from firecrest.config import HPCCluster, Scheduler
-from tests.filesystem_ops_test import load_ssh_output
 
-from tests.helpers import helper_test_userinfo
+from tests.helpers import helper_test_userinfo, load_ssh_output
 
 
 @pytest.fixture(scope="module")
@@ -53,11 +52,6 @@ def mocked_get_partitions_response():
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_id_recursive_output():
-    return load_ssh_output("ssh_id_command.json")
-
-
-@pytest.fixture(scope="module")
 def mocked_ssh_reservation_output():
     return load_ssh_output("ssh_scontrol_reservation_command.json")
 
@@ -65,16 +59,6 @@ def mocked_ssh_reservation_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_partitions_output():
     return load_ssh_output("ssh_scontrol_partitions.json")
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_default_account_output():
-    return load_ssh_output("ssh_sacctmgr_default_account.json")
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_accounts_output():
-    return load_ssh_output("ssh_sacctmgr_accounts.json")
 
 
 @pytest.fixture(scope="module")

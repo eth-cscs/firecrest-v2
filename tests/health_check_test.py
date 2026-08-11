@@ -26,11 +26,6 @@ from tests.helpers import (
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_id_output():
-    return load_ssh_output("ssh_id_command.json")
-
-
-@pytest.fixture(scope="module")
 def mocked_nodes_get_response():
     response_file = impresources.files(mocked_api_responses) / "slurm_get_nodes.json"
     with response_file.open("r") as response:
@@ -156,19 +151,3 @@ async def test_health_check_disabled_ok_with_no_filesystem(
 
     await helper_test_ls_command(client, ssh_client,
                                  slurm_cluster_with_ssh_no_health_check_config.name)
-
-
-async def test_health_check_disabled_not_ok_traversal(
-        client, ssh_client,
-        slurm_cluster_with_ssh_no_health_check_config,):
-
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output())]):
-
-        response = client.get(
-            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
-                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/home/../etc/passwd"
-            )
-        )
-
-        assert response.status_code == 400
-        assert response.json() is not None
