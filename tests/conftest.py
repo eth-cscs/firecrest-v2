@@ -143,6 +143,15 @@ def slurm_cluster_with_ssh_config():
 
 
 @pytest.fixture(scope="module")
+def slurm_cluster_with_ssh_no_health_check_config():
+    for cluster in settings.clusters:
+        if (
+            getattr(cluster, "name", None).lower() == "cluster-slurm-ssh-no-health-check"
+        ):
+            return cluster
+
+
+@pytest.fixture(scope="module")
 def pbs_cluster():
     for cluster in settings.clusters:
         if getattr(cluster.scheduler, "type", "").lower() == "pbs":

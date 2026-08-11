@@ -12,7 +12,14 @@ from pytest_httpx import HTTPXMock
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
-from tests import mocked_api_responses
+from tests.mock_ssh_client import MockedCommand
+from tests import mocked_ssh_outputs, mocked_api_responses
+
+
+def load_ssh_output(file: str):
+    output_file = impresources.files(mocked_ssh_outputs) / file
+    with output_file.open("rb") as output:
+        return json.load(output, strict=False)
 
 
 @pytest.fixture(scope="module")
@@ -20,6 +27,36 @@ def mocked_nodes_get_response():
     response_file = impresources.files(mocked_api_responses) / "slurm_get_nodes.json"
     with response_file.open("r") as response:
         return json.load(response)
+
+@pytest.fixture(scope="module")
+def mocked_unhealthy_filesystem_response():
+    response_file = impresources.files(mocked_api_responses) / "f7t_filesystem_not_healthy.json"
+    with response_file.open("r") as response:
+        return json.load(response)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_squeue_output():
+    output_file = impresources.files(mocked_ssh_outputs) / "ssh_squeue_command.json"
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_sacct_output():
+    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_command.json"
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_ls_wrong_path_output():
+    return load_ssh_output("ssh_ls_command_wrong_path.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_ls_output():
+    return load_ssh_output("ssh_ls_command.json")
 
 
 def mocked_token_response():
@@ -75,3 +112,88 @@ async def test_health_check(
         assert slurm_cluster_with_api_config.servicesHealth is not None
         assert isinstance(slurm_cluster_with_api_config.servicesHealth, list)
         assert len(slurm_cluster_with_api_config.servicesHealth) > 0
+
+
+async def test_health_check_disabled(
+    slurm_cluster_with_ssh_no_health_check_config,
+):
+
+    # storage probing is configured
+    assert "s3" in slurm_cluster_with_ssh_no_health_check_config.probing.services
+
+    # ssh, scheduler and filesystem probing are not configured
+    assert "ssh" not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+    assert "scheduler" not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+    assert "filesystem" not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+
+
+async def test_health_check_disabled_ok_with_ssh(
+    client, ssh_client, 
+    mocked_ssh_sacct_output,
+    mocked_ssh_squeue_output,
+    slurm_cluster_with_ssh_no_health_check_config,
+):
+
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_output),
+            MockedCommand(**mocked_ssh_squeue_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs/{job_id}".format(
+                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, job_id=1
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
+
+
+async def test_health_check_disabled_ok_with_filesystem(
+        client, ssh_client, mocked_ssh_ls_wrong_path_output,
+        slurm_cluster_with_ssh_no_health_check_config,):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_wrong_path_output)]):
+
+        response = client.get(
+            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
+                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/wrong_path"
+            )
+        )
+
+        assert response.status_code == 404
+        assert response.json() is not None
+
+
+async def test_health_check_disabled_ok_with_no_filesystem(
+        client, ssh_client, mocked_ssh_ls_output,
+        slurm_cluster_with_ssh_no_health_check_config,):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
+
+        response = client.get(
+            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
+                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/home"
+            )
+        )
+
+        assert response.status_code == 200
+        assert response.json() is not None
+
+
+async def test_health_check_disabled_not_ok_transversal(
+        client, ssh_client, mocked_ssh_ls_output,
+        slurm_cluster_with_ssh_no_health_check_config,):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
+
+        response = client.get(
+            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
+                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/home/../etc/passwd"
+            )
+        )
+
+        assert response.status_code == 400
+        assert response.json() is not None
