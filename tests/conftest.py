@@ -216,6 +216,13 @@ def set_up_cluster_health():
                     "latency": 0,
                     "healthy": True,
                     "path": "/home",
-                },                
+                },
+                {
+                    "serviceType": "filesystem",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": False,
+                    "path": "/scratch",
+                },
             ]
         cluster.servicesHealth = health

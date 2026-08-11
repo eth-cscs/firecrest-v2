@@ -83,6 +83,9 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+    - path: '/scratch'
+      data_type: 'scratch'
+      default_work_dir: false
   data_operation:
     max_ops_file_size: 5242880 # 5M
     datatransfer_jobs_directives:
@@ -121,12 +124,12 @@ clusters:
       storage:
         timeout: 10
   file_systems:
-    - path: '/wrong_path'
-      data_type: 'scratch'
-      default_work_dir: false
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+    - path: '/scratch'
+      data_type: 'scratch'
+      default_work_dir: false
   data_operation:
     max_ops_file_size: 5242880 # 5M
     datatransfer_jobs_directives:
