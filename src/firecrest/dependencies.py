@@ -120,6 +120,12 @@ class ServiceAvailabilityDependency:
                 detail="All filesystem requests require a path or source_path parameter.",
             )
 
+        if not os.path.isabs(path):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"The provided path ({path}) is not an absolute path.",
+            )
+
         norm_path = os.path.normpath(path)
         valid_path = next(
             (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/")+"/")),
@@ -128,7 +134,7 @@ class ServiceAvailabilityDependency:
         if valid_path is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"The provided path ({path}) does not match any of the defined filesystem paths for the requested system ({system.name}).",
+                detail=f"The provided path ({norm_path}) does not match any of the defined filesystem paths for the requested system ({system.name}).",
             )
 
         service = None
@@ -136,7 +142,7 @@ class ServiceAvailabilityDependency:
             service = next(
                 filter(
                     lambda service: service.service_type == self.service_type
-                    and path.startswith(service.path),
+                    and (norm_path == service.path or norm_path.startswith(service.path.rstrip("/")+"/")),
                     system.servicesHealth,
                 ),
                 None,
