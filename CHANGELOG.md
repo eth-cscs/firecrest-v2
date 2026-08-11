@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SSH connection pool locking is now per-user instead of global, reducing unnecessary SSH connection wait times. The max_clients connection pool setting is no longer a hard limit; under a high number of concurrent requests, the limit may be temporarily exceeded.
 - Allow command execution when the health check is disabled
 
 ## [2.5.5]

@@ -141,8 +141,6 @@ class SSHClient:
 
 class SSHClientPool:
 
-    lock = asyncio.Lock()
-
     def __init__(
         self,
         host: str,
@@ -159,6 +157,15 @@ class SSHClientPool:
         keep_alive: int = 5,
     ):
         self.clients: Dict[str, SSHClient] = {}
+        # Intentionally unbounded / never pruned: one entry per distinct
+        # authenticated username seen (~100 bytes each), and this API is
+        # not expected to see enough distinct users over its uptime for
+        # that to matter. Safe pruning would need to be race-free against
+        # get_client() below (a lock fetched here but not yet acquired
+        # must not be pruned and replaced with a different lock instance
+        # for the same user, which would allow two tasks into the
+        # critical section at once and leak an entry in self.clients).
+        self.user_locks: Dict[str, asyncio.Lock] = {}
         self.host = host
         self.port = port
         self.proxy_host = proxy_host
@@ -177,6 +184,7 @@ class SSHClientPool:
             raise ValueError("idle_timeout must be greater than execute_timeout")
 
     def prune_connection_pool(self):
+        # Note: does not prune self.user_locks, see comment on that field.
         for client in self.clients.values():
             if client.is_idle():
                 client.close()
@@ -218,11 +226,12 @@ class SSHClientPool:
         self,
         options: Optional[asyncssh.SSHClientConnectionOptions] = None,
         exp_reason: Optional[str] = None,
+        username: Optional[str] = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
 
-        logger.error(f"SSH Server Error: {exp_reason}")
+        logger.error(f"SSH Server Error for {username}: {exp_reason}")
         if options and len(options.kwargs["client_certs"]) > 0:
             logger.error("[BEG] Client Certificate debug info:")
             for cert in options.kwargs["client_certs"]:
@@ -243,11 +252,14 @@ class SSHClientPool:
                     logger.error("\tNo valid client certificate found.")
             logger.error("[END] Client Certificate debug info")
 
+    def _get_user_lock(self, username: str) -> asyncio.Lock:
+        return self.user_locks.setdefault(username, asyncio.Lock())
+
     @asynccontextmanager
     async def get_client(self, username: str, jwt_token: str):
         client: SSHClient = None
-
-        async with SSHClientPool.lock:
+        user_lock = self._get_user_lock(username)
+        async with user_lock:
             options = None
             try:
 
@@ -258,6 +270,8 @@ class SSHClientPool:
                         client = None
 
                 if client is None:
+                    # Note: max_clients is not a hard limit.
+                    # Concurrent requests for different users can exceed this limit.
                     if len(self.clients) >= self.max_clients:
                         raise SSHConnectionError(
                             "SSH connection pool capacity exceeded"
@@ -281,22 +295,22 @@ class SSHClientPool:
                         keep_alive=self.keep_alive,
                     )
                     self.clients[username] = client
-
-                client.reset_idle()
-                yield client
             except TimeoutError as e:
                 raise TimeoutLimitExceeded(
                     "SSH connection timeout limit exceeded."
                 ) from e
-            except ConnectionResetError as e:
-                raise SSHConnectionError("Unable to establish SSH connection.") from e
-            except ConnectionLost as e:
+            except (ConnectionLost, ConnectionResetError) as e:
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except PermissionDenied as e:
-                await self.get_ssh_debug_info(options, e.reason)
-
+                await self.get_ssh_debug_info(options, e.reason, username)
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except ProtocolError as e:
-                await self.get_ssh_debug_info(options, e.reason)
-
+                await self.get_ssh_debug_info(options, e.reason, username)
                 raise SSHConnectionError("SSH Protocol Error.") from e
+        try:
+            client.reset_idle()
+            yield client
+        except ConnectionResetError as e:
+            raise SSHConnectionError("SSH connection Reset.") from e
+        except ProtocolError as e:
+            raise SSHConnectionError("SSH Protocol Error.") from e
