@@ -194,25 +194,28 @@ def client(app, s3_client, ssh_client):
 def set_up_cluster_health():
     settings = get_settings()
     for cluster in settings.clusters:
-        health = [
-            {
-                "serviceType": "scheduler",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-            },
-            {
-                "serviceType": "ssh",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-            },
-            {
-                "serviceType": "filesystem",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-                "path": "/home",
-            },
-        ]
+        if cluster.name.lower() == "cluster-slurm-ssh-no-health-check":
+            health = None
+        else:
+            health = [
+                {
+                    "serviceType": "scheduler",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                },
+                {
+                    "serviceType": "ssh",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                },
+                {
+                    "serviceType": "filesystem",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                    "path": "/home",
+                },                
+            ]
         cluster.servicesHealth = health
