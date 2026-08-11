@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from importlib import resources as impresources
+from xmlrpc import client
 from firecrest.plugins import settings
 import json
 import pytest
@@ -14,12 +15,25 @@ from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
 from tests.mock_ssh_client import MockedCommand
 from tests import mocked_ssh_outputs, mocked_api_responses
+# import test functions from other test files to reuse them in this test
+from tests.compute_slurm_ssh_test import test_get_job
+from tests.filesystem_ops_test import test_ls_command
+from tests.status_test import test_userinfo
+# import mocked ssh outputs
+from tests.compute_slurm_ssh_test import mocked_ssh_sacct_output, mocked_ssh_squeue_output
+from tests.filesystem_ops_test import mocked_ssh_ls_output
+from tests.status_test import mocked_ssh_id_recursive_output, mocked_ssh_default_account_output, mocked_ssh_accounts_output
 
 
 def load_ssh_output(file: str):
     output_file = impresources.files(mocked_ssh_outputs) / file
     with output_file.open("rb") as output:
         return json.load(output, strict=False)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_id_output():
+    return load_ssh_output("ssh_id_command.json")
 
 
 @pytest.fixture(scope="module")
@@ -36,27 +50,8 @@ def mocked_unhealthy_filesystem_response():
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_squeue_output():
-    output_file = impresources.files(mocked_ssh_outputs) / "ssh_squeue_command.json"
-    with output_file.open("rb") as output:
-        return json.load(output)
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_sacct_output():
-    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_command.json"
-    with output_file.open("rb") as output:
-        return json.load(output)
-
-
-@pytest.fixture(scope="module")
 def mocked_ssh_ls_wrong_path_output():
     return load_ssh_output("ssh_ls_command_wrong_path.json")
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_ls_output():
-    return load_ssh_output("ssh_ls_command.json")
 
 
 def mocked_token_response():
@@ -128,27 +123,31 @@ async def test_health_check_disabled(
 
 
 async def test_health_check_disabled_ok_with_ssh(
+    client,
+    ssh_client,
+    mocked_ssh_id_recursive_output,
+    mocked_ssh_default_account_output,
+    mocked_ssh_accounts_output,
+    slurm_cluster_with_ssh_config,
+):
+
+    await test_userinfo(client, ssh_client,
+                        mocked_ssh_id_recursive_output,
+                        mocked_ssh_default_account_output,
+                        mocked_ssh_accounts_output,
+                        slurm_cluster_with_ssh_config)
+
+
+async def test_health_check_disabled_ok_with_scheduler(
     client, ssh_client, 
     mocked_ssh_sacct_output,
     mocked_ssh_squeue_output,
     slurm_cluster_with_ssh_no_health_check_config,
 ):
-
-    async with ssh_client.mocked_output(
-        [
-            MockedCommand(**mocked_ssh_sacct_output),
-            MockedCommand(**mocked_ssh_squeue_output),
-        ]
-    ):
-        response = client.get(
-            "/compute/{cluster_name}/jobs/{job_id}".format(
-                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, job_id=1
-            )
-        )
-        assert response.status_code == 200
-        assert response.json() is not None
-
-        assert response.json()["jobs"][0]["status"]["exitCode"] == 0
+    await test_get_job(client, ssh_client,
+                       mocked_ssh_sacct_output,
+                       mocked_ssh_squeue_output,
+                       slurm_cluster_with_ssh_no_health_check_config)
 
 
 async def test_health_check_disabled_ok_with_filesystem(
@@ -171,16 +170,9 @@ async def test_health_check_disabled_ok_with_no_filesystem(
         client, ssh_client, mocked_ssh_ls_output,
         slurm_cluster_with_ssh_no_health_check_config,):
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
-
-        response = client.get(
-            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
-                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/home"
-            )
-        )
-
-        assert response.status_code == 200
-        assert response.json() is not None
+    await test_ls_command(client, ssh_client,
+                          mocked_ssh_ls_output,
+                          slurm_cluster_with_ssh_no_health_check_config.name)
 
 
 async def test_health_check_disabled_not_ok_transversal(

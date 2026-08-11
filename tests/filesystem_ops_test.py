@@ -129,12 +129,16 @@ def mocked_ssh_tar_output():
     return load_ssh_output("ssh_tar_command.json")
 
 
-async def test_ls_command(client, ssh_client, mocked_ssh_ls_output):
+async def test_ls_command(client,
+                          ssh_client, mocked_ssh_ls_output,
+                          cluster_name="cluster-slurm-ssh"):
 
     async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_output)]):
 
         response = client.get(
-            "/filesystem/cluster-slurm-ssh/ops/ls?path={path}".format(path="/home")
+            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
+                cluster_name=cluster_name, path="/home"
+            )
         )
         assert response.status_code == 200
         assert response.json() is not None
