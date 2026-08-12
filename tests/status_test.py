@@ -11,8 +11,7 @@ import aiohttp
 from firecrest.status.models import (
     GetNodesResponse,
     GetPartitionsResponse,
-    GetReservationsResponse,
-    UserInfoResponse,
+    GetReservationsResponse,    
 )
 
 from importlib import resources as impresources
@@ -23,7 +22,8 @@ import pytest
 from aioresponses import aioresponses
 
 from firecrest.config import HPCCluster, Scheduler
-from tests.filesystem_ops_test import load_ssh_output
+
+from tests.helpers import helper_test_userinfo, load_ssh_output
 
 
 @pytest.fixture(scope="module")
@@ -52,11 +52,6 @@ def mocked_get_partitions_response():
 
 
 @pytest.fixture(scope="module")
-def mocked_ssh_id_recursive_output():
-    return load_ssh_output("ssh_id_command.json")
-
-
-@pytest.fixture(scope="module")
 def mocked_ssh_reservation_output():
     return load_ssh_output("ssh_scontrol_reservation_command.json")
 
@@ -64,16 +59,6 @@ def mocked_ssh_reservation_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_partitions_output():
     return load_ssh_output("ssh_scontrol_partitions.json")
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_default_account_output():
-    return load_ssh_output("ssh_sacctmgr_default_account.json")
-
-
-@pytest.fixture(scope="module")
-def mocked_ssh_accounts_output():
-    return load_ssh_output("ssh_sacctmgr_accounts.json")
 
 
 @pytest.fixture(scope="module")
@@ -213,22 +198,14 @@ def test_systems_reservations(
 async def test_userinfo(
     client,
     ssh_client,
-    mocked_ssh_id_recursive_output,
-    mocked_ssh_default_account_output,
-    mocked_ssh_accounts_output,
     slurm_cluster_with_ssh_config,
 ):
 
-    async with ssh_client.mocked_output(
-        [
-            MockedCommand(**mocked_ssh_id_recursive_output),
-            MockedCommand(**mocked_ssh_default_account_output),
-            MockedCommand(**mocked_ssh_accounts_output),
-        ]
-    ):
-        response = client.get(f"/status/{slurm_cluster_with_ssh_config.name}/userinfo")
-        assert response.status_code == 200
-        assert UserInfoResponse(**response.json()) is not None
+    await helper_test_userinfo(
+        client,
+        ssh_client,
+        cluster_name=slurm_cluster_with_ssh_config.name,        
+    )
 
 
 async def test_ssh_reservation(
