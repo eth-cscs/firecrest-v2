@@ -67,7 +67,23 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointFilter(logging.Filter):
+    """Drops noisy /status/liveness access logs and lifts the HTTP method
+    and status code out of uvicorn's free-text access log message into
+    dedicated record fields, so the JSON formatter can emit them as their
+    own (ECS-style) fields instead of only inside the message string."""
+
     def filter(self, record: logging.LogRecord) -> bool:
+        # uvicorn.access records carry (client_addr, method, path, http_version,
+        # status_code) as positional args - see uvicorn's h11/httptools protocols.
+        if isinstance(record.args, tuple) and len(record.args) == 5:
+            client_addr, method, path, http_version, status_code = record.args
+            if path.find("/status/liveness") != -1:
+                return False
+            record.http_request_method = method
+            record.http_response_status_code = status_code
+            record.msg = '%s - "%s HTTP/%s"'
+            record.args = (client_addr, path, http_version)
+            return True
         return record.getMessage().find("/status/liveness") == -1
 
 
@@ -133,6 +149,8 @@ async def schedule_tasks(scheduler: AsyncScheduler):
 
 
 def register_middlewares(app: FastAPI):
+    logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+
     @app.middleware("http")
     async def init_request_vars(request: Request, call_next):
         # A fresh namespace per request, bound in this async context, so
@@ -148,9 +166,6 @@ def register_middlewares(app: FastAPI):
 
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
-
-        logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
-
         try:
             # Logging from Middleware request
             if settings.logger.enable_tracing_log:
@@ -241,7 +256,7 @@ def register_exception_handlers(app: FastAPI):
 
         msg = "\n caused by: ".join(cause_chain)
         if context.exists():
-            msg += "\n trace_id: " + get_tracing_data(HeaderKeys.correlation_id)
+            msg += "\n correlation_id: " + get_tracing_data(HeaderKeys.correlation_id)
             msg += "\n request_id: " + get_tracing_data(HeaderKeys.request_id)
 
         if response.status_code and response.status_code < 500:
