@@ -82,7 +82,6 @@ class EndpointFilter(logging.Filter):
             record.http_request_method = method
             record.http_response_status_code = status_code
             return True
-            return True
         return record.getMessage().find("/status/liveness") == -1
 
 
