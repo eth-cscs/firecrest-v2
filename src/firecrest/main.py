@@ -252,15 +252,17 @@ def register_exception_handlers(app: FastAPI):
             request=request,
         )
 
-        msg = "\n caused by: ".join(cause_chain)
+        log_data = {}
+        log_data["message"] = "\n caused by: ".join(cause_chain)
+
         if context.exists():
-            msg += "\n correlation_id: " + get_tracing_data(HeaderKeys.correlation_id)
-            msg += "\n request_id: " + get_tracing_data(HeaderKeys.request_id)
+            log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
+            log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
 
         if response.status_code and response.status_code < 500:
-            logging.getLogger("uvicorn.error").warning(msg)
+            logging.getLogger("uvicorn.error").warning(log_data)
         else:
-            logging.getLogger("uvicorn.error").error(msg)
+            logging.getLogger("uvicorn.error").error(log_data)
 
         return response
 
