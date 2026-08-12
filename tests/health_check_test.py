@@ -184,3 +184,10 @@ async def test_health_check_relative_path(
     assert response.status_code == 400
 
 
+async def test_health_check_path_prefix_not_a_filesystem(
+    client, slurm_cluster_with_ssh_config
+):
+    response = client.get(
+        f"/filesystem/{slurm_cluster_with_ssh_config.name}/ops/ls?path=/home_private/x"
+    )
+    assert response.status_code == 400

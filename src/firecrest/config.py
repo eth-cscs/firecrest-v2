@@ -378,6 +378,12 @@ class DataOperation(BaseModel):
 class FileSystem(CamelModel):
     """Defines a cluster file system and its type."""
 
+    @pydantic.field_validator("path", mode="before")
+    def normalize_path(cls, value):
+        if isinstance(value, str):
+            return os.path.normpath(value)
+        return value
+
     path: str = Field(..., description="Mount path for the file system.")
     data_type: FileSystemDataType = Field(..., description="File system purpose/type.")
     default_work_dir: bool = Field(
