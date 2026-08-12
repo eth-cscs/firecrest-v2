@@ -126,8 +126,7 @@ class ServiceAvailabilityDependency:
                 detail=f"The provided path ({path}) is not an absolute path.",
             )
 
-        norm_path = os.path.normpath(path)
-        print(system.file_systems)
+        norm_path = os.path.normpath(path)        
         valid_path = next(
             (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/")+"/")),
             None
