@@ -31,9 +31,9 @@ def _ssh_service_headers(app_version: str) -> dict:
     }
     if context.exists():
         if HeaderKeys.request_id in context:
-            headers["X-Request-ID"] = context[HeaderKeys.request_id]
+            headers[HeaderKeys.request_id] = context[HeaderKeys.request_id]
         if HeaderKeys.correlation_id in context:
-            headers["X-Correlation-ID"] = context[HeaderKeys.correlation_id]
+            headers[HeaderKeys.correlation_id] = context[HeaderKeys.correlation_id]
     return headers
 
 
