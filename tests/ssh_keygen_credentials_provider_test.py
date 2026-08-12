@@ -48,8 +48,9 @@ def test_headers_include_request_and_trace_id_when_present():
     ):
         headers = _ssh_service_headers("token-abc", APP_VERSION)
 
-    assert CIMultiDict(headers)["x-request-id"] == "req-123"
-    assert CIMultiDict(headers)["x-correlation-id"] == "corr-456"
+    lowercased = {key.lower(): value for key, value in headers.items()}
+    assert lowercased["x-request-id"] == "req-123"
+    assert lowercased["x-correlation-id"] == "corr-456"
 
 
 def test_headers_omit_request_and_trace_id_when_absent_from_context():
