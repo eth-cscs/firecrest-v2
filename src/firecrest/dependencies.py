@@ -128,7 +128,7 @@ class ServiceAvailabilityDependency:
 
         norm_path = os.path.normpath(path)
         valid_path = next(
-            (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/")+"/")),
+            (fs.path for fs in system.file_systems if norm_path == fs.path or norm_path.startswith(fs.path.rstrip("/"))),
             None
         )
         if valid_path is None:
@@ -142,7 +142,7 @@ class ServiceAvailabilityDependency:
             service = next(
                 filter(
                     lambda service: service.service_type == self.service_type
-                    and (norm_path == service.path or norm_path.startswith(service.path.rstrip("/")+"/")),
+                    and (norm_path == service.path or norm_path.startswith(service.path.rstrip("/"))),
                     system.servicesHealth,
                 ),
                 None,
