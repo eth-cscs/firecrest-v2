@@ -325,6 +325,7 @@ class SchedulerClientDependency:
                     system.scheduler.api_url,
                     system.scheduler.timeout,
                     settings.auth.authentication.username_claim,
+                    system.scheduler.connection_mode,
                 )
             case SchedulerType.pbs:
                 return PbsClient(
