@@ -247,7 +247,7 @@ class SSHClientPool:
             for i, cert in enumerate(options.kwargs["client_certs"]):
                 if isinstance(cert, asyncssh.SSHCertificate):
                     log_data[f"ssh.certificate.{i}.algorithm"] = cert.get_algorithm()
-                    log_data[f"ssh.certificate.{i}.principals"] = cert.principals()
+                    log_data[f"ssh.certificate.{i}.principals"] = cert.principals
                     log_data[f"ssh.certificate.{i}.public_key"] = (
                         cert.key.export_public_key().decode().strip()
                     )
