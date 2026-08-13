@@ -225,32 +225,45 @@ class SSHClientPool:
     async def get_ssh_debug_info(
         self,
         options: Optional[asyncssh.SSHClientConnectionOptions] = None,
-        exp_reason: Optional[str] = None,
+        exception: Optional[Exception] = None,
         username: Optional[str] = None,
     ):
 
         logger = logging.getLogger("uvicorn.error")
+        log_data = {}
+        log_data["message"] = (
+            f"SSH Connection Error: {exception.reason if exception else 'Unknown reason'}"
+        )
+        log_data["error.type"] = "SSHConnectionError"
+        if exception:
+            log_data["error.message"] = exception.__class__.__name__
+            log_data["error.cause"] = exception.reason
+        else:
+            log_data["error.message"] = "Unknown SSH connection excpeption"
 
-        logger.error(f"SSH Server Error for {username}: {exp_reason}")
+        log_data["firecrest.username"] = username
+
         if options and len(options.kwargs["client_certs"]) > 0:
-            logger.error("[BEG] Client Certificate debug info:")
-            for cert in options.kwargs["client_certs"]:
+            for i, cert in enumerate(options.kwargs["client_certs"]):
                 if isinstance(cert, asyncssh.SSHCertificate):
-                    logger.error(f"\tAlgorithm: {cert.get_algorithm()}")
-                    logger.error(f"\tPrincipals: {cert.principals}")
-                    logger.error(
-                        f"\tPublic key: {cert.key.export_public_key().decode().strip()}"
+                    log_data[f"ssh.certificate.{i}.algorithm"] = cert.get_algorithm()
+                    log_data[f"ssh.certificate.{i}.principals"] = cert.principals()
+                    log_data[f"ssh.certificate.{i}.public_key"] = (
+                        cert.key.export_public_key().decode().strip()
                     )
-                    logger.error(f"\tSerial ID: {cert._serial}")
-                    logger.error(
-                        f"\tValid after: {datetime.fromtimestamp(cert._valid_after)}"
+                    log_data[f"ssh.certificate.{i}.serial_id"] = cert._serial
+                    log_data[f"ssh.certificate.{i}.valid_after"] = (
+                        datetime.fromtimestamp(cert._valid_after)
                     )
-                    logger.error(
-                        f"\tValid before: {datetime.fromtimestamp(cert._valid_before)}"
+                    log_data[f"ssh.certificate.{i}.valid_before"] = (
+                        datetime.fromtimestamp(cert._valid_before)
                     )
                 else:
-                    logger.error("\tNo valid client certificate found.")
-            logger.error("[END] Client Certificate debug info")
+                    log_data[f"ssh.certificate.{i}"] = (
+                        "No valid client certificate found."
+                    )
+
+        logger.error(log_data)
 
     def _get_user_lock(self, username: str) -> asyncio.Lock:
         return self.user_locks.setdefault(username, asyncio.Lock())
@@ -302,10 +315,10 @@ class SSHClientPool:
             except (ConnectionLost, ConnectionResetError) as e:
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except PermissionDenied as e:
-                await self.get_ssh_debug_info(options, e.reason, username)
+                await self.get_ssh_debug_info(options, e, username)
                 raise SSHConnectionError("Unable to establish SSH connection.") from e
             except ProtocolError as e:
-                await self.get_ssh_debug_info(options, e.reason, username)
+                await self.get_ssh_debug_info(options, e, username)
                 raise SSHConnectionError("SSH Protocol Error.") from e
         try:
             client.reset_idle()
