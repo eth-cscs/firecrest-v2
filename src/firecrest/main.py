@@ -237,14 +237,16 @@ def register_exception_handlers(app: FastAPI):
                 return context[key]
             return ""
 
-        cause_chain = [str(exc)]
+        cause_chain = []
         cause = exc.__cause__
         visited = set()
         while cause is not None:
             if id(cause) in visited:
                 break
             visited.add(id(cause))
-            cause_chain.append(str(cause))
+            cause_chain.append(
+                {"error.type": cause.__class__.__name__, "error.message": str(cause)}
+            )
             cause = cause.__cause__
 
         response = response_error_handler(
@@ -253,7 +255,16 @@ def register_exception_handlers(app: FastAPI):
         )
 
         log_data = {}
-        log_data["message"] = "\n caused by: ".join(cause_chain)
+        log_data["message"] = (
+            str(exc)
+            + " "
+            + ", caused by: ".join(
+                [cause.get("error.message", "") for cause in cause_chain]
+            )
+        ).strip()
+        log_data["error.type"] = exc.__class__.__name__
+        log_data["error.message"] = str(exc)
+        log_data["error.cause"] = cause_chain
 
         if context.exists():
             log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
