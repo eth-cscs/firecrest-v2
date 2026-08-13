@@ -30,7 +30,7 @@ class SlurmClient(SlurmBaseClient):
         api_url: str | None,
         timeout: int | None,
         username_claim: str | None,
-        connection_mode: str = SchedulerConnectionMode.ssh.value
+        connection_mode: SchedulerConnectionMode = SchedulerConnectionMode.ssh
     ):
 
         self.ssh_client = ssh_client
@@ -46,7 +46,7 @@ class SlurmClient(SlurmBaseClient):
         if ssh_client:
             self.slurm_cli_client = SlurmCliClient(ssh_client, slurm_version)
 
-        if self.connection_mode != SchedulerConnectionMode.ssh.value:
+        if self.connection_mode != SchedulerConnectionMode.ssh:
             self.slurm_rest_client = SlurmRestClient(
                 api_url, api_version, timeout, username_claim
             )
