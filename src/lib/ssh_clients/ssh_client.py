@@ -236,8 +236,9 @@ class SSHClientPool:
         )
         log_data["error.type"] = "SSHConnectionError"
         if exception:
-            log_data["error.message"] = exception.__class__.__name__
-            log_data["error.cause"] = exception.reason
+            log_data["error.message"] = (
+                exception.__class__.__name__ + ": " + exception.reason
+            )
         else:
             log_data["error.message"] = "Unknown SSH connection excpeption"
 
