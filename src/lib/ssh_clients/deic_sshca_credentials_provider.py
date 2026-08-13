@@ -31,9 +31,9 @@ def _ssh_service_headers(app_version: str) -> dict:
     }
     if context.exists():
         if HeaderKeys.request_id in context:
-            headers["x-request-id"] = context[HeaderKeys.request_id]
+            headers[HeaderKeys.request_id] = context[HeaderKeys.request_id]
         if HeaderKeys.correlation_id in context:
-            headers["x-trace-id"] = context[HeaderKeys.correlation_id]
+            headers[HeaderKeys.correlation_id] = context[HeaderKeys.correlation_id]
     return headers
 
 
@@ -60,7 +60,9 @@ class DeiCSSHCACredentialsProvider(SSHCredentialsProvider):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def __init__(self, ssh_keygen_url: str, max_connections: int = 100, *, app_version: str):
+    def __init__(
+        self, ssh_keygen_url: str, max_connections: int = 100, *, app_version: str
+    ):
         self.ssh_keygen_url = ssh_keygen_url
         self.app_version = app_version
         DeiCSSHCACredentialsProvider.max_connections = max_connections

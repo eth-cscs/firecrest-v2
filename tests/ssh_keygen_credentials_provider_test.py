@@ -48,8 +48,9 @@ def test_headers_include_request_and_trace_id_when_present():
     ):
         headers = _ssh_service_headers("token-abc", APP_VERSION)
 
-    assert headers["x-request-id"] == "req-123"
-    assert headers["x-trace-id"] == "corr-456"
+    lowercased = {key.lower(): value for key, value in headers.items()}
+    assert lowercased["x-request-id"] == "req-123"
+    assert lowercased["x-correlation-id"] == "corr-456"
 
 
 def test_headers_omit_request_and_trace_id_when_absent_from_context():
@@ -144,8 +145,8 @@ async def test_get_credentials_forwards_request_and_trace_id():
             await provider.get_credentials("fireuser", "token-abc")
 
     sent = _sent_headers(mock_session)
-    assert sent["x-request-id"] == "req-456"
-    assert sent["x-trace-id"] == "corr-789"
+    assert sent["X-Request-ID"] == "req-456"
+    assert sent["X-Correlation-ID"] == "corr-789"
 
 
 async def test_get_credentials_raises_on_non_201():

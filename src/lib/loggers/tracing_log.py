@@ -101,8 +101,9 @@ def tracing_log_middleware(
     log_data["message"] = f"{operation.value}: {endpoint}"
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
-    log_data["status_code"] = status_code
-    log_data["trace_id"] = get_tracing_data(HeaderKeys.correlation_id)
+    log_data["http_request_method"] = request.method
+    log_data["http_response_status_code"] = status_code
+    log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
     log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
 
     for header in headers_to_trace:
