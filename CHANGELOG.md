@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Allow command execution when the health check is disabled
+- Scheduler in connection mode `ssh` was skipped when RESTAPI `url` option was set.
 
 ## [2.5.5]
 
