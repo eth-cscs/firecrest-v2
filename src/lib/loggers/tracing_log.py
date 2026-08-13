@@ -82,6 +82,10 @@ def tracing_log_middleware(
     root_path = request.scope["root_path"]
     # Normalize endpoint: remove prefix from root path, added by any API gateway
     endpoint = url_path.removeprefix(root_path) if root_path != "" else url_path
+
+    if url_path.find("/status/liveness") != -1:
+        return  # Skip logging for liveness endpoint
+
     # Initialize logging data
     resource = ""
     system_name = ""
