@@ -15,16 +15,15 @@ jobs:
     permissions:
       id-token: write
     steps:
-       - name: Checkout repository
-         uses: actions/checkout@v6
-         with:
-           fetch-depth: 1
-           persist-credentials: false
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
-       - name: Run OpenCode
+      - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
           CSCS_INFERENCE_API_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
         with:
           model: cscs/moonshotai/Kimi-K2.7-Code
-          # use_github_token: true
