@@ -59,7 +59,8 @@ class SlurmBaseClient(SchedulerBaseClient):
 
     @abstractmethod
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None,
     ) -> List[SlurmJob] | None:
         pass
 

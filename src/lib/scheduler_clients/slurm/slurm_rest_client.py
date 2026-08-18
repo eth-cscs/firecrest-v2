@@ -210,15 +210,23 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
 
-        query_string = (
-            f"?{urllib.parse.urlencode({'account': account})}" if account else ""
-        )
+        query_list = []
+        if account:
+            query_list.append(f"{urllib.parse.urlencode({'account': account})}")
+        if name:
+            query_list.append(f"{urllib.parse.urlencode({'job_name': name})}")
+
+        query_string = ""
+        if len(query_list) > 0:
+            query_string = f"?{"&".join(query_list)}"
+
         slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{query_string}"
         slurm_url = f"{self.api_url}/slurm/v{self.api_version}/jobs{query_string}"
 

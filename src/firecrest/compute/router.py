@@ -89,11 +89,16 @@ async def get_jobs(
         str | None,
         Query(description="If specified, filter jobs by account name"),
     ] = None,
+    name: Annotated[
+        str | None,
+        Query(description="If specified, filter jobs by name"),
+    ] = None,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(
-        username=username, jwt_token=access_token, allusers=allusers, account=account
+        username=username, jwt_token=access_token, allusers=allusers,
+        account=account, name=name
     )
     return {"jobs": jobs}
 
