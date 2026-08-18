@@ -17,5 +17,5 @@
     }
   },
   "small_model": "cscs/moonshotai/Kimi-K2.7-Code",
-  "share": "disabled"
+  "share": "enabled"
 }
