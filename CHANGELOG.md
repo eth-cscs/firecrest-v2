@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `jobname` parameter in `GET /compute/jobs` request
+- `name` parameter in `GET /compute/jobs` request
 
 ### Changed
 
