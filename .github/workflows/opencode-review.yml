@@ -21,7 +21,7 @@ jobs:
         env:
           CSCS_INFERENCE_API_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
         with:
-          model: cscs/moonshotai/Kimi-K2.7-Code
+          model: cscs/zai-org/GLM-5.2
           # use_github_token: true
           # Your custom review instructions
           prompt: |
