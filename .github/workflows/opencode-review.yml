@@ -7,6 +7,10 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: opencode-review-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: true
     permissions:
       id-token: write
       contents: read
@@ -21,7 +25,8 @@ jobs:
         env:
           CSCS_INFERENCE_API_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
         with:
-          model: cscs/zai-org/GLM-5.2
+          agent: grumpy-reviewer
+          model: cscs/moonshotai/Kimi-K2.7-Code
           # use_github_token: true
           # Your custom review instructions
           prompt: |
