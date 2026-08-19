@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+import shlex
 from typing import List
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
 
@@ -18,24 +19,26 @@ class SqueueCommand(SacctCommand):
         account: str = None,
         name: str = None,
     ) -> None:
-        super().__init__()
-        self.username = username
-        self.allusers = allusers
-        self.job_ids = job_ids
-        self.account = account
-        self.name = name
+        super().__init__(
+            username,
+            job_ids,
+            allusers,
+            account,
+            name
+        )
 
     def get_command(self) -> str:
         cmd = ["SLURM_TIME_FORMAT='%s' squeue"]
+        print(f"Name: {self.name}")
         if not self.allusers:
             cmd += [f"--user='{self.username}'"]  # show only user jobs
         if self.account:
-            cmd += [f"--account='{self.account}'"]
+            cmd += [f"--account={shlex.quote(self.account)}"]
         if self.name:
-            cmd += [f"--name='{self.name}'"]
+            cmd += [f"--name={shlex.quote(self.name)}"]
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
-            cmd += [f"--jobs='{str_job_ids}'"]
+            cmd += [f"--jobs={shlex.quote(str_job_ids)}"]
         cmd += [
             "--noheader",
             "--Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'",

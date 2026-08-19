@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+import shlex
 from abc import abstractmethod
 from typing import List
 from lib.ssh_clients.ssh_client import BaseCommand
@@ -31,18 +32,17 @@ class SacctCommandBase(BaseCommand):
         if self.allusers:
             cmd += ["--allusers"]
         if self.account:
-            cmd += [f"--account='{self.account}'"]
+            cmd += [f"--account={shlex.quote(self.account)}"]
         if self.name:
-            cmd += [f"--name='{self.name}'"]
+            cmd += [f"--name={shlex.quote(self.name)}"]
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
-            cmd += [f"--jobs='{str_job_ids}'"]
+            cmd += [f"--jobs={shlex.quote(str_job_ids)}"]
         else:
             cmd += [
                 "--starttime=now-7days"
             ]  # up to one week ago, default is since midnight today
         cmd += ["--parsable2"]
-        print(" ".join(cmd))
         return " ".join(cmd)
 
     @abstractmethod
