@@ -31,10 +31,12 @@
     },
     "bash": "allow",
     "edit": "deny",
+    "write": "deny",
     "webfetch": "allow"
   },
   "instructions": ["CONTRIBUTING.md","AGENTS.md"],
   "model": "cscs/moonshotai/Kimi-K2.7-Code",
-  "small_model": "cscs/zai-org/GLM-5.2",
-  "share": "auto"
+  "small_model": "cscs/moonshotai/Kimi-K2.7-Code",
+  "share": "disabled",
+  "default_agent": "grumpy-reviewer"
 }
