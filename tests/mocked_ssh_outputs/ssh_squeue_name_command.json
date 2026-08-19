@@ -2,5 +2,5 @@
     "stdout": "12|1|cluster||users|users|NameExists|localhost|part01|1|RUNNING|None|0:11|1787127431|1787127431|1787559431||5-00:00:00|test-user|/home/test-user",
     "stderr": "",
     "exit_code": 0,
-    "command":"SLURM_TIME_FORMAT='%s' squeue --user='test-user' --name=NameExists --noheader --Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'"
+    "command":"SLURM_TIME_FORMAT='%s' squeue --user=test-user --name=NameExists --noheader --Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'"
 }

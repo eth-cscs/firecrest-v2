@@ -47,6 +47,15 @@ def mocked_ssh_squeue_by_name_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_squeue_by_name_dont_exist_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_squeue_name_dont_exist_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_squeue_by_name_not_ok_output():
     output_file = (
         impresources.files(mocked_ssh_outputs) / "ssh_squeue_name_not_ok_command.json"
@@ -72,6 +81,15 @@ def mocked_ssh_sacct_by_name_output():
     with output_file.open("rb") as output:
         return json.load(output)
 
+
+@pytest.fixture(scope="module")
+def mocked_ssh_sacct_by_name_dont_exist_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_dont_exist_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+    
 
 @pytest.fixture(scope="module")
 def mocked_ssh_sacct_by_name_not_ok_output():
@@ -244,6 +262,30 @@ async def test_get_jobs_by_name(
         assert response.json()["jobs"][0]["user"] == "test-user"
 
 
+async def test_get_jobs_by_name_dont_exist(
+    client,
+    ssh_client,
+    mocked_ssh_sacct_by_name_dont_exist_output,
+    mocked_ssh_squeue_by_name_dont_exist_output,
+    slurm_cluster_with_ssh_config,
+):
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_by_name_dont_exist_output),
+            MockedCommand(**mocked_ssh_squeue_by_name_dont_exist_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?name=DontExist".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert len(response.json()["jobs"]) == 0
+
+
 async def test_get_jobs_by_name_notok(
     client,
     ssh_client,
@@ -258,14 +300,12 @@ async def test_get_jobs_by_name_notok(
         ]
     ):
         response = client.get(
-            "/compute/{cluster_name}/jobs?name=DontExist".format(
+            "/compute/{cluster_name}/jobs?name='x' ; touch /tmp/pwn ; ''".format(
                 cluster_name=slurm_cluster_with_ssh_config.name
             )
         )
-        assert response.status_code == 200
-        assert response.json() is not None
-
-        assert len(response.json()["jobs"]) == 0
+        assert response.status_code == 400
+        assert response.json() is not None       
 
 
 async def test_get_job_metadata(
