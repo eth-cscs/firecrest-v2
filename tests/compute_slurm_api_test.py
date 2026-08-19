@@ -48,10 +48,29 @@ def mocked_get_jobs_allusers_response():
 
 
 @pytest.fixture(scope="module")
+def mocked_get_jobs_by_name_response():
+    response_file = (
+        impresources.files(mocked_api_responses) / "slurm_get_jobs_by_name.json"
+    )
+    with response_file.open("r") as response:
+        return json.load(response)
+
+
+@pytest.fixture(scope="module")
 def mocked_get_jobs_allusers_from_db_response():
     response_file = (
         impresources.files(mocked_api_responses)
         / "slurm_get_allusers_jobs_from_db.json"
+    )
+    with response_file.open("r") as response:
+        return json.load(response)
+
+
+@pytest.fixture(scope="module")
+def mocked_get_jobs_by_name_from_db_response():
+    response_file = (
+        impresources.files(mocked_api_responses)
+        / "slurm_get_jobs_by_name_from_db.json"
     )
     with response_file.open("r") as response:
         return json.load(response)
@@ -252,6 +271,64 @@ async def test_get_jobs_allusers(
         jobs_result = GetJobResponse(**response.json())
         assert jobs_result.jobs[0].user == "fireuser"
         assert jobs_result.jobs[1].user == "firesrv"
+
+
+async def test_get_jobs_by_name(
+    client,
+    mocked_get_jobs_by_name_response,
+    mocked_get_jobs_by_name_from_db_response,
+    slurm_cluster_with_api_config,
+):
+    with aioresponses() as mocked:
+
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?name=NameExists"
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        jobs_result = GetJobResponse(**response.json())
+
+        assert jobs_result.jobs[0].user == "test-user"
+        assert jobs_result.jobs[0].name == "NameExists"
+
+
+async def test_get_jobs_by_name_not_ok(
+    client,
+    mocked_get_jobs_by_name_response,
+    mocked_get_jobs_by_name_from_db_response,
+    slurm_cluster_with_api_config,
+):
+    with aioresponses() as mocked:
+
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?name=DontExist"
+        )
+
+        assert response.status_code == 200
+        assert len(response.json()["jobs"]) == 0
 
 
 def test_cancel_job(client, mocked_cancel_job_response, slurm_cluster_with_api_config):

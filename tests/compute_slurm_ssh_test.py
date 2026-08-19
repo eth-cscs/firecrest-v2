@@ -27,6 +27,7 @@ def mocked_ssh_sbatch_output_out_of_quota():
     with output_file.open("rb") as output:
         return json.load(output)
 
+
 @pytest.fixture(scope="module")
 def mocked_ssh_squeue_allusers_output():
     output_file = (
@@ -37,9 +38,45 @@ def mocked_ssh_squeue_allusers_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_squeue_by_name_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_squeue_name_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_squeue_by_name_not_ok_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_squeue_name_not_ok_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_sacct_allusers_output():
     output_file = (
         impresources.files(mocked_ssh_outputs) / "ssh_sacct_allusers_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_sacct_by_name_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_command.json"
+    )
+    with output_file.open("rb") as output:
+        return json.load(output)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_sacct_by_name_not_ok_output():
+    output_file = (
+        impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_not_ok_command.json"
     )
     with output_file.open("rb") as output:
         return json.load(output)
@@ -145,7 +182,7 @@ async def test_submit_job_out_of_quota(
 
 async def test_get_job(
     client,
-    ssh_client,    
+    ssh_client,
     slurm_cluster_with_ssh_config,
 ):
 
@@ -179,6 +216,56 @@ async def test_get_jobs_allusers(
 
         assert response.json()["jobs"][0]["user"] == "fireuser"
         assert response.json()["jobs"][1]["user"] == "firesrv"
+
+
+async def test_get_jobs_by_name(
+    client,
+    ssh_client,
+    mocked_ssh_sacct_by_name_output,
+    mocked_ssh_squeue_by_name_output,
+    slurm_cluster_with_ssh_config,
+):
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_by_name_output),
+            MockedCommand(**mocked_ssh_squeue_by_name_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?name=NameExists".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert response.json()["jobs"][0]["name"] == "NameExists"
+        assert response.json()["jobs"][0]["user"] == "test-user"
+
+
+async def test_get_jobs_by_name_notok(
+    client,
+    ssh_client,
+    mocked_ssh_sacct_by_name_not_ok_output,
+    mocked_ssh_squeue_by_name_not_ok_output,
+    slurm_cluster_with_ssh_config,
+):
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**mocked_ssh_sacct_by_name_not_ok_output),
+            MockedCommand(**mocked_ssh_squeue_by_name_not_ok_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?name=DontExist".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert len(response.json()["jobs"]) == 0
 
 
 async def test_get_job_metadata(

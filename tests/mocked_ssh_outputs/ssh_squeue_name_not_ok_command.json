@@ -1,0 +1,7 @@
+{
+    "stdout": "",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"SLURM_TIME_FORMAT='%s' squeue --user='test-user' --name=DontExist --noheader --Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'"
+}
+
