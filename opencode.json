@@ -24,6 +24,16 @@
       }
     }
   },
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny"
+    },
+    "bash": "allow",
+    "edit": "deny",
+    "webfetch": "allow"
+  },
+  "instructions": ["CONTRIBUTING.md","AGENTS.md"],
   "model": "cscs/moonshotai/Kimi-K2.7-Code",
   "small_model": "cscs/zai-org/GLM-5.2",
   "share": "auto"
