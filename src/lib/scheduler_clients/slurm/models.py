@@ -95,6 +95,9 @@ class SlurmJobDescription(JobDescriptionModel):
 
 
 class SlurmJobMetadata(JobMetadataModel):
+    job_id: str = Field(
+        validation_alias=AliasChoices("JobId", "jobId", "job_id"),
+    )
     standard_input: Optional[str] = Field(
         validation_alias=AliasChoices("StdIn", "standardInput"),
         default=None,
