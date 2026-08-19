@@ -56,7 +56,7 @@ class SchedulerBaseClient(ABC):
     @abstractmethod
     async def get_jobs(
         self, username: str, jwt_token: str, allusers: bool = False,
-        name: str = None,
+        account: str = None, name: str = None,
     ) -> List[JobModel] | None:
         pass
 
