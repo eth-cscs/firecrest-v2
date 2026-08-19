@@ -220,8 +220,6 @@ class SlurmRestClient(SlurmBaseClient):
         query_list = []
         if account:
             query_list.append(f"{urllib.parse.urlencode({'account': account})}")
-        if name:
-            query_list.append(f"{urllib.parse.urlencode({'job_name': name})}")
 
         query_string = ""
         if len(query_list) > 0:
@@ -247,13 +245,15 @@ class SlurmRestClient(SlurmBaseClient):
             if isinstance(result, Exception):
                 raise SlurmError("Error fetching Slurm API data.") from result
             if result and "jobs" in result:
-                # Note: starting from API version v0.0.39 this filter can be set as query param
+                # Note: starting from API version v0.0.39 the "user_name" filter can be set as query param
+                # Note: starting from API version v0.0.45 the "job_name" filter can be set as query param
                 filtered_jobs = list(
                     filter(
                         lambda job: (
-                            allusers or job["user"] == username
-                            if "user" in job
-                            else job["user_name"] == username
+                            (allusers or job["user"] == username
+                                if "user" in job
+                                else job["user_name"] == username)
+                            and (name is None or job["name"] == name)
                         ),
                         result["jobs"],
                     )
