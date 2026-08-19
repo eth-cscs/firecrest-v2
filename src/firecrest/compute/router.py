@@ -91,7 +91,9 @@ async def get_jobs(
     ] = None,
     name: Annotated[
         str | None,
-        Query(description="If specified, filter jobs by name"),
+        Query(description="If specified, filter jobs by name",
+              max_length=1024,
+              pattern="^[A-Za-z0-9][A-Za-z0-9+.\\-_]{0,235}$"),
     ] = None,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
