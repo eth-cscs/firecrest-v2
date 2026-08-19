@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.6] - OPEN
+## [2.5.7] - OPEN
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Job metadata no longer fails with `object of type 'NoneType' has no len()` when the batch script is unavailable, e.g. for jobs purged from the Slurm controller or not submitted with `sbatch`. The metadata is now returned with a null `script`.
+
+## [2.5.6]
 
 ### Added
 
@@ -19,7 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow command execution when the health check is disabled
 - Scheduler in connection mode `ssh` was skipped when RESTAPI `url` option was set.
-- Job metadata no longer fails with `object of type 'NoneType' has no len()` when the batch script is unavailable, e.g. for jobs purged from the Slurm controller or not submitted with `sbatch`. The metadata is now returned with a null `script`.
 
 ## [2.5.5]
 
