@@ -26,6 +26,7 @@ class QstatBaseCommand(BaseCommand):
 
     def get_command(self) -> str:
         cmd = ["qstat", "-F", "json", "-f"] + self.ids
+        # removed the -A options, since is not an option in qstat command
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
