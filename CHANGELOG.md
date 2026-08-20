@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `time_window` query parameter to `GET /compute/{system_name}/jobs` to control how far back historical (completed, failed, cancelled...) jobs are looked up. Accepted values: `1h`, `8h`, `24h`, `3days`, `7days`.
+
 ### Changed
+
+- ***⚠️ API Breaking*** `GET /compute/{system_name}/jobs` now defaults to a `24h` historical lookback window instead of the previous fixed `7days`. Pass `time_window=7days` to restore the old behavior.
 
 - SSH connection pool locking is now per-user instead of global, reducing unnecessary SSH connection wait times. The max_clients connection pool setting is no longer a hard limit; under a high number of concurrent requests, the limit may be temporarily exceeded.
 
