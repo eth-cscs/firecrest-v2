@@ -23,7 +23,10 @@ class JobsTimeWindow(str, Enum):
 # doubles as both a `datetime.timedelta` keyword argument (used by the Slurm
 # REST client to compute an absolute start time) and a sacct/squeue
 # relative-time suffix (used by the Slurm CLI client to build
-# `--starttime=now-<amount><unit>`).
+# `--starttime=now-<amount><unit>`). `unit` must stay plural here --
+# `timedelta` only accepts plural keyword arguments (`hours`, not `hour`) --
+# any singular-for-grammar adjustment (e.g. "1 hour" vs "1 hours") is done
+# separately, only for CLI command rendering, in sacct_base.py.
 TIME_WINDOW_DURATIONS: Dict[JobsTimeWindow, Tuple[int, str]] = {
     JobsTimeWindow.LAST_HOUR: (1, "hours"),
     JobsTimeWindow.LAST_8_HOURS: (8, "hours"),

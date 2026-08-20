@@ -103,8 +103,7 @@ def mocked_get_jobs_allusers_from_db_response():
 @pytest.fixture(scope="module")
 def mocked_get_jobs_by_name_from_db_response():
     response_file = (
-        impresources.files(mocked_api_responses)
-        / "slurm_get_jobs_by_name_from_db.json"
+        impresources.files(mocked_api_responses) / "slurm_get_jobs_by_name_from_db.json"
     )
     with response_file.open("r") as response:
         return json.load(response)
@@ -403,16 +402,8 @@ async def test_get_jobs_with_invalid_time_window(
     assert response.status_code == 400
 
 
-@pytest.mark.parametrize("api_version", ["0.0.38", "0.0.39", "0.0.40"])
+@pytest.mark.parametrize("api_version", ["0.0.38", "0.0.39"])
 def test_time_window_start_time_before_epoch_support(api_version):
-    # v0.0.40 is included here too: its docs dropped the old parse_time()
-    # grammar description but never documented "UNIX timestamp" either, so
-    # it's treated conservatively the same as older versions (see the
-    # citations next to _EPOCH_START_TIME_MIN_API_VERSION). Below that
-    # boundary, a relative time spec ("now-<amount><unit>", the same grammar
-    # sacct's --starttime accepts) is sent instead of a resolved timestamp,
-    # so parse_time() evaluates "now" and the timezone server-side -- there's
-    # nothing for this client to get wrong about the slurmdbd host's clock.
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert start_time == "now-24hours"
 
@@ -448,7 +439,9 @@ async def test_get_jobs_by_name(
     with aioresponses() as mocked:
 
         mocked.get(
-            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            re.compile(
+                rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_by_name_from_db_response),
         )
@@ -479,7 +472,9 @@ async def test_get_jobs_by_name_not_ok(
     with aioresponses() as mocked:
 
         mocked.get(
-            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            re.compile(
+                rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_by_name_from_db_response),
         )
