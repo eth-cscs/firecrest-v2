@@ -86,7 +86,9 @@ def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> st
     # clock time (no timezone offset in the grammar), so it must be rendered
     # in local time here too, not UTC, or the window shifts by the local UTC
     # offset (and can even invert sign west of UTC).
-    return start_datetime.astimezone().strftime("%m/%d/%y-%H:%M:%S")
+    # Relative time specs are evaluated by the Slurm server, so no assumption
+    # is needed about this host's timezone vs. the slurmdbd host's.
+    return f"now-{amount}{unit}"
 
 
 class SlurmRestClient(SlurmBaseClient):
