@@ -64,17 +64,9 @@ async def _slurm_unexpected_response(response):
 
 # `start_time`/`end_time` on /slurmdb/v{version}/jobs are only explicitly
 # documented as accepting a plain Unix timestamp starting at API v0.0.41
-# ("Usage start (UNIX timestamp)"):
-#   https://slurm.schedmd.com/archive/slurm-24.05.4/rest_api.html#slurmdbV0041GetJobs
-# v0.0.40's docs are ambiguous: the "Accepted formats" grammar description
-# (sacct's parse_time(), e.g. "MM/DD[/YY]-HH:MM[:SS]", "YYYY-MM-DD[THH:MM[:SS]]")
-# present through v0.0.39 was dropped, but the param is just called "usage
-# start timestamp" with no format spec, and "UNIX timestamp" wasn't added
-# until v0.0.41 -- see:
-#   https://slurm.schedmd.com/archive/slurm-23.11.4/rest_api.html#slurmdbV0040GetJobs
-# So v0.0.40 is treated the same as pre-v0.0.40 here and falls back to a
-# relative time spec, which parse_time() has always accepted.
-_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.41")
+# We asume API v0.0.40 also accepts a Unix timestamp.
+# Prior versions are treated as accepting a relative time spec, e.g. "now-1hours" or "now-3days".
+_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
 
 
 def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
@@ -82,10 +74,6 @@ def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> st
     if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
         start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
         return str(int(start_datetime.timestamp()))
-    # Relative time specs ("now-<amount><unit>", the same grammar sacct's
-    # --starttime accepts) are evaluated server-side by parse_time(), so
-    # there's no need to resolve "now" or a timezone on this side at all --
-    # sidesteps the whole local-vs-server-timezone question entirely.
     return f"now-{amount}{unit}"
 
 
@@ -255,7 +243,9 @@ class SlurmRestClient(SlurmBaseClient):
         if account:
             query_params["account"] = account
 
-        query_string = f"?{urllib.parse.urlencode(query_params)}" if query_params else ""
+        query_string = (
+            f"?{urllib.parse.urlencode(query_params)}" if query_params else ""
+        )
 
         # slurmdb holds historical/accounting jobs (equivalent to sacct), so it is the
         # only endpoint bound by the requested time window; slurm holds only the jobs
@@ -266,7 +256,9 @@ class SlurmRestClient(SlurmBaseClient):
         }
         slurmdb_query_string = f"?{urllib.parse.urlencode(slurmdb_query_params)}"
 
-        slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{slurmdb_query_string}"
+        slurmdb_url = (
+            f"{self.api_url}/slurmdb/v{self.api_version}/jobs{slurmdb_query_string}"
+        )
         slurm_url = f"{self.api_url}/slurm/v{self.api_version}/jobs{query_string}"
 
         async def fetch_jobs(url: str) -> list:
