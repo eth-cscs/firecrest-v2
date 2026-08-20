@@ -381,10 +381,12 @@ async def test_get_jobs_with_invalid_time_window(
     assert response.status_code == 400
 
 
-@pytest.mark.parametrize("api_version", ["0.0.38", "0.0.39"])
+@pytest.mark.parametrize("api_version", ["0.0.38", "0.0.39", "0.0.40"])
 def test_time_window_start_time_before_epoch_support(api_version):
-    # Below v0.0.40 the jobs endpoint only understands sacct's parse_time()
-    # grammar, not raw Unix timestamps.
+    # v0.0.40 is included here too: its docs dropped the old parse_time()
+    # grammar description but never documented "UNIX timestamp" either, so
+    # it's treated conservatively the same as older versions (see the
+    # citations next to _EPOCH_START_TIME_MIN_API_VERSION).
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert re.fullmatch(r"\d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}", start_time)
 
@@ -413,7 +415,7 @@ def test_time_window_start_time_before_epoch_support_uses_local_time():
         time.tzset()
 
 
-@pytest.mark.parametrize("api_version", ["0.0.40", "0.0.41", "0.0.42"])
+@pytest.mark.parametrize("api_version", ["0.0.41", "0.0.42"])
 def test_time_window_start_time_with_epoch_support(api_version):
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert start_time.isdigit()

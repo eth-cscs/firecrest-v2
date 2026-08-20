@@ -65,14 +65,19 @@ async def _slurm_unexpected_response(response):
     )
 
 
-# `start_time`/`end_time` on /slurmdb/v{version}/jobs accept a plain Unix
-# timestamp from this API version onwards (e.g. v0.0.42's docs: "Usage start
-# (UNIX timestamp)"). Older versions only understand sacct's parse_time()
-# grammar (e.g. "MM/DD[/YY]-HH:MM[:SS]", "YYYY-MM-DD[THH:MM[:SS]]") and don't
-# document epoch integers as a valid format, so we fall back to a formatted
-# timestamp string for them.
-# https://slurm.schedmd.com/archive/slurm-23.11.4/rest_api.html#slurmdbV0040GetJobs
-_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
+# `start_time`/`end_time` on /slurmdb/v{version}/jobs are only explicitly
+# documented as accepting a plain Unix timestamp starting at API v0.0.41
+# ("Usage start (UNIX timestamp)"):
+#   https://slurm.schedmd.com/archive/slurm-24.05.4/rest_api.html#slurmdbV0041GetJobs
+# v0.0.40's docs are ambiguous: the "Accepted formats" grammar description
+# (sacct's parse_time(), e.g. "MM/DD[/YY]-HH:MM[:SS]", "YYYY-MM-DD[THH:MM[:SS]]")
+# present through v0.0.39 was dropped, but the param is just called "usage
+# start timestamp" with no format spec, and "UNIX timestamp" wasn't added
+# until v0.0.41 -- see:
+#   https://slurm.schedmd.com/archive/slurm-23.11.4/rest_api.html#slurmdbV0040GetJobs
+# So v0.0.40 is treated the same as pre-v0.0.40 here and falls back to a
+# formatted date-time string, which parse_time() has always accepted.
+_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.41")
 
 
 def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
