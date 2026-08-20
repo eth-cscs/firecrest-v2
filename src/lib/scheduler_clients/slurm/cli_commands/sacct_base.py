@@ -39,6 +39,10 @@ class SacctCommandBase(BaseCommand):
             cmd += [f"--jobs='{str_job_ids}'"]
         else:
             amount, unit = TIME_WINDOW_DURATIONS[self.time_window]
+            # sacct's parse_time() accepts both singular and plural unit
+            # names ("hour"/"hours"); use the grammatically correct one.
+            if amount == 1:
+                unit = unit[:-1]
             cmd += [f"--starttime=now-{amount}{unit}"]
         cmd += ["--parsable2"]
         return " ".join(cmd)

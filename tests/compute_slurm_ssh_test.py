@@ -191,7 +191,7 @@ async def test_get_jobs_with_time_window(
     sacct_output_last_hour = {
         **mocked_ssh_sacct_allusers_output,
         "command": mocked_ssh_sacct_allusers_output["command"].replace(
-            "--starttime=now-24hours", "--starttime=now-1hours"
+            "--starttime=now-24hours", "--starttime=now-1hour"
         ),
     }
     async with ssh_client.mocked_output(
