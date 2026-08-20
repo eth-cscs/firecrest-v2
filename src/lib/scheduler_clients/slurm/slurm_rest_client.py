@@ -18,7 +18,7 @@ import urllib
 from lib.exceptions import SlurmAuthTokenError, SlurmError
 
 # Models
-from lib.scheduler_clients.models import JobsTimeWindow
+from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -29,10 +29,7 @@ from lib.scheduler_clients.slurm.models import (
     SlurmReservations,
     SlurmNode,
 )
-from lib.scheduler_clients.slurm.slurm_base_client import (
-    TIME_WINDOW_DURATIONS,
-    SlurmBaseClient,
-)
+from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 
 # Tracing logs
 from lib.loggers.tracing_log import log_backend_http_scheduler

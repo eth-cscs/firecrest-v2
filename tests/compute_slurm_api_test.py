@@ -18,8 +18,7 @@ from aioresponses import aioresponses
 
 from tests import mocked_api_responses
 from firecrest.compute.models import GetJobResponse, PostJobSubmissionResponse
-from lib.scheduler_clients.models import JobsTimeWindow
-from lib.scheduler_clients.slurm.slurm_base_client import TIME_WINDOW_DURATIONS
+from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.scheduler_clients.slurm.slurm_rest_client import _time_window_start_time
 
 
@@ -271,7 +270,9 @@ async def test_get_jobs_allusers(
 
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            re.compile(
+                rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_allusers_from_db_response),
         )
@@ -308,7 +309,9 @@ async def test_get_jobs_with_time_window(
 ):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            re.compile(
+                rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_allusers_from_db_response),
         )
@@ -319,7 +322,7 @@ async def test_get_jobs_with_time_window(
         )
 
         response = client.get(
-            f"/compute/{slurm_cluster_with_api_config.name}/jobs?allusers=true&time_window=7days"
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?allusers=true&time_window=7d"
         )
         assert response.status_code == 200
         assert response.json() is not None
@@ -344,7 +347,9 @@ async def test_get_jobs_with_account_and_time_window(
 ):
     with aioresponses() as mocked:
         mocked.get(
-            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            re.compile(
+                rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_allusers_from_db_response),
         )
@@ -403,9 +408,9 @@ def test_time_window_start_time_before_epoch_support_uses_local_time():
     try:
         start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, "0.0.38")
         parsed = datetime.strptime(start_time, "%m/%d/%y-%H:%M:%S")
-        expected_local = (
-            datetime.now().astimezone() - timedelta(hours=24)
-        ).replace(tzinfo=None)
+        expected_local = (datetime.now().astimezone() - timedelta(hours=24)).replace(
+            tzinfo=None
+        )
         assert abs((parsed - expected_local).total_seconds()) <= 15
     finally:
         if original_tz is None:

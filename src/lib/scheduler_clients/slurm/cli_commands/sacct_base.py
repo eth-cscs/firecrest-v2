@@ -6,8 +6,7 @@
 # commands
 from abc import abstractmethod
 from typing import List
-from lib.scheduler_clients.models import JobsTimeWindow
-from lib.scheduler_clients.slurm.slurm_base_client import TIME_WINDOW_DURATIONS
+from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
