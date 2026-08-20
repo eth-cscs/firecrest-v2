@@ -7,7 +7,9 @@
 from importlib import resources as impresources
 
 import json
+import os
 import re
+import time
 from datetime import datetime, timedelta, timezone
 
 import aiohttp
@@ -385,6 +387,30 @@ def test_time_window_start_time_before_epoch_support(api_version):
     # grammar, not raw Unix timestamps.
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert re.fullmatch(r"\d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}", start_time)
+
+
+def test_time_window_start_time_before_epoch_support_uses_local_time():
+    # parse_time() interprets "MM/DD/YY-HH:MM:SS" as local wall-clock time
+    # (there's no timezone in the grammar), so the rendered string must be
+    # in local time, not UTC. Pin the process timezone to something with a
+    # non-zero, DST-observing UTC offset so this fails under UTC-mislabeled-
+    # as-local regardless of what timezone the test host itself runs in.
+    original_tz = os.environ.get("TZ")
+    os.environ["TZ"] = "Europe/Zurich"
+    time.tzset()
+    try:
+        start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, "0.0.38")
+        parsed = datetime.strptime(start_time, "%m/%d/%y-%H:%M:%S")
+        expected_local = (
+            datetime.now().astimezone() - timedelta(hours=24)
+        ).replace(tzinfo=None)
+        assert abs((parsed - expected_local).total_seconds()) <= 15
+    finally:
+        if original_tz is None:
+            os.environ.pop("TZ", None)
+        else:
+            os.environ["TZ"] = original_tz
+        time.tzset()
 
 
 @pytest.mark.parametrize("api_version", ["0.0.40", "0.0.41", "0.0.42"])

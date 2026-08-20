@@ -80,7 +80,11 @@ def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> st
     start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
     if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
         return str(int(start_datetime.timestamp()))
-    return start_datetime.strftime("%m/%d/%y-%H:%M:%S")
+    # parse_time() interprets an unqualified "MM/DD/YY-HH:MM:SS" as local wall
+    # clock time (no timezone offset in the grammar), so it must be rendered
+    # in local time here too, not UTC, or the window shifts by the local UTC
+    # offset (and can even invert sign west of UTC).
+    return start_datetime.astimezone().strftime("%m/%d/%y-%H:%M:%S")
 
 
 class SlurmRestClient(SlurmBaseClient):
