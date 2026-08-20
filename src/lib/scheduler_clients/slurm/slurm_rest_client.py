@@ -29,7 +29,10 @@ from lib.scheduler_clients.slurm.models import (
     SlurmReservations,
     SlurmNode,
 )
-from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
+from lib.scheduler_clients.slurm.slurm_base_client import (
+    TIME_WINDOW_DURATIONS,
+    SlurmBaseClient,
+)
 
 # Tracing logs
 from lib.loggers.tracing_log import log_backend_http_scheduler
@@ -62,15 +65,6 @@ async def _slurm_unexpected_response(response):
     )
 
 
-# lookback duration for each supported historical time window
-_TIME_WINDOW_TO_TIMEDELTA = {
-    JobsTimeWindow.LAST_HOUR: timedelta(hours=1),
-    JobsTimeWindow.LAST_8_HOURS: timedelta(hours=8),
-    JobsTimeWindow.LAST_24_HOURS: timedelta(hours=24),
-    JobsTimeWindow.LAST_3_DAYS: timedelta(days=3),
-    JobsTimeWindow.LAST_7_DAYS: timedelta(days=7),
-}
-
 # `start_time`/`end_time` on /slurmdb/v{version}/jobs accept a plain Unix
 # timestamp from this API version onwards (e.g. v0.0.42's docs: "Usage start
 # (UNIX timestamp)"). Older versions only understand sacct's parse_time()
@@ -82,7 +76,8 @@ _EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
 
 
 def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
-    start_datetime = datetime.now(timezone.utc) - _TIME_WINDOW_TO_TIMEDELTA[time_window]
+    amount, unit = TIME_WINDOW_DURATIONS[time_window]
+    start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
     if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
         return str(int(start_datetime.timestamp()))
     return start_datetime.strftime("%m/%d/%y-%H:%M:%S")

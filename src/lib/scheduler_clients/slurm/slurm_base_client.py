@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from abc import abstractmethod
-from typing import List
+from typing import Dict, List, Tuple
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
@@ -17,6 +17,18 @@ from lib.scheduler_clients.slurm.models import (
     SlurmNode,
     SlurmAccounts,
 )
+
+# Canonical (amount, unit) duration for each historical time window. `unit`
+# doubles as both a `datetime.timedelta` keyword argument (used by the REST
+# client to compute an absolute start time) and a sacct/squeue relative-time
+# suffix (used by the CLI client to build `--starttime=now-<amount><unit>`).
+TIME_WINDOW_DURATIONS: Dict[JobsTimeWindow, Tuple[int, str]] = {
+    JobsTimeWindow.LAST_HOUR: (1, "hours"),
+    JobsTimeWindow.LAST_8_HOURS: (8, "hours"),
+    JobsTimeWindow.LAST_24_HOURS: (24, "hours"),
+    JobsTimeWindow.LAST_3_DAYS: (3, "days"),
+    JobsTimeWindow.LAST_7_DAYS: (7, "days"),
+}
 
 
 class SlurmBaseClient(SchedulerBaseClient):

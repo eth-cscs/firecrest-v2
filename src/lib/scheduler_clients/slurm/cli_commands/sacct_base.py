@@ -7,16 +7,8 @@
 from abc import abstractmethod
 from typing import List
 from lib.scheduler_clients.models import JobsTimeWindow
+from lib.scheduler_clients.slurm.slurm_base_client import TIME_WINDOW_DURATIONS
 from lib.ssh_clients.ssh_client import BaseCommand
-
-# sacct relative --starttime value for each supported historical time window
-_SACCT_STARTTIME_BY_TIME_WINDOW = {
-    JobsTimeWindow.LAST_HOUR: "now-1hours",
-    JobsTimeWindow.LAST_8_HOURS: "now-8hours",
-    JobsTimeWindow.LAST_24_HOURS: "now-24hours",
-    JobsTimeWindow.LAST_3_DAYS: "now-3days",
-    JobsTimeWindow.LAST_7_DAYS: "now-7days",
-}
 
 
 class SacctCommandBase(BaseCommand):
@@ -46,7 +38,8 @@ class SacctCommandBase(BaseCommand):
             str_job_ids = ",".join(self.job_ids)
             cmd += [f"--jobs='{str_job_ids}'"]
         else:
-            cmd += [f"--starttime={_SACCT_STARTTIME_BY_TIME_WINDOW[self.time_window]}"]
+            amount, unit = TIME_WINDOW_DURATIONS[self.time_window]
+            cmd += [f"--starttime=now-{amount}{unit}"]
         cmd += ["--parsable2"]
         return " ".join(cmd)
 
