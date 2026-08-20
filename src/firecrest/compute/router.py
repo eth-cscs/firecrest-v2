@@ -93,7 +93,7 @@ async def get_jobs(
     time_window: Annotated[
         JobsTimeWindow,
         Query(
-            description="Time window used to look back for historical (completed, failed, cancelled...) jobs. Does not affect currently pending or running jobs, which are always returned"
+            description="Time window used to look back for historical (completed, failed, cancelled...) jobs. Does not affect currently pending or running jobs, which are always returned. Not supported for PBS clusters: the parameter is accepted but has no effect, and job history visibility there is bounded by the scheduler's own configuration instead"
         ),
     ] = JobsTimeWindow.LAST_24_HOURS,
 ) -> Any:
