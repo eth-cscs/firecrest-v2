@@ -402,15 +402,42 @@ def test_time_window_start_time_before_epoch_support_uses_local_time():
     # in local time, not UTC. Pin the process timezone to something with a
     # non-zero, DST-observing UTC offset so this fails under UTC-mislabeled-
     # as-local regardless of what timezone the test host itself runs in.
+    #
+    # os.environ["TZ"] + time.tzset() is process-global, not just this test's
+    # state, but this test is a plain sync function with no `await` inside
+    # the try block, so nothing else in this (single-threaded, non-xdist)
+    # suite runs while TZ is mutated; the try/finally guarantees it's always
+    # restored (and re-tzset()) before control returns to the runner either
+    # way.
     original_tz = os.environ.get("TZ")
     os.environ["TZ"] = "Europe/Zurich"
     time.tzset()
     try:
+        # If Europe/Zurich's tzdata isn't installed in this environment,
+        # tzset() silently falls back to UTC: local would then equal UTC and
+        # this test would pass vacuously (the exact bug it exists to catch
+        # would slip through). Fail loudly instead of trusting a false green.
+        local_offset = datetime.now().astimezone().utcoffset()
+        assert local_offset != timedelta(0), (
+            "Europe/Zurich resolved to a UTC+0 offset -- tzdata for that "
+            "zone appears to be missing from this environment, which would "
+            "make this test pass vacuously"
+        )
+
         start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, "0.0.38")
         parsed = datetime.strptime(start_time, "%m/%d/%y-%H:%M:%S")
-        expected_local = (datetime.now().astimezone() - timedelta(hours=24)).replace(
-            tzinfo=None
-        )
+        # Mirror the implementation's own ordering -- subtract the absolute
+        # duration first (in UTC), then convert to local wall-clock time --
+        # rather than converting "now" to local and subtracting 24 numeric
+        # hours from that. The two orders only diverge across a DST
+        # transition (using today's offset instead of the offset that was
+        # actually in effect 24h ago), which for Europe/Zurich is a fixed,
+        # ~2-days-a-year calendar event, not a runner flake: getting this
+        # backwards would make the test go red for 24h twice a year for
+        # nobody's fault.
+        expected_local = (
+            datetime.now(timezone.utc) - timedelta(hours=24)
+        ).astimezone().replace(tzinfo=None)
         assert abs((parsed - expected_local).total_seconds()) <= 15
     finally:
         if original_tz is None:
