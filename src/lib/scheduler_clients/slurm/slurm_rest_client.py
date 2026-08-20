@@ -246,7 +246,7 @@ class SlurmRestClient(SlurmBaseClient):
             def matches(job):
                 job_user = job.get("user") or job.get("user_name")
                 return (allusers or job_user == username) and (
-                    name is None or job.get("name") == name
+                    not name or job.get("name") == name
                 )
 
             if result and "jobs" in result:
