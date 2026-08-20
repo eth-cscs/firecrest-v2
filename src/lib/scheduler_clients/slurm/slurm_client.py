@@ -98,7 +98,7 @@ class SlurmClient(SlurmBaseClient):
         allusers: bool = False,
         account: str = None,
         name: str = None,
-        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         return await self.slurm_default_client.get_jobs(
             username, jwt_token, allusers, account, name, time_window

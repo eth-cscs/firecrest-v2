@@ -66,7 +66,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         allusers: bool = False,
         account: str = None,
         name: str = None,
-        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         pass
 

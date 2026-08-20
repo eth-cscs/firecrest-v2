@@ -182,7 +182,7 @@ class SlurmCliClient(SlurmBaseClient):
         allusers: bool = False,
         account: str = None,
         name: str = None,
-        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         sacct = SacctCommand(username, None, allusers, account, name, time_window)
         squeue = SqueueCommand(username, None, allusers, account, name)

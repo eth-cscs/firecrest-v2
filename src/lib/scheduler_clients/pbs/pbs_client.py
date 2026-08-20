@@ -118,7 +118,7 @@ class PbsClient(SchedulerBaseClient):
         name: str = None,
         # Note: PBS's qstat has no time-window filter; job history visibility is
         # bounded server-side by the `job_history_duration` setting instead.
-        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
+        time_window: JobsTimeWindow = None,
     ) -> List[PbsJob] | None:
         qstat = QstatCommand(username, None, allusers, account, name)
         result = await self.__executed_ssh_cmd(username, jwt_token, qstat)

@@ -424,7 +424,7 @@ def test_time_window_start_time_before_epoch_support_relative_values(
     assert _time_window_start_time(time_window, "0.0.38") == expected
 
 
-@pytest.mark.parametrize("api_version", ["0.0.41", "0.0.42"])
+@pytest.mark.parametrize("api_version", ["0.0.40", "0.0.41", "0.0.42"])
 def test_time_window_start_time_with_epoch_support(api_version):
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert start_time.isdigit()

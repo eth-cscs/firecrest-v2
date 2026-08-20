@@ -64,8 +64,8 @@ async def _slurm_unexpected_response(response):
 
 # `start_time`/`end_time` on /slurmdb/v{version}/jobs are only explicitly
 # documented as accepting a plain Unix timestamp starting at API v0.0.41
-# We asume API v0.0.40 also accepts a Unix timestamp.
-# Prior versions are treated as accepting a relative time spec, e.g. "now-1hour" or "now-3days".
+# API v0.0.40 accepts timestamp.
+# Prior versions are treated as accepting a relative time spec, e.g. "now-1hours" or "now-3days".
 _EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
 
 
@@ -233,7 +233,7 @@ class SlurmRestClient(SlurmBaseClient):
         allusers: bool = False,
         account: str = None,
         name: str = None,
-        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
