@@ -7,9 +7,7 @@
 from importlib import resources as impresources
 
 import json
-import os
 import re
-import time
 from datetime import datetime, timedelta, timezone
 
 import aiohttp
@@ -84,10 +82,29 @@ def mocked_get_jobs_allusers_response():
 
 
 @pytest.fixture(scope="module")
+def mocked_get_jobs_by_name_response():
+    response_file = (
+        impresources.files(mocked_api_responses) / "slurm_get_jobs_by_name.json"
+    )
+    with response_file.open("r") as response:
+        return json.load(response)
+
+
+@pytest.fixture(scope="module")
 def mocked_get_jobs_allusers_from_db_response():
     response_file = (
         impresources.files(mocked_api_responses)
         / "slurm_get_allusers_jobs_from_db.json"
+    )
+    with response_file.open("r") as response:
+        return json.load(response)
+
+
+@pytest.fixture(scope="module")
+def mocked_get_jobs_by_name_from_db_response():
+    response_file = (
+        impresources.files(mocked_api_responses)
+        / "slurm_get_jobs_by_name_from_db.json"
     )
     with response_file.open("r") as response:
         return json.load(response)
@@ -391,66 +408,93 @@ def test_time_window_start_time_before_epoch_support(api_version):
     # v0.0.40 is included here too: its docs dropped the old parse_time()
     # grammar description but never documented "UNIX timestamp" either, so
     # it's treated conservatively the same as older versions (see the
-    # citations next to _EPOCH_START_TIME_MIN_API_VERSION).
+    # citations next to _EPOCH_START_TIME_MIN_API_VERSION). Below that
+    # boundary, a relative time spec ("now-<amount><unit>", the same grammar
+    # sacct's --starttime accepts) is sent instead of a resolved timestamp,
+    # so parse_time() evaluates "now" and the timezone server-side -- there's
+    # nothing for this client to get wrong about the slurmdbd host's clock.
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
-    assert re.fullmatch(r"\d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}", start_time)
+    assert start_time == "now-24hours"
 
 
-def test_time_window_start_time_before_epoch_support_uses_local_time():
-    # parse_time() interprets "MM/DD/YY-HH:MM:SS" as local wall-clock time
-    # (there's no timezone in the grammar), so the rendered string must be
-    # in local time, not UTC. Pin the process timezone to something with a
-    # non-zero, DST-observing UTC offset so this fails under UTC-mislabeled-
-    # as-local regardless of what timezone the test host itself runs in.
-    #
-    # os.environ["TZ"] + time.tzset() is process-global, not just this test's
-    # state, but this test is a plain sync function with no `await` inside
-    # the try block, so nothing else in this (single-threaded, non-xdist)
-    # suite runs while TZ is mutated; the try/finally guarantees it's always
-    # restored (and re-tzset()) before control returns to the runner either
-    # way.
-    original_tz = os.environ.get("TZ")
-    os.environ["TZ"] = "Europe/Zurich"
-    time.tzset()
-    try:
-        # If Europe/Zurich's tzdata isn't installed in this environment,
-        # tzset() silently falls back to UTC: local would then equal UTC and
-        # this test would pass vacuously (the exact bug it exists to catch
-        # would slip through). Fail loudly instead of trusting a false green.
-        local_offset = datetime.now().astimezone().utcoffset()
-        assert local_offset != timedelta(0), (
-            "Europe/Zurich resolved to a UTC+0 offset -- tzdata for that "
-            "zone appears to be missing from this environment, which would "
-            "make this test pass vacuously"
-        )
-
-        start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, "0.0.38")
-        parsed = datetime.strptime(start_time, "%m/%d/%y-%H:%M:%S")
-        # Mirror the implementation's own ordering -- subtract the absolute
-        # duration first (in UTC), then convert to local wall-clock time --
-        # rather than converting "now" to local and subtracting 24 numeric
-        # hours from that. The two orders only diverge across a DST
-        # transition (using today's offset instead of the offset that was
-        # actually in effect 24h ago), which for Europe/Zurich is a fixed,
-        # ~2-days-a-year calendar event, not a runner flake: getting this
-        # backwards would make the test go red for 24h twice a year for
-        # nobody's fault.
-        expected_local = (
-            datetime.now(timezone.utc) - timedelta(hours=24)
-        ).astimezone().replace(tzinfo=None)
-        assert abs((parsed - expected_local).total_seconds()) <= 15
-    finally:
-        if original_tz is None:
-            os.environ.pop("TZ", None)
-        else:
-            os.environ["TZ"] = original_tz
-        time.tzset()
+@pytest.mark.parametrize(
+    "time_window,expected",
+    [
+        (JobsTimeWindow.LAST_HOUR, "now-1hours"),
+        (JobsTimeWindow.LAST_8_HOURS, "now-8hours"),
+        (JobsTimeWindow.LAST_24_HOURS, "now-24hours"),
+        (JobsTimeWindow.LAST_3_DAYS, "now-3days"),
+        (JobsTimeWindow.LAST_7_DAYS, "now-7days"),
+    ],
+)
+def test_time_window_start_time_before_epoch_support_relative_values(
+    time_window, expected
+):
+    assert _time_window_start_time(time_window, "0.0.38") == expected
 
 
 @pytest.mark.parametrize("api_version", ["0.0.41", "0.0.42"])
 def test_time_window_start_time_with_epoch_support(api_version):
     start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
     assert start_time.isdigit()
+
+
+async def test_get_jobs_by_name(
+    client,
+    mocked_get_jobs_by_name_response,
+    mocked_get_jobs_by_name_from_db_response,
+    slurm_cluster_with_api_config,
+):
+    with aioresponses() as mocked:
+
+        mocked.get(
+            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?name=NameExists"
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        jobs_result = GetJobResponse(**response.json())
+
+        assert jobs_result.jobs[0].user == "test-user"
+        assert jobs_result.jobs[0].name == "NameExists"
+
+
+async def test_get_jobs_by_name_not_ok(
+    client,
+    mocked_get_jobs_by_name_response,
+    mocked_get_jobs_by_name_from_db_response,
+    slurm_cluster_with_api_config,
+):
+    with aioresponses() as mocked:
+
+        mocked.get(
+            re.compile(rf"^{re.escape(_slurmdb_jobs_url_prefix(slurm_cluster_with_api_config))}"),
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_by_name_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?name=DontExist"
+        )
+
+        assert response.status_code == 200
+        assert len(response.json()["jobs"]) == 0
 
 
 def test_cancel_job(client, mocked_cancel_job_response, slurm_cluster_with_api_config):

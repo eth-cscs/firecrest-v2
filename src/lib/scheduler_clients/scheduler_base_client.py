@@ -61,6 +61,7 @@ class SchedulerBaseClient(ABC):
         jwt_token: str,
         allusers: bool = False,
         account: str = None,
+        name: str = None,
         time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> List[JobModel] | None:
         pass

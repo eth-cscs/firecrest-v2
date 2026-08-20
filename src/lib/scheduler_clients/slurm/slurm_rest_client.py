@@ -73,21 +73,19 @@ async def _slurm_unexpected_response(response):
 # until v0.0.41 -- see:
 #   https://slurm.schedmd.com/archive/slurm-23.11.4/rest_api.html#slurmdbV0040GetJobs
 # So v0.0.40 is treated the same as pre-v0.0.40 here and falls back to a
-# formatted date-time string, which parse_time() has always accepted.
+# relative time spec, which parse_time() has always accepted.
 _EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.41")
 
 
 def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
     amount, unit = TIME_WINDOW_DURATIONS[time_window]
-    start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
     if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
+        start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
         return str(int(start_datetime.timestamp()))
-    # parse_time() interprets an unqualified "MM/DD/YY-HH:MM:SS" as local wall
-    # clock time (no timezone offset in the grammar), so it must be rendered
-    # in local time here too, not UTC, or the window shifts by the local UTC
-    # offset (and can even invert sign west of UTC).
-    # Relative time specs are evaluated by the Slurm server, so no assumption
-    # is needed about this host's timezone vs. the slurmdbd host's.
+    # Relative time specs ("now-<amount><unit>", the same grammar sacct's
+    # --starttime accepts) are evaluated server-side by parse_time(), so
+    # there's no need to resolve "now" or a timezone on this side at all --
+    # sidesteps the whole local-vs-server-timezone question entirely.
     return f"now-{amount}{unit}"
 
 
@@ -246,23 +244,26 @@ class SlurmRestClient(SlurmBaseClient):
         jwt_token: str,
         allusers: bool = False,
         account: str = None,
+        name: str = None,
         time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
 
-        query_string = (
-            f"?{urllib.parse.urlencode({'account': account})}" if account else ""
-        )
+        query_params = {}
+        if account:
+            query_params["account"] = account
+
+        query_string = f"?{urllib.parse.urlencode(query_params)}" if query_params else ""
+
         # slurmdb holds historical/accounting jobs (equivalent to sacct), so it is the
         # only endpoint bound by the requested time window; slurm holds only the jobs
         # currently known to the controller (equivalent to squeue).
         slurmdb_query_params = {
-            "start_time": _time_window_start_time(time_window, self.api_version)
+            **query_params,
+            "start_time": _time_window_start_time(time_window, self.api_version),
         }
-        if account:
-            slurmdb_query_params["account"] = account
         slurmdb_query_string = f"?{urllib.parse.urlencode(slurmdb_query_params)}"
 
         slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{slurmdb_query_string}"
@@ -284,18 +285,19 @@ class SlurmRestClient(SlurmBaseClient):
         for result in results:
             if isinstance(result, Exception):
                 raise SlurmError("Error fetching Slurm API data.") from result
-            if result and "jobs" in result:
-                # Note: starting from API version v0.0.39 this filter can be set as query param
-                filtered_jobs = list(
-                    filter(
-                        lambda job: (
-                            allusers or job["user"] == username
-                            if "user" in job
-                            else job["user_name"] == username
-                        ),
-                        result["jobs"],
-                    )
+
+            def matches(job):
+                job_user = job.get("user") or job.get("user_name")
+                return (allusers or job_user == username) and (
+                    not name or job.get("name") == name
                 )
+
+            if result and "jobs" in result:
+                # Note: starting from API version v0.0.39 the "user_name" filter can be set as query param
+                # Note: starting from API version v0.0.45 the "job_name" filter can be set as query param
+
+                filtered_jobs = list(filter(matches, result["jobs"]))
+
                 for job in filtered_jobs:
                     job_obj = SlurmJob.model_validate(job)
                     if job_obj.time.limit is not None:

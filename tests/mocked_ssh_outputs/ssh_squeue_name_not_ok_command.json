@@ -1,0 +1,6 @@
+{
+    "stdout": "",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"SLURM_TIME_FORMAT='%s' squeue --user=test-user --name=''\"'\"'x'\"'\"' ; touch /tmp/test ; '\"'\"''\"'\"'' --noheader --Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'"
+}

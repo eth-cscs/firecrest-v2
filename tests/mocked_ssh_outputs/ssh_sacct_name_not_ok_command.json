@@ -1,0 +1,6 @@
+{
+    "stdout": "",
+    "stderr": "",
+    "exit_code": 0,
+    "command": "SLURM_TIME_FORMAT='%s' sacct --name=''\"'\"'x'\"'\"' ; touch /tmp/test ; '\"'\"''\"'\"'' --starttime=now-24hours --parsable2 --noheader --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
+}

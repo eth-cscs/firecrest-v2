@@ -113,6 +113,41 @@ async def test_get_jobs_allusers(
         assert response.json()["jobs"][2]["user"] == "firesrv"
 
 
+async def test_get_jobs_by_name(
+    client, ssh_client, mocked_ssh_qstat_allusers_output, pbs_cluster
+):
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_qstat_allusers_output)]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?allusers=true&name=hi_pbs".format(
+                cluster_name=pbs_cluster.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert response.json()["jobs"][0]["user"] == "firesrv"
+        assert response.json()["jobs"][0]["name"] == "hi_pbs"
+
+
+async def test_get_jobs_by_name_not_ok(
+    client, ssh_client, mocked_ssh_qstat_allusers_output, pbs_cluster
+):
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_qstat_allusers_output)]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?allusers=true&name=doesntexist".format(
+                cluster_name=pbs_cluster.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+
+        assert len(response.json()["jobs"]) == 0
+
+
 async def test_get_job_metadata(
     client,
     ssh_client,

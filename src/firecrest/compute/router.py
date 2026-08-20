@@ -90,6 +90,10 @@ async def get_jobs(
         str | None,
         Query(description="If specified, filter jobs by account name"),
     ] = None,
+    name: Annotated[
+        str | None,
+        Query(description="If specified, filter jobs by name", max_length=235)  # length based on OpenPBS
+    ] = None,
     time_window: Annotated[
         JobsTimeWindow,
         Query(
@@ -104,6 +108,7 @@ async def get_jobs(
         jwt_token=access_token,
         allusers=allusers,
         account=account,
+        name=name,
         time_window=time_window,
     )
     return {"jobs": jobs}
