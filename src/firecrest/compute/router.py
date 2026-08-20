@@ -21,6 +21,7 @@ from firecrest.dependencies import (
 
 # clients
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.scheduler_clients.models import JobsTimeWindow
 from firecrest.compute.models import (
     GetJobMetadataResponse,
     PostJobAttachRequest,
@@ -93,12 +94,22 @@ async def get_jobs(
         str | None,
         Query(description="If specified, filter jobs by name", max_length=235)  # length based on OpenPBS
     ] = None,
+    time_window: Annotated[
+        JobsTimeWindow,
+        Query(
+            description="Time window used to look back for historical (completed, failed, cancelled...) jobs. Does not affect currently pending or running jobs, which are always returned. Not supported for PBS clusters: the parameter is accepted but has no effect, and job history visibility there is bounded by the scheduler's own configuration instead"
+        ),
+    ] = JobsTimeWindow.LAST_24_HOURS,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(
-        username=username, jwt_token=access_token, allusers=allusers,
-        account=account, name=name
+        username=username,
+        jwt_token=access_token,
+        allusers=allusers,
+        account=account,
+        name=name,
+        time_window=time_window,
     )
     return {"jobs": jobs}
 

@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import HTTPException
 
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -91,11 +92,16 @@ class SlurmClient(SlurmBaseClient):
         )
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False,
-        account: str = None, name: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         return await self.slurm_default_client.get_jobs(
-            username, jwt_token, allusers, account, name
+            username, jwt_token, allusers, account, name, time_window
         )
 
     async def get_job_metadata(

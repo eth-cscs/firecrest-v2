@@ -6,6 +6,7 @@
 from abc import abstractmethod
 from typing import List
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
     SlurmJob,
     SlurmJobDescription,
@@ -59,8 +60,13 @@ class SlurmBaseClient(SchedulerBaseClient):
 
     @abstractmethod
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False,
-        account: str = None, name: str = None,
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         pass
 

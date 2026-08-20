@@ -49,7 +49,8 @@ def mocked_ssh_squeue_by_name_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_squeue_by_name_dont_exist_output():
     output_file = (
-        impresources.files(mocked_ssh_outputs) / "ssh_squeue_name_dont_exist_command.json"
+        impresources.files(mocked_ssh_outputs)
+        / "ssh_squeue_name_dont_exist_command.json"
     )
     with output_file.open("rb") as output:
         return json.load(output)
@@ -75,9 +76,7 @@ def mocked_ssh_sacct_allusers_output():
 
 @pytest.fixture(scope="module")
 def mocked_ssh_sacct_by_name_output():
-    output_file = (
-        impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_command.json"
-    )
+    output_file = impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_command.json"
     with output_file.open("rb") as output:
         return json.load(output)
 
@@ -85,11 +84,12 @@ def mocked_ssh_sacct_by_name_output():
 @pytest.fixture(scope="module")
 def mocked_ssh_sacct_by_name_dont_exist_output():
     output_file = (
-        impresources.files(mocked_ssh_outputs) / "ssh_sacct_name_dont_exist_command.json"
+        impresources.files(mocked_ssh_outputs)
+        / "ssh_sacct_name_dont_exist_command.json"
     )
     with output_file.open("rb") as output:
         return json.load(output)
-    
+
 
 @pytest.fixture(scope="module")
 def mocked_ssh_sacct_by_name_not_ok_output():
@@ -205,9 +205,7 @@ async def test_get_job(
 ):
 
     await helper_test_get_job(
-        client,
-        ssh_client,
-        cluster_name=slurm_cluster_with_ssh_config.name
+        client, ssh_client, cluster_name=slurm_cluster_with_ssh_config.name
     )
 
 
@@ -308,9 +306,51 @@ async def test_get_jobs_by_name_notok(
         assert response.json() is not None
 
 
+async def test_get_jobs_with_time_window(
+    client,
+    ssh_client,
+    mocked_ssh_sacct_allusers_output,
+    mocked_ssh_squeue_allusers_output,
+    slurm_cluster_with_ssh_config,
+):
+    sacct_output_last_hour = {
+        **mocked_ssh_sacct_allusers_output,
+        "command": mocked_ssh_sacct_allusers_output["command"].replace(
+            "--starttime=now-24hours", "--starttime=now-1hour"
+        ),
+    }
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**sacct_output_last_hour),
+            MockedCommand(**mocked_ssh_squeue_allusers_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?allusers=true&time_window=1h".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["jobs"][0]["user"] == "fireuser"
+        assert response.json()["jobs"][1]["user"] == "firesrv"
+
+
+async def test_get_jobs_with_invalid_time_window(
+    client,
+    slurm_cluster_with_ssh_config,
+):
+    response = client.get(
+        "/compute/{cluster_name}/jobs?time_window=30days".format(
+            cluster_name=slurm_cluster_with_ssh_config.name
+        )
+    )
+    assert response.status_code == 400
+
+
 async def test_get_job_metadata(
     client,
-    ssh_client,    
+    ssh_client,
     mocked_ssh_sacct_script_output,
     mocked_ssh_scontrol_script_output,
     mocked_ssh_scontrol_job_output,
