@@ -21,6 +21,7 @@ from firecrest.dependencies import (
 
 # clients
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
+from lib.scheduler_clients.models import JobsTimeWindow
 from firecrest.compute.models import (
     GetJobMetadataResponse,
     PostJobAttachRequest,
@@ -89,11 +90,21 @@ async def get_jobs(
         str | None,
         Query(description="If specified, filter jobs by account name"),
     ] = None,
+    time_window: Annotated[
+        JobsTimeWindow,
+        Query(
+            description="Time window used to look back for historical (completed, failed, cancelled...) jobs. Does not affect currently pending or running jobs, which are always returned"
+        ),
+    ] = JobsTimeWindow.LAST_24_HOURS,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     jobs = await scheduler_client.get_jobs(
-        username=username, jwt_token=access_token, allusers=allusers, account=account
+        username=username,
+        jwt_token=access_token,
+        allusers=allusers,
+        account=account,
+        time_window=time_window,
     )
     return {"jobs": jobs}
 

@@ -11,6 +11,14 @@ from lib.models import CamelModel
 from pydantic import Field, AliasChoices
 
 
+class JobsTimeWindow(str, Enum):
+    LAST_HOUR = "1h"
+    LAST_8_HOURS = "8h"
+    LAST_24_HOURS = "24h"
+    LAST_3_DAYS = "3days"
+    LAST_7_DAYS = "7days"
+
+
 class NodeState(str, Enum):
     IDLE = "IDLE"
     ALLOCATED = "ALLOCATED"

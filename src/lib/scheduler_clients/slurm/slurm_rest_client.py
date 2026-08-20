@@ -6,6 +6,7 @@
 import asyncio
 import json
 import aiohttp
+from datetime import datetime, timedelta, timezone
 from fastapi import status
 from socket import AF_INET
 from typing import Optional, List
@@ -17,6 +18,7 @@ import urllib
 from lib.exceptions import SlurmAuthTokenError, SlurmError
 
 # Models
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -58,6 +60,20 @@ async def _slurm_unexpected_response(response):
     raise SlurmError(
         f"Unexpected Slurm API response. status:{response.status} message:{message}"
     )
+
+
+# lookback duration for each supported historical time window
+_TIME_WINDOW_TO_TIMEDELTA = {
+    JobsTimeWindow.LAST_HOUR: timedelta(hours=1),
+    JobsTimeWindow.LAST_8_HOURS: timedelta(hours=8),
+    JobsTimeWindow.LAST_24_HOURS: timedelta(hours=24),
+    JobsTimeWindow.LAST_3_DAYS: timedelta(days=3),
+    JobsTimeWindow.LAST_7_DAYS: timedelta(days=7),
+}
+
+
+def _time_window_start_time(time_window: JobsTimeWindow) -> int:
+    return int((datetime.now(timezone.utc) - _TIME_WINDOW_TO_TIMEDELTA[time_window]).timestamp())
 
 
 class SlurmRestClient(SlurmBaseClient):
@@ -210,7 +226,12 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
@@ -219,7 +240,15 @@ class SlurmRestClient(SlurmBaseClient):
         query_string = (
             f"?{urllib.parse.urlencode({'account': account})}" if account else ""
         )
-        slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{query_string}"
+        # slurmdb holds historical/accounting jobs (equivalent to sacct), so it is the
+        # only endpoint bound by the requested time window; slurm holds only the jobs
+        # currently known to the controller (equivalent to squeue).
+        slurmdb_query_params = {"start_time": _time_window_start_time(time_window)}
+        if account:
+            slurmdb_query_params["account"] = account
+        slurmdb_query_string = f"?{urllib.parse.urlencode(slurmdb_query_params)}"
+
+        slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{slurmdb_query_string}"
         slurm_url = f"{self.api_url}/slurm/v{self.api_version}/jobs{query_string}"
 
         async def fetch_jobs(url: str) -> list:

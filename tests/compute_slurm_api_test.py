@@ -7,6 +7,7 @@
 from importlib import resources as impresources
 
 import json
+import re
 import aiohttp
 import pytest
 from aioresponses import aioresponses
@@ -234,7 +235,9 @@ async def test_get_jobs_allusers(
 
     with aioresponses() as mocked:
         mocked.get(
-            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            re.compile(
+                rf"^{re.escape(slurm_cluster_with_api_config.scheduler.api_url)}/slurmdb/v{re.escape(slurm_cluster_with_api_config.scheduler.api_version)}/jobs\?start_time=\d+$"
+            ),
             status=200,
             body=json.dumps(mocked_get_jobs_allusers_from_db_response),
         )
@@ -252,6 +255,46 @@ async def test_get_jobs_allusers(
         jobs_result = GetJobResponse(**response.json())
         assert jobs_result.jobs[0].user == "fireuser"
         assert jobs_result.jobs[1].user == "firesrv"
+
+
+async def test_get_jobs_with_time_window(
+    client,
+    mocked_get_jobs_allusers_response,
+    mocked_get_jobs_allusers_from_db_response,
+    slurm_cluster_with_api_config,
+):
+    with aioresponses() as mocked:
+        mocked.get(
+            re.compile(
+                rf"^{re.escape(slurm_cluster_with_api_config.scheduler.api_url)}/slurmdb/v{re.escape(slurm_cluster_with_api_config.scheduler.api_version)}/jobs\?start_time=\d+$"
+            ),
+            status=200,
+            body=json.dumps(mocked_get_jobs_allusers_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/jobs",
+            status=200,
+            body=json.dumps(mocked_get_jobs_allusers_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs?allusers=true&time_window=7days"
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        jobs_result = GetJobResponse(**response.json())
+        assert jobs_result.jobs[0].user == "fireuser"
+        assert jobs_result.jobs[1].user == "firesrv"
+
+
+async def test_get_jobs_with_invalid_time_window(
+    client,
+    slurm_cluster_with_api_config,
+):
+    response = client.get(
+        f"/compute/{slurm_cluster_with_api_config.name}/jobs?time_window=30days"
+    )
+    assert response.status_code == 400
 
 
 def test_cancel_job(client, mocked_cancel_job_response, slurm_cluster_with_api_config):

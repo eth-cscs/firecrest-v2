@@ -181,6 +181,48 @@ async def test_get_jobs_allusers(
         assert response.json()["jobs"][1]["user"] == "firesrv"
 
 
+async def test_get_jobs_with_time_window(
+    client,
+    ssh_client,
+    mocked_ssh_sacct_allusers_output,
+    mocked_ssh_squeue_allusers_output,
+    slurm_cluster_with_ssh_config,
+):
+    sacct_output_last_hour = {
+        **mocked_ssh_sacct_allusers_output,
+        "command": mocked_ssh_sacct_allusers_output["command"].replace(
+            "--starttime=now-24hours", "--starttime=now-1hours"
+        ),
+    }
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**sacct_output_last_hour),
+            MockedCommand(**mocked_ssh_squeue_allusers_output),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs?allusers=true&time_window=1h".format(
+                cluster_name=slurm_cluster_with_ssh_config.name
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["jobs"][0]["user"] == "fireuser"
+        assert response.json()["jobs"][1]["user"] == "firesrv"
+
+
+async def test_get_jobs_with_invalid_time_window(
+    client,
+    slurm_cluster_with_ssh_config,
+):
+    response = client.get(
+        "/compute/{cluster_name}/jobs?time_window=30days".format(
+            cluster_name=slurm_cluster_with_ssh_config.name
+        )
+    )
+    assert response.status_code == 400
+
+
 async def test_get_job_metadata(
     client,
     ssh_client,    

@@ -6,7 +6,17 @@
 # commands
 from abc import abstractmethod
 from typing import List
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.ssh_clients.ssh_client import BaseCommand
+
+# sacct relative --starttime value for each supported historical time window
+_SACCT_STARTTIME_BY_TIME_WINDOW = {
+    JobsTimeWindow.LAST_HOUR: "now-1hours",
+    JobsTimeWindow.LAST_8_HOURS: "now-8hours",
+    JobsTimeWindow.LAST_24_HOURS: "now-24hours",
+    JobsTimeWindow.LAST_3_DAYS: "now-3days",
+    JobsTimeWindow.LAST_7_DAYS: "now-7days",
+}
 
 
 class SacctCommandBase(BaseCommand):
@@ -17,12 +27,14 @@ class SacctCommandBase(BaseCommand):
         job_ids: List[str] = None,
         allusers: bool = False,
         account: str = None,
+        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> None:
         super().__init__()
         self.username = username
         self.allusers = allusers
         self.job_ids = job_ids
         self.account = account
+        self.time_window = time_window
 
     def get_command(self) -> str:
         cmd = ["SLURM_TIME_FORMAT='%s' sacct"]
@@ -34,9 +46,7 @@ class SacctCommandBase(BaseCommand):
             str_job_ids = ",".join(self.job_ids)
             cmd += [f"--jobs='{str_job_ids}'"]
         else:
-            cmd += [
-                "--starttime=now-7days"
-            ]  # up to one week ago, default is since midnight today
+            cmd += [f"--starttime={_SACCT_STARTTIME_BY_TIME_WINDOW[self.time_window]}"]
         cmd += ["--parsable2"]
         return " ".join(cmd)
 

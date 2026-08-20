@@ -26,6 +26,7 @@ from lib.scheduler_clients.pbs.cli_commands.pbs_partitions_command import (
 from lib.scheduler_clients.pbs.cli_commands.ping_command import PbsPingCommand
 
 # models
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.pbs.models import (
     PbsAccounts,
     PbsJob,
@@ -109,7 +110,14 @@ class PbsClient(SchedulerBaseClient):
         return result
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        # Note: PBS's qstat has no time-window filter; job history visibility is
+        # bounded server-side by the `job_history_duration` setting instead.
+        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> List[PbsJob] | None:
         qstat = QstatCommand(username, None, allusers, account)
         result = await self.__executed_ssh_cmd(username, jwt_token, qstat)
