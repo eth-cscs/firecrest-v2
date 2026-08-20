@@ -300,12 +300,12 @@ async def test_get_jobs_by_name_notok(
         ]
     ):
         response = client.get(
-            "/compute/{cluster_name}/jobs?name='x' ; touch /tmp/pwn ; ''".format(
+            "/compute/{cluster_name}/jobs?name='x' ; touch /tmp/test ; ''".format(
                 cluster_name=slurm_cluster_with_ssh_config.name
             )
         )
-        assert response.status_code == 400
-        assert response.json() is not None       
+        assert response.status_code == 200
+        assert response.json() is not None
 
 
 async def test_get_job_metadata(

@@ -242,12 +242,16 @@ class SlurmRestClient(SlurmBaseClient):
         for result in results:
             if isinstance(result, Exception):
                 raise SlurmError("Error fetching Slurm API data.") from result
+
+            def matches(job):
+                job_user = job.get("user") or job.get("user_name")
+                return (allusers or job_user == username) and (
+                    name is None or job.get("name") == name
+                )
+
             if result and "jobs" in result:
                 # Note: starting from API version v0.0.39 the "user_name" filter can be set as query param
                 # Note: starting from API version v0.0.45 the "job_name" filter can be set as query param
-                def matches(job):
-                    job_user = job.get("user", job.get("user_name"))
-                    return (allusers or job_user == username) and (name is None or job.get("name") == name)
 
                 filtered_jobs = list(filter(matches, result["jobs"]))
 

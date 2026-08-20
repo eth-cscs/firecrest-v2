@@ -26,7 +26,8 @@ class QstatBaseCommand(BaseCommand):
 
     def get_command(self) -> str:
         cmd = ["qstat", "-F", "json", "-f"] + self.ids
-        # removed the -A options, since is not an option in qstat command
+        # removed the -A options, since it is not an option in qstat command,
+        # then the account filtering is done on the client-side
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
