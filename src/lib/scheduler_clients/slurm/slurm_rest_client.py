@@ -71,9 +71,21 @@ _TIME_WINDOW_TO_TIMEDELTA = {
     JobsTimeWindow.LAST_7_DAYS: timedelta(days=7),
 }
 
+# `start_time`/`end_time` on /slurmdb/v{version}/jobs accept a plain Unix
+# timestamp from this API version onwards (e.g. v0.0.42's docs: "Usage start
+# (UNIX timestamp)"). Older versions only understand sacct's parse_time()
+# grammar (e.g. "MM/DD[/YY]-HH:MM[:SS]", "YYYY-MM-DD[THH:MM[:SS]]") and don't
+# document epoch integers as a valid format, so we fall back to a formatted
+# timestamp string for them.
+# https://slurm.schedmd.com/archive/slurm-23.11.4/rest_api.html#slurmdbV0040GetJobs
+_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
 
-def _time_window_start_time(time_window: JobsTimeWindow) -> int:
-    return int((datetime.now(timezone.utc) - _TIME_WINDOW_TO_TIMEDELTA[time_window]).timestamp())
+
+def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
+    start_datetime = datetime.now(timezone.utc) - _TIME_WINDOW_TO_TIMEDELTA[time_window]
+    if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
+        return str(int(start_datetime.timestamp()))
+    return start_datetime.strftime("%m/%d/%y-%H:%M:%S")
 
 
 class SlurmRestClient(SlurmBaseClient):
@@ -243,7 +255,9 @@ class SlurmRestClient(SlurmBaseClient):
         # slurmdb holds historical/accounting jobs (equivalent to sacct), so it is the
         # only endpoint bound by the requested time window; slurm holds only the jobs
         # currently known to the controller (equivalent to squeue).
-        slurmdb_query_params = {"start_time": _time_window_start_time(time_window)}
+        slurmdb_query_params = {
+            "start_time": _time_window_start_time(time_window, self.api_version)
+        }
         if account:
             slurmdb_query_params["account"] = account
         slurmdb_query_string = f"?{urllib.parse.urlencode(slurmdb_query_params)}"

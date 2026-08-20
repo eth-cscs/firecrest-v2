@@ -14,6 +14,8 @@ from aioresponses import aioresponses
 
 from tests import mocked_api_responses
 from firecrest.compute.models import GetJobResponse, PostJobSubmissionResponse
+from lib.scheduler_clients.models import JobsTimeWindow
+from lib.scheduler_clients.slurm.slurm_rest_client import _time_window_start_time
 
 
 @pytest.fixture(scope="module")
@@ -295,6 +297,20 @@ async def test_get_jobs_with_invalid_time_window(
         f"/compute/{slurm_cluster_with_api_config.name}/jobs?time_window=30days"
     )
     assert response.status_code == 400
+
+
+@pytest.mark.parametrize("api_version", ["0.0.38", "0.0.39"])
+def test_time_window_start_time_before_epoch_support(api_version):
+    # Below v0.0.40 the jobs endpoint only understands sacct's parse_time()
+    # grammar, not raw Unix timestamps.
+    start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
+    assert re.fullmatch(r"\d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}", start_time)
+
+
+@pytest.mark.parametrize("api_version", ["0.0.40", "0.0.41", "0.0.42"])
+def test_time_window_start_time_with_epoch_support(api_version):
+    start_time = _time_window_start_time(JobsTimeWindow.LAST_24_HOURS, api_version)
+    assert start_time.isdigit()
 
 
 def test_cancel_job(client, mocked_cancel_job_response, slurm_cluster_with_api_config):
