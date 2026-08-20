@@ -210,15 +210,19 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
 
-        query_string = (
-            f"?{urllib.parse.urlencode({'account': account})}" if account else ""
-        )
+        query_params = {}
+        if account:
+            query_params["account"] = account
+
+        query_string = f"?{urllib.parse.urlencode(query_params)}" if query_params else ""
+
         slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{query_string}"
         slurm_url = f"{self.api_url}/slurm/v{self.api_version}/jobs{query_string}"
 
@@ -238,18 +242,19 @@ class SlurmRestClient(SlurmBaseClient):
         for result in results:
             if isinstance(result, Exception):
                 raise SlurmError("Error fetching Slurm API data.") from result
-            if result and "jobs" in result:
-                # Note: starting from API version v0.0.39 this filter can be set as query param
-                filtered_jobs = list(
-                    filter(
-                        lambda job: (
-                            allusers or job["user"] == username
-                            if "user" in job
-                            else job["user_name"] == username
-                        ),
-                        result["jobs"],
-                    )
+
+            def matches(job):
+                job_user = job.get("user") or job.get("user_name")
+                return (allusers or job_user == username) and (
+                    not name or job.get("name") == name
                 )
+
+            if result and "jobs" in result:
+                # Note: starting from API version v0.0.39 the "user_name" filter can be set as query param
+                # Note: starting from API version v0.0.45 the "job_name" filter can be set as query param
+
+                filtered_jobs = list(filter(matches, result["jobs"]))
+
                 for job in filtered_jobs:
                     job_obj = SlurmJob.model_validate(job)
                     if job_obj.time.limit is not None:

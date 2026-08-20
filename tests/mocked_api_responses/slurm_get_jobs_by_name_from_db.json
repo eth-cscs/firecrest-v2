@@ -1,0 +1,1849 @@
+{
+    "jobs": [
+        {
+            "account": "users",
+            "comment": {
+                "administrator": "",
+                "job": "",
+                "system": ""
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task_id": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "task": ""
+            },
+            "association": {
+                "account": "users",
+                "cluster": "cluster",
+                "partition": "",
+                "user": "fireuser",
+                "id": 7
+            },
+            "block": "",
+            "cluster": "cluster",
+            "constraints": "",
+            "container": "",
+            "derived_exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "time": {
+                "elapsed": 61,
+                "eligible": 1787124673,
+                "end": 1787124734,
+                "planned": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "start": 1787124673,
+                "submission": 1787124673,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 7200
+                },
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "extra": "",
+            "failed_node": "",
+            "flags": [
+                "STARTED_ON_SCHEDULE",
+                "START_RECEIVED"
+            ],
+            "group": "users",
+            "het": {
+                "job_id": 0,
+                "job_offset": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "job_id": 10,
+            "name": "SbatchTestXYZ",
+            "licenses": "",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "hold": false,
+            "priority": {
+                "set": true,
+                "infinite": false,
+                "number": 1
+            },
+            "qos": "normal",
+            "qosreq": "",
+            "required": {
+                "CPUs": 1,
+                "memory_per_cpu": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "memory_per_node": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "kill_request_user": "",
+            "restart_cnt": 0,
+            "reservation": {
+                "id": 0,
+                "name": ""
+            },
+            "script": "",
+            "stdin_expanded": "/dev/null",
+            "stdout_expanded": "/home/fireuser/slurm-10.out",
+            "stderr_expanded": "",
+            "stdout": "/home/fireuser/slurm-%j.out",
+            "stderr": "",
+            "stdin": "/dev/null",
+            "state": {
+                "current": [
+                    "COMPLETED"
+                ],
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "time": {
+                        "elapsed": 61,
+                        "end": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787124734
+                        },
+                        "start": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787124673
+                        },
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": [
+                            "SUCCESS"
+                        ],
+                        "return_code": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 0
+                        },
+                        "signal": {
+                            "id": {
+                                "set": false,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "name": ""
+                        }
+                    },
+                    "nodes": {
+                        "count": 1,
+                        "range": "localhost",
+                        "list": [
+                            "localhost"
+                        ]
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": "",
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "max": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        },
+                        "governor": "0"
+                    },
+                    "kill_request_user": "",
+                    "state": [
+                        "COMPLETED"
+                    ],
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        }
+                    },
+                    "step": {
+                        "id": "10.batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": "",
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": "",
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": "",
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "submit_line": "sbatch --export=ALL,PATH=/bin:/usr/bin/:/usr/local/bin/,VAR1=Value1,VAR2=\"value2,asdadas\" --chdir=/home/fireuser --account=users --job-name=SbatchTestXYZ",
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": "",
+                        "id": 3,
+                        "count": -2
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "used_gres": "",
+            "user": "fireuser",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/fireuser"
+        },
+        {
+            "account": "users",
+            "comment": {
+                "administrator": "",
+                "job": "",
+                "system": ""
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task_id": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "task": ""
+            },
+            "association": {
+                "account": "users",
+                "cluster": "cluster",
+                "partition": "",
+                "user": "fireuser",
+                "id": 7
+            },
+            "block": "",
+            "cluster": "cluster",
+            "constraints": "",
+            "container": "",
+            "derived_exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "time": {
+                "elapsed": 60,
+                "eligible": 1787126671,
+                "end": 1787126732,
+                "planned": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 1
+                },
+                "start": 1787126672,
+                "submission": 1787126671,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 7200
+                },
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "extra": "",
+            "failed_node": "",
+            "flags": [
+                "STARTED_ON_SCHEDULE",
+                "START_RECEIVED"
+            ],
+            "group": "users",
+            "het": {
+                "job_id": 0,
+                "job_offset": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "job_id": 11,
+            "name": "SbatchTestXYZ",
+            "licenses": "",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "hold": false,
+            "priority": {
+                "set": true,
+                "infinite": false,
+                "number": 1
+            },
+            "qos": "normal",
+            "qosreq": "",
+            "required": {
+                "CPUs": 1,
+                "memory_per_cpu": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "memory_per_node": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "kill_request_user": "",
+            "restart_cnt": 0,
+            "reservation": {
+                "id": 0,
+                "name": ""
+            },
+            "script": "",
+            "stdin_expanded": "/dev/null",
+            "stdout_expanded": "/home/fireuser/slurm-11.out",
+            "stderr_expanded": "",
+            "stdout": "/home/fireuser/slurm-%j.out",
+            "stderr": "",
+            "stdin": "/dev/null",
+            "state": {
+                "current": [
+                    "COMPLETED"
+                ],
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "time": {
+                        "elapsed": 60,
+                        "end": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787126732
+                        },
+                        "start": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787126672
+                        },
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": [
+                            "SUCCESS"
+                        ],
+                        "return_code": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 0
+                        },
+                        "signal": {
+                            "id": {
+                                "set": false,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "name": ""
+                        }
+                    },
+                    "nodes": {
+                        "count": 1,
+                        "range": "localhost",
+                        "list": [
+                            "localhost"
+                        ]
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": "",
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "max": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        },
+                        "governor": "0"
+                    },
+                    "kill_request_user": "",
+                    "state": [
+                        "COMPLETED"
+                    ],
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        }
+                    },
+                    "step": {
+                        "id": "11.batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": "",
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": "",
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": "",
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "submit_line": "sbatch --export=ALL,PATH=/bin:/usr/bin/:/usr/local/bin/,VAR1=Value1,VAR2=\"value2,asdadas\" --chdir=/home/fireuser --account=users --job-name=SbatchTestXYZ",
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": "",
+                        "id": 3,
+                        "count": -2
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "used_gres": "",
+            "user": "fireuser",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/fireuser"
+        },
+        {
+            "account": "users",
+            "comment": {
+                "administrator": "",
+                "job": "",
+                "system": ""
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task_id": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "task": ""
+            },
+            "association": {
+                "account": "users",
+                "cluster": "cluster",
+                "partition": "",
+                "user": "fireuser",
+                "id": 7
+            },
+            "block": "",
+            "cluster": "cluster",
+            "constraints": "",
+            "container": "",
+            "derived_exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "time": {
+                "elapsed": 61,
+                "eligible": 1787127431,
+                "end": 1787127492,
+                "planned": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "start": 1787127431,
+                "submission": 1787127431,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 7200
+                },
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "extra": "",
+            "failed_node": "",
+            "flags": [
+                "STARTED_ON_SCHEDULE",
+                "START_RECEIVED"
+            ],
+            "group": "users",
+            "het": {
+                "job_id": 0,
+                "job_offset": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "job_id": 12,
+            "name": "NameExists",
+            "licenses": "",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "hold": false,
+            "priority": {
+                "set": true,
+                "infinite": false,
+                "number": 1
+            },
+            "qos": "normal",
+            "qosreq": "",
+            "required": {
+                "CPUs": 1,
+                "memory_per_cpu": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "memory_per_node": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "kill_request_user": "",
+            "restart_cnt": 0,
+            "reservation": {
+                "id": 0,
+                "name": ""
+            },
+            "script": "",
+            "stdin_expanded": "/dev/null",
+            "stdout_expanded": "/home/fireuser/slurm-12.out",
+            "stderr_expanded": "",
+            "stdout": "/home/fireuser/slurm-%j.out",
+            "stderr": "",
+            "stdin": "/dev/null",
+            "state": {
+                "current": [
+                    "COMPLETED"
+                ],
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "time": {
+                        "elapsed": 61,
+                        "end": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787127492
+                        },
+                        "start": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787127431
+                        },
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": [
+                            "SUCCESS"
+                        ],
+                        "return_code": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 0
+                        },
+                        "signal": {
+                            "id": {
+                                "set": false,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "name": ""
+                        }
+                    },
+                    "nodes": {
+                        "count": 1,
+                        "range": "localhost",
+                        "list": [
+                            "localhost"
+                        ]
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": "",
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "max": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        },
+                        "governor": "0"
+                    },
+                    "kill_request_user": "",
+                    "state": [
+                        "COMPLETED"
+                    ],
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        }
+                    },
+                    "step": {
+                        "id": "12.batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": "",
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": "",
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": "",
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "submit_line": "sbatch --export=ALL,PATH=/bin:/usr/bin/:/usr/local/bin/,VAR1=Value1,VAR2=\"value2,asdadas\" --chdir=/home/fireuser --account=users --job-name=NameExists",
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": "",
+                        "id": 3,
+                        "count": -2
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "used_gres": "",
+            "user": "fireuser",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/fireuser"
+        },
+        {
+            "account": "staff",
+            "comment": {
+                "administrator": "",
+                "job": "",
+                "system": ""
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task_id": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "task": ""
+            },
+            "association": {
+                "account": "staff",
+                "cluster": "cluster",
+                "partition": "",
+                "user": "firesrv",
+                "id": 8
+            },
+            "block": "",
+            "cluster": "cluster",
+            "constraints": "",
+            "container": "",
+            "derived_exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "time": {
+                "elapsed": 130,
+                "eligible": 1787141399,
+                "end": 1787141529,
+                "planned": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "start": 1787141399,
+                "submission": 1787141399,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 7200
+                },
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "extra": "",
+            "failed_node": "",
+            "flags": [
+                "STARTED_ON_BACKFILL",
+                "START_RECEIVED"
+            ],
+            "group": "service-accounts",
+            "het": {
+                "job_id": 0,
+                "job_offset": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "job_id": 13,
+            "name": "wrap",
+            "licenses": "",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "hold": false,
+            "priority": {
+                "set": true,
+                "infinite": false,
+                "number": 1
+            },
+            "qos": "normal",
+            "qosreq": "",
+            "required": {
+                "CPUs": 1,
+                "memory_per_cpu": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "memory_per_node": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "kill_request_user": "",
+            "restart_cnt": 0,
+            "reservation": {
+                "id": 0,
+                "name": ""
+            },
+            "script": "",
+            "stdin_expanded": "/dev/null",
+            "stdout_expanded": "/home/firesrv/slurm-13.out",
+            "stderr_expanded": "",
+            "stdout": "/home/firesrv/slurm-%j.out",
+            "stderr": "",
+            "stdin": "/dev/null",
+            "state": {
+                "current": [
+                    "COMPLETED"
+                ],
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "time": {
+                        "elapsed": 130,
+                        "end": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787141529
+                        },
+                        "start": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787141399
+                        },
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": [
+                            "SUCCESS"
+                        ],
+                        "return_code": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 0
+                        },
+                        "signal": {
+                            "id": {
+                                "set": false,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "name": ""
+                        }
+                    },
+                    "nodes": {
+                        "count": 1,
+                        "range": "localhost",
+                        "list": [
+                            "localhost"
+                        ]
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": "",
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "max": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        },
+                        "governor": "0"
+                    },
+                    "kill_request_user": "",
+                    "state": [
+                        "COMPLETED"
+                    ],
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        }
+                    },
+                    "step": {
+                        "id": "13.batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": "",
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": "",
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": "",
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "submit_line": "sbatch --wrap sleep 130s",
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": "",
+                        "id": 3,
+                        "count": -2
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "used_gres": "",
+            "user": "firesrv",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/firesrv"
+        },
+        {
+            "account": "staff",
+            "comment": {
+                "administrator": "",
+                "job": "",
+                "system": ""
+            },
+            "allocation_nodes": 1,
+            "array": {
+                "job_id": 0,
+                "limits": {
+                    "max": {
+                        "running": {
+                            "tasks": 0
+                        }
+                    }
+                },
+                "task_id": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "task": ""
+            },
+            "association": {
+                "account": "staff",
+                "cluster": "cluster",
+                "partition": "",
+                "user": "fireuser",
+                "id": 6
+            },
+            "block": "",
+            "cluster": "cluster",
+            "constraints": "",
+            "container": "",
+            "derived_exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "time": {
+                "elapsed": 601,
+                "eligible": 1787141488,
+                "end": 1787142131,
+                "planned": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 42
+                },
+                "start": 1787141530,
+                "submission": 1787141488,
+                "suspended": 0,
+                "system": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "limit": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 7200
+                },
+                "total": {
+                    "seconds": 0,
+                    "microseconds": 0
+                },
+                "user": {
+                    "seconds": 0,
+                    "microseconds": 0
+                }
+            },
+            "exit_code": {
+                "status": [
+                    "SUCCESS"
+                ],
+                "return_code": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                },
+                "signal": {
+                    "id": {
+                        "set": false,
+                        "infinite": false,
+                        "number": 0
+                    },
+                    "name": ""
+                }
+            },
+            "extra": "",
+            "failed_node": "",
+            "flags": [
+                "STARTED_ON_SCHEDULE",
+                "START_RECEIVED"
+            ],
+            "group": "users",
+            "het": {
+                "job_id": 0,
+                "job_offset": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "job_id": 14,
+            "name": "wrap",
+            "licenses": "",
+            "mcs": {
+                "label": ""
+            },
+            "nodes": "localhost",
+            "partition": "part01",
+            "hold": false,
+            "priority": {
+                "set": true,
+                "infinite": false,
+                "number": 1
+            },
+            "qos": "normal",
+            "qosreq": "",
+            "required": {
+                "CPUs": 1,
+                "memory_per_cpu": {
+                    "set": false,
+                    "infinite": false,
+                    "number": 0
+                },
+                "memory_per_node": {
+                    "set": true,
+                    "infinite": false,
+                    "number": 0
+                }
+            },
+            "kill_request_user": "",
+            "restart_cnt": 0,
+            "reservation": {
+                "id": 0,
+                "name": ""
+            },
+            "script": "",
+            "stdin_expanded": "/dev/null",
+            "stdout_expanded": "/home/fireuser/slurm-14.out",
+            "stderr_expanded": "",
+            "stdout": "/home/fireuser/slurm-%j.out",
+            "stderr": "",
+            "stdin": "/dev/null",
+            "state": {
+                "current": [
+                    "COMPLETED"
+                ],
+                "reason": "None"
+            },
+            "steps": [
+                {
+                    "time": {
+                        "elapsed": 601,
+                        "end": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787142131
+                        },
+                        "start": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 1787141530
+                        },
+                        "suspended": 0,
+                        "system": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "total": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        },
+                        "user": {
+                            "seconds": 0,
+                            "microseconds": 0
+                        }
+                    },
+                    "exit_code": {
+                        "status": [
+                            "SUCCESS"
+                        ],
+                        "return_code": {
+                            "set": true,
+                            "infinite": false,
+                            "number": 0
+                        },
+                        "signal": {
+                            "id": {
+                                "set": false,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "name": ""
+                        }
+                    },
+                    "nodes": {
+                        "count": 1,
+                        "range": "localhost",
+                        "list": [
+                            "localhost"
+                        ]
+                    },
+                    "tasks": {
+                        "count": 1
+                    },
+                    "pid": "",
+                    "CPU": {
+                        "requested_frequency": {
+                            "min": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            },
+                            "max": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        },
+                        "governor": "0"
+                    },
+                    "kill_request_user": "",
+                    "state": [
+                        "COMPLETED"
+                    ],
+                    "statistics": {
+                        "CPU": {
+                            "actual_frequency": 0
+                        },
+                        "energy": {
+                            "consumed": {
+                                "set": true,
+                                "infinite": false,
+                                "number": 0
+                            }
+                        }
+                    },
+                    "step": {
+                        "id": "14.batch",
+                        "name": "batch"
+                    },
+                    "task": {
+                        "distribution": "Unknown"
+                    },
+                    "tres": {
+                        "requested": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "consumed": {
+                            "max": [],
+                            "min": [],
+                            "average": [],
+                            "total": []
+                        },
+                        "allocated": [
+                            {
+                                "type": "cpu",
+                                "name": "",
+                                "id": 1,
+                                "count": 1
+                            },
+                            {
+                                "type": "mem",
+                                "name": "",
+                                "id": 2,
+                                "count": 1000
+                            },
+                            {
+                                "type": "node",
+                                "name": "",
+                                "id": 4,
+                                "count": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "submit_line": "sbatch --wrap sleep 600s",
+            "tres": {
+                "allocated": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "energy",
+                        "name": "",
+                        "id": 3,
+                        "count": -2
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ],
+                "requested": [
+                    {
+                        "type": "cpu",
+                        "name": "",
+                        "id": 1,
+                        "count": 1
+                    },
+                    {
+                        "type": "mem",
+                        "name": "",
+                        "id": 2,
+                        "count": 1000
+                    },
+                    {
+                        "type": "node",
+                        "name": "",
+                        "id": 4,
+                        "count": 1
+                    },
+                    {
+                        "type": "billing",
+                        "name": "",
+                        "id": 5,
+                        "count": 1
+                    }
+                ]
+            },
+            "used_gres": "",
+            "user": "fireuser",
+            "wckey": {
+                "wckey": "",
+                "flags": []
+            },
+            "working_directory": "/home/fireuser"
+        }
+    ],
+    "meta": {
+        "plugin": {
+            "type": "openapi/slurmdbd",
+            "name": "Slurm OpenAPI slurmdbd",
+            "data_parser": "data_parser/v0.0.42",
+            "accounting_storage": "accounting_storage/slurmdbd"
+        },
+        "client": {
+            "source": "[slurm]:42010(fd:11)",
+            "user": "",
+            "group": ""
+        },
+        "command": [],
+        "slurm": {
+            "version": {
+                "major": "24",
+                "micro": "3",
+                "minor": "11"
+            },
+            "release": "24.11.3",
+            "cluster": "cluster"
+        }
+    },
+    "errors": [],
+    "warnings": []
+}

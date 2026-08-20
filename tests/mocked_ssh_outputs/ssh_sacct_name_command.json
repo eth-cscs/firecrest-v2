@@ -1,0 +1,6 @@
+{
+    "stdout": "12|1|cluster|0:0|users|users|NameExists|localhost|part01|1|COMPLETED|None|61|1787127431|1787127431|1787127492|00:00:00|7200|test-user|/home/test-user\n12.batch|1|cluster|0:0||users|batch|localhost|||COMPLETED||61|1787127431|1787127431|1787127492|00:00:00|||",
+    "stderr": "",
+    "exit_code": 0,
+    "command":"SLURM_TIME_FORMAT='%s' sacct --name=NameExists --starttime=now-7days --parsable2 --noheader --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
+}

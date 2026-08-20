@@ -109,9 +109,10 @@ class PbsClient(SchedulerBaseClient):
         return result
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None,
     ) -> List[PbsJob] | None:
-        qstat = QstatCommand(username, None, allusers, account)
+        qstat = QstatCommand(username, None, allusers, account, name)
         result = await self.__executed_ssh_cmd(username, jwt_token, qstat)
         # Apply PBS model
         if result:

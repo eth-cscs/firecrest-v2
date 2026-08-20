@@ -193,7 +193,11 @@ class SlurmJob(JobModel):
         # Custom nodes count extraction
         if "allocation_nodes" not in kwargs and "job_resources" in kwargs:
             if kwargs["job_resources"] and "nodes" in kwargs["job_resources"]:
-                kwargs["allocation_nodes"] = kwargs["job_resources"]["nodes"]["count"]
+                nodes = kwargs["job_resources"]["nodes"]
+                if isinstance(nodes, dict):
+                    kwargs["allocation_nodes"] = nodes.get("count", 0)
+                else:
+                    kwargs["allocation_nodes"] = kwargs["job_resources"].get("allocated_hosts", 0)
             else:
                 kwargs["allocation_nodes"] = 0
 

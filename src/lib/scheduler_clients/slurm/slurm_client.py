@@ -91,10 +91,11 @@ class SlurmClient(SlurmBaseClient):
         )
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None
     ) -> List[SlurmJob] | None:
         return await self.slurm_default_client.get_jobs(
-            username, jwt_token, allusers, account
+            username, jwt_token, allusers, account, name
         )
 
     async def get_job_metadata(

@@ -175,10 +175,11 @@ class SlurmCliClient(SlurmBaseClient):
         return jobs
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self, username: str, jwt_token: str, allusers: bool = False,
+        account: str = None, name: str = None
     ) -> List[SlurmJob] | None:
-        sacct = SacctCommand(username, None, allusers, account)
-        squeue = SqueueCommand(username, None, allusers, account)
+        sacct = SacctCommand(username, None, allusers, account, name)
+        squeue = SqueueCommand(username, None, allusers, account, name)
 
         commands = [
             # sacct has precedence over squeue, as it contains more complete job info, including finished jobs

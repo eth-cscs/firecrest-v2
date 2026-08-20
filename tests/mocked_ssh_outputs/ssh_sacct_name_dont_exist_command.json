@@ -1,0 +1,6 @@
+{
+    "stdout": "JobID|JobName|Partition|Account|AllocCPUS|State|ExitCode",
+    "stderr": "",
+    "exit_code": 0,
+    "command": "SLURM_TIME_FORMAT='%s' sacct --name=DontExist --starttime=now-7days --parsable2 --noheader --format='JobID,AllocNodes,Cluster,ExitCode,Group,Account,JobName,NodeList,Partition,Priority,State,Reason,ElapsedRaw,Submit,Start,End,Suspended,TimelimitRaw,User,WorkDir'"
+}
