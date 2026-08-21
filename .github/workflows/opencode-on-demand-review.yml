@@ -1,16 +1,20 @@
-name: opencode-review
+name: opencode-review-on-demand
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
 
 jobs:
   review:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event.issue.pull_request &&
+      github.event.comment.user.type != 'Bot' &&
+      startsWith(github.event.comment.body, '/oc-review') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
-      group: opencode-review-${{ github.event.issue.number || github.event.pull_request.number }}
+      group: opencode-review-${{ github.event.issue.number }}
       cancel-in-progress: true
     permissions:
       id-token: write
@@ -26,6 +30,6 @@ jobs:
         env:
           CSCS_INFERENCE_API_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
         with:
-          agent: grumpy-reviewer
           model: cscs/moonshotai/Kimi-K2.7-Code
+          agent: grumpy-reviewer
           share: false

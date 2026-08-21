@@ -5,10 +5,35 @@
 
 # models
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from lib.models import CamelModel
 
 from pydantic import Field, AliasChoices
+
+
+class JobsTimeWindow(str, Enum):
+    LAST_HOUR = "1h"
+    LAST_8_HOURS = "8h"
+    LAST_24_HOURS = "24h"
+    LAST_3_DAYS = "3d"
+    LAST_7_DAYS = "7d"
+
+
+# Canonical (amount, unit) duration for each historical time window. `unit`
+# doubles as both a `datetime.timedelta` keyword argument (used by the Slurm
+# REST client to compute an absolute start time) and a sacct/squeue
+# relative-time suffix (used by the Slurm CLI client to build
+# `--starttime=now-<amount><unit>`). `unit` must stay plural here --
+# `timedelta` only accepts plural keyword arguments (`hours`, not `hour`) --
+# any singular-for-grammar adjustment (e.g. "1 hour" vs "1 hours") is done
+# separately, only for CLI command rendering, in sacct_base.py.
+TIME_WINDOW_DURATIONS: Dict[JobsTimeWindow, Tuple[int, str]] = {
+    JobsTimeWindow.LAST_HOUR: (1, "hours"),
+    JobsTimeWindow.LAST_8_HOURS: (8, "hours"),
+    JobsTimeWindow.LAST_24_HOURS: (24, "hours"),
+    JobsTimeWindow.LAST_3_DAYS: (3, "days"),
+    JobsTimeWindow.LAST_7_DAYS: (7, "days"),
+}
 
 
 class NodeState(str, Enum):

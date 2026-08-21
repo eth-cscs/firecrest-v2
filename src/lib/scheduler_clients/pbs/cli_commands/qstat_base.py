@@ -15,17 +15,19 @@ class QstatBaseCommand(BaseCommand):
         ids: Optional[List[str]] = None,
         allusers: bool = True,
         account: str = None,
+        name: str = None,
     ) -> None:
         super().__init__()
         self.username = username
         self.ids = ids if ids else []
         self.allusers = allusers
         self.account = account
+        self.name = name
 
     def get_command(self) -> str:
         cmd = ["qstat", "-F", "json", "-f"] + self.ids
-        if self.account:
-            cmd += ["-A", self.account]
+        # removed the -A options, since it is not an option in qstat command,
+        # then the account filtering is done on the client-side
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

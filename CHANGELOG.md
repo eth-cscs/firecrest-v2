@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Job metadata no longer fails with `object of type 'NoneType' has no len()` when the batch script is unavailable, e.g. for jobs purged from the Slurm controller or not submitted with `sbatch`. The metadata is now returned with a null `script`.
+- `name` parameter in `GET /compute/jobs` request
+- Added `time_window` query parameter to `GET /compute/{system_name}/jobs` to control how far back historical (completed, failed, cancelled...) jobs are looked up. Accepted values: `1h`, `8h`, `24h`, `3d`, `7d`.
+
+### Changed
+
+- ***⚠️ API Breaking*** `GET /compute/{system_name}/jobs` now defaults to a `24h` historical lookback window. Previously the lookback was a fixed 7 days on SSH/CLI-based clusters, and unbounded on REST-based clusters (no time filter was sent to `slurmdb`). Pass `time_window=7d` for the widest supported window.
+
+### Fixed
 
 ## [2.5.6]
 
