@@ -374,6 +374,75 @@ async def test_get_job_metadata(
         assert response.json() is not None
 
 
+async def test_get_job_metadata_without_stored_batch_script(
+    client, ssh_client, slurm_cluster_with_ssh_config
+):
+    # The job is no longer known to the slurm controller but is still in the
+    # accounting database, which was not configured to store batch scripts
+    # (AccountingStoreFlags=job_script). Both script commands come back empty.
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(
+                command="scontrol show",
+                stdout="",
+                stderr="slurm_load_jobs error: Invalid job id specified",
+                exit_code=1,
+            ),
+            MockedCommand(
+                command="scontrol write batch_script",
+                stdout="",
+                stderr="scontrol: error: Invalid job id specified",
+                exit_code=1,
+            ),
+            MockedCommand(command="--batch-script", stdout="", stderr=""),
+            MockedCommand(
+                command="--format=",
+                stdout="4498195|myjob||slurm-%j.out|slurm-%j.err|/scratch/test-user",
+                stderr="",
+            ),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs/{job_id}/metadata".format(
+                cluster_name=slurm_cluster_with_ssh_config.name, job_id=4498195
+            )
+        )
+        assert response.status_code == 200
+        job = response.json()["jobs"][0]
+        assert job["jobId"] == "4498195"
+        assert job["script"] is None
+        assert job["standardOutput"] == "/scratch/test-user/slurm-4498195.out"
+
+
+async def test_get_job_metadata_of_non_batch_job(
+    client, ssh_client, mocked_ssh_scontrol_job_output, slurm_cluster_with_ssh_config
+):
+    # scontrol knows the job but cannot write a batch script for it, as the job
+    # was not submitted with sbatch (BatchFlag=0).
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(
+                command="scontrol write batch_script",
+                stdout="",
+                stderr="scontrol: error: Job script not found",
+                exit_code=1,
+            ),
+            MockedCommand(**mocked_ssh_scontrol_job_output),
+            MockedCommand(command="--batch-script", stdout="", stderr=""),
+            MockedCommand(command="--format=", stdout="", stderr=""),
+        ]
+    ):
+        response = client.get(
+            "/compute/{cluster_name}/jobs/{job_id}/metadata".format(
+                cluster_name=slurm_cluster_with_ssh_config.name, job_id=1
+            )
+        )
+        assert response.status_code == 200
+        job = response.json()["jobs"][0]
+        assert job["jobId"] == "1"
+        assert job["script"] is None
+
+
 async def test_delete_job(
     client, ssh_client, mocked_ssh_scancel_output, slurm_cluster_with_ssh_config
 ):

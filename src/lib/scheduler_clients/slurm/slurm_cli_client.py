@@ -156,22 +156,24 @@ class SlurmCliClient(SlurmBaseClient):
         if not isinstance(results[cmd_result_i], list) and len(results) == 4:
             cmd_result_i = 2
 
+        job_info = results[cmd_result_i]
+        script_info = results[cmd_result_i + 1]
+
         # check if job was found
-        if results[cmd_result_i] is None:
+        if job_info is None:
             return None
-        if isinstance(results[cmd_result_i], Exception):
-            return results[cmd_result_i]
+        if isinstance(job_info, Exception):
+            raise SlurmError("Error executing Slurm command.") from job_info
+
+        # script info is optional: it is only stored in the accounting database when
+        # slurm.conf sets AccountingStoreFlags=job_script
+        if not isinstance(script_info, list):
+            script_info = []
 
         jobs = []
-        for i in range(len(results[cmd_result_i])):
-            # if script info is not available, continue
-            if i >= len(results[cmd_result_i + 1]):
-                continue
-            jobs.append(
-                SlurmJobMetadata(
-                    **{**results[cmd_result_i][i], **results[cmd_result_i + 1][i]}
-                )
-            )
+        for i, job in enumerate(job_info):
+            script = script_info[i] if i < len(script_info) else {}
+            jobs.append(SlurmJobMetadata(**{**job, **script}))
 
         return jobs
 
