@@ -5,25 +5,77 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-
 ## [2.6.0] - OPEN
 
 ### Added
 
+- `name` parameter in `GET /compute/jobs` request
+- Added `time_window` query parameter to `GET /compute/{system_name}/jobs` to control how far back historical (completed, failed, cancelled...) jobs are looked up. Accepted values: `1h`, `8h`, `24h`, `3d`, `7d`.
 
 ### Changed
 
 - ***⚠️ API Breaking*** Refactored UserInfo response, group and groups objects have been merged.
+- ***⚠️ API Breaking*** `GET /compute/{system_name}/jobs` now defaults to a `24h` historical lookback window. Previously the lookback was a fixed 7 days on SSH/CLI-based clusters, and unbounded on REST-based clusters (no time filter was sent to `slurmdb`). Pass `time_window=7d` for the widest supported window.
 
 ### Fixed
 
 
+## [2.5.6]
+
+### Added
+
+### Changed
+
+- SSH connection pool locking is now per-user instead of global, reducing unnecessary SSH connection wait times. The max_clients connection pool setting is no longer a hard limit; under a high number of concurrent requests, the limit may be temporarily exceeded.
+
+- Consolidated logging messages and HTTP tracing headers. Forwarded requests now include X-Request-ID and X-Correlation-ID (instead of X-Trace-Id). 
+
+### Fixed
+
+- Allow command execution when the health check is disabled
+- Scheduler in connection mode `ssh` was skipped when RESTAPI `url` option was set.
+
+## [2.5.5]
+
+### Added
+
+- Trace logs now include both request and response trace.
+
+### Fixed
+
+- Fixes truncation of `workingDirectory` in job responses for running/pending jobs caused by `squeue`'s default 20-character column width.
+- Fixes error handling of downstream services.
+- Fixes log tracing
 
 
 
+## [2.5.4]
 
-## [2.5.2] - OPEN
+### Added
+
+- Added partition and reservation override parameters to job submission endpoint.
+- Added parameter to shows hidden partitions.
+- Added reservation status in API response.
+
+### Changed
+
+### Fixed
+
+- Fixes reservations date parsing.
+
+## [2.5.3]
+
+### Added
+
+- Configuration setting `token_endpoint_auth_method` to authenticate the health-check client following [OIDC client authentication standards](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication). Defaults to `client_secret_basic` to match pre-2.5.3 behavior.
+
+### Changed
+
+### Fixed
+
+- Aligned livenessProbe timeout with the check_liveness.py script inner timeout value.
+
+## [2.5.2]
 
 ### Added
 

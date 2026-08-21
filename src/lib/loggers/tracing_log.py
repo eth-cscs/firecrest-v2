@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from enum import Enum
 import json
 import re
 import logging
@@ -10,9 +11,11 @@ import logging
 from functools import wraps
 from fastapi import Request
 from starlette_context import context
+from starlette_context.header_keys import HeaderKeys
 
 # The actual tracing logger
 tracing_logger = logging.getLogger("f7t_v2_tracing_log")
+
 
 # Wrapper
 def tracing_log_method(func):
@@ -61,13 +64,28 @@ def log_backend_http_scheduler(url: str, response_status: int) -> None:
     )
 
 
+class Log_operation(Enum):
+    Request = "Requesting"
+    Response = "Responding"
+
+
 @tracing_log_method
-def tracing_log_middleware(request: Request, username: str, status_code: int, headers_to_trace: list) -> None:
+def tracing_log_middleware(
+    operation: Log_operation,
+    request: Request,
+    username: str,
+    status_code: int,
+    headers_to_trace: list,
+) -> None:
     # Get URL
     url_path = request.scope["path"]
     root_path = request.scope["root_path"]
     # Normalize endpoint: remove prefix from root path, added by any API gateway
     endpoint = url_path.removeprefix(root_path) if root_path != "" else url_path
+
+    if url_path.find("/status/liveness") != -1:
+        return  # Skip logging for liveness endpoint
+
     # Initialize logging data
     resource = ""
     system_name = ""
@@ -84,14 +102,18 @@ def tracing_log_middleware(request: Request, username: str, status_code: int, he
     log_data["username"] = username
     if system_name != "":
         log_data["system_name"] = system_name
+    log_data["message"] = f"{operation.value}: {endpoint}"
     log_data["endpoint"] = endpoint
     log_data["resource"] = resource
-    log_data["status_code"] = status_code
-    
+    log_data["http_request_method"] = request.method
+    log_data["http_response_status_code"] = status_code
+    log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
+    log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
+
     for header in headers_to_trace:
-        if header['input'] in request.headers:
-            log_data[header['output']] = request.headers[header['input']]
-    
+        if header["input"] in request.headers:
+            log_data[header["output"]] = request.headers[header["input"]]
+
     # Get backend log if any
     backend = get_tracing_backend_log()
     if backend is not None:

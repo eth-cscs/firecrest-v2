@@ -1,0 +1,8 @@
+{
+    "stdout": "",
+    "stderr": "ls: cannot access '/scratch': No such file or directory",
+    "exit_code": 2,
+    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -- '/scratch'"
+
+}
+

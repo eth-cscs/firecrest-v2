@@ -12,7 +12,18 @@ from pytest_httpx import HTTPXMock
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
+from tests.mock_ssh_client import MockedCommand
 from tests import mocked_api_responses
+from firecrest.config import BackendServiceType
+
+# import helpers functions to avoid duplicating code in tests
+from tests.helpers import (
+    mocked_ssh_ls_output,
+    helper_test_userinfo,
+    helper_test_get_job,
+    helper_test_ls_command,
+    load_ssh_output,
+)
 
 
 @pytest.fixture(scope="module")
@@ -20,6 +31,11 @@ def mocked_nodes_get_response():
     response_file = impresources.files(mocked_api_responses) / "slurm_get_nodes.json"
     with response_file.open("r") as response:
         return json.load(response)
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_ls_wrong_path_output():
+    return load_ssh_output("ssh_ls_command_wrong_path.json")
 
 
 def mocked_token_response():
@@ -75,3 +91,103 @@ async def test_health_check(
         assert slurm_cluster_with_api_config.servicesHealth is not None
         assert isinstance(slurm_cluster_with_api_config.servicesHealth, list)
         assert len(slurm_cluster_with_api_config.servicesHealth) > 0
+
+
+async def test_health_check_disabled(
+    slurm_cluster_with_ssh_no_health_check_config,
+):
+
+    # storage probing is configured
+    assert BackendServiceType.external_storage in slurm_cluster_with_ssh_no_health_check_config.probing.services
+
+    # ssh, scheduler and filesystem probing are not configured
+    assert BackendServiceType.ssh not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+    assert BackendServiceType.scheduler not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+    assert BackendServiceType.filesystem not in slurm_cluster_with_ssh_no_health_check_config.probing.services
+
+
+async def test_health_check_disabled_ok_with_ssh(
+    client,
+    ssh_client,
+    slurm_cluster_with_ssh_no_health_check_config,
+):
+
+    await helper_test_userinfo(
+        client,
+        ssh_client,
+        slurm_cluster_with_ssh_no_health_check_config.name
+    )
+
+
+async def test_health_check_disabled_ok_with_scheduler(
+    client, ssh_client,
+    slurm_cluster_with_ssh_no_health_check_config,
+):
+    await helper_test_get_job(
+        client,
+        ssh_client,
+        slurm_cluster_with_ssh_no_health_check_config.name
+    )
+
+
+async def test_health_check_disabled_notok_with_filesystem(
+        client, ssh_client, mocked_ssh_ls_wrong_path_output,
+        slurm_cluster_with_ssh_no_health_check_config,):
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_ls_wrong_path_output)]):
+
+        response = client.get(
+            "/filesystem/{cluster_name}/ops/ls?path={path}".format(
+                cluster_name=slurm_cluster_with_ssh_no_health_check_config.name, path="/scratch"
+            )
+        )
+
+        assert response.status_code == 404
+        assert response.json() is not None
+
+
+async def test_health_check_disabled_ok_with_no_filesystem(
+        client, ssh_client,
+        slurm_cluster_with_ssh_no_health_check_config,):
+
+    await helper_test_ls_command(client, ssh_client,
+                                 slurm_cluster_with_ssh_no_health_check_config.name)
+
+
+async def test_health_check_disabled_not_ok_traversal(
+    client, slurm_cluster_with_ssh_no_health_check_config
+):
+    response = client.get(
+        f"/filesystem/{slurm_cluster_with_ssh_no_health_check_config.name}"
+        "/ops/ls?path=/home/../etc/passwd"
+    )
+    assert response.status_code == 400
+
+
+async def test_health_check_enabled_on_wrong_path(
+    client, slurm_cluster_with_ssh_config
+):
+    response = client.get(
+        f"/filesystem/{slurm_cluster_with_ssh_config.name}"
+        "/ops/ls?path=/scratch"
+    )
+    assert response.status_code == 503
+
+
+async def test_health_check_relative_path(
+    client, slurm_cluster_with_ssh_config
+):
+    response = client.get(
+        f"/filesystem/{slurm_cluster_with_ssh_config.name}"
+        "/ops/ls?path=./home/fireuser"
+    )
+    assert response.status_code == 400
+
+
+async def test_health_check_path_prefix_not_a_filesystem(
+    client, slurm_cluster_with_ssh_config
+):
+    response = client.get(
+        f"/filesystem/{slurm_cluster_with_ssh_config.name}/ops/ls?path=/home_private/x"
+    )
+    assert response.status_code == 400

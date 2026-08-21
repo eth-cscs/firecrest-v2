@@ -4,8 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # commands
+import shlex
 from abc import abstractmethod
 from typing import List
+from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.ssh_clients.ssh_client import BaseCommand
 
 
@@ -17,26 +19,35 @@ class SacctCommandBase(BaseCommand):
         job_ids: List[str] = None,
         allusers: bool = False,
         account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> None:
         super().__init__()
         self.username = username
         self.allusers = allusers
         self.job_ids = job_ids
         self.account = account
+        self.name = name
+        self.time_window = time_window
 
     def get_command(self) -> str:
         cmd = ["SLURM_TIME_FORMAT='%s' sacct"]
         if self.allusers:
             cmd += ["--allusers"]
         if self.account:
-            cmd += [f"--account='{self.account}'"]
+            cmd += [f"--account={shlex.quote(self.account)}"]
+        if self.name:
+            cmd += [f"--name={shlex.quote(self.name)}"]
         if self.job_ids:
             str_job_ids = ",".join(self.job_ids)
-            cmd += [f"--jobs='{str_job_ids}'"]
+            cmd += [f"--jobs={shlex.quote(str_job_ids)}"]
         else:
-            cmd += [
-                "--starttime=now-7days"
-            ]  # up to one week ago, default is since midnight today
+            amount, unit = TIME_WINDOW_DURATIONS[self.time_window]
+            # sacct's parse_time() accepts both singular and plural unit
+            # names ("hour"/"hours"); use the grammatically correct one.
+            if amount == 1:
+                unit = unit[:-1]
+            cmd += [f"--starttime=now-{amount}{unit}"]
         cmd += ["--parsable2"]
         return " ".join(cmd)
 

@@ -6,7 +6,7 @@ Authlib
 pydantic
 pydantic-settings >= 2.2.0
 setuptools
-aiohttp
+aiohttp <3.14 # Temporary constraint: aiohttp 3.14 added a required stream_writer argument to ClientResponse.__init__ which breaks the aioresponses test mocks (https://github.com/pnuckowski/aioresponses/issues/289). Remove once aioresponses supports aiohttp 3.14.
 asyncio
 rootpath
 asyncssh

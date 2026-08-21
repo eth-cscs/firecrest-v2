@@ -35,6 +35,7 @@ from lib.scheduler_clients.slurm.cli_commands.scontrol_reservations_command impo
 )
 from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.cli_commands.srun_command import SrunCommand
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -175,10 +176,16 @@ class SlurmCliClient(SlurmBaseClient):
         return jobs
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
-        sacct = SacctCommand(username, None, allusers, account)
-        squeue = SqueueCommand(username, None, allusers, account)
+        sacct = SacctCommand(username, None, allusers, account, name, time_window)
+        squeue = SqueueCommand(username, None, allusers, account, name)
 
         commands = [
             # sacct has precedence over squeue, as it contains more complete job info, including finished jobs
@@ -219,9 +226,9 @@ class SlurmCliClient(SlurmBaseClient):
         return result
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        scontrolpartition = ScontrolPartitionCommand()
+        scontrolpartition = ScontrolPartitionCommand(show_hidden)
         result = await self.__executed_ssh_cmd(username, jwt_token, scontrolpartition)
         if result:
             result = [

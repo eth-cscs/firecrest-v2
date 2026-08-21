@@ -41,6 +41,16 @@ class QstatCommand(QstatBaseCommand):
             if not self.allusers and job_owner != self.username:
                 continue
 
+            if self.name:
+                name = job_data.get("Job_Name", "")
+                if name != self.name:
+                    continue
+
+            if self.account:
+                account = job_data.get("project", "")
+                if account != self.account:
+                    continue
+
             # job_id examples:
             #  "123456.pbs"
             #  "123456[].pbs"

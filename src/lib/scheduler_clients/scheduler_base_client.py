@@ -12,6 +12,7 @@ from lib.scheduler_clients.models import (
     JobMetadataModel,
     JobModel,
     JobDescriptionModel,
+    JobsTimeWindow,
     NodeModel,
     PartitionModel,
     ReservationModel,
@@ -55,7 +56,13 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = JobsTimeWindow.LAST_24_HOURS,
     ) -> List[JobModel] | None:
         pass
 
@@ -81,6 +88,6 @@ class SchedulerBaseClient(ABC):
 
     @abstractmethod
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[PartitionModel] | None:
         pass

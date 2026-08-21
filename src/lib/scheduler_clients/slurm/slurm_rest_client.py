@@ -6,6 +6,7 @@
 import asyncio
 import json
 import aiohttp
+from datetime import datetime, timedelta, timezone
 from fastapi import status
 from socket import AF_INET
 from typing import Optional, List
@@ -17,6 +18,7 @@ import urllib
 from lib.exceptions import SlurmAuthTokenError, SlurmError
 
 # Models
+from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -58,6 +60,21 @@ async def _slurm_unexpected_response(response):
     raise SlurmError(
         f"Unexpected Slurm API response. status:{response.status} message:{message}"
     )
+
+
+# `start_time`/`end_time` on /slurmdb/v{version}/jobs are only explicitly
+# documented as accepting a plain Unix timestamp starting at API v0.0.41
+# API v0.0.40 accepts timestamp.
+# Prior versions are treated as accepting a relative time spec, e.g. "now-1hours" or "now-3days".
+_EPOCH_START_TIME_MIN_API_VERSION = Version("0.0.40")
+
+
+def _time_window_start_time(time_window: JobsTimeWindow, api_version: str) -> str:
+    amount, unit = TIME_WINDOW_DURATIONS[time_window]
+    if Version(api_version) >= _EPOCH_START_TIME_MIN_API_VERSION:
+        start_datetime = datetime.now(timezone.utc) - timedelta(**{unit: amount})
+        return str(int(start_datetime.timestamp()))
+    return f"now-{amount}{unit}"
 
 
 class SlurmRestClient(SlurmBaseClient):
@@ -210,16 +227,38 @@ class SlurmRestClient(SlurmBaseClient):
         raise NotImplementedError("This method is not supported by the Slurm REST API")
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
 
+        query_params = {}
+        if account:
+            query_params["account"] = account
+
         query_string = (
-            f"?{urllib.parse.urlencode({'account': account})}" if account else ""
+            f"?{urllib.parse.urlencode(query_params)}" if query_params else ""
         )
-        slurmdb_url = f"{self.api_url}/slurmdb/v{self.api_version}/jobs{query_string}"
+
+        # slurmdb holds historical/accounting jobs (equivalent to sacct), so it is the
+        # only endpoint bound by the requested time window; slurm holds only the jobs
+        # currently known to the controller (equivalent to squeue).
+        slurmdb_query_params = {
+            **query_params,
+            "start_time": _time_window_start_time(time_window, self.api_version),
+        }
+        slurmdb_query_string = f"?{urllib.parse.urlencode(slurmdb_query_params)}"
+
+        slurmdb_url = (
+            f"{self.api_url}/slurmdb/v{self.api_version}/jobs{slurmdb_query_string}"
+        )
         slurm_url = f"{self.api_url}/slurm/v{self.api_version}/jobs{query_string}"
 
         async def fetch_jobs(url: str) -> list:
@@ -238,18 +277,19 @@ class SlurmRestClient(SlurmBaseClient):
         for result in results:
             if isinstance(result, Exception):
                 raise SlurmError("Error fetching Slurm API data.") from result
-            if result and "jobs" in result:
-                # Note: starting from API version v0.0.39 this filter can be set as query param
-                filtered_jobs = list(
-                    filter(
-                        lambda job: (
-                            allusers or job["user"] == username
-                            if "user" in job
-                            else job["user_name"] == username
-                        ),
-                        result["jobs"],
-                    )
+
+            def matches(job):
+                job_user = job.get("user") or job.get("user_name")
+                return (allusers or job_user == username) and (
+                    not name or job.get("name") == name
                 )
+
+            if result and "jobs" in result:
+                # Note: starting from API version v0.0.39 the "user_name" filter can be set as query param
+                # Note: starting from API version v0.0.45 the "job_name" filter can be set as query param
+
+                filtered_jobs = list(filter(matches, result["jobs"]))
+
                 for job in filtered_jobs:
                     job_obj = SlurmJob.model_validate(job)
                     if job_obj.time.limit is not None:
@@ -315,12 +355,14 @@ class SlurmRestClient(SlurmBaseClient):
         return res
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
         client = await self.get_aiohttp_client()
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/partitions"
+        if show_hidden:
+            url += "?flags=all"
         async with client.get(
             url=url,
             headers=headers,
@@ -331,11 +373,14 @@ class SlurmRestClient(SlurmBaseClient):
                 await _slurm_unexpected_response(response)
             partition_result = await response.json()
             # Apply Slurm model
-            res = [
+            part = [
                 SlurmPartitions.model_validate(partition)
                 for partition in partition_result["partitions"]
+                # Note: the following approach only works if the API version is >= v0.0.45
+                # if show_hidden or ("hidden" not in partition["flags"])
+                # For now, filtering happens by omitting the "flags=all" query param and let Slurm filter hidden partitions.
             ]
-        return res
+        return part
 
     async def get_accounts(
         self, username: str, jwt_token: str

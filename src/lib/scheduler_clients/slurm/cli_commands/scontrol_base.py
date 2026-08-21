@@ -10,7 +10,7 @@ from lib.ssh_clients.ssh_client import BaseCommand
 class ScontrolBase(BaseCommand):
 
     def get_command(self) -> str:
-        cmd = ["scontrol"]
+        cmd = ["SLURM_TIME_FORMAT='%s' scontrol"]
         return " ".join(cmd)
 
     @abstractmethod

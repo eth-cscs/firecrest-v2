@@ -143,6 +143,15 @@ def slurm_cluster_with_ssh_config():
 
 
 @pytest.fixture(scope="module")
+def slurm_cluster_with_ssh_no_health_check_config():
+    for cluster in settings.clusters:
+        if (
+            getattr(cluster, "name", None).lower() == "cluster-slurm-ssh-no-health-check"
+        ):
+            return cluster
+
+
+@pytest.fixture(scope="module")
 def pbs_cluster():
     for cluster in settings.clusters:
         if getattr(cluster.scheduler, "type", "").lower() == "pbs":
@@ -185,25 +194,35 @@ def client(app, s3_client, ssh_client):
 def set_up_cluster_health():
     settings = get_settings()
     for cluster in settings.clusters:
-        health = [
-            {
-                "serviceType": "scheduler",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-            },
-            {
-                "serviceType": "ssh",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-            },
-            {
-                "serviceType": "filesystem",
-                "lastChecked": datetime.now(),
-                "latency": 0,
-                "healthy": True,
-                "path": "/home",
-            },
-        ]
+        if cluster.name.lower() == "cluster-slurm-ssh-no-health-check":
+            health = None
+        else:
+            health = [
+                {
+                    "serviceType": "scheduler",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                },
+                {
+                    "serviceType": "ssh",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                },
+                {
+                    "serviceType": "filesystem",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": True,
+                    "path": "/home",
+                },
+                {
+                    "serviceType": "filesystem",
+                    "lastChecked": datetime.now(),
+                    "latency": 0,
+                    "healthy": False,
+                    "path": "/scratch",
+                },
+            ]
         cluster.servicesHealth = health

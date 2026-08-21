@@ -38,6 +38,8 @@ nav:
       - use_cases/jupyterhub/README.md
     - 'Web UI Application':
       - use_cases/UI-client-credentials/README.md
+    - 'Open OnDemand':
+      - use_cases/open-ondemand/README.md
   - 'API Reference': https://eth-cscs.github.io/firecrest-v2/openapi/
 
 theme:

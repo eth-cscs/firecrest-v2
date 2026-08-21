@@ -2,8 +2,9 @@ auth:
   authentication:
     scopes:  {}
     tokenUrl:  "http://192.168.240.3:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+    tokenEndpointAuthMethod: "client_secret_post"
     publicCerts: []
-    username_claim: "sub"
+    usernameClaim: "sub"
 ssh_credentials:
   type: "SSHService"
   url: "http://192.168.240.20:5000"
@@ -82,6 +83,53 @@ clusters:
     - path: '/home'
       data_type: 'users'
       default_work_dir: true
+    - path: '/scratch'
+      data_type: 'scratch'
+      default_work_dir: false
+  data_operation:
+    max_ops_file_size: 5242880 # 5M
+    datatransfer_jobs_directives:
+      - "#SBATCH --nodes=1"
+      - "#SBATCH --time=0-00:15:00"
+      - "#SBATCH --account={account}"
+    data_transfer:
+      name: "s3-storage"
+      service_type: "s3"
+      private_url: "http://192.168.240.19:9000"
+      public_url: "http://localhost:9000"
+      access_key_id: "storage_access_key"
+      secret_access_key: ""
+      region: "us-east-1"
+      ttl: 604800
+      multipart:
+        use_split: false
+        max_part_size: 1073741824 # 1G
+        parallel_runs: 3
+        tmp_folder: "tmp"
+- name: "cluster-SLURM-ssh-no-health-check"
+  ssh:
+    host: "192.168.240.2"
+    port: 22
+    max_clients: 500
+  scheduler:
+    type: "slurm"
+    version: "24.11.0"
+    timeout: 10
+  service_account:
+    client_id: "firecrest-api"
+    secret: ""
+  probing:
+    interval_check: 60
+    services:      
+      storage:
+        timeout: 10
+  file_systems:
+    - path: '/home'
+      data_type: 'users'
+      default_work_dir: true
+    - path: '/scratch'
+      data_type: 'scratch'
+      default_work_dir: false
   data_operation:
     max_ops_file_size: 5242880 # 5M
     datatransfer_jobs_directives:

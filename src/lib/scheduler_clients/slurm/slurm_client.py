@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import HTTPException
 
+from lib.scheduler_clients.models import JobsTimeWindow
 from lib.scheduler_clients.slurm.models import (
     SlurmAccounts,
     SlurmJob,
@@ -15,6 +16,7 @@ from lib.scheduler_clients.slurm.models import (
 from lib.scheduler_clients.slurm.slurm_base_client import SlurmBaseClient
 from lib.scheduler_clients.slurm.slurm_cli_client import SlurmCliClient
 from lib.scheduler_clients.slurm.slurm_rest_client import SlurmRestClient
+from firecrest.config import SchedulerConnectionMode
 
 from lib.ssh_clients.ssh_client import SSHClientPool
 
@@ -29,6 +31,7 @@ class SlurmClient(SlurmBaseClient):
         api_url: str | None,
         timeout: int | None,
         username_claim: str | None,
+        connection_mode: SchedulerConnectionMode = SchedulerConnectionMode.ssh
     ):
 
         self.ssh_client = ssh_client
@@ -37,13 +40,14 @@ class SlurmClient(SlurmBaseClient):
         self.slurm_version = slurm_version
         self.api_version = api_version
         self.username_claim = username_claim
+        self.connection_mode = connection_mode
 
         self.slurm_cli_client = None
 
         if ssh_client:
             self.slurm_cli_client = SlurmCliClient(ssh_client, slurm_version)
 
-        if self.api_url:
+        if self.connection_mode != SchedulerConnectionMode.ssh:
             self.slurm_rest_client = SlurmRestClient(
                 api_url, api_version, timeout, username_claim
             )
@@ -88,10 +92,16 @@ class SlurmClient(SlurmBaseClient):
         )
 
     async def get_jobs(
-        self, username: str, jwt_token: str, allusers: bool = False, account: str = None
+        self,
+        username: str,
+        jwt_token: str,
+        allusers: bool = False,
+        account: str = None,
+        name: str = None,
+        time_window: JobsTimeWindow = None,
     ) -> List[SlurmJob] | None:
         return await self.slurm_default_client.get_jobs(
-            username, jwt_token, allusers, account
+            username, jwt_token, allusers, account, name, time_window
         )
 
     async def get_job_metadata(
@@ -119,9 +129,11 @@ class SlurmClient(SlurmBaseClient):
         return await self.slurm_default_client.get_reservations(username, jwt_token)
 
     async def get_partitions(
-        self, username: str, jwt_token: str
+        self, show_hidden: bool, username: str, jwt_token: str
     ) -> List[SlurmPartitions] | None:
-        return await self.slurm_default_client.get_partitions(username, jwt_token)
+        return await self.slurm_default_client.get_partitions(
+            show_hidden, username, jwt_token
+        )
 
     async def cancel_job(self, job_id: str, username: str, jwt_token: str) -> bool:
         return await self.slurm_default_client.cancel_job(job_id, username, jwt_token)

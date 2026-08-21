@@ -11,4 +11,5 @@ content submission.
 
 - When adding new features or fixing bugs not covered by existing tests, please also provide unit tests.
 - Add an entry to the `CHANGELOG.md` file.
+- If a change alters the API's or a cluster configuration's existing behavior in a way that is not backward compatible (e.g. a changed default value, a renamed/removed field, a different response shape), prefix the `CHANGELOG.md` entry with `***⚠️ API Breaking***` or `***⚠️ Configuration Breaking***` as appropriate, and describe how to preserve the previous behavior if possible.
 - Submit your contributions as GitHub Pull Requests to the main public repository at https://github.com/eth-cscs/firecrest-v2 targeting `master` branch.

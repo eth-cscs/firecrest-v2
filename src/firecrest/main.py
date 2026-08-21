@@ -5,7 +5,6 @@
 
 import uvicorn
 
-
 # plugins
 from firecrest.plugins import settings
 
@@ -17,6 +16,11 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from lib.exceptions import (
+    SSHServiceError,
+    SchedulerError,
+)
+from lib.ssh_clients.ssh_client import SSHClientError
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from starlette_context import plugins
 from starlette_context.middleware import RawContextMiddleware
@@ -51,15 +55,33 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.datastores.memory import MemoryDataStore
 from apscheduler.eventbrokers.local import LocalEventBroker
 
+
+from starlette_context import context
+from starlette_context.header_keys import HeaderKeys
+
 # FirecREST tracing JSON logger
-from lib.loggers.tracing_log import tracing_log_middleware
+from lib.loggers.tracing_log import Log_operation, tracing_log_middleware
 
 # Uvicorn logger
 logger = logging.getLogger(__name__)
 
 
 class EndpointFilter(logging.Filter):
+    """Drops noisy /status/liveness access logs and lifts the HTTP method
+    and status code out of uvicorn's free-text access log message into
+    dedicated record fields, so the JSON formatter can emit them as their
+    own (ECS-style) fields instead of only inside the message string."""
+
     def filter(self, record: logging.LogRecord) -> bool:
+        # uvicorn.access records carry (client_addr, method, path, http_version,
+        # status_code) as positional args - see uvicorn's h11/httptools protocols.
+        if isinstance(record.args, tuple) and len(record.args) == 5:
+            client_addr, method, path, http_version, status_code = record.args
+            if path.find("/status/liveness") != -1:
+                return False
+            record.http_request_method = method
+            record.http_response_status_code = status_code
+            return True
         return record.getMessage().find("/status/liveness") == -1
 
 
@@ -125,10 +147,14 @@ async def schedule_tasks(scheduler: AsyncScheduler):
 
 
 def register_middlewares(app: FastAPI):
+    logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+
     @app.middleware("http")
     async def init_request_vars(request: Request, call_next):
-        initial_g = types.SimpleNamespace()
-        request_vars.request_global.set(initial_g)
+        # A fresh namespace per request, bound in this async context, so
+        # per-request state (e.g. auth in api_auth_helper.py) never leaks
+        # across concurrent requests sharing the contextvar's default.
+        request_vars.request_global.set(types.SimpleNamespace())
         response = await call_next(request)
         return response
 
@@ -138,19 +164,29 @@ def register_middlewares(app: FastAPI):
 
     @app.middleware("http")
     async def log_middleware(request: Request, call_next):
-
-        logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
-
         try:
-            response = await call_next(request)
-            username = None
-            if hasattr(request.state, "username"):
-                username = request.state.username
-            # Logging from Middleware
+            # Logging from Middleware request
             if settings.logger.enable_tracing_log:
                 tracing_log_middleware(
+                    Log_operation.Request,
                     request,
-                    username,
+                    None,
+                    None,
+                    settings.logger.loggable_request_headers,
+                )
+
+            response = await call_next(request)
+
+            # Logging from Middleware response
+            if settings.logger.enable_tracing_log:
+                tracing_log_middleware(
+                    Log_operation.Response,
+                    request,
+                    (
+                        request.state.username
+                        if hasattr(request.state, "username")
+                        else None
+                    ),
                     response.status_code,
                     settings.logger.loggable_request_headers,
                 )
@@ -183,14 +219,63 @@ def register_routes(app: FastAPI, settings: config.Settings):
 
 
 def register_exception_handlers(app: FastAPI):
+    # Base classes must be listed explicitly: the `Exception` handler is served by
+    # Starlette's ServerErrorMiddleware, which re-raises after responding. Only handlers
+    # registered here are resolved (by MRO) without re-raising.
     @app.exception_handler(Exception)
+
+    # Explicitly register base classes to avoid re-raising by Starlette's ServerErrorMiddleware
     @app.exception_handler(StarletteHTTPException)
     @app.exception_handler(RequestValidationError)
+    @app.exception_handler(SchedulerError)
+    @app.exception_handler(SSHServiceError)
+    @app.exception_handler(SSHClientError)
     async def http_exception_handler(request, exc):
-        return response_error_handler(
+
+        def get_tracing_data(key: str) -> str:
+            if key in context:
+                return context[key]
+            return ""
+
+        cause_chain = []
+        cause = exc.__cause__
+        visited = set()
+        while cause is not None:
+            if id(cause) in visited:
+                break
+            visited.add(id(cause))
+            cause_chain.append(
+                {"error.type": cause.__class__.__name__, "error.message": str(cause)}
+            )
+            cause = cause.__cause__
+
+        response = response_error_handler(
             exc=exc,
             request=request,
         )
+
+        log_data = {}
+        log_data["message"] = (
+            str(exc)
+            + " "
+            + ", caused by: ".join(
+                [cause.get("error.message", "") for cause in cause_chain]
+            )
+        ).strip()
+        log_data["error.type"] = exc.__class__.__name__
+        log_data["error.message"] = str(exc)
+        log_data["error.cause"] = cause_chain
+
+        if context.exists():
+            log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
+            log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
+
+        if response.status_code and response.status_code < 500:
+            logging.getLogger("uvicorn.error").warning(log_data)
+        else:
+            logging.getLogger("uvicorn.error").error(log_data)
+
+        return response
 
 
 app = create_app(settings=settings)
