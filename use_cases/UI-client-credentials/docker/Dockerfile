@@ -11,6 +11,7 @@ RUN apk add --no-cache gcc libc-dev libffi-dev
 
 ADD ./docker/requirements.txt /app/docker/requirements.txt
 
+RUN pip install --upgrade pip==26.1.2
 RUN pip install -r /app/docker/requirements.txt
 
 ADD ./ app
