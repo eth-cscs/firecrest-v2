@@ -116,7 +116,7 @@ class SSHClient:
                     process.terminate()
                     process.stdin.write("\x03".encode())
                     process.stdin.write_eof()
-                except Exception:
+                except (BrokenPipeError, OSError, ValueError):
                     logger = logging.getLogger("uvicorn.error")
                     logger.error(
                         {
