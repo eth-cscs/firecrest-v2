@@ -45,7 +45,7 @@ T = TypeVar("T", bound=Any)
 # matches no row (and is not an `HTTPException`) falls back to 500.
 EXCEPTION_STATUS_CODES: tuple[tuple[tuple[type[BaseException], ...], int], ...] = (
     ((SchedulerAuthError,), fastapi.status.HTTP_401_UNAUTHORIZED),
-    ((SchedulerQuotaError,), fastapi.status.HTTP_429_TOO_MANY_REQUESTS),
+    ((SchedulerQuotaError,), fastapi.status.HTTP_403_FORBIDDEN),
     ((OutputLimitExceeded,), fastapi.status.HTTP_413_REQUEST_ENTITY_TOO_LARGE),
     ((TimeoutLimitExceeded,), fastapi.status.HTTP_504_GATEWAY_TIMEOUT),
     ((SSHConnectionError,), fastapi.status.HTTP_424_FAILED_DEPENDENCY),
@@ -120,6 +120,7 @@ class ApiResponseError(CamelModel):
 
     @staticmethod
     def _resolve_status_code(exc: Exception) -> int:
+        #  root cause informs the status code, so we check the whole cause chain.
         if isinstance(exc, HTTPException):
             return exc.status_code
         chain = tuple(ApiResponseError._exception_chain(exc))
@@ -130,6 +131,7 @@ class ApiResponseError(CamelModel):
 
     @staticmethod
     def _resolve_message(exc: Exception) -> str:
+        # Outer exception informs the message, so we only check the outermost exception.
         if isinstance(exc, HTTPException):
             return exc.detail
         if isinstance(exc, SchedulerError):
