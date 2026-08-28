@@ -12,7 +12,7 @@ from firecrest.plugins import settings
 import logging
 import types
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -218,6 +218,13 @@ def register_routes(app: FastAPI, settings: config.Settings):
     app.include_router(filesystem_router)
 
 
+# 5xx status codes that signal an unavailable downstream dependency rather than a
+# fault in this implementation: they are logged as warnings, not errors.
+TOLLERATED_DOWNSTREAM_STATUS_CODES = {
+    status.HTTP_503_SERVICE_UNAVAILABLE,
+}
+
+
 def register_exception_handlers(app: FastAPI):
     # Base classes must be listed explicitly: the `Exception` handler is served by
     # Starlette's ServerErrorMiddleware, which re-raises after responding. Only handlers
@@ -270,7 +277,10 @@ def register_exception_handlers(app: FastAPI):
             log_data["correlation_id"] = get_tracing_data(HeaderKeys.correlation_id)
             log_data["request_id"] = get_tracing_data(HeaderKeys.request_id)
 
-        if response.status_code and response.status_code < 500:
+        if response.status_code and (
+            response.status_code < 500
+            or response.status_code in TOLLERATED_DOWNSTREAM_STATUS_CODES
+        ):
             logging.getLogger("uvicorn.error").warning(log_data)
         else:
             logging.getLogger("uvicorn.error").error(log_data)
