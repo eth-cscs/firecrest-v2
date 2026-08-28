@@ -12,15 +12,27 @@ class SchedulerError(Exception):
         self.error_msg = error
 
 
+class SchedulerAuthError(SchedulerError):
+    """Scheduler rejected the request because of an authentication problem."""
+
+    pass
+
+
+class SchedulerQuotaError(SchedulerError):
+    """Scheduler rejected the request because a quota/accounting limit was hit."""
+
+    pass
+
+
 class SlurmError(SchedulerError):
     pass
 
 
-class SlurmAuthTokenError(SlurmError):
+class SlurmAuthTokenError(SlurmError, SchedulerAuthError):
     pass
 
 
-class SlurmQuotaError(SlurmError):
+class SlurmQuotaError(SlurmError, SchedulerQuotaError):
     pass
 
 
