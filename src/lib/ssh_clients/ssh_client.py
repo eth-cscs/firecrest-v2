@@ -249,7 +249,7 @@ class SSHClientPool:
                 exception.__class__.__name__ + ": " + exception.reason
             )
         else:
-            log_data["error.message"] = "Unknown SSH connection excpeption"
+            log_data["error.message"] = "Unknown SSH connection exception"
 
         log_data["firecrest.username"] = username
 
