@@ -220,8 +220,10 @@ def register_routes(app: FastAPI, settings: config.Settings):
 
 # 5xx status codes that signal an unavailable downstream dependency rather than a
 # fault in this implementation: they are logged as warnings, not errors.
-TOLLERATED_DOWNSTREAM_STATUS_CODES = {
+TOLERATED_DOWNSTREAM_STATUS_CODES = {
     status.HTTP_503_SERVICE_UNAVAILABLE,
+    status.HTTP_502_BAD_GATEWAY,
+    status.HTTP_504_GATEWAY_TIMEOUT,
 }
 
 
@@ -279,7 +281,7 @@ def register_exception_handlers(app: FastAPI):
 
         if response.status_code and (
             response.status_code < 500
-            or response.status_code in TOLLERATED_DOWNSTREAM_STATUS_CODES
+            or response.status_code in TOLERATED_DOWNSTREAM_STATUS_CODES
         ):
             logging.getLogger("uvicorn.error").warning(log_data)
         else:

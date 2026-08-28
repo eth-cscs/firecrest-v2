@@ -110,7 +110,7 @@ class ApiResponseError(CamelModel):
             current = current.__cause__
 
     @staticmethod
-    def build_exception_chain(exc: Exception) -> Optional[list]:
+    def build_exception_chain(exc: Exception) -> Optional[list[str]]:
         causes = [
             str(cause)
             for cause in ApiResponseError._exception_chain(exc)
