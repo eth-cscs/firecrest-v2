@@ -18,6 +18,12 @@ class SchedulerAuthError(SchedulerError):
     pass
 
 
+class SchedulerRequestError(SchedulerError):
+    """Scheduler rejected the request because of a request error."""
+
+    pass
+
+
 class SchedulerQuotaError(SchedulerError):
     """Scheduler rejected the request because a quota/accounting limit was hit."""
 
@@ -28,7 +34,7 @@ class SlurmError(SchedulerError):
     pass
 
 
-class SlurmAuthTokenError(SlurmError, SchedulerAuthError):
+class SlurmAuthTokenError(SlurmError, SchedulerRequestError):
     pass
 
 

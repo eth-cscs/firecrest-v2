@@ -12,6 +12,7 @@ from lib.exceptions import (
     SchedulerAuthError,
     SchedulerError,
     SchedulerQuotaError,
+    SchedulerRequestError,
     SSHServiceError,
 )
 from lib.ssh_clients.ssh_client import (
@@ -28,7 +29,6 @@ from lib.models.apis.api_response_model import (
     EXCEPTION_STATUS_CODES,
 )
 
-
 # One case per exception referenced in `EXCEPTION_STATUS_CODES`. The
 # `test_all_mapped_exceptions_have_a_case` test below fails if the map grows a
 # row that is not represented here.
@@ -37,6 +37,11 @@ EXCEPTION_CASES = [
         SchedulerAuthError("auth rejected"),
         fastapi.status.HTTP_401_UNAUTHORIZED,
         id="SchedulerAuthError",
+    ),
+    pytest.param(
+        SchedulerRequestError("invalid request"),
+        fastapi.status.HTTP_400_BAD_REQUEST,
+        id="SchedulerRequestError",
     ),
     pytest.param(
         SchedulerQuotaError("quota exceeded"),
@@ -131,6 +136,12 @@ def test_more_specific_row_wins_over_broader_row():
         == fastapi.status.HTTP_401_UNAUTHORIZED
     )
 
+    exc = SchedulerRequestError("wrong request")
+    assert (
+        ApiResponseError._resolve_status_code(exc)
+        == fastapi.status.HTTP_400_BAD_REQUEST
+    )
+
 
 def test_unmapped_exception_falls_back_to_500():
     assert (
@@ -140,7 +151,9 @@ def test_unmapped_exception_falls_back_to_500():
 
 
 def test_http_exception_status_is_passed_through():
-    exc = HTTPException(status_code=fastapi.status.HTTP_418_IM_A_TEAPOT, detail="teapot")
+    exc = HTTPException(
+        status_code=fastapi.status.HTTP_418_IM_A_TEAPOT, detail="teapot"
+    )
     assert (
         ApiResponseError._resolve_status_code(exc)
         == fastapi.status.HTTP_418_IM_A_TEAPOT
