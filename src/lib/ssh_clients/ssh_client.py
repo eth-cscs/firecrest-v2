@@ -117,7 +117,13 @@ class SSHClient:
                     process.stdin.write("\x03".encode())
                     process.stdin.write_eof()
                 except Exception:
-                    pass
+                    logger = logging.getLogger("uvicorn.error")
+                    logger.error(
+                        {
+                            "message": "Failed to terminate SSH process after timeout",
+                            "command": command.get_command(),
+                        }
+                    )
             raise TimeoutLimitExceeded(
                 "Command execution timeout limit exceeded."
             ) from e
