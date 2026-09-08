@@ -115,10 +115,10 @@ firecrest:
 
       ## min_token_ttl: minimum remaining TTL check for incoming OIDC access tokens.
       ## Rejecting near-expiry tokens helps to avoid downstream failures.
-      ## Default is 30 seconds.
+      ## Default is 5 seconds.
       ## example:
       ##   min_token_ttl: 60
-      # min_token_ttl : 30
+      # min_token_ttl : 5
 
     ## Authorization settings via OpenFGA
     # authorization:
