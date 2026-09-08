@@ -11,7 +11,6 @@ import requests
 from requests.adapters import HTTPAdapter, Retry
 from requests_file import FileAdapter
 
-
 # models
 from lib.auth.authN.authentication_service import AuthenticationService
 from lib.models import ApiAuthModel
@@ -21,7 +20,13 @@ class OIDCTokenAuth(AuthenticationService):
 
     public_keys = {}
 
-    def __init__(self, public_certs: List[str] = None, username_claim: str = None, jwk_algorithm: str = None, min_token_ttl: int = 30):
+    def __init__(
+        self,
+        public_certs: List[str] = None,
+        username_claim: str = None,
+        jwk_algorithm: str = None,
+        min_token_ttl: int = 5,
+    ):
 
         self.username_claim = username_claim
         self.jwk_algorithm = jwk_algorithm
@@ -45,10 +50,16 @@ class OIDCTokenAuth(AuthenticationService):
             identifier = key.get("kid", None) or key.get("x5t", None)
             algorithm = key.get("alg", None)
             algo_map = {
-                "RSA":"RS256",
-                "oct":"HS256",
-                "EC": {"None":"ES256", "P-256":"ES256", "P-384":"ES384", "P-521":"ES512", "secp256k1":"ES256K"},
-                "OKP":{"Ed25519":"EdDSA"}
+                "RSA": "RS256",
+                "oct": "HS256",
+                "EC": {
+                    "None": "ES256",
+                    "P-256": "ES256",
+                    "P-384": "ES384",
+                    "P-521": "ES512",
+                    "secp256k1": "ES256K",
+                },
+                "OKP": {"Ed25519": "EdDSA"},
             }
 
             if not algorithm:

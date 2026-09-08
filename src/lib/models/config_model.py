@@ -56,7 +56,7 @@ class Oidc(CamelModel):
         nullable=True,
     )
     min_token_ttl: int = Field(
-        30,
+        5,
         description=(
             "Minimum remaining lifetime (in seconds) required for an access token to be "
             "accepted. Tokens expiring sooner than this threshold are rejected with HTTP 401 "
