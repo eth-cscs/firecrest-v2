@@ -14,6 +14,7 @@ from requests_file import FileAdapter
 # models
 from lib.auth.authN.authentication_service import AuthenticationService
 from lib.models import ApiAuthModel
+from lib.models.config_model import DEFAULT_MIN_TOKEN_TTL
 
 
 class OIDCTokenAuth(AuthenticationService):
@@ -25,7 +26,7 @@ class OIDCTokenAuth(AuthenticationService):
         public_certs: List[str] = None,
         username_claim: str = None,
         jwk_algorithm: str = None,
-        min_token_ttl: int = 30,
+        min_token_ttl: int = DEFAULT_MIN_TOKEN_TTL,
     ):
 
         self.username_claim = username_claim

@@ -10,6 +10,13 @@ from pydantic import SecretStr, Field
 from lib.models.base_model import CamelModel
 from lib.models.token_endpoint_auth_method import TokenEndpointAuthMethod
 
+# Default minimum remaining lifetime (in seconds) required for an access
+# token to be accepted. Shared between the Oidc config model (default value
+# used when no config is provided) and OIDCTokenAuth (fallback default when
+# instantiated without an explicit min_token_ttl), so it must only be
+# defined here and imported elsewhere.
+DEFAULT_MIN_TOKEN_TTL = 5
+
 
 class Oidc(CamelModel):
     """
@@ -56,7 +63,7 @@ class Oidc(CamelModel):
         nullable=True,
     )
     min_token_ttl: int = Field(
-        30,
+        DEFAULT_MIN_TOKEN_TTL,
         description=(
             "Minimum remaining lifetime (in seconds) required for an access token to be "
             "accepted. Tokens expiring sooner than this threshold are rejected with HTTP 401 "
