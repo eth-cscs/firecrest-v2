@@ -112,9 +112,18 @@ class SSHClient:
 
         except TimeoutError as e:
             if process:
-                process.terminate()
-                process.stdin.write("\x03".encode())
-                process.stdin.write_eof()
+                try:
+                    process.terminate()
+                    process.stdin.write("\x03".encode())
+                    process.stdin.write_eof()
+                except (BrokenPipeError, OSError, ValueError):
+                    logger = logging.getLogger("uvicorn.error")
+                    logger.error(
+                        {
+                            "message": "Failed to terminate SSH process after timeout",
+                            "command": command.get_command(),
+                        }
+                    )
             raise TimeoutLimitExceeded(
                 "Command execution timeout limit exceeded."
             ) from e
@@ -240,7 +249,7 @@ class SSHClientPool:
                 exception.__class__.__name__ + ": " + exception.reason
             )
         else:
-            log_data["error.message"] = "Unknown SSH connection excpeption"
+            log_data["error.message"] = "Unknown SSH connection exception"
 
         log_data["firecrest.username"] = username
 

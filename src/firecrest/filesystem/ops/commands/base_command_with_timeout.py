@@ -16,7 +16,7 @@ class BaseCommandWithTimeoutErrorHandling(BaseCommandErrorHandling):
 
         if exit_status == 124:
             raise HTTPException(
-                status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=error_mess
+                status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail=error_mess
             )
 
         super().error_handling(stderr, exit_status)
