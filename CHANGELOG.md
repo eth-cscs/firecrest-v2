@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [2.6.0]
 
 ### Added
@@ -16,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ***⚠️ API Breaking*** Refactored UserInfo response, group and groups objects have been merged.
 - ***⚠️ API Breaking*** `GET /compute/{system_name}/jobs` now defaults to a `24h` historical lookback window. Previously the lookback was a fixed 7 days on SSH/CLI-based clusters, and unbounded on REST-based clusters (no time filter was sent to `slurmdb`). Pass `time_window=7d` for the widest supported window.
+- ***⚠️ API Breaking*** Reworked the mapping from internal exceptions to HTTP response status codes. Changed status codes:
+    - A command that exceeds its execution timeout (`TimeoutLimitExceeded`) now returns **504 Gateway Timeout** instead of **408 Request Timeout**.
+    - Generic SSH client/service failures (`SSHClientError` / `SSHServiceError` that are not a more specific connection error) now return **502 Bad Gateway** instead of **500 Internal Server Error**.
 
 ### Fixed
 
