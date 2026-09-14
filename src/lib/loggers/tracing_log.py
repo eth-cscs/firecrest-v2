@@ -29,7 +29,7 @@ def tracing_log_method(func):
     return wrapper
 
 
-# Put key-vale pair into context data map
+# Put key-value pair into context data map
 def set_tracing_data(key: str, value: str) -> None:
     if context.exists():
         context[key] = value
@@ -43,9 +43,12 @@ def get_tracing_data(key: str) -> str:
 
 
 # Get detailed backend logging list
-def get_tracing_backend_log() -> list:
+def get_tracing_backend_log() -> list | None:
     if "backend" in context:
-        return json.loads(get_tracing_data("backend"))
+        try:
+            return json.loads(get_tracing_data("backend"))
+        except (json.JSONDecodeError, TypeError):
+            return None
     else:
         return None
 
@@ -59,16 +62,12 @@ def _append_tracing_backend_log(entry: dict) -> None:
 
 # Append command and exit status into the backend logging list
 def log_backend_command(command: str, exit_status: int) -> None:
-    _append_tracing_backend_log(
-        {"command": command, "exit_status": str(exit_status)}
-    )
+    _append_tracing_backend_log({"command": command, "exit_status": str(exit_status)})
 
 
 # Append url and response status into the backend logging list
 def log_backend_http_scheduler(url: str, response_status: int) -> None:
-    _append_tracing_backend_log(
-        {"url": url, "response_status": str(response_status)}
-    )
+    _append_tracing_backend_log({"url": url, "response_status": str(response_status)})
 
 
 class Log_operation(Enum):

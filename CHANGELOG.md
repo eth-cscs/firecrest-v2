@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.6.1] - Open
 
 ### Added
-- Adds tracing capability for multiple concurrent backend commands. 
+- Added tracing capability for multiple backend commands per request.
 ### Changed
 ### Fixed
 
