@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from firecrest.status.health_check.checks.health_check_scheduler import ping_is_up
-from lib.scheduler_clients.models import SchedPing
 
 
 def test_ping_is_up_legacy_pinged_shape():
@@ -28,11 +27,3 @@ def test_ping_is_up_overloaded_shape_prefers_responding():
 def test_ping_is_up_missing_fields_is_down():
     assert not ping_is_up({"hostname": "ctl"})
     assert not ping_is_up({"pinged": None})
-
-
-def test_sched_ping_model_accepts_both_shapes():
-    legacy = SchedPing(hostname="ctl", pinged="UP", mode="primary")
-    current = SchedPing(hostname="ctl", responding=True, primary=True)
-    assert ping_is_up(legacy)
-    assert ping_is_up(current)
-    assert current.responding is True and current.primary is True

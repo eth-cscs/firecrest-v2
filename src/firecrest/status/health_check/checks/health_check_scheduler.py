@@ -18,14 +18,13 @@ def ping_is_up(ping) -> bool:
     ``responding`` and ``primary``, and dropped the old fields in v0.0.45
     (Slurm 26.05). The CLI client (``scontrol ping``) still produces
     ``pinged``. Accept both shapes so the probe works across the supported
-    ``api_version`` range.
+    ``api_version`` range. Both scheduler clients return the pings as plain
+    dicts.
     """
-    if isinstance(ping, SchedPing):
-        ping = ping.model_dump()
-    responding = ping.get("responding")
-    if responding is not None:
-        return bool(responding)
-    return str(ping.get("pinged") or "").lower() == "up"
+    if "responding" in ping:
+        return bool(ping["responding"])
+    else:
+        return str(ping.get("pinged") or "").lower() == "up"
 
 
 class SchedulerHealthCheck(HealthCheckBase):
