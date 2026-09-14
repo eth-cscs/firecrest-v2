@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as little as 5 seconds left are now accepted, where 30 seconds was
   previously required.
 
+## [Unreleased]
+
+### Fixed
+
+- Scheduler health check no longer fails with `KeyError: 'pinged'` against Slurm 26.05 (slurmrestd data_parser v0.0.45), where the `pinged`/`mode` ping fields were removed in favour of the boolean `responding`/`primary` introduced in v0.0.44. Both response shapes are accepted; the `scontrol ping` (SSH) path is unchanged.
+
 ## [2.6.0]
 
 ### Added
