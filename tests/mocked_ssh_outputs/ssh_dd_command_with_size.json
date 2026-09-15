@@ -1,6 +1,6 @@
 {
-    "stdout": "ABCDE",
+    "stdout": "20\n0\nABCDEFGHIJ",
     "stderr": "",
     "exit_code": 0,
-    "command":"dd if='/home/readme.txt' bs=5 skip=0 count=2"
+    "command":"dd if=/home/readme.txt bs=\"$bs\" skip=\"$skip\" count=2"
 }
