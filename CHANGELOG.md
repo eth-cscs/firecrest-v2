@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as little as 5 seconds left are now accepted, where 30 seconds was
   previously required.
 
+
+## [2.7.0]
+
+### Added
+### Changed
+- ***⚠️ API Breaking*** Added tracing capability for multiple backend commands per request. Log entry backend is now of type list of objects.
+### Fixed
+
+
+
 ## [2.6.0]
 
 ### Added
