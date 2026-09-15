@@ -1,5 +1,5 @@
 {
-    "stdout": "10\n0\nABCDEFGHIJ",
+    "stdout": "20\n15\nPQRST",
     "stderr": "",
     "exit_code": 0,
     "command":"dd if=/home/readme.txt bs=\"$bs\" skip=\"$skip\" count=2"

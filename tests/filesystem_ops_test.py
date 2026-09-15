@@ -57,6 +57,11 @@ def mocked_ssh_dd_with_size_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_dd_negative_offset_output():
+    return load_ssh_output("ssh_dd_command_negative_offset.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
     return load_ssh_output("ssh_tail_command.json")
 
@@ -307,7 +312,10 @@ async def test_dd_command(client, ssh_client, mocked_ssh_dd_output):
         )
         assert response.status_code == 200
         assert response.json() is not None
-        assert response.json()["output"] == mocked_ssh_dd_output["stdout"]
+        assert response.json()["output"]["content"] == "ABCDEFGHIJ"
+        assert response.json()["output"]["fileSize"] == 10
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == 0
 
 
 async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_output):
@@ -323,7 +331,31 @@ async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_
         )
         assert response.status_code == 200
         assert response.json() is not None
-        assert response.json()["output"] == mocked_ssh_dd_with_size_output["stdout"]
+        assert response.json()["output"]["content"] == "ABCDE"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == -15
+
+
+async def test_dd_command_with_negative_offset(
+    client, ssh_client, mocked_ssh_dd_negative_offset_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_negative_offset_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=-5
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == "PQRST"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 15
+        assert response.json()["output"]["endOffset"] == 0
 
 
 async def test_head_command(client, ssh_client, mocked_ssh_head_output):
