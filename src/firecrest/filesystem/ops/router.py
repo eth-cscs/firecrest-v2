@@ -308,18 +308,17 @@ async def get_view(
         int | None,
         Query(
             alias="offset",
-            description="Value in bytes of the offset.",
+            description=(
+                "Value in bytes of the offset. A negative value is "
+                "resolved relative to the end of the file (e.g. `-100` "
+                "returns the window starting 100 bytes before EOF, as "
+                "measured at the time of the read)."
+            ),
         ),
     ] = 0,
 ) -> Any:
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
-
-    if offset < 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="`offset` value must be an integer value equal or greater than 0",
-        )
 
     if size <= 0:
         raise HTTPException(
@@ -341,8 +340,15 @@ async def get_view(
         command_timeout=system.ssh.timeout.command_execution,
     )
     async with ssh_client.get_client(username, access_token) as client:
-        output = await client.execute(view)
-        return {"output": output}
+        result = await client.execute(view)
+        return {
+            "output": {
+                "content": result["content"],
+                "file_size": result["file_size"],
+                "start_offset": result["start_offset"],
+                "end_offset": result["end_offset"],
+            }
+        }
 
 
 @router.get(

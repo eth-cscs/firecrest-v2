@@ -164,8 +164,15 @@ class PostFileSymlinkResponse(CamelModel):
     output: Optional[File] = Field(None, nullable=True)
 
 
+class FileView(CamelModel):
+    content: str
+    file_size: int
+    start_offset: int
+    end_offset: int
+
+
 class GetViewFileResponse(CamelModel):
-    output: Optional[str] = Field(None, nullable=True)
+    output: Optional[FileView] = Field(None, nullable=True)
 
 
 class PostMkdirResponse(CamelModel):
