@@ -44,21 +44,25 @@ class DdCommand(BaseCommandWithTimeout):
             f"off={self.offset}; "
             f'if [ "$off" -lt 0 ]; then '
             f"start=$(( fsize + off )); "
-            f'if [ "$start" -lt 0 ]; then start=0; fi; '
             f"else start=$off; fi; "
+            f'if [ "$start" -lt 0 ]; then start=0; fi; '
+            f'if [ "$start" -gt "$fsize" ]; then start=$fsize; fi; '
             f"bs={self.size}; skip=$(( start / bs )); "
-            f"printf '%s\\n%s\\n' \"$fsize\" \"$start\"; "
-            f'dd if={quoted_path} bs="$bs" skip="$skip" count=2 2>/dev/null'
+            f'printf \'%s\\n%s\\n\' "$fsize" "$start"; '
+            f'dd if={quoted_path} bs="$bs" skip="$skip" count=2'
         )
-        return f"timeout {self.command_timeout} sh -c {shlex.quote(script)}"
+        return f"{super().get_command()} sh -c {shlex.quote(script)}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:
             super().error_handling(stderr, exit_status)
 
-        file_size_str, start_str, chunk = stdout.split("\n", 2)
-        file_size = int(file_size_str)
-        start = int(start_str)
+        try:
+            file_size_str, start_str, chunk = stdout.split("\n", 2)
+            file_size = int(file_size_str)
+            start = int(start_str)
+        except ValueError as ex:
+            raise ValueError("Unexpected output format from dd command") from ex
 
         i = start % self.size
         content = chunk[i : i + self.size]
