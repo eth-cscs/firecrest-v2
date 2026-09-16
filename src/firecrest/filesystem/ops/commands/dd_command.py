@@ -6,6 +6,7 @@
 # commands
 
 import shlex
+from typing import Optional
 
 from fastapi import status
 
@@ -21,10 +22,10 @@ class DdCommand(BaseCommandWithTimeout):
 
     def __init__(
         self,
-        target_path: str = None,
-        size: int = None,
+        target_path: Optional[str] = None,
+        size: int = 5 * 1024 * 1024,  # default is 5MB
         offset: int = 0,
-        size_limit: int = None,
+        size_limit: Optional[int] = None,
         command_timeout: int = 5,
     ) -> None:
         super().__init__(command_timeout=command_timeout)
@@ -56,7 +57,7 @@ class DdCommand(BaseCommandWithTimeout):
             'if [ "$start" -lt 0 ]; then start=0; fi; '
             'if [ "$start" -gt "$fsize" ]; then start=$fsize; fi; '
             'bs="$3"; skip=$(( start / bs )); '
-            'printf \'%s\\n%s\\n\' "$fsize" "$start"; '
+            'printf \'%d\\n%d\\n\' "$fsize" "$start"; '
             'dd if="$1" bs="$bs" skip="$skip" count=2'
         )
         quoted_path = shlex.quote(self.target_path)

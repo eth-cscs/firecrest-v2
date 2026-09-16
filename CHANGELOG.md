@@ -16,8 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - ***⚠️ API Breaking*** `GET .../ops/view` response now nests its content
-  under `output` as an object: `output.content` and adds three new fields `output.fileSize`,
-  `output.startOffset` (bytes skipped from the beginning of the file to the
+  under `output` as an object: `output.content`. Response now also includes three new fields `output.fileSize`,`output.startOffset` (bytes skipped from the beginning of the file to the
   start of `content`) and `output.endOffset` (distance from
   EOF to the end of `content`, expressed as a non-positive number of bytes;
   0 means `content` reaches EOF).
