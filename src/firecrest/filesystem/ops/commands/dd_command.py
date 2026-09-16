@@ -74,12 +74,9 @@ class DdCommand(BaseCommandWithTimeout):
             file_size = int(file_size_str)
             start = int(start_str)
         except ValueError as ex:
-            error_mess = "Unexpected output format from dd command"
-            if stderr:
-                error_mess += f", stderr:{stderr.strip()}"
             raise CommandExecutionError(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=error_mess,
+                detail="Unexpected output format from dd command",
             ) from ex
 
         i = start % self.size
