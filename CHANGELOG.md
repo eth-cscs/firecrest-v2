@@ -16,13 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - ***⚠️ API Breaking*** `GET .../ops/view` response now nests its content
-  under `output` as an object: `output.content`, `output.fileSize`,
+  under `output` as an object: `output.content` and adds three new fields `output.fileSize`,
   `output.startOffset` (bytes skipped from the beginning of the file) and
-  `output.endOffset` (bytes remaining until the end of the file, as a value
-  `<= 0`). Previously `output` was the raw file content string with
-  `fileSize`/`startOffset`/`endOffset` as sibling fields. This lets clients
-  page backward through a file's history using contiguous byte ranges, e.g.
-  to implement reversed infinite scroll over a growing log file.
+  `output.endOffset` (bytes skipped from the end of the file). 
+  Previously `output` was the raw file content.
 
 ## [2.6.1]
 
