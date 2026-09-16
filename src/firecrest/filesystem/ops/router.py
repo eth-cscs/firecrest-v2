@@ -51,6 +51,7 @@ from firecrest.filesystem.ops.commands.symlink_command import SymlinkCommand
 
 # models
 from firecrest.filesystem.ops.models import (
+    FileView,
     GetDirectoryLsResponse,
     GetFileHeadResponse,
     GetFileTailResponse,
@@ -341,14 +342,7 @@ async def get_view(
     )
     async with ssh_client.get_client(username, access_token) as client:
         result = await client.execute(view)
-        return {
-            "output": {
-                "content": result["content"],
-                "file_size": result["file_size"],
-                "start_offset": result["start_offset"],
-                "end_offset": result["end_offset"],
-            }
-        }
+        return GetViewFileResponse(output=FileView(**result))
 
 
 @router.get(
