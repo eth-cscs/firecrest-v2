@@ -176,7 +176,11 @@ class FileView(CamelModel):
     )
     end_offset: int = Field(
         None,
-        description="Offset from EOF (bytes skipped after the content window)",
+        description=(
+            "Distance from EOF to the end of the content window, as a "
+            "non-positive number of bytes (0 means the window reaches EOF, "
+            "-100 means 100 bytes of the file remain after the window)"
+        ),
         nullable=True,
     )
 

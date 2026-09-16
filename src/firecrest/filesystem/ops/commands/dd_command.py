@@ -7,6 +7,11 @@
 
 import shlex
 
+from fastapi import status
+
+from firecrest.filesystem.ops.commands.base_command_error_handling import (
+    CommandExecutionError,
+)
 from firecrest.filesystem.ops.commands.base_command_with_timeout import (
     BaseCommandWithTimeout,
 )
@@ -38,20 +43,27 @@ class DdCommand(BaseCommandWithTimeout):
         # `count=2` brings back 2 chunks of the file, in case the resolved
         # offset is not a multiple of `size`. `parse_output` then trims the
         # result down to the requested window.
-        quoted_path = shlex.quote(self.target_path)
+        # `$1`/`$2`/`$3` are passed in as positional arguments below rather
+        # than interpolated into the script text, so the path/offset/size
+        # values can never be mistaken for shell syntax regardless of how
+        # this script is edited in the future.
         script = (
-            f"fsize=$(stat -c%s -- {quoted_path}) || exit 1; "
-            f"off={self.offset}; "
-            f'if [ "$off" -lt 0 ]; then '
-            f"start=$(( fsize + off )); "
-            f"else start=$off; fi; "
-            f'if [ "$start" -lt 0 ]; then start=0; fi; '
-            f'if [ "$start" -gt "$fsize" ]; then start=$fsize; fi; '
-            f"bs={self.size}; skip=$(( start / bs )); "
-            f'printf \'%s\\n%s\\n\' "$fsize" "$start"; '
-            f'dd if={quoted_path} bs="$bs" skip="$skip" count=2'
+            'fsize=$(stat -c%s -- "$1") || exit 1; '
+            'off="$2"; '
+            'if [ "$off" -lt 0 ]; then '
+            "start=$(( fsize + off )); "
+            "else start=$off; fi; "
+            'if [ "$start" -lt 0 ]; then start=0; fi; '
+            'if [ "$start" -gt "$fsize" ]; then start=$fsize; fi; '
+            'bs="$3"; skip=$(( start / bs )); '
+            'printf \'%s\\n%s\\n\' "$fsize" "$start"; '
+            'dd if="$1" bs="$bs" skip="$skip" count=2'
         )
-        return f"{super().get_command()} sh -c {shlex.quote(script)}"
+        quoted_path = shlex.quote(self.target_path)
+        return (
+            f"{super().get_command()} sh -c {shlex.quote(script)} "
+            f"-- {quoted_path} {self.offset} {self.size}"
+        )
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:
@@ -62,7 +74,13 @@ class DdCommand(BaseCommandWithTimeout):
             file_size = int(file_size_str)
             start = int(start_str)
         except ValueError as ex:
-            raise ValueError("Unexpected output format from dd command") from ex
+            error_mess = "Unexpected output format from dd command"
+            if stderr:
+                error_mess += f", stderr:{stderr.strip()}"
+            raise CommandExecutionError(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_mess,
+            ) from ex
 
         i = start % self.size
         content = chunk[i : i + self.size]

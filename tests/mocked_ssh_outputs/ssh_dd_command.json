@@ -2,5 +2,5 @@
     "stdout": "10\n0\nABCDEFGHIJ",
     "stderr": "",
     "exit_code": 0,
-    "command": "timeout 5 sh -c 'fsize=$(stat -c%s -- /home/readme.txt) || exit 1; off=0; if [ \"$off\" -lt 0 ]; then start=$(( fsize + off )); else start=$off; fi; if [ \"$start\" -lt 0 ]; then start=0; fi; if [ \"$start\" -gt \"$fsize\" ]; then start=$fsize; fi; bs=5242880; skip=$(( start / bs )); printf '\"'\"'%s\\n%s\\n'\"'\"' \"$fsize\" \"$start\"; dd if=/home/readme.txt bs=\"$bs\" skip=\"$skip\" count=2'"
+    "command": "timeout 5 sh -c 'fsize=$(stat -c%s -- \"$1\") || exit 1; off=\"$2\"; if [ \"$off\" -lt 0 ]; then start=$(( fsize + off )); else start=$off; fi; if [ \"$start\" -lt 0 ]; then start=0; fi; if [ \"$start\" -gt \"$fsize\" ]; then start=$fsize; fi; bs=\"$3\"; skip=$(( start / bs )); printf '\"'\"'%s\\n%s\\n'\"'\"' \"$fsize\" \"$start\"; dd if=\"$1\" bs=\"$bs\" skip=\"$skip\" count=2' -- /home/readme.txt 0 5242880"
 }
