@@ -165,10 +165,20 @@ class PostFileSymlinkResponse(CamelModel):
 
 
 class FileView(CamelModel):
-    content: str
-    file_size: int
-    start_offset: int
-    end_offset: int
+    content: str = Field(None, description="Extracted file content", nullable=True)
+    file_size: int = Field(
+        None, description="Total size of the file in bytes", nullable=True
+    )
+    start_offset: int = Field(
+        None,
+        description="Offset from BOF (bytes skipped before the content window)",
+        nullable=True,
+    )
+    end_offset: int = Field(
+        None,
+        description="Offset from EOF (bytes skipped after the content window)",
+        nullable=True,
+    )
 
 
 class GetViewFileResponse(CamelModel):
