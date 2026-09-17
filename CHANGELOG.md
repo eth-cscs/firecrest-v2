@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0]
+
+### Added
+
+- The `offset` query parameter of `GET .../ops/view` now accepts negative
+  values, resolved relative to the end of the file at read time (e.g.
+  `offset=-100` returns the window starting 100 bytes before EOF).
+
+### Changed
+
+- ***⚠️ API Breaking*** `GET .../ops/view` response now nests its content
+  under `output` as an object: `output.content`.
+
+  Response now also includes three new fields:
+  - `output.fileSize`
+  - `output.startOffset` (bytes skipped from BOF to the start of `content`)
+  - `output.endOffset` — distance from EOF to the end of the content window,
+    as a non-positive number of bytes (0 means the window reaches EOF,
+    -100 means 100 bytes remain after the window).
+
+  Previously `output` was the raw file content.
+
 ## [2.6.1]
 
 ### Changed

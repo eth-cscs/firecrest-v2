@@ -57,6 +57,31 @@ def mocked_ssh_dd_with_size_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_dd_negative_offset_output():
+    return load_ssh_output("ssh_dd_command_negative_offset.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_offset_beyond_eof_output():
+    return load_ssh_output("ssh_dd_command_offset_beyond_eof.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_negative_offset_beyond_start_output():
+    return load_ssh_output("ssh_dd_command_negative_offset_beyond_start.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_empty_file_output():
+    return load_ssh_output("ssh_dd_command_empty_file.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_unaligned_offset_output():
+    return load_ssh_output("ssh_dd_command_unaligned_offset.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
     return load_ssh_output("ssh_tail_command.json")
 
@@ -252,8 +277,9 @@ async def test_checksum_command(client, ssh_client, mocked_ssh_checksum_output):
 
 
 async def test_checksum_command_error(client, ssh_client, mocked_ssh_checksum_output):
-    mocked_ssh_checksum_output["exit_code"] = 1
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_checksum_output)]):
+    error_output = mocked_ssh_checksum_output.copy()
+    error_output["exit_code"] = 1
+    async with ssh_client.mocked_output([MockedCommand(**error_output)]):
         response = client.get(
             "/filesystem/cluster-slurm-ssh/ops/checksum?path={path}".format(
                 path="/home/README.md"
@@ -307,7 +333,10 @@ async def test_dd_command(client, ssh_client, mocked_ssh_dd_output):
         )
         assert response.status_code == 200
         assert response.json() is not None
-        assert response.json()["output"] == mocked_ssh_dd_output["stdout"]
+        assert response.json()["output"]["content"] == "ABCDEFGHIJ"
+        assert response.json()["output"]["fileSize"] == 10
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == 0
 
 
 async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_output):
@@ -323,7 +352,162 @@ async def test_dd_command_with_size(client, ssh_client, mocked_ssh_dd_with_size_
         )
         assert response.status_code == 200
         assert response.json() is not None
-        assert response.json()["output"] == mocked_ssh_dd_with_size_output["stdout"]
+        assert response.json()["output"]["content"] == "ABCDE"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == -15
+
+
+async def test_dd_command_with_negative_offset(
+    client, ssh_client, mocked_ssh_dd_negative_offset_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_negative_offset_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=-5
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == "PQRST"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 15
+        assert response.json()["output"]["endOffset"] == 0
+
+
+async def test_dd_command_with_offset_beyond_eof(
+    client, ssh_client, mocked_ssh_dd_offset_beyond_eof_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_offset_beyond_eof_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=30
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == ""
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 20
+        assert response.json()["output"]["endOffset"] == 0
+
+
+async def test_dd_command_with_negative_offset_beyond_start(
+    client, ssh_client, mocked_ssh_dd_negative_offset_beyond_start_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_negative_offset_beyond_start_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=-1000
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == "ABCDE"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == -15
+
+
+async def test_dd_command_empty_file(
+    client, ssh_client, mocked_ssh_dd_empty_file_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_empty_file_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}".format(
+                path="/home/readme.txt"
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == ""
+        assert response.json()["output"]["fileSize"] == 0
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == 0
+
+
+async def test_dd_command_with_unaligned_offset(
+    client, ssh_client, mocked_ssh_dd_unaligned_offset_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_unaligned_offset_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=3
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        # offset=3 is not a multiple of size=5, so dd (which operates in
+        # whole `size`-byte blocks) returns the block(s) containing the
+        # requested window, and parse_output must trim it down to the
+        # 5 bytes actually requested, starting at byte 3.
+        assert response.json()["output"]["content"] == "DEFGH"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 3
+        assert response.json()["output"]["endOffset"] == -12
+
+
+async def test_dd_command_invalid_size(client, ssh_client):
+
+    response = client.get(
+        "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}".format(
+            path="/home/readme.txt", size=0
+        )
+    )
+    assert response.status_code == 400
+    assert response.json() is not None
+    assert (
+        response.json()["message"]
+        == "`size` value must be an integer value greater than 0"
+    )
+
+
+async def test_dd_command_size_too_large(client, ssh_client):
+
+    response = client.get(
+        "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}".format(
+            path="/home/readme.txt", size=6 * 1024 * 1024
+        )
+    )
+    assert response.status_code == 400
+    assert response.json() is not None
+    assert response.json()["message"] == "`size` value must be less than 5242880 bytes"
+
+
+async def test_dd_command_error(client, ssh_client, mocked_ssh_dd_output):
+    error_output = mocked_ssh_dd_output.copy()
+    error_output["exit_code"] = 1
+    error_output["stderr"] = "dd: /home/readme.txt: No such file or directory"
+
+    async with ssh_client.mocked_output([MockedCommand(**error_output)]):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}".format(
+                path="/home/readme.txt"
+            )
+        )
+        assert response.status_code == 404
+        assert response.json() is not None
 
 
 async def test_head_command(client, ssh_client, mocked_ssh_head_output):

@@ -164,8 +164,28 @@ class PostFileSymlinkResponse(CamelModel):
     output: Optional[File] = Field(None, nullable=True)
 
 
+class FileView(CamelModel):
+    content: Optional[str] = Field(None, description="Extracted file content")
+    file_size: int = Field(
+        0,
+        description="Total size of the file in bytes",
+    )
+    start_offset: int = Field(
+        0,
+        description="Offset from BOF (bytes skipped before the content window)",
+    )
+    end_offset: int = Field(
+        0,
+        description=(
+            "Distance from EOF to the end of the content window, as a "
+            "non-positive number of bytes (0 means the window reaches EOF, "
+            "-100 means 100 bytes of the file remain after the window)"
+        ),
+    )
+
+
 class GetViewFileResponse(CamelModel):
-    output: Optional[str] = Field(None, nullable=True)
+    output: Optional[FileView] = Field(None)
 
 
 class PostMkdirResponse(CamelModel):
