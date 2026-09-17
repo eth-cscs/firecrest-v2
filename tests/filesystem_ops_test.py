@@ -141,7 +141,9 @@ def mocked_ssh_tar_output():
     return load_ssh_output("ssh_tar_command.json")
 
 
-async def test_ls_command(client, ssh_client, cluster_name="cluster-slurm-ssh"):
+async def test_ls_command(client,
+                          ssh_client,
+                          cluster_name="cluster-slurm-ssh"):
 
     await helper_test_ls_command(client, ssh_client, cluster_name)
 
