@@ -495,6 +495,7 @@ async def test_dd_command_size_too_large(client, ssh_client):
 
 
 async def test_dd_command_error(client, ssh_client, mocked_ssh_dd_output):
+    mocked_ssh_dd_output = mocked_ssh_dd_output.copy()
     mocked_ssh_dd_output["exit_code"] = 1
     mocked_ssh_dd_output["stderr"] = "dd: /home/readme.txt: No such file or directory"
 

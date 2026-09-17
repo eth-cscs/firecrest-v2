@@ -302,9 +302,7 @@ async def get_view(
             alias="size",
             description="Value, in bytes, of the size of data to be retrieved from the file.",
         ),
-    ] = 5
-    * 1024
-    * 1024,  # Default to 5 MiB
+    ] = 5 * 1024 * 1024,  # Default to 5 MiB
     offset: Annotated[
         int | None,
         Query(

@@ -78,7 +78,7 @@ class DdCommand(BaseCommandWithTimeout):
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:
-            super().error_handling(stderr, exit_status)
+            super().error_handling(stderr.strip() if stderr else "", exit_status)
 
         try:
             file_size_str, start_str, chunk = stdout.split("\n", 2)
