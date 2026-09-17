@@ -141,9 +141,7 @@ def mocked_ssh_tar_output():
     return load_ssh_output("ssh_tar_command.json")
 
 
-async def test_ls_command(client,
-                          ssh_client,
-                          cluster_name="cluster-slurm-ssh"):
+async def test_ls_command(client, ssh_client, cluster_name="cluster-slurm-ssh"):
 
     await helper_test_ls_command(client, ssh_client, cluster_name)
 
@@ -420,7 +418,9 @@ async def test_dd_command_with_negative_offset_beyond_start(
         assert response.json()["output"]["endOffset"] == -15
 
 
-async def test_dd_command_empty_file(client, ssh_client, mocked_ssh_dd_empty_file_output):
+async def test_dd_command_empty_file(
+    client, ssh_client, mocked_ssh_dd_empty_file_output
+):
 
     async with ssh_client.mocked_output(
         [MockedCommand(**mocked_ssh_dd_empty_file_output)]
@@ -488,18 +488,15 @@ async def test_dd_command_size_too_large(client, ssh_client):
     )
     assert response.status_code == 400
     assert response.json() is not None
-    assert (
-        response.json()["message"]
-        == "`size` value must be less than 5242880 bytes"
-    )
+    assert response.json()["message"] == "`size` value must be less than 5242880 bytes"
 
 
 async def test_dd_command_error(client, ssh_client, mocked_ssh_dd_output):
-    mocked_ssh_dd_output = mocked_ssh_dd_output.copy()
-    mocked_ssh_dd_output["exit_code"] = 1
-    mocked_ssh_dd_output["stderr"] = "dd: /home/readme.txt: No such file or directory"
+    error_output = mocked_ssh_dd_output.copy()
+    error_output["exit_code"] = 1
+    error_output["stderr"] = "dd: /home/readme.txt: No such file or directory"
 
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_dd_output)]):
+    async with ssh_client.mocked_output([MockedCommand(**error_output)]):
 
         response = client.get(
             "/filesystem/cluster-slurm-ssh/ops/view?path={path}".format(

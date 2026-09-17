@@ -297,7 +297,7 @@ async def get_view(
         use_cache=False,
     ),
     size: Annotated[
-        int | None,
+        int,
         Query(
             alias="size",
             description="Value, in bytes, of the size of data to be retrieved from the file.",

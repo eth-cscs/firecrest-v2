@@ -20,9 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   Response now also includes three new fields:
   - `output.fileSize`
-  - `output.startOffset` (bytes skipped from BOF the
-  start of `content`)
-  - `output.endOffset` (bytes skipped from end of `content` to EOF, expressed as a non-positive number of bytes).
+  - `output.startOffset` (bytes skipped from BOF to the start of `content`)
+  - `output.endOffset` (bytes skipped from end of `content` to EOF, expressed as a non-positive number).
   
   Previously `output` was the raw file content.
 

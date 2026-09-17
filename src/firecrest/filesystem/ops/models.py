@@ -165,9 +165,7 @@ class PostFileSymlinkResponse(CamelModel):
 
 
 class FileView(CamelModel):
-    content: Optional[str] = Field(
-        None, description="Extracted file content", json_schema_extra={"nullable": True}
-    )
+    content: Optional[str] = Field(None, description="Extracted file content")
     file_size: int = Field(
         0,
         description="Total size of the file in bytes",
@@ -187,7 +185,7 @@ class FileView(CamelModel):
 
 
 class GetViewFileResponse(CamelModel):
-    output: Optional[FileView] = Field(None, json_schema_extra={"nullable": True})
+    output: Optional[FileView] = Field(None)
 
 
 class PostMkdirResponse(CamelModel):
