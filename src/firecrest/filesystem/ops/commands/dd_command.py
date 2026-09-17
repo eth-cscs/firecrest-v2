@@ -33,16 +33,14 @@ class DdCommand(BaseCommandWithTimeout):
         if not target_path:
             raise ValueError("`target_path` is required")
 
-        if size is None:
-            size = size_limit
         if size_limit is not None and size > size_limit:
             size = size_limit
-        if size is None or size <= 0:
+        if size <= 0:
             raise ValueError("`size` must be a positive integer")
 
         self.target_path = target_path
         self.size = size
-        self.offset = offset if offset is not None else 0
+        self.offset = offset
 
     def get_command(self) -> str:
         # `offset` may be negative, meaning "this many bytes before EOF".
@@ -78,7 +76,7 @@ class DdCommand(BaseCommandWithTimeout):
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:
-            super().error_handling(stderr if stderr else "", exit_status)
+            super().error_handling(stderr, exit_status)
 
         try:
             file_size_str, start_str, chunk = stdout.split("\n", 2)
@@ -91,6 +89,11 @@ class DdCommand(BaseCommandWithTimeout):
             ) from ex
 
         i = start % self.size
+        if i > len(chunk):
+            raise CommandExecutionError(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="File changed while being read",
+            )
         content = chunk[i : i + self.size]
         end = start + len(content)
 

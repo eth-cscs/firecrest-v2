@@ -304,7 +304,7 @@ async def get_view(
         ),
     ] = 5 * 1024 * 1024,  # Default to 5 MiB
     offset: Annotated[
-        int | None,
+        int,
         Query(
             alias="offset",
             description=(

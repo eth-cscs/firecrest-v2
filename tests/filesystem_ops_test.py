@@ -275,8 +275,9 @@ async def test_checksum_command(client, ssh_client, mocked_ssh_checksum_output):
 
 
 async def test_checksum_command_error(client, ssh_client, mocked_ssh_checksum_output):
-    mocked_ssh_checksum_output["exit_code"] = 1
-    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_checksum_output)]):
+    error_output = mocked_ssh_checksum_output.copy()
+    error_output["exit_code"] = 1
+    async with ssh_client.mocked_output([MockedCommand(**error_output)]):
         response = client.get(
             "/filesystem/cluster-slurm-ssh/ops/checksum?path={path}".format(
                 path="/home/README.md"
