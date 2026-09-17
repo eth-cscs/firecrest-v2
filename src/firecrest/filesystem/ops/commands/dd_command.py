@@ -30,8 +30,18 @@ class DdCommand(BaseCommandWithTimeout):
     ) -> None:
         super().__init__(command_timeout=command_timeout)
 
+        if not target_path:
+            raise ValueError("`target_path` is required")
+
+        if size is None:
+            size = size_limit
+        if size_limit is not None and size > size_limit:
+            size = size_limit
+        if size is None or size <= 0:
+            raise ValueError("`size` must be a positive integer")
+
         self.target_path = target_path
-        self.size = size_limit if (size is None or size > size_limit) else size
+        self.size = size
         self.offset = offset if offset is not None else 0
 
     def get_command(self) -> str:
