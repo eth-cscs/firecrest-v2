@@ -202,8 +202,10 @@ class SSHClientPool:
         self.idle_timeout = idle_timeout
         self.keep_alive = keep_alive
 
-        if idle_timeout <= execute_timeout:
-            raise ValueError("idle_timeout must be greater than execute_timeout")
+        if idle_timeout <= execute_timeout + process_setup_timeout:
+            raise ValueError(
+                "idle_timeout must be greater than execute_timeout+process_setup_timeout"
+            )
 
     def prune_connection_pool(self):
         # Note: does not prune self.user_locks, see comment on that field.
