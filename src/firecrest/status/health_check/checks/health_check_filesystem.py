@@ -32,6 +32,7 @@ class FilesystemHealthCheck(HealthCheckBase):
         health.healthy = True
         health.path = self.path
 
+        self.ssh_client.process_setup_timeout = self.timeout
         self.ssh_client.execute_timeout = self.timeout
 
         ls = LsCommand(self.path, no_recursion=True)

@@ -26,6 +26,7 @@ class SSHHealthCheck(HealthCheckBase):
         health = SSHServiceHealth(service_type=BackendServiceType.ssh)
         health.healthy = True
 
+        self.ssh_client.process_setup_timeout = self.timeout
         self.ssh_client.execute_timeout = self.timeout
 
         truecmd = TrueCommand()

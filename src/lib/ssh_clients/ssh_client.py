@@ -59,6 +59,7 @@ class SSHClient:
         self,
         conn: SSHClientConnection,
         idle_timeout: int = 60,
+        process_setup_timeout: int = 5,
         execute_timeout: int = 5,
         keep_alive: int = 5,
         buffer_limit: int = 5 * 1024 * 1024,
@@ -66,6 +67,7 @@ class SSHClient:
         self.idle_timeout = idle_timeout
         self.conn = conn
         self.conn.set_keepalive(interval=keep_alive, count_max=3)
+        self.process_setup_timeout = process_setup_timeout
         self.execute_timeout = execute_timeout
         self.buffer_limit = buffer_limit
 
@@ -80,38 +82,47 @@ class SSHClient:
 
     async def execute(self, command: BaseCommand, stdin: str = None):
         process = None
+        command_line = command.get_command()
         try:
-            async with asyncio.timeout(self.execute_timeout):
-                command_line = command.get_command()
-                process = await self.conn.create_process(command_line, encoding=None)
+            try:
+                async with asyncio.timeout(self.process_setup_timeout):
+                    process = await self.conn.create_process(
+                        command_line, encoding=None
+                    )
+            except TimeoutError as e:
+                raise TimeoutLimitExceeded(
+                    "SSH channel/process setup timeout limit exceeded."
+                ) from e
 
-                if stdin:
-                    process.stdin.write(stdin.encode())
-                    process.stdin.write_eof()
+            try:
+                async with asyncio.timeout(self.execute_timeout):
+                    if stdin:
+                        process.stdin.write(stdin.encode())
+                        process.stdin.write_eof()
 
-                stdout_data, stdout_error = await asyncio.gather(
-                    self._read_limit(process.stdout, self.buffer_limit),
-                    self._read_limit(process.stderr, self.buffer_limit),
-                )
+                    stdout_data, stdout_error = await asyncio.gather(
+                        self._read_limit(process.stdout, self.buffer_limit),
+                        self._read_limit(process.stderr, self.buffer_limit),
+                    )
 
-                if (
-                    len(stdout_data) >= self.buffer_limit
-                    or len(stdout_error) >= self.buffer_limit
-                ):
-                    raise OutputLimitExceeded("Command output exceeded buffer limit.")
+                    if (
+                        len(stdout_data) >= self.buffer_limit
+                        or len(stdout_error) >= self.buffer_limit
+                    ):
+                        raise OutputLimitExceeded(
+                            "Command output exceeded buffer limit."
+                        )
 
-                process.close()
-                await process.wait_closed()
-                # Log command
-                log_backend_command(command_line, process.exit_status)
-                return command.parse_output(
-                    stdout_data.decode("utf-8", errors="replace"),
-                    stdout_error.decode("utf-8", errors="replace"),
-                    process.exit_status,
-                )
-
-        except TimeoutError as e:
-            if process:
+                    process.close()
+                    await process.wait_closed()
+                    # Log command
+                    log_backend_command(command_line, process.exit_status)
+                    return command.parse_output(
+                        stdout_data.decode("utf-8", errors="replace"),
+                        stdout_error.decode("utf-8", errors="replace"),
+                        process.exit_status,
+                    )
+            except TimeoutError as e:
                 try:
                     process.terminate()
                     process.stdin.write("\x03".encode())
@@ -124,9 +135,9 @@ class SSHClient:
                             "command": command.get_command(),
                         }
                     )
-            raise TimeoutLimitExceeded(
-                "Command execution timeout limit exceeded."
-            ) from e
+                raise TimeoutLimitExceeded(
+                    "Command execution timeout limit exceeded."
+                ) from e
         except ConnectionLost as e:
             raise SSHConnectionError("Unable to establish SSH connection.") from e
         except ChannelOpenError as e:
@@ -160,6 +171,7 @@ class SSHClientPool:
         buffer_limit: int = 5 * 1024 * 1024,
         connect_timeout: int = 5,
         login_timeout: int = 5,
+        process_setup_timeout: int = 5,
         execute_timeout: int = 5,
         max_clients: int = 100,
         idle_timeout: int = 60,
@@ -182,6 +194,7 @@ class SSHClientPool:
         self.buffer_limit = buffer_limit
         self.connect_timeout = connect_timeout
         self.login_timeout = login_timeout
+        self.process_setup_timeout = process_setup_timeout
         self.execute_timeout = execute_timeout
         self.key_provider = key_provider
         self.conn = None
@@ -313,6 +326,7 @@ class SSHClientPool:
                     client = SSHClient(
                         conn,
                         idle_timeout=self.idle_timeout,
+                        process_setup_timeout=self.process_setup_timeout,
                         execute_timeout=self.execute_timeout,
                         buffer_limit=self.buffer_limit,
                         keep_alive=self.keep_alive,
