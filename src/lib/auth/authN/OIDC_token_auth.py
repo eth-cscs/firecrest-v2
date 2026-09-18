@@ -27,11 +27,13 @@ class OIDCTokenAuth(AuthenticationService):
         username_claim: str = None,
         jwk_algorithm: str = None,
         min_token_ttl: int = DEFAULT_MIN_TOKEN_TTL,
+        audience: List[str] = None,
     ):
 
         self.username_claim = username_claim
         self.jwk_algorithm = jwk_algorithm
         self.min_token_ttl = min_token_ttl
+        self.audience = audience
 
         keys = []
         s = requests.Session()
@@ -83,6 +85,24 @@ class OIDCTokenAuth(AuthenticationService):
             if identifier:
                 self.public_keys[identifier] = jwk.construct(key, algorithm=algorithm)
 
+    def _validate_audience(self, decoded_token: dict, access_token: str):
+        if not self.audience:
+            return
+
+        token_aud = decoded_token.get("aud")
+        if isinstance(token_aud, str):
+            token_aud = [token_aud]
+        # jose returns early when "aud" is absent (its rejection is commented
+        # out) and only compares against one value, so check it here.
+        if not isinstance(token_aud, list) or not any(
+            aud in self.audience for aud in token_aud
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token audience is missing or not accepted.",
+                headers={"auth-token": access_token},
+            )
+
     def auth_from_token(self, access_token: str):
         token_header = jwt.get_unverified_header(access_token)
         identifier = token_header.get("kid", None) or token_header.get("x5t", None)
@@ -91,6 +111,8 @@ class OIDCTokenAuth(AuthenticationService):
 
         options = {"verify_signature": True, "verify_aud": False, "verify_exp": True}
         decoded_token = jwt.decode(token=access_token, key=public_key, options=options)
+
+        self._validate_audience(decoded_token, access_token)
 
         exp = decoded_token.get("exp")
         if exp is not None and (exp - time()) < self.min_token_ttl:

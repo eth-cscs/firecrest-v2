@@ -73,6 +73,19 @@ class Oidc(CamelModel):
         nullable=False,
         ge=0,
     )
+    audience: Optional[List[str]] = Field(
+        None,
+        description=(
+            "Expected audience(s) for the JWT `aud` claim. A token is accepted "
+            "when its `aud` claim contains at least one of these, and rejected "
+            "when it carries no `aud` claim at all. When unset, audience "
+            "validation is disabled. "
+            "Only list values that identify *this* deployment: accepting an "
+            "audience that names another service would let tokens minted for "
+            "that service be replayed here."
+        ),
+        nullable=True,
+    )
 
 
 class LoadFileSecretStr(SecretStr):
