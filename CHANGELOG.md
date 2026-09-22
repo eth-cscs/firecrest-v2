@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.1]
 
+### Added
+
+- Added SSH process_setup timeout. A timeout for opening the SSH channel and dispatching the exec request for a command.
+
 ### Changed
 
 - Minimum JWT token ttl now defaults to 5 seconds (was 30). A token is only

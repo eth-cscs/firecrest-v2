@@ -400,8 +400,15 @@ class SSHTimeouts(CamelModel):
         5, description="Timeout (seconds) for initial SSH connection."
     )
     login: int = Field(5, description="Timeout (seconds) for SSH login/auth.")
+    process_setup: int = Field(
+        5,
+        description="Timeout (seconds) for opening the SSH channel and "
+        "dispatching the exec request for a command.",
+    )
     command_execution: int = Field(
-        5, description="Timeout (seconds) for executing commands over SSH."
+        5,
+        description="Timeout (seconds) for a command to finish producing "
+        "output and for its channel to close, once it has started.",
     )
     idle_timeout: int = Field(
         60, description="Max idle time (seconds) before disconnecting."
