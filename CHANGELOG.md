@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as little as 5 seconds left are now accepted, where 30 seconds was
   previously required.
 
+### Fixed
+
+- Use of a custom field delimiter for Slurm cli cammands. This fixes slurm jobs parsing issues when job name includes the pipe char.
+
 ## [2.6.0]
 
 ### Added
