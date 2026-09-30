@@ -397,7 +397,9 @@ async def test_get_job_metadata_without_stored_batch_script(
             MockedCommand(command="--batch-script", stdout="", stderr=""),
             MockedCommand(
                 command="--format=",
-                stdout="4498195|myjob||slurm-%j.out|slurm-%j.err|/scratch/test-user",
+                stdout="|~f7t~|".join(
+                    ["4498195", "myjob", "", "slurm-%j.out", "slurm-%j.err", "/scratch/test-user"]
+                ),
                 stderr="",
             ),
         ]
