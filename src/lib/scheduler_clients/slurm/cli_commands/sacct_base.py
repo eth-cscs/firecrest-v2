@@ -10,6 +10,10 @@ from typing import List
 from lib.scheduler_clients.models import JobsTimeWindow, TIME_WINDOW_DURATIONS
 from lib.ssh_clients.ssh_client import BaseCommand
 
+# Field separator for Slurm's parsable output. The default "|" can appear in
+# free-text fields such as JobName or WorkDir, which breaks field splitting.
+SLURM_FIELD_DELIMITER = "|~f7t~|"
+
 
 class SacctCommandBase(BaseCommand):
 
@@ -48,7 +52,7 @@ class SacctCommandBase(BaseCommand):
             if amount == 1:
                 unit = unit[:-1]
             cmd += [f"--starttime=now-{amount}{unit}"]
-        cmd += ["--parsable2"]
+        cmd += ["--parsable2", f"--delimiter={shlex.quote(SLURM_FIELD_DELIMITER)}"]
         return " ".join(cmd)
 
     @abstractmethod
