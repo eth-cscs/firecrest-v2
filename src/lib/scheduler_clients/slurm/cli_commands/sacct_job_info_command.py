@@ -7,7 +7,10 @@
 from datetime import datetime
 import re
 from lib.exceptions import SlurmError
-from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
+from lib.scheduler_clients.slurm.cli_commands.sacct_base import (
+    SacctCommandBase,
+    SLURM_FIELD_DELIMITER,
+)
 
 
 def _dhms_to_seconds(time_str: str) -> int:
@@ -89,13 +92,15 @@ class SacctCommand(SacctCommandBase):
 
         jobs = {}
         for job_str in stdout.split("\n"):
-            job_info = job_str.split("|")
+            job_info = job_str.split(SLURM_FIELD_DELIMITER)
             if len(job_info) != 20:
                 continue
             jobId = job_info[0]
             if "." in jobId:
-                main_job_id, step_id = jobId.split(".")
-                jobs[main_job_id]["steps"].append(self._parse_step(job_info))
+                main_job_id = jobId.split(".")[0]
+                # Skip steps whose parent job line was not returned/parsed
+                if main_job_id in jobs:
+                    jobs[main_job_id]["steps"].append(self._parse_step(job_info))
             else:
                 jobs[jobId] = self._parse_job(job_info)
 

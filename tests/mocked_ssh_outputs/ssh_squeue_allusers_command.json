@@ -1,6 +1,6 @@
 {
-    "stdout": "1|1|||users|staff|Count to 100||part01|0.00000000023283|PENDING|Resources|0:00|1773058665|N/A|(null)|5-00:00:00|fireuser|/home/fireuser",
+    "stdout": "1|~f7t~|1|~f7t~||~f7t~||~f7t~|users|~f7t~|staff|~f7t~|Count to 100|~f7t~||~f7t~|part01|~f7t~|0.00000000023283|~f7t~|PENDING|~f7t~|Resources|~f7t~|0:00|~f7t~|1773058665|~f7t~|N/A|~f7t~|(null)|~f7t~|5-00:00:00|~f7t~|fireuser|~f7t~|/home/fireuser",
     "stderr": "",
     "exit_code": 0,
-    "command":"squeue --noheader --Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'"
+    "command":"squeue --noheader --Format='JobID:|~f7t~|,NumNodes:|~f7t~|,Cluster:|~f7t~||~f7t~|,GroupName:|~f7t~|,Account:|~f7t~|,Name:|~f7t~|,NodeList:|~f7t~|,Partition:|~f7t~|,PriorityLong:|~f7t~|,State:|~f7t~|,Reason:|~f7t~|,TimeUsed:|~f7t~|,SubmitTime:|~f7t~|,StartTime:|~f7t~|,EndTime:|~f7t~||~f7t~|,TimeLimit:|~f7t~|,UserName:|~f7t~|,WorkDir:'"
 }

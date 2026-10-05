@@ -6,7 +6,32 @@
 # commands
 import shlex
 from typing import List
+from lib.scheduler_clients.slurm.cli_commands.sacct_base import SLURM_FIELD_DELIMITER
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
+
+# squeue fields, each followed by the given number of delimiters. Extra
+# delimiters add empty columns so the output lines up with SacctCommand's
+# format (ExitCode after Cluster, Suspended after EndTime).
+SQUEUE_FIELDS = [
+    ("JobID", 1),
+    ("NumNodes", 1),
+    ("Cluster", 2),
+    ("GroupName", 1),
+    ("Account", 1),
+    ("Name", 1),
+    ("NodeList", 1),
+    ("Partition", 1),
+    ("PriorityLong", 1),
+    ("State", 1),
+    ("Reason", 1),
+    ("TimeUsed", 1),
+    ("SubmitTime", 1),
+    ("StartTime", 1),
+    ("EndTime", 2),
+    ("TimeLimit", 1),
+    ("UserName", 1),
+    ("WorkDir", 0),
+]
 
 
 class SqueueCommand(SacctCommand):
@@ -40,7 +65,12 @@ class SqueueCommand(SacctCommand):
             cmd += [f"--jobs={shlex.quote(str_job_ids)}"]
         cmd += [
             "--noheader",
-            "--Format='JobID:|,NumNodes:|,Cluster:||,GroupName:|,Account:|,Name:|,NodeList:|,Partition:|,PriorityLong:|,State:|,Reason:|,TimeUsed:|,SubmitTime:|,StartTime:|,EndTime:||,TimeLimit:|,UserName:|,WorkDir:'",
+            "--Format='"
+            + ",".join(
+                f"{field}:{SLURM_FIELD_DELIMITER * separators}"
+                for field, separators in SQUEUE_FIELDS
+            )
+            + "'",
         ]
         return " ".join(cmd)
 
