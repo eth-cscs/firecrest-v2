@@ -3,6 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import asyncio
+
 from firecrest.config import HPCCluster, BackendServiceType, SSHServiceHealth
 from firecrest.dependencies import SSHClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
@@ -26,14 +28,12 @@ class SSHHealthCheck(HealthCheckBase):
         health = SSHServiceHealth(service_type=BackendServiceType.ssh)
         health.healthy = True
 
-        self.ssh_client.execute_timeout = self.timeout
-
         truecmd = TrueCommand()
         async with self.ssh_client.get_client(
             self.auth.username, self.token["access_token"]
         ) as client:
-            await client.execute(truecmd)
-
+            async with asyncio.timeout(self.timeout):
+                await client.execute(truecmd)
         return health
 
     async def handle_error(self, ex: Exception) -> SSHServiceHealth:

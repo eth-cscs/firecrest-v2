@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.1]
 
+### Added
+
+- Added SSH process_setup timeout. A timeout for opening the SSH channel and dispatching the exec request for a command.
+
 ### Changed
 
 - Minimum JWT token ttl now defaults to 5 seconds (was 30). A token is only
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Use of a custom field delimiter for Slurm cli cammands. This fixes slurm jobs parsing issues when job name includes the pipe char.
+- Scheduler health check no longer fails with `KeyError: 'pinged'` against Slurm 26.05 (slurmrestd data_parser v0.0.45), where the `pinged`/`mode` ping fields were removed in favour of the boolean `responding`/`primary` introduced in v0.0.44. Both response shapes are accepted; the `scontrol ping` (SSH) path is unchanged.
 
 ## [2.6.0]
 

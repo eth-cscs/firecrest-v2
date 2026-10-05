@@ -53,7 +53,11 @@ class NodeState(str, Enum):
 
 class SchedPing(CamelModel):
     hostname: Optional[str] = Field(default=None, nullable=True)
+    # ``pinged`` and ``mode`` are the pre-v0.0.45 (Slurm < 26.05) fields;
+    # ``responding`` and ``primary`` replace them from data_parser v0.0.44 on.
     pinged: Optional[str] = Field(default=None, nullable=True)
+    responding: Optional[bool] = Field(default=None, nullable=True)
+    primary: Optional[bool] = Field(default=None, nullable=True)
     latency: Optional[int] = Field(default=None, nullable=True)
     mode: Optional[str] = Field(default=None, nullable=True)
 
