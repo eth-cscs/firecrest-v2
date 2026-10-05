@@ -48,7 +48,7 @@ EXCEPTION_STATUS_CODES: tuple[tuple[tuple[type[BaseException], ...], int], ...] 
     ((SchedulerAuthError,), fastapi.status.HTTP_401_UNAUTHORIZED),
     ((SchedulerRequestError,), fastapi.status.HTTP_400_BAD_REQUEST),
     ((SchedulerQuotaError,), fastapi.status.HTTP_403_FORBIDDEN),
-    ((OutputLimitExceeded,), fastapi.status.HTTP_413_REQUEST_ENTITY_TOO_LARGE),
+    ((OutputLimitExceeded,), fastapi.status.HTTP_413_CONTENT_TOO_LARGE),
     ((TimeoutLimitExceeded,), fastapi.status.HTTP_504_GATEWAY_TIMEOUT),
     ((SSHConnectionError,), fastapi.status.HTTP_424_FAILED_DEPENDENCY),
     ((SSHClientError, SSHServiceError), fastapi.status.HTTP_502_BAD_GATEWAY),

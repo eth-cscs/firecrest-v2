@@ -50,7 +50,7 @@ EXCEPTION_CASES = [
     ),
     pytest.param(
         OutputLimitExceeded("output too large"),
-        fastapi.status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        fastapi.status.HTTP_413_CONTENT_TOO_LARGE,
         id="OutputLimitExceeded",
     ),
     pytest.param(
