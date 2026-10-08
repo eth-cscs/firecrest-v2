@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- User accounts (`/status/{system_name}/userinfo`) are no longer reported truncated: `sacctmgr` printed account names longer than 10 characters as e.g. `project-a+`, which then failed job submission with an invalid account. Both `sacctmgr` lookups now use parsable output (`-P`), so the default account is also matched correctly, and an account associated with several partitions is listed once.
+- User accounts (`/status/{system_name}/userinfo`) are no longer reported truncated: `sacctmgr` printed account names longer than 10 characters as e.g. `project-a+`, which then failed job submission with an invalid account. Both `sacctmgr` lookups now use parsable output (`--parsable2`), so the default account is also matched correctly. An account associated with several partitions is listed once, with both the SSH and the slurmrestd backend.
 - Scheduler health check no longer fails with `KeyError: 'pinged'` against Slurm 26.05 (slurmrestd data_parser v0.0.45), where the `pinged`/`mode` ping fields were removed in favour of the boolean `responding`/`primary` introduced in v0.0.44. Both response shapes are accepted; the `scontrol ping` (SSH) path is unchanged.
 
 ## [2.6.0]
