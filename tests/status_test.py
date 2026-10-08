@@ -239,3 +239,65 @@ async def test_liveness_check(client):
 
     response = client.get("/status/liveness")
     assert response.status_code == 200
+
+
+async def test_userinfo_long_and_repeated_accounts(
+    client,
+    ssh_client,
+    slurm_cluster_with_ssh_config,
+):
+    # sacctmgr lists one association per partition; names exceed the
+    # default column width, so they are only intact in parsable output
+    async with ssh_client.mocked_output(
+        [
+            MockedCommand(**load_ssh_output("ssh_id_command.json")),
+            MockedCommand(
+                stdout="project-account-2\n",
+                command="sacctmgr show user 'test-user' format=defaultaccount -n --parsable2",
+            ),
+            MockedCommand(
+                stdout="project-account-1\nproject-account-2\nproject-account-1\n",
+                command="sacctmgr show assoc user='test-user' format=account -n --parsable2",
+            ),
+        ]
+    ):
+        response = client.get(f"/status/{slurm_cluster_with_ssh_config.name}/userinfo")
+        assert response.status_code == 200
+        assert response.json()["accounts"] == [
+            {"name": "project-account-1", "default": False},
+            {"name": "project-account-2", "default": True},
+        ]
+
+
+async def test_userinfo_rest_repeated_associations(
+    client,
+    ssh_client,
+    slurm_cluster_with_api_config,
+):
+    associations = {
+        "associations": [
+            {"account": "project-account-1", "partition": "p1", "is_default": False},
+            {"account": "project-account-2", "partition": "p1", "is_default": False},
+            {"account": "project-account-2", "partition": "p2", "is_default": True},
+        ]
+    }
+    with aioresponses() as mocked:
+        mocked.get(
+            "{root_url}/slurmdb/v{version}/associations?user=test-user".format(
+                root_url=slurm_cluster_with_api_config.scheduler.api_url,
+                version=slurm_cluster_with_api_config.scheduler.api_version,
+            ),
+            status=200,
+            body=json.dumps(associations),
+        )
+        async with ssh_client.mocked_output(
+            [MockedCommand(**load_ssh_output("ssh_id_command.json"))]
+        ):
+            response = client.get(
+                f"/status/{slurm_cluster_with_api_config.name}/userinfo"
+            )
+        assert response.status_code == 200
+        assert response.json()["accounts"] == [
+            {"name": "project-account-1", "default": False},
+            {"name": "project-account-2", "default": True},
+        ]

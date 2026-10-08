@@ -19,7 +19,7 @@ class SacctmgrDefaultAccountCommand(SacctmgrBaseCommand):
         cmd = [super().get_command()]
         cmd += ["show"]
         cmd += [f"user '{self.username}'"]
-        cmd += ["format=defaultaccount -n"]
+        cmd += ["format=defaultaccount -n --parsable2"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

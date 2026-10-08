@@ -19,7 +19,9 @@ class SacctmgrAccountsCommand(SacctmgrBaseCommand):
         cmd = [super().get_command()]
         cmd += ["show assoc"]
         cmd += [f"user='{self.username}'"]
-        cmd += ["format=account -n"]
+        # Without --parsable2, names longer than the column width (10)
+        # are truncated, e.g. "project-a-1" -> "project-a+"
+        cmd += ["format=account -n --parsable2"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -28,11 +30,10 @@ class SacctmgrAccountsCommand(SacctmgrBaseCommand):
                 f"Unexpected Slurm command response. exit_status:{exit_status} std_err:{stderr}"
             )
 
-        accounts = []
-        for line in stdout.split("\n"):
-            if line.strip() == "":
-                continue
-            accounts.append(line.strip())
+        # One association row is listed per partition/cluster
+        accounts = list(
+            dict.fromkeys(line.strip() for line in stdout.split("\n") if line.strip())
+        )
 
         if len(accounts) == 0:
             return None
