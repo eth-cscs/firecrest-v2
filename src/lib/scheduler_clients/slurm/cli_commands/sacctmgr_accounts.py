@@ -19,7 +19,9 @@ class SacctmgrAccountsCommand(SacctmgrBaseCommand):
         cmd = [super().get_command()]
         cmd += ["show assoc"]
         cmd += [f"user='{self.username}'"]
-        cmd += ["format=account -n"]
+        # -P: parsable output, otherwise names longer than the column
+        # width (10) are truncated, e.g. "project-a-1" -> "project-a+"
+        cmd += ["format=account -n -P"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -32,7 +34,10 @@ class SacctmgrAccountsCommand(SacctmgrBaseCommand):
         for line in stdout.split("\n"):
             if line.strip() == "":
                 continue
-            accounts.append(line.strip())
+            account = line.strip()
+            # One association row is listed per partition/cluster
+            if account not in accounts:
+                accounts.append(account)
 
         if len(accounts) == 0:
             return None
