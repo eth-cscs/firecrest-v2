@@ -1,0 +1,6 @@
+{
+    "stdout": "22\n0\n22\nLoop 🚀\n1 ✅\n2 ✅\n",
+    "stderr": "",
+    "exit_code": 0,
+    "command": "timeout 5 sh -c 'fsize=$(stat -c%s -- \"$1\") || exit 1; off=\"$2\"; if [ \"$off\" -lt 0 ]; then start=$(( fsize + off )); else start=$off; fi; if [ \"$start\" -lt 0 ]; then start=0; fi; if [ \"$start\" -gt \"$fsize\" ]; then start=$fsize; fi; n=$(( fsize - start )); if [ \"$n\" -gt \"$3\" ]; then n=$3; fi; printf '\"'\"'%d\\n%d\\n%d\\n'\"'\"' \"$fsize\" \"$start\" \"$n\"; dd if=\"$1\" bs=65536 iflag=skip_bytes,count_bytes skip=\"$start\" count=\"$n\" status=none' -- /home/readme.txt 0 5242880"
+}
