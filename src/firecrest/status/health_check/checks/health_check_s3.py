@@ -8,10 +8,12 @@ from firecrest.config import (
     BackendServiceType,
     S3ServiceHealth,
 )
-from aiobotocore.session import get_session
-from aiobotocore.config import AioConfig
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from firecrest.status.health_check.checks.helpers import log_health_check_error
+
+
+from aiobotocore.session import get_session
+from aiobotocore.config import AioConfig
 
 
 class S3HealthCheck(HealthCheckBase):
@@ -52,7 +54,6 @@ class S3HealthCheck(HealthCheckBase):
         health.message = str(ex)
 
         log_health_check_error(service_type=BackendServiceType.external_storage,
-                               system_name=self.data_transfer.public_url,
                                health_message=health.message,
                                exception=ex)
         return health

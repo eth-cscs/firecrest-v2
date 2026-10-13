@@ -6,31 +6,29 @@
 import logging
 from firecrest.config import BackendServiceType
 
+logger = logging.getLogger("uvicorn.error")
+
 
 def log_health_check_error(service_type: BackendServiceType,
                            health_message: str,
-                           system_name: str = None,
-                           filesystem_path: str = None,
-                           exception: Exception = None,
-                           username: str = None):
+                           system_name: str | None = None,
+                           filesystem_path: str | None = None,
+                           exception: Exception | None = None,
+                           username: str | None = None):
 
-    logger = logging.getLogger("uvicorn.error")
     log_data = {}
 
-    log_data["message"] = (
-        f"Health check for {service_type.value} service on {system_name} failed: {health_message}" if
-        service_type != BackendServiceType.filesystem else
-        f"Health check for {service_type.value} service on {system_name} at path {filesystem_path} failed: {health_message}"
-    )
-
-    log_data["error.type"] = exception.__class__.__name__ if exception else f"Unknown{service_type.value}Exception"
-    if exception:
-        log_data["error.message"] = (
-            exception.__class__.__name__ + ": " + health_message
-        )
+    message = ""
+    if service_type == BackendServiceType.filesystem:
+        message = f"Health check for {service_type.value} service on {system_name} at path {filesystem_path} failed: {health_message}"
+    elif service_type == BackendServiceType.external_storage:
+        message = f"Health check for {service_type.value} failed: {health_message}"
     else:
-        log_data["error.message"] = f"Unknown {service_type.value} exception"
-
+        message = f"Health check for {service_type.value} service on {system_name} failed: {health_message}"
+    
+    log_data["message"] = message
+    log_data["error.type"] = exception.__class__.__name__
+    log_data["error.message"] = f"{exception.__class__.__name__}: {health_message}"
     log_data["firecrest.username"] = username
 
     logger.error(log_data)

@@ -6,10 +6,13 @@
 from importlib import resources as impresources
 from firecrest.plugins import settings
 import json
+import logging
 import pytest
+from unittest.mock import AsyncMock, patch
 from aioresponses import aioresponses
 from pytest_httpx import HTTPXMock
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
+from firecrest.status.health_check.checks.health_check_ssh import SSHHealthCheck
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
 from tests.mock_ssh_client import MockedCommand
@@ -191,3 +194,34 @@ async def test_health_check_path_prefix_not_a_filesystem(
         f"/filesystem/{slurm_cluster_with_ssh_config.name}/ops/ls?path=/home_private/x"
     )
     assert response.status_code == 400
+
+
+async def test_health_check_ssh_failure_logs_error(
+    slurm_cluster_with_ssh_config,
+    caplog,
+):
+    auth = TokenDecoderMock().auth_from_token("")
+    token = mocked_token_response()
+
+    ssh_check = SSHHealthCheck(
+        auth=auth,
+        token=token,
+        system=slurm_cluster_with_ssh_config,
+        timeout=10,
+    )
+
+    with patch.object(
+        SSHHealthCheck,
+        "execute_check",
+        new_callable=AsyncMock,
+        side_effect=ConnectionError("SSH connection refused"),
+    ):
+        with caplog.at_level(logging.ERROR, logger="uvicorn.error"):
+            health = await ssh_check.check()
+
+    assert health.healthy is False
+    assert health.message == "SSH connection refused"
+    assert any(
+        f"Health check for ssh service on {slurm_cluster_with_ssh_config.name} failed" in str(record.message)
+        for record in caplog.records
+    )
