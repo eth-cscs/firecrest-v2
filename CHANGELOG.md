@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2]
+
+### Added
+
+- Added logging of errors when health checks fail. Before, errors were ommited in the logs.
+
 ## [2.6.1]
 
 ### Added
@@ -18,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   threshold, so lowering it makes the check more permissive: tokens with
   as little as 5 seconds left are now accepted, where 30 seconds was
   previously required.
-
-## [Unreleased]
 
 ### Fixed
 

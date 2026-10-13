@@ -12,6 +12,8 @@ from aiobotocore.session import get_session
 from aiobotocore.config import AioConfig
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 
+import logging
+
 
 class S3HealthCheck(HealthCheckBase):
 
@@ -49,4 +51,23 @@ class S3HealthCheck(HealthCheckBase):
         health = S3ServiceHealth(service_type=BackendServiceType.external_storage)
         health.healthy = False
         health.message = str(ex)
+        logger = logging.getLogger("uvicorn.error")
+        
+        log_data = {}
+
+        log_data["message"] = (
+            f"S3 Health check failed: {health.message if ex else 'Unknown exception'}"
+        )
+
+        log_data["error.type"] = ex.__class__.__name__ if ex else "UnknownS3Exception"
+        if ex:
+            log_data["error.message"] = (
+                ex.__class__.__name__ + ": " + health.message
+            )
+        else:
+            log_data["error.message"] = "Unknown S3 connection exception"
+
+        log_data["firecrest.username"] = None  # S3 health check does not have a user context
+
+        logger.error(log_data)
         return health

@@ -10,6 +10,8 @@ from firecrest.dependencies import SSHClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from firecrest.status.health_check.checks.true_command import TrueCommand
 
+import logging
+
 
 class SSHHealthCheck(HealthCheckBase):
 
@@ -40,4 +42,22 @@ class SSHHealthCheck(HealthCheckBase):
         health = SSHServiceHealth(service_type=BackendServiceType.ssh)
         health.healthy = False
         health.message = str(ex)
+        logger = logging.getLogger("uvicorn.error")
+        log_data = {}
+
+        log_data["message"] = (
+            f"SSH Health check for {self.system.name if self.system else 'unknown system'} failed: {health.message if ex else 'Unknown SSH connection exception'}"
+        )
+
+        log_data["error.type"] = ex.__class__.__name__ if ex else "SSHConnectionError"
+        if ex:
+            log_data["error.message"] = (
+                ex.__class__.__name__ + ": " + health.message
+            )
+        else:
+            log_data["error.message"] = "Unknown SSH connection exception"
+
+        log_data["firecrest.username"] = self.auth.username
+
+        logger.error(log_data)
         return health

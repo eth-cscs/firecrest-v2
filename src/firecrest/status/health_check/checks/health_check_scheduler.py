@@ -9,6 +9,8 @@ from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from lib.scheduler_clients.models import SchedPing
 
+import logging
+
 
 def ping_is_up(ping) -> bool:
     """Whether a scheduler ping entry reports a responding controller.
@@ -56,4 +58,23 @@ class SchedulerHealthCheck(HealthCheckBase):
         health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         health.healthy = False
         health.message = error_message
+        logger = logging.getLogger("uvicorn.error")
+
+        log_data = {}
+
+        log_data["message"] = (
+            f"Scheduler Health check for {self.system.name if self.system else 'unknown system'} failed: {health.message if ex else 'Unknown exception'}"
+        )
+
+        log_data["error.type"] = ex.__class__.__name__ if ex else "SchedulerConnectionError"
+        if ex:
+            log_data["error.message"] = (
+                ex.__class__.__name__ + ": " + health.message
+            )
+        else:
+            log_data["error.message"] = "Unknown Scheduler connection exception"
+
+        log_data["firecrest.username"] = self.auth.username
+
+        logger.error(log_data)
         return health
