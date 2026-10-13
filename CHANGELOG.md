@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added logging of errors when health checks fail. Before, errors were ommited in the logs.
+- Added logging of errors when health checks fail. Before, errors were omitted in the logs.
 
 ## [2.6.1]
 

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import asyncio
-import logging
 
 from firecrest.config import (
     BackendServiceType,
@@ -14,6 +13,7 @@ from firecrest.config import (
 from firecrest.dependencies import SSHClientDependency
 from firecrest.filesystem.ops.commands.ls_command import LsCommand
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
+from firecrest.status.health_check.checks.helpers import log_health_check_error
 
 
 class FilesystemHealthCheck(HealthCheckBase):
@@ -49,23 +49,10 @@ class FilesystemHealthCheck(HealthCheckBase):
         health.healthy = False
         health.path = self.path
         health.message = str(ex)
-        logger = logging.getLogger("uvicorn.error")
-
-        log_data = {}
-
-        log_data["message"] = (
-            f"Filesystem Health check for {self.path} in {self.system.name if self.system else 'unknown system'} failed: {health.message if ex else 'Unknown exception'}"
-        )
-
-        log_data["error.type"] = ex.__class__.__name__ if ex else "SSHConnectionError"
-        if ex:
-            log_data["error.message"] = (
-                ex.__class__.__name__ + ": " + health.message
-            )
-        else:
-            log_data["error.message"] = "Unknown SSH connection exception"
-
-        log_data["firecrest.username"] = self.auth.username
-
-        logger.error(log_data)
+        log_health_check_error(service_type=BackendServiceType.filesystem,
+                               system_name=self.system.name,
+                               filesystem_path=self.path,
+                               health_message=health.message,
+                               exception=ex,
+                               username=self.auth.username)
         return health
