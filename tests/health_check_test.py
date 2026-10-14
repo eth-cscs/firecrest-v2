@@ -4,13 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from importlib import resources as impresources
-from firecrest.plugins import settings
 import json
 import logging
 import pytest
 from unittest.mock import AsyncMock, patch
 from aioresponses import aioresponses
 from pytest_httpx import HTTPXMock
+
+from firecrest.plugins import settings
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from firecrest.status.health_check.checks.health_check_ssh import SSHHealthCheck
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
@@ -18,6 +19,7 @@ from lib.models.apis.api_auth_model import ApiAuthModel
 from tests.mock_ssh_client import MockedCommand
 from tests import mocked_api_responses
 from firecrest.config import BackendServiceType
+
 
 # import helpers functions to avoid duplicating code in tests
 from tests.helpers import (

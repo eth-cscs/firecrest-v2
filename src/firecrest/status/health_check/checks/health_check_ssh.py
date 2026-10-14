@@ -42,8 +42,8 @@ class SSHHealthCheck(HealthCheckBase):
         health.healthy = False
         health.message = str(ex)
         log_health_check_error(service_type=BackendServiceType.ssh,
-                               system_name=self.system.name,
-                               health_message=health.message,
                                exception=ex,
+                               health_message=health.message,
+                               system_name=self.system.name,
                                username=self.auth.username)
         return health

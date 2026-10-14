@@ -50,9 +50,9 @@ class FilesystemHealthCheck(HealthCheckBase):
         health.path = self.path
         health.message = str(ex)
         log_health_check_error(service_type=BackendServiceType.filesystem,
-                               system_name=self.system.name,
-                               filesystem_path=self.path,
                                health_message=health.message,
                                exception=ex,
+                               system_name=self.system.name,
+                               filesystem_path=self.path,
                                username=self.auth.username)
         return health
