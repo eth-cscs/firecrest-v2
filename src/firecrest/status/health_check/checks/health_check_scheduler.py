@@ -53,12 +53,10 @@ class SchedulerHealthCheck(HealthCheckBase):
     async def handle_error(self, ex: Exception) -> SchedulerServiceHealth:
         health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         health.healthy = False
-        print(f"System {self.system.name} scheduler health check failed: {ex}")
         health.message = str(ex)
-        print(f"Error message is: {health.message}")
         log_health_check_error(service_type=BackendServiceType.scheduler,
                                health_message=health.message,
                                exception=ex,
-                               system_name=self.system.name,                               
+                               system_name=self.system.name,
                                username=self.auth.username)
         return health
