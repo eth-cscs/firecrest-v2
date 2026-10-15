@@ -309,9 +309,6 @@ async def test_health_check_s3_failure_logs_error(
     slurm_cluster_with_ssh_config,
     caplog,
 ):
-    # auth = TokenDecoderMock().auth_from_token("")
-    # token = mocked_token_response()
-
     s3_check = S3HealthCheck(
         data_transfer=slurm_cluster_with_ssh_config.data_operation.data_transfer,
         timeout=10,

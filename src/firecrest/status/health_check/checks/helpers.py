@@ -18,7 +18,7 @@ def log_health_check_error(service_type: BackendServiceType,
 
     log_data = {}
 
-    match service_type.value:
+    match service_type:
         case BackendServiceType.filesystem:
             log_data["error.path"] = filesystem_path
             log_data["error.system"] = system_name
