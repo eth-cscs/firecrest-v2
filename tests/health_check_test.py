@@ -5,6 +5,7 @@
 
 from importlib import resources as impresources
 import json
+import ast
 import logging
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -14,6 +15,9 @@ from pytest_httpx import HTTPXMock
 from firecrest.plugins import settings
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from firecrest.status.health_check.checks.health_check_ssh import SSHHealthCheck
+from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
+from firecrest.status.health_check.checks.health_check_scheduler import SchedulerHealthCheck
+from firecrest.status.health_check.checks.health_check_filesystem import FilesystemHealthCheck
 from lib.auth.authN.OIDC_token_auth import OIDCTokenAuth
 from lib.models.apis.api_auth_model import ApiAuthModel
 from tests.mock_ssh_client import MockedCommand
@@ -221,9 +225,113 @@ async def test_health_check_ssh_failure_logs_error(
         with caplog.at_level(logging.ERROR, logger="uvicorn.error"):
             health = await ssh_check.check()
 
+    record = caplog.records[0]
+    payload = ast.literal_eval(record.getMessage())
+
     assert health.healthy is False
-    assert health.message == "SSH connection refused"
-    assert any(
-        f"Health check for ssh service on {slurm_cluster_with_ssh_config.name} failed" in str(record.message)
-        for record in caplog.records
+    assert payload["message"] == "Health check failed"
+    assert payload["error.service"] == BackendServiceType.ssh.value
+    assert payload["firecrest.username"] == auth.username
+    assert payload["error.system"] == slurm_cluster_with_ssh_config.name
+    assert "error.path" not in payload  # SSH health check does not have a filesystem path
+
+
+async def test_health_check_scheduler_failure_logs_error(
+    slurm_cluster_with_ssh_config,
+    caplog,
+):
+    auth = TokenDecoderMock().auth_from_token("")
+    token = mocked_token_response()
+
+    scheduler_check = SchedulerHealthCheck(
+        auth=auth,
+        token=token,
+        system=slurm_cluster_with_ssh_config,
+        timeout=10,
     )
+
+    with patch.object(
+        SchedulerHealthCheck,
+        "execute_check",
+        new_callable=AsyncMock,
+        side_effect=ConnectionError("SSH connection refused"),
+    ):
+        with caplog.at_level(logging.ERROR, logger="uvicorn.error"):
+            health = await scheduler_check.check()
+
+    record = caplog.records[0]
+    payload = ast.literal_eval(record.getMessage())
+
+    assert health.healthy is False
+    assert payload["message"] == "Health check failed"
+    assert payload["error.service"] == BackendServiceType.scheduler.value
+    assert payload["firecrest.username"] == auth.username
+    assert payload["error.system"] == slurm_cluster_with_ssh_config.name
+    assert "error.path" not in payload  # Scheduler health check does not have a filesystem path
+
+
+async def test_health_check_filesystem_failure_logs_error(
+    slurm_cluster_with_ssh_config,
+    caplog,
+):
+    auth = TokenDecoderMock().auth_from_token("")
+    token = mocked_token_response()
+
+    filesystem_check = FilesystemHealthCheck(
+        auth=auth,
+        token=token,
+        system=slurm_cluster_with_ssh_config,
+        timeout=10,
+        path=slurm_cluster_with_ssh_config.file_systems[0].path
+    )
+
+    with patch.object(
+        FilesystemHealthCheck,
+        "execute_check",
+        new_callable=AsyncMock,
+        side_effect=ConnectionError("SSH connection refused"),
+    ):
+        with caplog.at_level(logging.ERROR, logger="uvicorn.error"):
+            health = await filesystem_check.check()
+
+    record = caplog.records[0]
+    payload = ast.literal_eval(record.getMessage())
+
+    assert health.healthy is False
+    assert payload["message"] == "Health check failed"
+    assert payload["error.service"] == BackendServiceType.filesystem.value
+    assert payload["error.system"] == slurm_cluster_with_ssh_config.name
+    assert payload["firecrest.username"] == auth.username
+    assert "error.path" in payload  # Filesystem health check does have a filesystem path
+
+
+async def test_health_check_s3_failure_logs_error(
+    slurm_cluster_with_ssh_config,
+    caplog,
+):
+    # auth = TokenDecoderMock().auth_from_token("")
+    # token = mocked_token_response()
+
+    s3_check = S3HealthCheck(
+        data_transfer=slurm_cluster_with_ssh_config.data_operation.data_transfer,
+        timeout=10,
+    )
+
+    with patch.object(
+        S3HealthCheck,
+        "execute_check",
+        new_callable=AsyncMock,
+        side_effect=ConnectionError("S3 connection refused"),
+    ):
+        with caplog.at_level(logging.ERROR, logger="uvicorn.error"):
+            health = await s3_check.check()
+
+    record = caplog.records[0]
+    payload = ast.literal_eval(record.getMessage())
+
+    assert health.healthy is False
+    assert payload["message"] == "Health check failed"
+    assert payload["error.service"] == BackendServiceType.external_storage.value
+    assert "error.system" not in payload  # S3 health check does not have a system name
+    assert "error.path" not in payload  # S3 health check does not have a filesystem path
+    assert "firecrest.username" not in payload  # S3 health check does not have a username

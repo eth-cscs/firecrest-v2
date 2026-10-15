@@ -18,24 +18,27 @@ def log_health_check_error(service_type: BackendServiceType,
 
     log_data = {}
 
-    message = ""
-    if service_type == BackendServiceType.filesystem:
-        message = (
-            f"Health check for {service_type.value} service on "
-            f"{system_name} at path {filesystem_path} failed: {health_message}"
-        )
-        log_data["firecrest.username"] = username
-    elif service_type == BackendServiceType.external_storage:
-        message = f"Health check for {service_type.value} failed: {health_message}"
-    else:
-        message = (
-            f"Health check for {service_type.value} service on "
-            f"{system_name} failed: {health_message}"
-        )
-        log_data["firecrest.username"] = username
+    match service_type.value:
+        case BackendServiceType.filesystem:
+            log_data["error.path"] = filesystem_path
+            log_data["error.system"] = system_name
+            log_data["firecrest.username"] = username
+        case BackendServiceType.scheduler:
+            log_data["error.system"] = system_name
+            log_data["firecrest.username"] = username
+        case BackendServiceType.ssh:
+            log_data["error.system"] = system_name
+            log_data["firecrest.username"] = username
+        case BackendServiceType.external_storage:
+            pass
+        case _:
+            pass
 
-    log_data["message"] = message
+    log_data["message"] = "Health check failed"
+    log_data["error.service"] = service_type.value
     log_data["error.type"] = exception.__class__.__name__
-    log_data["error.message"] = f"{exception.__class__.__name__}: {health_message}"
+    log_data["error.message"] = (
+        f"{exception.__class__.__name__}: {health_message}"
+    )
 
     logger.error(log_data)
