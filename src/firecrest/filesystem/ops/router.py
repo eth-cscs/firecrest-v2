@@ -299,11 +299,9 @@ async def get_view(
         int | None,
         Query(
             alias="size",
-            description="Value, in bytes, of the size of data to be retrieved from the file.",
+            description="Value, in bytes, of the size of data to be retrieved from the file. Defaults to 5 MiB, capped at the system's `max_ops_file_size`.",
         ),
-    ] = 5
-    * 1024
-    * 1024,  # Default to 5 MiB
+    ] = None,
     offset: Annotated[
         int | None,
         Query(
@@ -321,16 +319,22 @@ async def get_view(
             detail="`offset` value must be an integer value equal or greater than 0",
         )
 
+    max_ops_file_size = system.data_operation.max_ops_file_size
+    if size is None:
+        # Default to 5 MiB, but never above the system limit (otherwise the default
+        # itself would be rejected by the check below).
+        size = min(5 * 1024 * 1024, max_ops_file_size)
+
     if size <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="`size` value must be an integer value greater than 0",
         )
 
-    if size > system.data_operation.max_ops_file_size:
+    if size > max_ops_file_size:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"`size` value must be less than {system.data_operation.max_ops_file_size} bytes",
+            detail=f"`size` value must be less than {max_ops_file_size} bytes",
         )
 
     view = DdCommand(
