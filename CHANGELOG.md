@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.1]
 
+### Fixed
+
+- Replaced fastapi deprecated enum 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' with 'HTTP_413_CONTENT_TOO_LARGE'.
+
+
+
+## [2.6.1]
+
 ### Changed
 
 - Minimum JWT token ttl now defaults to 5 seconds (was 30). A token is only
