@@ -6,7 +6,10 @@
 # commands
 import os
 from lib.exceptions import SlurmError
-from lib.scheduler_clients.slurm.cli_commands.sacct_base import SacctCommandBase
+from lib.scheduler_clients.slurm.cli_commands.sacct_base import (
+    SacctCommandBase,
+    SLURM_FIELD_DELIMITER,
+)
 
 
 class SacctJobMetadataCommand(SacctCommandBase):
@@ -28,7 +31,7 @@ class SacctJobMetadataCommand(SacctCommandBase):
 
         jobs = []
         for job_str in stdout.split("\n"):
-            job_info = job_str.split("|")
+            job_info = job_str.split(SLURM_FIELD_DELIMITER)
             if len(job_info) != 6:
                 continue
 
