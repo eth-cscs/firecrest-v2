@@ -13,6 +13,7 @@ from firecrest.config import (
 from firecrest.dependencies import SSHClientDependency
 from firecrest.filesystem.ops.commands.ls_command import LsCommand
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
+from firecrest.status.health_check.checks.helpers import log_health_check_error
 
 
 class FilesystemHealthCheck(HealthCheckBase):
@@ -48,4 +49,10 @@ class FilesystemHealthCheck(HealthCheckBase):
         health.healthy = False
         health.path = self.path
         health.message = str(ex)
+        log_health_check_error(service_type=BackendServiceType.filesystem,
+                               health_message=health.message,
+                               exception=ex,
+                               system_name=self.system.name,
+                               filesystem_path=self.path,
+                               username=self.auth.username)
         return health
