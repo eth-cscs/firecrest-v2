@@ -1,0 +1,58 @@
+# Copyright (c) 2025, ETH Zurich. All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+
+from lib.scheduler_clients.slurm.cli_commands.sacctmgr_accounts import (
+    SacctmgrAccountsCommand,
+)
+from lib.scheduler_clients.slurm.cli_commands.sacctmgr_default_account import (
+    SacctmgrDefaultAccountCommand,
+)
+
+
+def test_accounts_command_uses_parsable_output():
+    # Without --parsable2, sacctmgr truncates names wider than the column ("project-a+")
+    command = SacctmgrAccountsCommand("test-user").get_command()
+    assert command == "sacctmgr -n --parsable2 show assoc user='test-user' format=account"
+
+
+def test_default_account_command_uses_parsable_output():
+    command = SacctmgrDefaultAccountCommand("test-user").get_command()
+    assert command == "sacctmgr -n --parsable2 show user 'test-user' format=defaultaccount"
+
+
+def test_accounts_long_names_are_kept():
+    accounts = SacctmgrAccountsCommand("test-user").parse_output(
+        "project-account-1\nproject-account-2\n", ""
+    )
+    assert accounts == ["project-account-1", "project-account-2"]
+
+
+def test_accounts_one_entry_per_account():
+    # sacctmgr lists one association row per partition (and cluster)
+    accounts = SacctmgrAccountsCommand("test-user").parse_output(
+        "root\nproject-account-1\nproject-account-1\nproject-account-2\n"
+        "project-account-1\n",
+        "",
+    )
+    assert accounts == ["root", "project-account-1", "project-account-2"]
+
+
+def test_accounts_names_with_pipe_are_kept():
+    # sacctmgr has no --delimiter option; a single column is printed as-is
+    accounts = SacctmgrAccountsCommand("test-user").parse_output(
+        "proj|a\nproj|b|c\n", ""
+    )
+    assert accounts == ["proj|a", "proj|b|c"]
+
+
+def test_default_account_name_with_pipe_is_kept():
+    default_account = SacctmgrDefaultAccountCommand("test-user").parse_output(
+        "proj|a\n", ""
+    )
+    assert default_account == "proj|a"
+
+
+def test_accounts_empty_output():
+    assert SacctmgrAccountsCommand("test-user").parse_output("\n", "") is None

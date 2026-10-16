@@ -2,5 +2,5 @@
     "stdout": "staff",
     "stderr": "",
     "exit_code": 0,
-    "command": "sacctmgr show assoc user='test-user' format=account -n"
+    "command": "sacctmgr -n --parsable2 show assoc user='test-user' format=account"
 }
