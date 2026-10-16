@@ -19,9 +19,7 @@ class SacctmgrAccountsCommand(SacctmgrBaseCommand):
         cmd = [super().get_command()]
         cmd += ["show assoc"]
         cmd += [f"user='{self.username}'"]
-        # Without --parsable2, names longer than the column width (10)
-        # are truncated, e.g. "project-a-1" -> "project-a+"
-        cmd += ["format=account -n --parsable2"]
+        cmd += ["format=account"]
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

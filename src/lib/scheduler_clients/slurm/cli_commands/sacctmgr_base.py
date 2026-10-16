@@ -14,7 +14,7 @@ class SacctmgrBaseCommand(BaseCommand):
     username: str
 
     def get_command(self) -> str:
-        cmd = ["sacctmgr"]
+        cmd = ["sacctmgr -n --parsable2"]
         return " ".join(cmd)
 
     @abstractmethod

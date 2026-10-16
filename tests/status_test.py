@@ -253,11 +253,11 @@ async def test_userinfo_long_and_repeated_accounts(
             MockedCommand(**load_ssh_output("ssh_id_command.json")),
             MockedCommand(
                 stdout="project-account-2\n",
-                command="sacctmgr show user 'test-user' format=defaultaccount -n --parsable2",
+                command="sacctmgr -n --parsable2 show user 'test-user' format=defaultaccount",
             ),
             MockedCommand(
                 stdout="project-account-1\nproject-account-2\nproject-account-1\n",
-                command="sacctmgr show assoc user='test-user' format=account -n --parsable2",
+                command="sacctmgr -n --parsable2 show assoc user='test-user' format=account",
             ),
         ]
     ):
