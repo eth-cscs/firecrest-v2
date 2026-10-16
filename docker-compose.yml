@@ -37,6 +37,8 @@ services:
         condition: service_healthy
       slurm:
         condition: service_healthy
+      rustfs:
+        condition: service_healthy
     build:
       context: ./
       args:
@@ -156,13 +158,16 @@ services:
        - ./build/docker/keycloak/config.json:/opt/keycloak/data/import/config.json:ro
      entrypoint: ["/bin/sh", "-c" , "/opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080/auth/ --realm master --user admin --password admin2 && /opt/keycloak/bin/kcadm.sh create users -r kcrealm -s username=fireuser -s enabled=true && /opt/keycloak/bin/kcadm.sh set-password -r kcrealm --username fireuser -p password"]
 
-  # S3 backend
-  minio:
-    image: minio/minio:latest
-    command: minio server /data --console-address ":9001"
+  # S3-compatible object storage
+  rustfs:
+    image: rustfs/rustfs:latest
     environment:
-     MINIO_ROOT_USER: storage_access_key
-     MINIO_ROOT_PASSWORD: storage_secret_key
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: storage_access_key
+      RUSTFS_SECRET_KEY: storage_secret_key
     networks:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.19
@@ -170,7 +175,12 @@ services:
       - "${F7T_HOST_IP:-127.0.0.1}:9000:9000"
       - "${F7T_HOST_IP:-127.0.0.1}:9001:9001"
     volumes:
-      - ./build/minio:/data:delegated
+      - rustfs-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
   ssh-ca:
     image: deic-sshca
     depends_on:
@@ -187,3 +197,6 @@ services:
     ports:
       - "${F7T_HOST_IP:-127.0.0.1}:2221:2221"
       - "${F7T_HOST_IP:-127.0.0.1}:2280:2280"
+
+volumes:
+  rustfs-data:

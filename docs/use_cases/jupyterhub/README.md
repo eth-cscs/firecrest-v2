@@ -89,7 +89,7 @@ That should show something like this
     CONTAINER ID   NAME                       STATE
     fd8b1575bf18   firecrest-v2-firecrest-1   running
     4a6e4c3d089d   firecrest-v2-keycloak-1    running
-    36f8d98f3b67   firecrest-v2-minio-1       running
+    36f8d98f3b67   firecrest-v2-rustfs-1      running
     85de3b4afe95   firecrest-v2-slurm-1       running
     ```
 
