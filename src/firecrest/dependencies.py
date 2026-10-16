@@ -269,6 +269,7 @@ class SSHClientDependency:
                 buffer_limit=system.data_operation.max_ops_file_size,
                 connect_timeout=system.ssh.timeout.connection,
                 login_timeout=system.ssh.timeout.login,
+                process_setup_timeout=system.ssh.timeout.process_setup,
                 execute_timeout=system.ssh.timeout.command_execution,
                 idle_timeout=system.ssh.timeout.idle_timeout,
                 max_clients=system.ssh.max_clients,

@@ -211,7 +211,9 @@ firecrest:
         connection: 5
         ## login: timeout (in seconds) used for login via SSH
         login: 5
-        ## command_execution: timeout (in seconds) used for execution of commands via SSH
+        ## process_setup: timeout (in seconds) for opening the SSH channel and dispatching the exec request for a command
+        process_setup: 5
+        ## command_execution: timeout (in seconds) for a command to finish producing output and for its channel to close, once it has started
         command_execution: 5
         ## idle_timeout: Max idle time (seconds) before disconnecting.
         # idle_timeout: 60
