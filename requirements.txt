@@ -3,6 +3,7 @@ uvicorn[standard]
 pyhumps
 python-jose
 Authlib
+httpx2 # Authlib's httpx integration falls back to legacy httpx (with a deprecation warning) when httpx2 is missing
 pydantic
 pydantic-settings >= 2.2.0
 setuptools
