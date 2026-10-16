@@ -39,5 +39,20 @@ def test_accounts_one_entry_per_account():
     assert accounts == ["root", "project-account-1", "project-account-2"]
 
 
+def test_accounts_names_with_pipe_are_kept():
+    # sacctmgr has no --delimiter option; a single column is printed as-is
+    accounts = SacctmgrAccountsCommand("test-user").parse_output(
+        "proj|a\nproj|b|c\n", ""
+    )
+    assert accounts == ["proj|a", "proj|b|c"]
+
+
+def test_default_account_name_with_pipe_is_kept():
+    default_account = SacctmgrDefaultAccountCommand("test-user").parse_output(
+        "proj|a\n", ""
+    )
+    assert default_account == "proj|a"
+
+
 def test_accounts_empty_output():
     assert SacctmgrAccountsCommand("test-user").parse_output("\n", "") is None
