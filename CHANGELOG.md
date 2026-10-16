@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use a custom field delimiter for Slurm CLI commands to fix parsing when job names contain |.
 - Scheduler health check no longer fails with `KeyError: 'pinged'` against Slurm 26.05 (slurmrestd data_parser v0.0.45), where the `pinged`/`mode` ping fields were removed in favour of the boolean `responding`/`primary` introduced in v0.0.44. Both response shapes are accepted; the `scontrol ping` (SSH) path is unchanged.
+- Replaced fastapi deprecated enum 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' with 'HTTP_413_CONTENT_TOO_LARGE'.
 
 ## [2.6.1]
 

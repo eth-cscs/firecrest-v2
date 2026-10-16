@@ -1,5 +1,5 @@
-fastapi[all]
-uvicorn[standard]
+fastapi[all] >= 0.116.2
+starlette >= 0.48.0
 pyhumps
 python-jose
 Authlib
