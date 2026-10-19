@@ -1,5 +1,5 @@
 #!/bin/bash
-set -E
+set -euo pipefail
 # -----------------------------------------------------------------------------
 # Arguments
 if [ "$#" -lt "4" ];
@@ -42,8 +42,6 @@ error_handler() {
 trap 'error_handler $LINENO' ERR
 
 # -----------------------------------------------------------------------------
-# Configuration
-PARTS_DIR="parts"           # Local directory to store parts
 # Load environment
 source "$ENV_FILE"
 
@@ -51,21 +49,26 @@ source "$ENV_FILE"
 # MAIN
 echo "Upload file: $DATA_FILE"
 # Get file size (in bytes)
-UPLOAD_FILE_SIZE=$(stat --printf "%s" "$DATA_FILE")
+UPLOAD_FILE_SIZE="$(stat --printf "%s" "$DATA_FILE")"
 
 # Get Access Token
 # Current token not provided or expired, get a new one
-response=$(curl -s --request POST \
+response="$(curl -s --request POST \
 --url "$TOKEN_URI" \
 --header "content-type: application/x-www-form-urlencoded" \
 --data "grant_type=client_credentials" \
 --data "client_id=$CLIENT_ID" \
---data "client_secret=$CLIENT_SECRET")
+--data "client_secret=$CLIENT_SECRET")"
+
 # Get the JWT token
-ACCESS_TOKEN=$(echo "$response" | jq -r '.access_token')
+ACCESS_TOKEN="$(echo "$response" | jq -r '.access_token')"
+if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
+  echo "Error: failed to obtain access token. Response: $response" >&2
+  exit 3
+fi
 
 # Submit upload file request to FirecREST
-response=$(curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
+raw_response=$(curl -s -w "\n%{http_code}" --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
 --header "Content-Type: application/json" \
 --header "Authorization: Bearer $ACCESS_TOKEN" \
 --data "{
@@ -78,32 +81,38 @@ response=$(curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/tra
   }
 }")
 
+# Split body and HTTP status code (last line)
+http_status="${raw_response##*$'\n'}"
+response="${raw_response%$'\n'*}"
+if [[ ! "$http_status" =~ ^2[0-9]{2}$ ]]; then
+    >&2 echo "Upload request failed with HTTP status: $http_status. Response: $response"
+    exit 4
+fi
+
 # Error check
-if [[ "$(echo $response | jq -r '.errorType')" == "error" ]]; then
-    echo "RESPONSE ERROR: $(echo $response | jq -r '.message')"
-    exit 3
+if [[ "$(echo "$response" | jq -r '.errorType')" == "error" ]]; then
+    echo "RESPONSE ERROR: $(echo "$response" | jq -r '.message')"
+    exit 4
 fi
 
 # Extract information
-directives=$(echo "$response" | jq -r ".transferDirectives")
-parts_upload_urls=$(echo $directives | jq -r ".partsUploadUrls")
-complete_upload_url=$(echo $directives | jq -r ".completeUploadUrl")
+directives="$(echo "$response" | jq -r ".transferDirectives")"
+parts_upload_urls="$(echo "$directives" | jq -r ".partsUploadUrls")"
+complete_upload_url="$(echo "$directives" | jq -r ".completeUploadUrl")"
 # Max part size shall be expressed in MB
-max_part_size=$(echo $directives | jq -r ".maxPartSize")
+max_part_size="$(echo $directives | jq -r ".maxPartSize")"
 
 # Prepare parts
 echo "Split file"
-mkdir -p "$PARTS_DIR"
-cd "$PARTS_DIR"
-split "../$DATA_FILE" -b "$max_part_size" --numeric-suffixes=1 --suffix-length=5
-cd - > /dev/null
+PARTS_DIR="$(mktemp -d -p .)"
+split "$DATA_FILE" -b "$max_part_size" --numeric-suffixes=1 --suffix-length=5 "${PARTS_DIR}/x"
 
 # Upload parts and get Etags
 part_id=1
 upload_error=false
 etags_xml=""
 while read -r part_url; do
-    part_file=$(printf "%s/x%05d" $PARTS_DIR ${part_id})
+    part_file=$(printf "%s/x%05d" "$PARTS_DIR" "${part_id}")
     echo "Uploading part ${part_id}: ${part_file}"
     # Upload data with curl and extract ETag
     if line=$(curl -f --show-error -D - --upload-file "$part_file" "$part_url" | grep -i "^ETag: " ) ;

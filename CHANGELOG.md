@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scheduler health check no longer fails with `KeyError: 'pinged'` against Slurm 26.05 (slurmrestd data_parser v0.0.45), where the `pinged`/`mode` ping fields were removed in favour of the boolean `responding`/`primary` introduced in v0.0.44. Both response shapes are accepted; the `scontrol ping` (SSH) path is unchanged.
 - Replaced fastapi deprecated enum 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' with 'HTTP_413_CONTENT_TOO_LARGE'.
 - Replaced deprecated MinIO container with RustFS in Docker Compose for demo/development.
-- Fixed multipart-upload Bash scripts, making them work with current F7T version.
+- Fixed multipart-upload bash scripts, making them work with current F7T version.
 - Replaced deprecated environment variables `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` in `keycloak.env` environment file for demo / development deployment.
 
 ## [2.6.1]
