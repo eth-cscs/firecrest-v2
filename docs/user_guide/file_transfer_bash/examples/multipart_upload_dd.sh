@@ -12,11 +12,11 @@ F7T_SYSTEM="$2"
 DESTINATION_PATH="$3"
 ENV_FILE="$4"
 SCHEDULER_ACCOUNT=${5:-staff}
-if [ ! -f "$DATA_FILE" ]; then 
+if [ ! -f "$DATA_FILE" ]; then
     echo "$DATA_FILE not found"
     exit 1
 fi
-if [ ! -f "$ENV_FILE"  ]; then 
+if [ ! -f "$ENV_FILE"  ]; then
     echo "$ENV_FILE not found"
     exit 2
 fi

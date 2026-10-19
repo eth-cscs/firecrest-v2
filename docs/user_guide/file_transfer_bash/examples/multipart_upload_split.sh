@@ -12,15 +12,17 @@ F7T_SYSTEM="$2"
 DESTINATION_PATH="$3"
 ENV_FILE="$4"
 SCHEDULER_ACCOUNT=${5:-staff}
-if [ ! -f "$DATA_FILE" ]; then 
+if [ ! -f "$DATA_FILE" ]; then
     echo "$DATA_FILE not found"
     exit 1
 fi
-if [ ! -f "$ENV_FILE"  ]; then 
+if [ ! -f "$ENV_FILE"  ]; then
     echo "$ENV_FILE not found"
     exit 2
 fi
-
+# -----------------------------------------------------------------------------
+# Create parts directory
+PARTS_DIR="$(mktemp -d -p .)"
 
 # -----------------------------------------------------------------------------
 # Utilities
@@ -99,12 +101,10 @@ fi
 directives="$(echo "$response" | jq -r ".transferDirectives")"
 parts_upload_urls="$(echo "$directives" | jq -r ".partsUploadUrls")"
 complete_upload_url="$(echo "$directives" | jq -r ".completeUploadUrl")"
-# Max part size shall be expressed in MB
 max_part_size="$(echo $directives | jq -r ".maxPartSize")"
 
 # Prepare parts
 echo "Split file"
-PARTS_DIR="$(mktemp -d -p .)"
 split "$DATA_FILE" -b "$max_part_size" --numeric-suffixes=1 --suffix-length=5 "${PARTS_DIR}/x"
 
 # Upload parts and get Etags
@@ -129,7 +129,7 @@ done <<< "$(echo "$parts_upload_urls" | jq -r '.[]')"
 
 if $upload_error; 
 then
-    >&2 echo "Upload failed."
+    >&2 echo "Upload failed."    
     exit 2
 fi
 
@@ -137,7 +137,7 @@ echo "Completing upload"
 complete_upload_xml="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">${etags_xml}</CompleteMultipartUpload>"
 
 # Complete multipart upload
-status=$(curl -f --show-error -i -o /dev/null -w "%{http_code}" -H "Content-Type: application/xml" -d "$complete_upload_xml" -X POST $complete_upload_url)
+status="$(curl -f --show-error -i -o /dev/null -w "%{http_code}" -H "Content-Type: application/xml" -d "$complete_upload_xml" -X POST $complete_upload_url)"
 if [[ "$status" == "200" ]]
 then
     echo "File upload successfully completed"
