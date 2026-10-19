@@ -64,7 +64,7 @@ response=$(curl -s --request POST \
 --data "client_id=$CLIENT_ID" \
 --data "client_secret=$CLIENT_SECRET")
 # Get the JWT token
-ACCESS_TOKEN=$(echo $response | jq -r '.access_token')
+ACCESS_TOKEN=$(echo "$response" | jq -r '.access_token')
 
 # Submit upload file request to FirecREST
 response=$(curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
@@ -87,7 +87,7 @@ if [[ "$(echo $response | jq -r '.errorType')" == "error" ]]; then
 fi
 
 # Extract information
-directives=$(echo $response | jq -r ".transferDirectives")
+directives=$(echo "$response" | jq -r ".transferDirectives")
 parts_upload_urls=$(echo $directives | jq -r ".partsUploadUrls")
 complete_upload_url=$(echo $directives | jq -r ".completeUploadUrl")
 # Max part size shall be expressed in MB
