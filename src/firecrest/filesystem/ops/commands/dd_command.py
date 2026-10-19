@@ -49,9 +49,12 @@ class DdCommand(BaseCommandWithTimeout):
         # call beforehand), so both values reflect one consistent snapshot
         # of the file even if it is being appended to concurrently.
         #
-        # `count=2` brings back 2 chunks of the file, in case the resolved
-        # offset is not a multiple of `size`. `parse_output` then trims the
-        # result down to the requested window.
+        # The window is read byte-exact on the remote side (`skip_bytes` /
+        # `count_bytes`), and its length `n` is printed alongside the file
+        # size and resolved start. The offsets returned to the caller are
+        # derived from those numbers only, never from the length of the
+        # decoded text: one character can be several bytes, so the two only
+        # agree for pure-ASCII files.
         # `$1`/`$2`/`$3` are passed in as positional arguments below rather
         # than interpolated into the script text, so the path/offset/size
         # values can never be mistaken for shell syntax regardless of how
@@ -64,9 +67,11 @@ class DdCommand(BaseCommandWithTimeout):
             "else start=$off; fi; "
             'if [ "$start" -lt 0 ]; then start=0; fi; '
             'if [ "$start" -gt "$fsize" ]; then start=$fsize; fi; '
-            'bs="$3"; skip=$(( start / bs )); '
-            'printf \'%d\\n%d\\n\' "$fsize" "$start"; '
-            'dd if="$1" bs="$bs" skip="$skip" count=2'
+            'n=$(( fsize - start )); '
+            'if [ "$n" -gt "$3" ]; then n=$3; fi; '
+            'printf \'%d\\n%d\\n%d\\n\' "$fsize" "$start" "$n"; '
+            'dd if="$1" bs=65536 iflag=skip_bytes,count_bytes '
+            'skip="$start" count="$n" status=none'
         )
         quoted_path = shlex.quote(self.target_path)
         return (
@@ -79,23 +84,17 @@ class DdCommand(BaseCommandWithTimeout):
             super().error_handling(stderr, exit_status)
 
         try:
-            file_size_str, start_str, chunk = stdout.split("\n", 2)
+            file_size_str, start_str, length_str, content = stdout.split("\n", 3)
             file_size = int(file_size_str)
             start = int(start_str)
+            length = int(length_str)
         except ValueError as ex:
             raise CommandExecutionError(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Unexpected output format from dd command",
             ) from ex
 
-        i = start % self.size
-        if i > len(chunk):
-            raise CommandExecutionError(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="File changed while being read",
-            )
-        content = chunk[i : i + self.size]
-        end = start + len(content)
+        end = start + length
 
         return {
             "content": content,

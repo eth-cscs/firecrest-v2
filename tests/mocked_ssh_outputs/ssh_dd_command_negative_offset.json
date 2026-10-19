@@ -1,6 +1,6 @@
 {
-    "stdout": "20\n15\nPQRST",
+    "stdout": "20\n15\n5\nPQRST",
     "stderr": "",
     "exit_code": 0,
-    "command": "timeout 5 sh -c 'fsize=$(stat -c%s -- \"$1\") || exit 1; off=\"$2\"; if [ \"$off\" -lt 0 ]; then start=$(( fsize + off )); else start=$off; fi; if [ \"$start\" -lt 0 ]; then start=0; fi; if [ \"$start\" -gt \"$fsize\" ]; then start=$fsize; fi; bs=\"$3\"; skip=$(( start / bs )); printf '\"'\"'%d\\n%d\\n'\"'\"' \"$fsize\" \"$start\"; dd if=\"$1\" bs=\"$bs\" skip=\"$skip\" count=2' -- /home/readme.txt -5 5"
+    "command": "timeout 5 sh -c 'fsize=$(stat -c%s -- \"$1\") || exit 1; off=\"$2\"; if [ \"$off\" -lt 0 ]; then start=$(( fsize + off )); else start=$off; fi; if [ \"$start\" -lt 0 ]; then start=0; fi; if [ \"$start\" -gt \"$fsize\" ]; then start=$fsize; fi; n=$(( fsize - start )); if [ \"$n\" -gt \"$3\" ]; then n=$3; fi; printf '\"'\"'%d\\n%d\\n%d\\n'\"'\"' \"$fsize\" \"$start\" \"$n\"; dd if=\"$1\" bs=65536 iflag=skip_bytes,count_bytes skip=\"$start\" count=\"$n\" status=none' -- /home/readme.txt -5 5"
 }

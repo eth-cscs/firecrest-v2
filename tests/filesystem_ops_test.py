@@ -82,6 +82,11 @@ def mocked_ssh_dd_unaligned_offset_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_dd_multibyte_output():
+    return load_ssh_output("ssh_dd_command_multibyte.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
     return load_ssh_output("ssh_tail_command.json")
 
@@ -457,14 +462,35 @@ async def test_dd_command_with_unaligned_offset(
         )
         assert response.status_code == 200
         assert response.json() is not None
-        # offset=3 is not a multiple of size=5, so dd (which operates in
-        # whole `size`-byte blocks) returns the block(s) containing the
-        # requested window, and parse_output must trim it down to the
-        # 5 bytes actually requested, starting at byte 3.
+        # offset=3 is not a multiple of size=5; dd reads the window
+        # byte-exact, so the 5 bytes starting at byte 3 come back as-is.
         assert response.json()["output"]["content"] == "DEFGH"
         assert response.json()["output"]["fileSize"] == 20
         assert response.json()["output"]["startOffset"] == 3
         assert response.json()["output"]["endOffset"] == -12
+
+
+async def test_dd_command_with_multibyte_content(
+    client, ssh_client, mocked_ssh_dd_multibyte_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_multibyte_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=4, offset=2
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        # The file is "é" * 10 (2 bytes per character, 20 bytes total).
+        # Offsets must be computed in bytes, not decoded characters.
+        assert response.json()["output"]["content"] == "éé"
+        assert response.json()["output"]["fileSize"] == 20
+        assert response.json()["output"]["startOffset"] == 2
+        assert response.json()["output"]["endOffset"] == -14
 
 
 async def test_dd_command_invalid_size(client, ssh_client):
