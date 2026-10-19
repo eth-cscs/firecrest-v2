@@ -87,6 +87,21 @@ def mocked_ssh_dd_multibyte_output():
 
 
 @pytest.fixture(scope="module")
+def mocked_ssh_dd_multibyte_window_output():
+    return load_ssh_output("ssh_dd_command_multibyte_window.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_multibyte_at_eof_output():
+    return load_ssh_output("ssh_dd_command_multibyte_at_eof.json")
+
+
+@pytest.fixture(scope="module")
+def mocked_ssh_dd_multibyte_split_char_output():
+    return load_ssh_output("ssh_dd_command_multibyte_split_char.json")
+
+
+@pytest.fixture(scope="module")
 def mocked_ssh_tail_output():
     return load_ssh_output("ssh_tail_command.json")
 
@@ -146,9 +161,7 @@ def mocked_ssh_tar_output():
     return load_ssh_output("ssh_tar_command.json")
 
 
-async def test_ls_command(client,
-                          ssh_client,
-                          cluster_name="cluster-slurm-ssh"):
+async def test_ls_command(client, ssh_client, cluster_name="cluster-slurm-ssh"):
 
     await helper_test_ls_command(client, ssh_client, cluster_name)
 
@@ -462,35 +475,104 @@ async def test_dd_command_with_unaligned_offset(
         )
         assert response.status_code == 200
         assert response.json() is not None
-        # offset=3 is not a multiple of size=5; dd reads the window
-        # byte-exact, so the 5 bytes starting at byte 3 come back as-is.
+        # offset=3 is not a multiple of size=5: the window is read
+        # byte-exact, so it starts at byte 3 and holds the 5 bytes requested.
         assert response.json()["output"]["content"] == "DEFGH"
         assert response.json()["output"]["fileSize"] == 20
         assert response.json()["output"]["startOffset"] == 3
         assert response.json()["output"]["endOffset"] == -12
 
 
-async def test_dd_command_with_multibyte_content(
-    client, ssh_client, mocked_ssh_dd_multibyte_output
-):
+# The file used by the multi-byte tests below is "Loop 🚀\n1 ✅\n2 ✅\n":
+# 16 characters but 22 bytes (🚀 is 4 bytes, ✅ is 3). Offsets are bytes, so
+# they must not be derived from the length of the decoded content.
+async def test_dd_command_multibyte(client, ssh_client, mocked_ssh_dd_multibyte_output):
 
     async with ssh_client.mocked_output(
         [MockedCommand(**mocked_ssh_dd_multibyte_output)]
     ):
 
         response = client.get(
-            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
-                path="/home/readme.txt", size=4, offset=2
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}".format(
+                path="/home/readme.txt"
             )
         )
         assert response.status_code == 200
         assert response.json() is not None
-        # The file is "é" * 10 (2 bytes per character, 20 bytes total).
-        # Offsets must be computed in bytes, not decoded characters.
-        assert response.json()["output"]["content"] == "éé"
-        assert response.json()["output"]["fileSize"] == 20
-        assert response.json()["output"]["startOffset"] == 2
-        assert response.json()["output"]["endOffset"] == -14
+        assert response.json()["output"]["content"] == "Loop 🚀\n1 ✅\n2 ✅\n"
+        assert response.json()["output"]["fileSize"] == 22
+        assert response.json()["output"]["startOffset"] == 0
+        assert response.json()["output"]["endOffset"] == 0
+
+
+async def test_dd_command_multibyte_window(
+    client, ssh_client, mocked_ssh_dd_multibyte_window_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_multibyte_window_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=4, offset=5
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        # Bytes 5..9 are exactly the 4-byte emoji: one character of content
+        # still moves the offsets by 4.
+        assert response.json()["output"]["content"] == "🚀"
+        assert response.json()["output"]["fileSize"] == 22
+        assert response.json()["output"]["startOffset"] == 5
+        assert response.json()["output"]["endOffset"] == -13
+
+
+async def test_dd_command_multibyte_at_eof(
+    client, ssh_client, mocked_ssh_dd_multibyte_at_eof_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_multibyte_at_eof_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=5, offset=22
+            )
+        )
+        # A client following the file polls at its last known end: with
+        # nothing new to read this is an empty window, not an error.
+        assert response.status_code == 200
+        assert response.json() is not None
+        assert response.json()["output"]["content"] == ""
+        assert response.json()["output"]["fileSize"] == 22
+        assert response.json()["output"]["startOffset"] == 22
+        assert response.json()["output"]["endOffset"] == 0
+
+
+async def test_dd_command_multibyte_split_char(
+    client, ssh_client, mocked_ssh_dd_multibyte_split_char_output
+):
+
+    async with ssh_client.mocked_output(
+        [MockedCommand(**mocked_ssh_dd_multibyte_split_char_output)]
+    ):
+
+        response = client.get(
+            "/filesystem/cluster-slurm-ssh/ops/view?path={path}&size={size}&offset={offset}".format(
+                path="/home/readme.txt", size=4, offset=6
+            )
+        )
+        assert response.status_code == 200
+        assert response.json() is not None
+        # The window starts inside the emoji: its 3 remaining bytes cannot
+        # be decoded and come back as replacement characters, but the
+        # offsets still describe the 4 bytes that were read.
+        assert response.json()["output"]["content"] == "\ufffd\ufffd\ufffd\n"
+        assert response.json()["output"]["fileSize"] == 22
+        assert response.json()["output"]["startOffset"] == 6
+        assert response.json()["output"]["endOffset"] == -12
 
 
 async def test_dd_command_invalid_size(client, ssh_client):
