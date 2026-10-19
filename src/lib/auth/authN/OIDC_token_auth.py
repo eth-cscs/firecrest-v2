@@ -92,8 +92,6 @@ class OIDCTokenAuth(AuthenticationService):
         token_aud = decoded_token.get("aud")
         if isinstance(token_aud, str):
             token_aud = [token_aud]
-        # jose returns early when "aud" is absent (its rejection is commented
-        # out) and only compares against one value, so check it here.
         if not isinstance(token_aud, list) or not any(
             aud in self.audience for aud in token_aud
         ):

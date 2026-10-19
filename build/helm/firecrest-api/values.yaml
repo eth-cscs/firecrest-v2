@@ -120,11 +120,12 @@ firecrest:
       ##   min_token_ttl: 60
       # min_token_ttl : 5
 
-      ## audience: expected audience(s) for the JWT "aud" claim. A token is accepted
+      ## audience: list of accepted token audiences ("aud" claim). A token is accepted
       ## when its "aud" claim contains at least one of these, and rejected when it
       ## carries no "aud" claim at all. If not specified, audience validation is disabled.
       ## example:
-      ##    audience: "https://firecrest-api.example.com"
+      ##    audience:
+      ##      - "https://firecrest-api.example.com"
       ## or, to accept more than one identifier for this same deployment:
       ##    audience:
       ##      - "https://firecrest-api.example.com"
