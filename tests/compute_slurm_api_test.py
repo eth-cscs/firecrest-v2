@@ -189,6 +189,87 @@ def test_submit_job(client, mocked_job_submit_response, slurm_cluster_with_api_c
         )
 
 
+def test_submit_job_with_resources(
+    client, mocked_job_submit_response, slurm_cluster_with_api_config
+):
+    # slurmrestd does not read #SBATCH lines, so these must be in the request
+    request_body = {
+        "job": {
+            "name": "test1",
+            "working_directory": "/home/test1",
+            "script": "#!/bin/bash\nsrun hostname",
+            "nodes": "2-4",
+            "minimumNodes": 2,
+            "tasks": 8,
+            "tasksPerNode": 4,
+            "cpusPerTask": 2,
+            "memoryPerNode": 2048,
+            "timeLimit": 90,
+        },
+    }
+    submit_url = f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/submit"
+
+    with aioresponses() as mocked:
+        mocked.post(
+            submit_url,
+            status=200,
+            body=json.dumps(mocked_job_submit_response),
+        )
+
+        response = client.post(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs",
+            json=request_body,
+        )
+        assert response.status_code == 201
+
+        (call,) = [
+            c
+            for (method, url), calls in mocked.requests.items()
+            if method == "POST" and str(url) == submit_url
+            for c in calls
+        ]
+        job = json.loads(call.kwargs["data"])["job"]
+        assert job["nodes"] == "2-4"
+        assert job["minimum_nodes"] == 2
+        assert job["tasks"] == 8
+        assert job["tasks_per_node"] == 4
+        assert job["cpus_per_task"] == 2
+        assert job["memory_per_node"] == 2048
+        assert job["time_limit"] == 90
+
+
+def test_get_job_resources(
+    client,
+    mocked_get_job_response,
+    mocked_get_job_from_db_response,
+    slurm_cluster_with_api_config,
+):
+
+    job_id = mocked_get_job_from_db_response["jobs"][0]["job_id"]
+
+    with aioresponses() as mocked:
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurmdb/v{slurm_cluster_with_api_config.scheduler.api_version}/job/{job_id}",
+            status=200,
+            body=json.dumps(mocked_get_job_from_db_response),
+        )
+        mocked.get(
+            f"{slurm_cluster_with_api_config.scheduler.api_url}/slurm/v{slurm_cluster_with_api_config.scheduler.api_version}/job/{job_id}",
+            status=200,
+            body=json.dumps(mocked_get_job_response),
+        )
+
+        response = client.get(
+            f"/compute/{slurm_cluster_with_api_config.name}/jobs/{job_id}"
+        )
+        assert response.status_code == 200
+        job = response.json()["jobs"][0]
+        assert job["time"]["submission"] == 1710516603
+        assert job["time"]["totalCpu"] == 0
+        assert job["allocationCpus"] == 1
+        assert job["requestedMemory"] == 1000
+
+
 def test_get_job(
     client,
     mocked_get_job_response,

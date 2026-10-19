@@ -271,8 +271,12 @@ class SlurmJob(JobModel):
             memory = _tres_count(tres.get("requested"), "mem")
             if memory is None and "memory_per_node" in kwargs:
                 per_node = slurm_int_to_int(kwargs["memory_per_node"])
+                # node_count is set before job_resources, i.e. while pending
+                node_count = slurm_int_to_int(kwargs.get("node_count")) or kwargs.get(
+                    "allocation_nodes"
+                )
                 if per_node:
-                    memory = per_node * max(kwargs.get("allocation_nodes") or 1, 1)
+                    memory = per_node * max(node_count or 1, 1)
             kwargs["requested_memory"] = memory or None
         if "max_rss" not in kwargs and isinstance(kwargs.get("steps"), list):
             kwargs["max_rss"] = _max_rss(kwargs["steps"])
