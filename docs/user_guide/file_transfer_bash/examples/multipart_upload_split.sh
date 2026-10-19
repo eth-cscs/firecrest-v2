@@ -2,7 +2,7 @@
 set -E
 # -----------------------------------------------------------------------------
 # Arguments
-if [ "$#" -ne "4" ];
+if [ "$#" -lt "t" ];
 then
     echo "usage: $0 <data_file> <system> <destination> <env_file> [<scheduler_account>]"
     exit 1
@@ -12,8 +12,15 @@ F7T_SYSTEM="$2"
 DESTINATION_PATH="$3"
 ENV_FILE="$4"
 SCHEDULER_ACCOUNT=${5:-staff}
-if [ ! -f "$DATA_FILE" ]; then echo "$DATA_FILE not found"; fi
-if [ ! -f "$ENV_FILE"  ]; then echo "$ENV_FILE not found";  fi
+if [ ! -f "$DATA_FILE" ]; then 
+    echo "$DATA_FILE not found"
+    exit 1
+fi
+if [ ! -f "$ENV_FILE"  ]; then 
+    echo "$ENV_FILE not found"
+    exit 2
+fi
+
 
 # -----------------------------------------------------------------------------
 # Utilities
@@ -74,13 +81,14 @@ response=$(curl -s --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/tra
 # Error check
 if [[ "$(echo $response | jq -r '.errorType')" == "error" ]]; then
     echo "RESPONSE ERROR: $(echo $response | jq -r '.message')"
-    exit 1
+    exit 3
 fi
 
 # Extract information
 directives=$(echo $response | jq -r ".transferDirectives")
 parts_upload_urls=$(echo $directives | jq -r ".partsUploadUrls")
 complete_upload_url=$(echo $directives | jq -r ".completeUploadUrl")
+# Max part size shall be expressed in MB
 max_part_size=$(echo $directives | jq -r ".maxPartSize")
 
 # Prepare parts

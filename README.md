@@ -47,7 +47,7 @@ To start a local Firecrest environment in VS Code right click the selected envir
 
 Alternatively, use the command line:
 ```console
-docker compose -f docker-compose.yml up --build
+docker compose -f docker-compose.yml up
 ```
 ## Local Environment
 
