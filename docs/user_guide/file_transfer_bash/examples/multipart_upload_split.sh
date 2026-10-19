@@ -2,7 +2,7 @@
 set -E
 # -----------------------------------------------------------------------------
 # Arguments
-if [ "$#" -lt "t" ];
+if [ "$#" -lt "4" ];
 then
     echo "usage: $0 <data_file> <system> <destination> <env_file> [<scheduler_account>]"
     exit 1

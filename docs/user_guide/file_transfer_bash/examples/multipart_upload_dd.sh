@@ -32,7 +32,7 @@ BLOCK_SIZE=1048576  # 1MB
 # Cleanup
 cleanup() {
     echo "Cleanup"
-    if [ -d "$PART_FILE" ]; then
+    if [ -f "$PART_FILE" ]; then
         rm -f "$PART_FILE" 
     fi
 }
