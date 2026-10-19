@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced fastapi deprecated enum 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' with 'HTTP_413_CONTENT_TOO_LARGE'.
 - Replaced deprecated Minio container with RustFS in Docker compose for demo/development.
 - Fixed multipart-upload Bash scripts, making them work with current F7T version.
+- Replaced deprecated environments variables `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` in `keycloak.env` environment file for demo / development deployment.
 
 ## [2.6.1]
 
