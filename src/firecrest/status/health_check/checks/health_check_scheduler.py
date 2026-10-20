@@ -8,6 +8,7 @@ from firecrest.config import HPCCluster, BackendServiceType, SchedulerServiceHea
 from firecrest.dependencies import SchedulerClientDependency
 from firecrest.status.health_check.checks.health_check_base import HealthCheckBase
 from lib.scheduler_clients.models import SchedPing
+from firecrest.status.health_check.checks.helpers import log_health_check_error
 
 
 def ping_is_up(ping) -> bool:
@@ -50,10 +51,12 @@ class SchedulerHealthCheck(HealthCheckBase):
         return health
 
     async def handle_error(self, ex: Exception) -> SchedulerServiceHealth:
-        error_message = f"{ex.__class__.__name__}"
-        if len(str(ex)) > 0:
-            error_message = f"{ex.__class__.__name__}: {str(ex)}"
         health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         health.healthy = False
-        health.message = error_message
+        health.message = str(ex)
+        log_health_check_error(service_type=BackendServiceType.scheduler,
+                               health_message=health.message,
+                               exception=ex,
+                               system_name=self.system.name,
+                               username=self.auth.username)
         return health

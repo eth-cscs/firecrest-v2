@@ -631,7 +631,7 @@ async def get_download(
 
         if len(file_content) > system.data_operation.max_ops_file_size:
             raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 detail="File to download is too large.",
             )
 
@@ -672,7 +672,7 @@ async def post_upload(
 
     if len(raw_content) > system.data_operation.max_ops_file_size:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail="File to upload is too large.",
         )
 
