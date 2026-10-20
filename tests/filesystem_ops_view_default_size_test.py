@@ -22,7 +22,7 @@ def small_ops_limit():
 async def test_view_without_size_is_capped_by_max_ops_file_size(
     client, ssh_client, small_ops_limit
 ):
-    # Default size (5 MiB) must be capped to max_ops_file_size (1 MiB), not rejected.
+    # Without `size`, the view defaults to max_ops_file_size (1 MiB) instead of being rejected.
     command = MockedCommand(
         stdout="ABCDEFGHIJ",
         stderr="",
