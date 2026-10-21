@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed multipart-upload bash scripts, making them work with current F7T version.
 - Replaced deprecated environment variables `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` in `keycloak.env` environment file for demo / development deployment.
 - `GET /filesystem/{system_name}/ops/view` no longer fails with `400` when the `size` query parameter is omitted and the system's `max_ops_file_size` is below 5 MiB. When omitted, `size` now defaults to `max_ops_file_size`. Explicit `size` values are validated as before.
+- Demo use cases: fixed packages for critical and high vulnerabilities ([CVE-2026-102268](https://www.cve.org/CVERecord?id=CVE-2026-102268), [CVE-2026-48526](https://www.cve.org/CVERecord?id=CVE-2026-48526), [CVE-2026-102271](https://www.cve.org/CVERecord?id=CVE-2026-102271), and [CVE-2026-102267](https://www.cve.org/CVERecord?id=CVE-2026-102267), among others moderates and lows).
 
 ## [2.6.1]
 
