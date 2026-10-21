@@ -8,6 +8,9 @@ from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import Sacc
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_metadata_command import (
     SacctJobMetadataCommand,
 )
+from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
+from lib.scheduler_clients.slurm.models import SlurmNode
+from lib.scheduler_clients.models import NodeState
 
 
 def _line(*fields):
@@ -53,3 +56,18 @@ def test_sacct_metadata_job_name_with_pipe():
     jobs = SacctJobMetadataCommand().parse_output(stdout, "", 0)
     assert jobs[0]["jobName"] == "a|b"
     assert jobs[0]["standardOutput"] == "/scratch/u/slurm-8167067.out"
+
+
+def test_sinfo_multi_state_is_split():
+    stdout = (
+        "2:1:1|2|3.53|2097|f7t|nid001|nid001|nid001|MIXED+PLANNED|normal|1|"
+        "24.05.4|1000|1/1/0/2\n"
+        "2:1:1|2|3.53|2097|f7t|nid002|nid002|nid002|IDLE+DRAIN*|normal|1|"
+        "24.05.4|1000|0/2/0/2"
+    )
+    nodes = list(SinfoCommand().parse_output(stdout, ""))
+
+    assert nodes[0]["state"] == ["MIXED", "PLANNED"]
+    assert nodes[1]["state"] == ["IDLE", "DRAIN*"]
+    assert SlurmNode(**nodes[0]).state == [NodeState.MIXED, NodeState.PLANNED]
+    assert SlurmNode(**nodes[1]).state == [NodeState.IDLE, NodeState.DRAIN]
