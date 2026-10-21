@@ -10,9 +10,7 @@ import logging
 import pytest
 from unittest.mock import AsyncMock, patch
 from aioresponses import aioresponses
-from pytest_httpx import HTTPXMock
 
-from firecrest.plugins import settings
 from firecrest.status.health_check.health_checker_cluster import ClusterHealthChecker
 from firecrest.status.health_check.checks.health_check_ssh import SSHHealthCheck
 from firecrest.status.health_check.checks.health_check_s3 import S3HealthCheck
@@ -75,14 +73,12 @@ class TokenDecoderMock(OIDCTokenAuth):
 async def test_health_check(
     mocked_nodes_get_response,
     slurm_cluster_with_api_config,
-    httpx_mock: HTTPXMock,
 ):
-    # mock oidc response used to fetch the service accoount token
-    httpx_mock.add_response(
-        url=settings.auth.authentication.token_url, json=mocked_token_response()
-    )
-
-    with aioresponses() as mocked:
+    # mock oidc response used to fetch the service account token
+    with aioresponses() as mocked, patch(
+        "firecrest.status.health_check.health_checker_cluster.AsyncOAuth2Client.fetch_token",
+        new=AsyncMock(return_value=mocked_token_response()),
+    ):
 
         mocked.get(
             "{root_url}/slurm/v0.0.38/nodes".format(
