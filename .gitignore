@@ -172,8 +172,6 @@ tmp
 
 # Docker containers volumes
 
-/build/minio
-
 # Docs
 ## Use Cases
 ### JupyterHub

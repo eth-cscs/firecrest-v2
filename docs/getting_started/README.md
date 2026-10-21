@@ -39,7 +39,7 @@ Alternatively, use the command line:
 
 ### Local Environment
 
-The environment comes with an OIDC/OAuth2 Identity Provider ([Keycloak](https://www.keycloak.org/)) for authentication, a dummy HPC cluster (with [Slurm](https://slurm.schedmd.com/documentation.html) as workload manager) and a storage service ([MinIO](https://min.io/product/s3-compatibility) with S3 interface).
+The environment comes with an OIDC/OAuth2 Identity Provider ([Keycloak](https://www.keycloak.org/)) for authentication, a dummy HPC cluster (with [Slurm](https://slurm.schedmd.com/documentation.html) as workload manager) and an S3-compatible object storage service ([RustFS](https://rustfs.com/)).
 
 
 #### Users
