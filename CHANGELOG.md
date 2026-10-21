@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `httpx2` as a runtime dependency so Authlib's OAuth2 client (used by the health checker) no longer falls back to the deprecated `httpx` package, which emitted an `AuthlibDeprecationWarning`.
 - Replaced fastapi deprecated enum 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' with 'HTTP_413_CONTENT_TOO_LARGE'.
 - `GET /filesystem/{system_name}/ops/view` no longer fails with `400` when the `size` query parameter is omitted and the system's `max_ops_file_size` is below 5 MiB. When omitted, `size` now defaults to `max_ops_file_size`. Explicit `size` values are validated as before.
+- Demo use cases: fixed packages for critical and high vulnerabilities ([CVE-2026-102268](https://www.cve.org/CVERecord?id=CVE-2026-102268), [CVE-2026-48526](https://www.cve.org/CVERecord?id=CVE-2026-48526), [CVE-2026-102271](https://www.cve.org/CVERecord?id=CVE-2026-102271), and [CVE-2026-102267](https://www.cve.org/CVERecord?id=CVE-2026-102267), among others moderates and lows).
 
 ## [2.6.1]
 

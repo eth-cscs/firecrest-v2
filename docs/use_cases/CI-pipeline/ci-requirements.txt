@@ -1,1 +1,1 @@
-pyfirecrest==3.10.0
+pyfirecrest == 3.10.0
