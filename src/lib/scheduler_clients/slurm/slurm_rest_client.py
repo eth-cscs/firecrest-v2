@@ -329,7 +329,7 @@ class SlurmRestClient(SlurmBaseClient):
             nodes_result = await response.json()
             if len(nodes_result["nodes"]) == 0:
                 return None
-        return nodes_result["nodes"]
+        return [SlurmNode.model_validate(node) for node in nodes_result["nodes"]]
 
     async def get_reservations(
         self, username: str, jwt_token: str

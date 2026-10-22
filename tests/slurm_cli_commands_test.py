@@ -3,11 +3,13 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SLURM_FIELD_DELIMITER
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_metadata_command import (
     SacctJobMetadataCommand,
 )
+from lib.scheduler_clients.slurm.cli_commands.sbatch_command import SbatchCommand
 
 
 def _line(*fields):
@@ -53,3 +55,37 @@ def test_sacct_metadata_job_name_with_pipe():
     jobs = SacctJobMetadataCommand().parse_output(stdout, "", 0)
     assert jobs[0]["jobName"] == "a|b"
     assert jobs[0]["standardOutput"] == "/scratch/u/slurm-8167067.out"
+
+
+def _sbatch(**resources):
+    job = JobDescriptionModel(
+        current_working_directory="/home/u", environment={}, **resources
+    )
+    return SbatchCommand(job).get_command()
+
+
+def test_sbatch_resource_flags():
+    cmd = _sbatch(
+        nodes="2-4",
+        tasks=8,
+        tasks_per_node=4,
+        cpus_per_task=2,
+        memory_per_node=2048,
+        time_limit=90,
+    )
+    assert cmd.endswith(
+        "--nodes=2-4 --ntasks=8 --ntasks-per-node=4 --cpus-per-task=2"
+        " --mem=2048 --time=90"
+    )
+
+
+def test_sbatch_minimum_nodes():
+    assert _sbatch(minimum_nodes=3).endswith("--nodes=3")
+    # an explicit node range wins over the minimum
+    assert _sbatch(nodes="4", minimum_nodes=3).endswith("--nodes=4")
+
+
+def test_sbatch_without_resources():
+    cmd = _sbatch()
+    for flag in ("--nodes", "--ntasks", "--cpus-per-task", "--mem", "--time"):
+        assert flag not in cmd
