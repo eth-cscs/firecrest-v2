@@ -73,6 +73,16 @@ class Oidc(CamelModel):
         nullable=False,
         ge=0,
     )
+    audience: Optional[List[str]] = Field(
+        None,
+        description=(
+            "List of accepted token audience(s) (`aud` claim). A token is accepted "
+            "when its `aud` claim contains at least one of these, and rejected "
+            "when it carries no `aud` claim at all. If not specified, audience "
+            "validation is disabled. "
+        ),
+        nullable=True,
+    )
 
 
 class LoadFileSecretStr(SecretStr):
