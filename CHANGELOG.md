@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added logging of errors when health checks fail. Before, errors were omitted in the logs.
+- Added configurable bucket name prefix for S3 data transfer operation
 
 ### Fixed
 

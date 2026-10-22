@@ -454,6 +454,7 @@ class DataTransferDependency:
                             tenant=data_transfer.tenant,
                             ttl=data_transfer.ttl,
                             system_name=system_name,
+                            bucket_name_prefix=data_transfer.bucket_name_prefix,
                         )
 
     # To allow for dependency override eq checks for class equality
