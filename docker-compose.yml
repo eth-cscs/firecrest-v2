@@ -168,6 +168,11 @@ services:
       RUSTFS_CONSOLE_ENABLE: "true"
       RUSTFS_ACCESS_KEY: storage_access_key
       RUSTFS_SECRET_KEY: storage_secret_key
+      # OIDC support settings
+      RUSTFS_IDENTITY_WEBIDENTITY_ENABLE: on
+      RUSTFS_IDENTITY_WEBIDENTITY_CONFIG_URL: "http://keycloak:8080/realms/kcrealm/.well-known/openid-configuration"
+      RUSTFS_IDENTITY_WEBIDENTITY_CLIENT_ID: "firecrest-s3-client"
+      RUSTFS_OUTBOUND_ALLOW_ORIGINS: "http://keycloak"
     networks:
       firecrest-internal-v2:
         ipv4_address: 192.168.240.19
@@ -181,6 +186,48 @@ services:
       interval: 1s
       timeout: 2s
       retries: 30
+
+  rustfs-setup:
+    image: rustfs/rc:v0.1.36
+    container_name: rustfs-setup
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    volumes:
+      - ./build/docker/rustfs/bucket-policy.json:/bucket-policy.json:ro
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Connect to RustFS'
+        rc alias set local http://rustfs:9000 storage_access_key storage_secret_key
+
+        echo 'Create buckets for users'
+        rc mb local/fireuser --ignore-existing
+        rc mb local/firesrv  --ignore-existing
+
+        echo 'Load generic bucket policy'
+        rc admin policy create local policy-user-bucket /bucket-policy.json || true
+
+        echo 'Create local users'
+        rc admin user add local fireuser 'fireuser_fs_password' || true
+        rc admin user add local firesrv  'firesrv_fs_password'  || true
+
+        echo 'Set policy to users'
+        rc admin policy attach local policy-user-bucket --user fireuser
+        rc admin policy attach local policy-user-bucket --user firesrv
+
+        echo 'Generate keys'
+        rc admin service-account create local 'fireuser_access_key' 'fireuser_secret_key' --user fireuser || true
+        rc admin service-account create local 'firesrv_access_key'  'firesrv_secret_key'  --user firesrv  || true
+        echo 'done'
+      "
+    networks:
+      firecrest-internal-v2:
+        ipv4_address: 192.168.240.119
+    
+  # mount on cluster
+  # s3fs fireuser /s3/fireuser -o passwd_file=/etc/s3fs/s3fs_creds_fireuser -o url=http://rustfs:9000 -o use_path_request_style -o allow_other -o uid=1001 -o gid=1001 -o umask=0006
+  # s3fs firesrv /s3/firesrv -o passwd_file=/etc/s3fs/s3fs_creds_firesrv -o url=http://rustfs:9000 -o use_path_request_style -o allow_other -o uid=1002 -o gid=1002 -o umask=0006
+
   ssh-ca:
     image: deic-sshca
     depends_on:

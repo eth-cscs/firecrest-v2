@@ -54,6 +54,7 @@ class S3Datatransfer(DataTransferBase):
         directives,
         s3_client_private,
         s3_client_public,
+        sts_client_public,
         ssh_client: SSHClientPool | None,
         work_dir,
         bucket_lifecycle_configuration,
@@ -68,6 +69,7 @@ class S3Datatransfer(DataTransferBase):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.s3_client_private = s3_client_private
         self.s3_client_public = s3_client_public
+        self.sts_client_public = sts_client_public
         self.ssh_client = ssh_client
         self.work_dir = work_dir
         self.bucket_lifecycle_configuration = bucket_lifecycle_configuration

@@ -372,6 +372,16 @@ class DataTransferDependency:
             config=AioConfig(signature_version="s3v4"),
         )
 
+    def _get_sts_client(self, endpoint_url, data_transfer: S3DataTransfer):
+        return get_session().create_client(
+            "sts",
+            region_name=data_transfer.region,
+            aws_secret_access_key=data_transfer.secret_access_key.get_secret_value(),
+            aws_access_key_id=data_transfer.access_key_id.get_secret_value(),
+            endpoint_url=endpoint_url,
+            config=AioConfig(signature_version="s3v4"),
+        )
+
     async def __call__(
         self,
         system_name: str,
@@ -425,36 +435,40 @@ class DataTransferDependency:
                 async with self._get_s3_client(
                     data_transfer.public_url, data_transfer
                 ) as s3_client_public:
-                    async with self._get_s3_client(
-                        data_transfer.private_url.get_secret_value(), data_transfer
-                    ) as s3_client_private:
+                    async with self._get_sts_client(
+                        data_transfer.public_url, data_transfer
+                    ) as sts_client_public:
+                        async with self._get_s3_client(
+                            data_transfer.private_url.get_secret_value(), data_transfer
+                        ) as s3_client_private:
 
-                        # This is required because botocore library bucket_name validation is not compliant
-                        # with ceph multi tenancy bucket names
-                        if data_transfer.tenant:
-                            s3_client_public.meta.events.unregister(
-                                "before-parameter-build.s3", validate_bucket_name
-                            )
-                            s3_client_private.meta.events.unregister(
-                                "before-parameter-build.s3", validate_bucket_name
-                            )
+                            # This is required because botocore library bucket_name validation is not compliant
+                            # with ceph multi tenancy bucket names
+                            if data_transfer.tenant:
+                                s3_client_public.meta.events.unregister(
+                                    "before-parameter-build.s3", validate_bucket_name
+                                )
+                                s3_client_private.meta.events.unregister(
+                                    "before-parameter-build.s3", validate_bucket_name
+                                )
 
-                        return S3Datatransfer(
-                            scheduler_client=scheduler_client,
-                            directives=system.data_operation.datatransfer_jobs_directives,
-                            s3_client_private=s3_client_private,
-                            s3_client_public=s3_client_public,
-                            ssh_client=ssh_client,
-                            work_dir=work_dir,
-                            bucket_lifecycle_configuration=data_transfer.bucket_lifecycle_configuration,
-                            max_part_size=data_transfer.multipart.max_part_size,
-                            use_split=data_transfer.multipart.use_split,
-                            tmp_folder=data_transfer.multipart.tmp_folder,
-                            parallel_runs=data_transfer.multipart.parallel_runs,
-                            tenant=data_transfer.tenant,
-                            ttl=data_transfer.ttl,
-                            system_name=system_name,
-                        )
+                            return S3Datatransfer(
+                                scheduler_client=scheduler_client,
+                                directives=system.data_operation.datatransfer_jobs_directives,
+                                s3_client_private=s3_client_private,
+                                s3_client_public=s3_client_public,
+                                sts_client_public=sts_client_public,
+                                ssh_client=ssh_client,
+                                work_dir=work_dir,
+                                bucket_lifecycle_configuration=data_transfer.bucket_lifecycle_configuration,
+                                max_part_size=data_transfer.multipart.max_part_size,
+                                use_split=data_transfer.multipart.use_split,
+                                tmp_folder=data_transfer.multipart.tmp_folder,
+                                parallel_runs=data_transfer.multipart.parallel_runs,
+                                tenant=data_transfer.tenant,
+                                ttl=data_transfer.ttl,
+                                system_name=system_name,
+                            )
 
     # To allow for dependency override eq checks for class equality
     def __eq__(self, other):
