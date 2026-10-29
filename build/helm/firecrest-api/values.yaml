@@ -315,7 +315,10 @@ firecrest:
         ## example for one day:
         ##  ttl: 86400
         ttl: 86400
-
+        ## bucket_name_prefix: Optional prefix string to apply to S3 bucket names.
+        ## example:
+        ##  bucket_name_prefix: "firecrest-transfer-"
+        # bucket_name_prefix: ""
 
       ## Configuration for multipart upload behavior.
       # multipart:
