@@ -403,22 +403,18 @@ class SlurmRestClient(SlurmBaseClient):
             # account once, as default if any of its associations is
             accounts_by_name = {}
             result = await response.json()
-            if "associations" in result:
-                for association in result["associations"]:
-                    account_name = association["account"]
-                    account = accounts_by_name.setdefault(
-                        account_name,
-                        {"name": account_name, "default": False}
-                    )
-                    account["default"] = account["default"] or bool(association["is_default"])
+            for association in result.get("associations", []):
+                name = association["account"]
+                account = accounts_by_name.setdefault(
+                    name, {"name": name, "default": False}
+                )
+                account["default"] |= bool(association["is_default"])
 
-            accounts = list(accounts_by_name.values())
-            if accounts:
-                accounts = [
-                    SlurmAccounts.model_validate(account) for account in accounts
-                ]
-
-            return accounts if len(accounts) > 0 else None
+            accounts = [
+                SlurmAccounts.model_validate(account)
+                for account in accounts_by_name.values()
+            ]
+            return accounts or None
 
     async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
         client = await self.get_aiohttp_client()
