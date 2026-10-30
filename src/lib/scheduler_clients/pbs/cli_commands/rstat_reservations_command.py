@@ -22,7 +22,8 @@ class RstatReservationsCommand(BaseCommand):
 
     def get_command(self) -> str:
         ids = self.res_ids if self.res_ids else []
-        cmd = ["pbs_rstat", "-Sf"] + ids
+        # pbs_rstat prints times in local time without a zone; force UTC
+        cmd = ["env", "TZ=UTC", "pbs_rstat", "-Sf"] + ids
         return " ".join(cmd)
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
@@ -41,7 +42,11 @@ class RstatReservationsCommand(BaseCommand):
 
             for line in block.splitlines():
                 line = line.strip()
-                if line.startswith("Reserve_Name"):
+                if line.startswith("Resv ID:"):
+                    # Maintenance reservations (pbs_rsub --hosts) get M IDs
+                    resv_id = line.split(":", 1)[1].strip()
+                    info["maintenance"] = resv_id.startswith("M")
+                elif line.startswith("Reserve_Name"):
                     info["name"] = line.split("=", 1)[1].strip()
                 elif line.startswith("reserve_start"):
                     info["start_time"] = line.split("=", 1)[1].strip()
@@ -49,6 +54,8 @@ class RstatReservationsCommand(BaseCommand):
                     info["end_time"] = line.split("=", 1)[1].strip()
                 elif line.startswith("resv_nodes"):
                     info["node_list"] = line.split("=", 1)[1].strip()
+                elif line.startswith("Resource_List.nodect"):
+                    info["node_count"] = line.split("=", 1)[1].strip()
 
             jobs.append(info)
 

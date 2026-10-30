@@ -3,11 +3,13 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.slurm.cli_commands.sacct_base import SLURM_FIELD_DELIMITER
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_info_command import SacctCommand
 from lib.scheduler_clients.slurm.cli_commands.sacct_job_metadata_command import (
     SacctJobMetadataCommand,
 )
+from lib.scheduler_clients.slurm.cli_commands.sbatch_command import SbatchCommand
 from lib.scheduler_clients.slurm.cli_commands.sinfo_command import SinfoCommand
 from lib.scheduler_clients.slurm.models import SlurmNode
 from lib.scheduler_clients.models import NodeState
@@ -71,3 +73,29 @@ def test_sinfo_multi_state_is_split():
     assert nodes[1]["state"] == ["IDLE", "DRAIN*"]
     assert SlurmNode(**nodes[0]).state == [NodeState.MIXED, NodeState.PLANNED]
     assert SlurmNode(**nodes[1]).state == [NodeState.IDLE, NodeState.DRAIN]
+
+
+def _sbatch(**resources):
+    job = JobDescriptionModel(
+        current_working_directory="/home/u", environment={}, **resources
+    )
+    return SbatchCommand(job).get_command()
+
+
+def test_sbatch_resource_flags():
+    cmd = _sbatch(
+        nodes=4,
+        tasks_per_node=4,
+        cpus_per_task=2,
+        memory_per_node=2048,
+        time_limit=90,
+    )
+    assert cmd.endswith(
+        "--nodes=4 --ntasks-per-node=4 --cpus-per-task=2 --mem=2048 --time=90"
+    )
+
+
+def test_sbatch_without_resources():
+    cmd = _sbatch()
+    for flag in ("--nodes", "--ntasks-per-node", "--cpus-per-task", "--mem", "--time"):
+        assert flag not in cmd

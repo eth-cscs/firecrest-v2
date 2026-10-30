@@ -48,6 +48,18 @@ class SbatchCommand(BaseCommand):
             cmd += [f"--input={shlex.quote(self.job_description.standard_input)}"]
         if self.job_description.constraints:
             cmd.append(f"--constraint={shlex.quote(self.job_description.constraints)}")
+        if self.job_description.nodes:
+            cmd.append(f"--nodes={self.job_description.nodes}")
+        if self.job_description.tasks_per_node:
+            cmd.append(f"--ntasks-per-node={self.job_description.tasks_per_node}")
+        if self.job_description.cpus_per_task:
+            cmd.append(f"--cpus-per-task={self.job_description.cpus_per_task}")
+        if self.job_description.memory_per_node:
+            # sbatch reads a unitless --mem as megabytes, matching memory_per_node
+            cmd.append(f"--mem={self.job_description.memory_per_node}")
+        if self.job_description.time_limit:
+            # sbatch reads a bare number as minutes, matching time_limit
+            cmd.append(f"--time={self.job_description.time_limit}")
         if self.job_description.script_path:
             cmd.append(f"-- {shlex.quote(self.job_description.script_path)}")
         return " ".join(cmd)

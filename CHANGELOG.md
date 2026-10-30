@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added logging of errors when health checks fail. Before, errors were omitted in the logs.
 - Added `PLANNED` node state. Slurm nodes reserved by the backfill scheduler for a pending job (`PLANNED`/`PLND`) are now reported as `PLANNED` instead of `UNKNOWN`.
 - Added configurable bucket name prefix for S3 data transfer operation
+- Job submission accepts resource requests (`nodes`, `tasksPerNode`, `cpusPerTask`, `memoryPerNode`, `timeLimit`), since slurmrestd does not parse `#SBATCH` lines. On Slurm over SSH they are passed to `sbatch` as `--nodes`, `--ntasks-per-node`, `--cpus-per-task`, `--mem` and `--time`; on PBS to `qsub` as `-l select=<nodes>:ncpus=…:mpiprocs=…:ompthreads=…:mem=…`, `-l place=scatter` and `-l walltime`.
+- Jobs report `time.submission`, `time.totalCpu`, `allocationCpus`, `requestedMemory`, `maxRss`, `allocationGpus` and `consumedEnergy` where the scheduler provides them (Slurm REST and PBS).
+- Nodes report the drain/down `reason` (the node `comment` on PBS); reservations report `nodeCount` and whether they are a `maintenance` reservation.
 
 ### Fixed
 
@@ -25,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced deprecated environment variables `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` in `keycloak.env` environment file for demo / development deployment.
 - `GET /filesystem/{system_name}/ops/view` no longer fails with `400` when the `size` query parameter is omitted and the system's `max_ops_file_size` is below 5 MiB. When omitted, `size` now defaults to `max_ops_file_size`. Explicit `size` values are validated as before.
 - Fixed Slurm CLI node state parsing when multiple states are provided (e.g. MIXED+PLANNED).
+- PBS job and reservation times (`time.start`, `startTime`, `endTime`) were off by the difference between the cluster's and FirecREST's time zones. `qstat` and `pbs_rstat` print local times without a zone; they are now run with `TZ=UTC` and read as UTC.
+- PBS node `freeMemory` and `allocMemory` are now reported in MiB, as for Slurm. They were in bytes, computed with decimal multipliers although PBS sizes are binary.
 - Demo use cases: fixed packages for critical and high vulnerabilities ([CVE-2026-102268](https://www.cve.org/CVERecord?id=CVE-2026-102268), [CVE-2026-48526](https://www.cve.org/CVERecord?id=CVE-2026-48526), [CVE-2026-102271](https://www.cve.org/CVERecord?id=CVE-2026-102271), and [CVE-2026-102267](https://www.cve.org/CVERecord?id=CVE-2026-102267), among others moderates and lows).
 
 ## [2.6.1]
