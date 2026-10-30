@@ -92,9 +92,10 @@ class OIDCTokenAuth(AuthenticationService):
         token_aud = decoded_token.get("aud")
         if isinstance(token_aud, str):
             token_aud = [token_aud]
-        if not isinstance(token_aud, list) or not any(
-            aud in self.audience for aud in token_aud
-        ):
+        elif not isinstance(token_aud, list):
+            token_aud = []
+
+        if set(self.audience).isdisjoint(token_aud):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Access token audience is missing or not accepted.",
