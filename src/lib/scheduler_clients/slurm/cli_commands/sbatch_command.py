@@ -48,14 +48,8 @@ class SbatchCommand(BaseCommand):
             cmd += [f"--input={shlex.quote(self.job_description.standard_input)}"]
         if self.job_description.constraints:
             cmd.append(f"--constraint={shlex.quote(self.job_description.constraints)}")
-        # sbatch has no separate minimum: --nodes=<min> is what slurmrestd's
-        # minimum_nodes alone means
         if self.job_description.nodes:
-            cmd.append(f"--nodes={shlex.quote(self.job_description.nodes)}")
-        elif self.job_description.minimum_nodes:
-            cmd.append(f"--nodes={self.job_description.minimum_nodes}")
-        if self.job_description.tasks:
-            cmd.append(f"--ntasks={self.job_description.tasks}")
+            cmd.append(f"--nodes={self.job_description.nodes}")
         if self.job_description.tasks_per_node:
             cmd.append(f"--ntasks-per-node={self.job_description.tasks_per_node}")
         if self.job_description.cpus_per_task:

@@ -41,6 +41,29 @@ class QsubCommand(BaseCommand):
         if self.job_description.standard_output:
             cmd.append(f"-o {shlex.quote(self.job_description.standard_output)}")
 
+        # One select chunk per node; place=scatter keeps chunks on separate
+        # nodes, like Slurm's --nodes
+        tasks = self.job_description.tasks_per_node
+        cpus = self.job_description.cpus_per_task
+        chunk = []
+        if tasks or cpus:
+            chunk.append(f"ncpus={(tasks or 1) * (cpus or 1)}")
+        if tasks:
+            chunk.append(f"mpiprocs={tasks}")
+        if cpus:
+            chunk.append(f"ompthreads={cpus}")
+        if self.job_description.memory_per_node:
+            # PBS "mb" is MiB, matching memory_per_node
+            chunk.append(f"mem={self.job_description.memory_per_node}mb")
+        if self.job_description.nodes or chunk:
+            select = [str(self.job_description.nodes or 1)] + chunk
+            cmd.append(f"-l select={':'.join(select)}")
+        if self.job_description.nodes:
+            cmd.append("-l place=scatter")
+        if self.job_description.time_limit:
+            hours, minutes = divmod(self.job_description.time_limit, 60)
+            cmd.append(f"-l walltime={hours:02d}:{minutes:02d}:00")
+
         # The last argument is the script to run
         if self.job_description.script_path:
             cmd.append(f"-- {shlex.quote(self.job_description.script_path)}")

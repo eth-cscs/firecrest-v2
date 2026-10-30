@@ -126,17 +126,18 @@ class SlurmRestClient(SlurmBaseClient):
                 for k, v in job_description.environment.items()
             ]
 
-        post_data = {**{"job": job_description.model_dump(exclude_none=True)}}
+        job = job_description.model_dump(exclude_none=True)
+        # slurmrestd takes the node count as a string (it also accepts ranges)
+        if "nodes" in job:
+            job["nodes"] = str(job["nodes"])
+        post_data = {**{"job": job}}
 
         if Version(self.api_version) < Version("0.0.41"):
             # Note: starting from version "0.0.41" the script field is included in the job description
             # to allow back compatibility for version older than that we keep the old json format
+            job.pop("script", None)
             post_data = {
-                **{
-                    "job": job_description.model_dump(
-                        exclude={"script"}, exclude_none=True
-                    )
-                },
+                **{"job": job},
                 **{"script": job_description.script},
             }
 

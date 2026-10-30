@@ -82,7 +82,7 @@ class JobTime(CamelModel):
     total_cpu: Optional[int] = Field(
         default=None,
         nullable=True,
-        description="CPU time consumed by all tasks, in seconds (accounting only)",
+        description="CPU time consumed by the job, in seconds",
     )
 
 
@@ -118,29 +118,17 @@ class JobModel(CamelModel):
     max_rss: Optional[int] = Field(
         default=None,
         nullable=True,
-        description="Peak resident memory of the largest step, in bytes "
-        "(accounting only)",
+        description="Peak resident memory, in bytes. Slurm reports the largest "
+        "task of the largest step, PBS the whole job",
     )
     allocation_gpus: Optional[int] = Field(
         default=None, nullable=True, description="GPUs allocated to the job"
     )
-    gpu_utilization: Optional[int] = Field(
-        default=None,
-        nullable=True,
-        description="Average GPU utilisation of the busiest step, percent "
-        "summed over a task's GPUs (accounting with gres/gpuutil only)",
-    )
-    max_gpu_memory: Optional[int] = Field(
-        default=None,
-        nullable=True,
-        description="Peak GPU memory of the largest step, in bytes, summed "
-        "over a task's GPUs (accounting with gres/gpumem only)",
-    )
     consumed_energy: Optional[int] = Field(
         default=None,
         nullable=True,
-        description="Energy consumed by the job, in joules (accounting with "
-        "an acct_gather_energy plugin only)",
+        description="Energy consumed by the job, in joules, where the scheduler "
+        "is configured to measure it",
     )
 
 
@@ -193,36 +181,20 @@ class JobDescriptionModel(CamelModel):
     constraints: Optional[str] = Field(
         default=None, description="Job constraints", nullable=True
     )
-    nodes: Optional[str] = Field(
-        default=None,
-        description="Node count or range, e.g. '4' or '2-4' (sbatch --nodes)",
-        nullable=True,
-    )
-    minimum_nodes: Optional[int] = Field(
-        default=None, description="Minimum node count", nullable=True
-    )
-    tasks: Optional[int] = Field(
-        default=None, description="Number of tasks (sbatch --ntasks)", nullable=True
+    nodes: Optional[int] = Field(
+        default=None, description="Number of nodes", nullable=True
     )
     tasks_per_node: Optional[int] = Field(
-        default=None,
-        description="Tasks per node (sbatch --ntasks-per-node)",
-        nullable=True,
+        default=None, description="Tasks per node", nullable=True
     )
     cpus_per_task: Optional[int] = Field(
-        default=None,
-        description="CPUs per task (sbatch --cpus-per-task)",
-        nullable=True,
+        default=None, description="CPUs per task", nullable=True
     )
     memory_per_node: Optional[int] = Field(
-        default=None,
-        description="Memory per node in MiB (sbatch --mem)",
-        nullable=True,
+        default=None, description="Memory per node, in MiB", nullable=True
     )
     time_limit: Optional[int] = Field(
-        default=None,
-        description="Wall time limit in minutes (sbatch --time)",
-        nullable=True,
+        default=None, description="Wall time limit, in minutes", nullable=True
     )
     script: str = Field(default=None, description="Script for the job")
     script_path: str = Field(
@@ -240,7 +212,9 @@ class NodeModel(CamelModel):
     threads: Optional[int] = Field(default=None, nullable=True)
     cpus: int
     cpu_load: Optional[float] = Field(default=None, nullable=True)
-    free_memory: Optional[int] = Field(default=None, nullable=True)
+    free_memory: Optional[int] = Field(
+        default=None, nullable=True, description="In MiB"
+    )
     features: Optional[str | List[str]] = Field(default=None, nullable=True)
     name: str
     address: Optional[str] = Field(default=None, nullable=True)
@@ -248,11 +222,15 @@ class NodeModel(CamelModel):
     state: List[NodeState]
     partitions: Optional[List[str]] = Field(default=None, nullable=True)
     weight: Optional[int] = Field(default=None, nullable=True)
-    alloc_memory: Optional[int] = Field(default=None, nullable=True)
+    alloc_memory: Optional[int] = Field(
+        default=None, nullable=True, description="In MiB"
+    )
     alloc_cpus: Optional[int] = Field(default=None, nullable=True)
     idle_cpus: Optional[int] = Field(default=None, nullable=True)
     reason: Optional[str] = Field(
-        default=None, nullable=True, description="Why the node is drained or down"
+        default=None,
+        nullable=True,
+        description="Why the node is drained or down (PBS: the node comment)",
     )
 
 
@@ -263,10 +241,11 @@ class ReservationModel(CamelModel):
     start_time: int
     features: Optional[str] = Field(default=None, nullable=True)
     state: Optional[str] = Field(default=None, nullable=True)
-    partition: Optional[str] = Field(default=None, nullable=True)
     node_count: Optional[int] = Field(default=None, nullable=True)
-    flags: Optional[List[str]] = Field(
-        default=None, nullable=True, description="Reservation flags, e.g. MAINT"
+    maintenance: Optional[bool] = Field(
+        default=None,
+        nullable=True,
+        description="Whether this is a maintenance reservation",
     )
 
 

@@ -161,21 +161,14 @@ def _named_tres_count(tres_list, tres_type: str, name: str) -> Optional[int]:
     return None
 
 
-def _step_peak(steps, kind: str, tres_type: str, name: str = "") -> Optional[int]:
-    """Largest value of a step usage TRES (tres.requested.<kind>) over the steps."""
+def _max_rss(steps) -> Optional[int]:
+    """Largest step peak RSS (bytes): sacct's MaxRSS for the job."""
     values = [
-        _named_tres_count(
-            ((step.get("tres") or {}).get("requested") or {}).get(kind), tres_type, name
-        )
+        _tres_count(((step.get("tres") or {}).get("requested") or {}).get("max"), "mem")
         for step in steps or []
     ]
     values = [v for v in values if v is not None]
     return max(values) if values else None
-
-
-def _max_rss(steps) -> Optional[int]:
-    """Largest step peak RSS (bytes): sacct's MaxRSS for the job."""
-    return _step_peak(steps, "max", "mem")
 
 
 class JobTaskSlurm(JobTask):
@@ -286,14 +279,6 @@ class SlurmJob(JobModel):
             )
         if "consumed_energy" not in kwargs:
             kwargs["consumed_energy"] = _tres_count(tres.get("allocated"), "energy") or None
-        if isinstance(kwargs.get("steps"), list):
-            # What the NVML gpu plugin samples (gres/gpuutil, gres/gpumem)
-            kwargs.setdefault(
-                "gpu_utilization", _step_peak(kwargs["steps"], "average", "gres", "gpuutil")
-            )
-            kwargs.setdefault(
-                "max_gpu_memory", _step_peak(kwargs["steps"], "max", "gres", "gpumem")
-            )
 
         # Custom status field definition
         if "exit_code" in kwargs:
@@ -398,6 +383,11 @@ class SlurmReservations(ReservationModel):
     state: Optional[str] = Field(
         validation_alias=AliasChoices("state", "State"), default=None, nullable=True
     )
+
+    def __init__(self, **kwargs):
+        if "maintenance" not in kwargs and isinstance(kwargs.get("flags"), list):
+            kwargs["maintenance"] = "MAINT" in kwargs["flags"]
+        super().__init__(**kwargs)
 
     @field_validator("node_count", mode="before")
     @classmethod

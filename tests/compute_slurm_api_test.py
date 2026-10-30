@@ -198,9 +198,7 @@ def test_submit_job_with_resources(
             "name": "test1",
             "working_directory": "/home/test1",
             "script": "#!/bin/bash\nsrun hostname",
-            "nodes": "2-4",
-            "minimumNodes": 2,
-            "tasks": 8,
+            "nodes": 4,
             "tasksPerNode": 4,
             "cpusPerTask": 2,
             "memoryPerNode": 2048,
@@ -229,9 +227,8 @@ def test_submit_job_with_resources(
             for c in calls
         ]
         job = json.loads(call.kwargs["data"])["job"]
-        assert job["nodes"] == "2-4"
-        assert job["minimum_nodes"] == 2
-        assert job["tasks"] == 8
+        # slurmrestd's nodes field is a string
+        assert job["nodes"] == "4"
         assert job["tasks_per_node"] == 4
         assert job["cpus_per_task"] == 2
         assert job["memory_per_node"] == 2048

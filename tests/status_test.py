@@ -179,7 +179,7 @@ def test_systems_reservations(
         assert len(reservations.reservations) == 1
         assert reservations.reservations[0].state == "inactive"
         assert reservations.reservations[0].node_count == 1
-        assert "MAINT" in reservations.reservations[0].flags
+        assert reservations.reservations[0].maintenance is True
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )

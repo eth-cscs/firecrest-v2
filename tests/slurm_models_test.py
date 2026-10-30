@@ -37,7 +37,7 @@ def _tres(tres_type, count, name=""):
     return {"type": tres_type, "name": name, "id": 1, "count": count}
 
 
-def _step(max_tres=(), average_tres=()):
+def _step(max_tres=()):
     return {
         "step": {"id": "1.batch", "name": "batch"},
         "state": "COMPLETED",
@@ -47,7 +47,7 @@ def _step(max_tres=(), average_tres=()):
             "requested": {
                 "max": list(max_tres),
                 "min": [],
-                "average": list(average_tres),
+                "average": [],
                 "total": [],
             }
         },
@@ -65,7 +65,7 @@ def test_accounting_job_resources(db_job):
     assert job.allocation_gpus is None
 
 
-def test_accounting_job_gpu_and_step_peaks(db_job):
+def test_accounting_job_gpus_and_max_rss(db_job):
     raw = copy.deepcopy(db_job)
     raw["time"]["total"] = {"seconds": 635, "microseconds": 0}
     raw["tres"]["allocated"] += [
@@ -74,18 +74,8 @@ def test_accounting_job_gpu_and_step_peaks(db_job):
     ]
     raw["tres"]["allocated"][2]["count"] = 2000  # energy
     raw["steps"] = [
-        _step(
-            max_tres=[
-                _tres("mem", 4263433216),
-                _tres("gres", 236707643392, "gpumem"),
-                _tres("gres", 340, "gpuutil"),
-            ],
-            average_tres=[_tres("gres", 309, "gpuutil")],
-        ),
-        _step(
-            max_tres=[_tres("mem", 5201004544), _tres("gres", 1024, "gpumem")],
-            average_tres=[_tres("gres", 12, "gpuutil")],
-        ),
+        _step(max_tres=[_tres("mem", 4263433216)]),
+        _step(max_tres=[_tres("mem", 5201004544), _tres("gres", 1024, "gpumem")]),
     ]
     job = SlurmJob.model_validate(raw)
     assert job.time.total_cpu == 635
@@ -93,8 +83,6 @@ def test_accounting_job_gpu_and_step_peaks(db_job):
     assert job.allocation_gpus == 4
     assert job.consumed_energy == 2000
     assert job.max_rss == 5201004544
-    assert job.max_gpu_memory == 236707643392
-    assert job.gpu_utilization == 309
 
 
 def test_accounting_job_without_step_usage(db_job):
@@ -102,8 +90,6 @@ def test_accounting_job_without_step_usage(db_job):
     raw["steps"] = [_step()]
     job = SlurmJob.model_validate(raw)
     assert job.max_rss is None
-    assert job.gpu_utilization is None
-    assert job.max_gpu_memory is None
 
 
 def test_controller_job_resources(ctl_job):
@@ -162,13 +148,24 @@ def test_reservation_fields():
             "nodes": "node[002-003]",
             "start_time": {"set": True, "infinite": False, "number": 1792435054},
             "end_time": {"set": True, "infinite": False, "number": 1792442254},
-            "partition": "debug",
             "node_count": {"set": True, "infinite": False, "number": 2},
             "flags": ["MAINT", "SPEC_NODES"],
         }
     )
-    assert reservation.partition == "debug"
     assert reservation.node_count == 2
-    assert reservation.flags == ["MAINT", "SPEC_NODES"]
+    assert reservation.maintenance is True
     # slurmrestd may omit features
     assert reservation.features is None
+
+
+def test_reservation_not_maintenance():
+    reservation = SlurmReservations.model_validate(
+        {
+            "name": "course",
+            "node_list": "node001",
+            "start_time": 1792435054,
+            "end_time": 1792442254,
+            "flags": ["SPEC_NODES"],
+        }
+    )
+    assert reservation.maintenance is False
