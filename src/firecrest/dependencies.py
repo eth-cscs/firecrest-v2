@@ -436,8 +436,8 @@ class DataTransferDependency:
                     data_transfer.public_url, data_transfer
                 ) as s3_client_public:
                     async with self._get_sts_client(
-                        data_transfer.public_url, data_transfer
-                    ) as sts_client_public:
+                        data_transfer.private_url.get_secret_value(), data_transfer
+                    ) as sts_client_private:
                         async with self._get_s3_client(
                             data_transfer.private_url.get_secret_value(), data_transfer
                         ) as s3_client_private:
@@ -457,7 +457,8 @@ class DataTransferDependency:
                                 directives=system.data_operation.datatransfer_jobs_directives,
                                 s3_client_private=s3_client_private,
                                 s3_client_public=s3_client_public,
-                                sts_client_public=sts_client_public,
+                                sts_client_private=sts_client_private,
+                                sts_role_arn=data_transfer.sts_role_arn,
                                 ssh_client=ssh_client,
                                 work_dir=work_dir,
                                 bucket_lifecycle_configuration=data_transfer.bucket_lifecycle_configuration,

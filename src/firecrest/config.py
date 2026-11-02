@@ -297,6 +297,11 @@ class S3DataTransfer(BaseDataTransfer):
     )
     region: str = Field(..., description="Region of the storage bucket.")
     ttl: int = Field(..., description="Time-to-live (in seconds) for generated URLs.")
+    sts_role_arn: Optional[str] = Field(
+        None,
+        description="Role ARN assumed through STS to issue temporary credentials restricted to the user bucket.",
+        nullable=True,
+    )
     tenant: Optional[str] = Field(
         None,
         description="Optional tenant identifier for multi-tenant setups.",

@@ -1,4 +1,5 @@
 from math import ceil
+import json
 import uuid
 import os
 
@@ -23,8 +24,10 @@ from lib.datatransfers.datatransfer_base import (
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.ssh_clients.ssh_client import SSHClientPool
-from lib.datatransfers.s3.models import S3TransferResponse
+from lib.datatransfers.s3.models import S3STSCredentials, S3TransferResponse
 
+import logging
+logger = logging.getLogger("uvicorn.error")
 
 async def _generate_presigned_url(
     client,
@@ -54,7 +57,8 @@ class S3Datatransfer(DataTransferBase):
         directives,
         s3_client_private,
         s3_client_public,
-        sts_client_public,
+        sts_client_private,
+        sts_role_arn,
         ssh_client: SSHClientPool | None,
         work_dir,
         bucket_lifecycle_configuration,
@@ -69,7 +73,8 @@ class S3Datatransfer(DataTransferBase):
         super().__init__(scheduler_client=scheduler_client, directives=directives)
         self.s3_client_private = s3_client_private
         self.s3_client_public = s3_client_public
-        self.sts_client_public = sts_client_public
+        self.sts_client_private = sts_client_private
+        self.sts_role_arn = sts_role_arn
         self.ssh_client = ssh_client
         self.work_dir = work_dir
         self.bucket_lifecycle_configuration = bucket_lifecycle_configuration
@@ -89,7 +94,6 @@ class S3Datatransfer(DataTransferBase):
         access_token,
         account,
     ) -> DataTransferOperation | None:
-
         job_id = None
         object_name = f"{str(uuid.uuid4())}/{os.path.basename(target.path)}"
 
@@ -129,7 +133,36 @@ class S3Datatransfer(DataTransferBase):
                         self.ttl,
                     )
                 )
-
+            # Credentials are restricted to the bucket targeted by this transfer
+            bucket_resource = f"{self.tenant}:{username}" if self.tenant else username
+            bucket_policy = json.dumps(
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": ["s3:*"],
+                            "Resource": [
+                                f"arn:aws:s3:::{bucket_resource}",
+                                f"arn:aws:s3:::{bucket_resource}/*",
+                            ],
+                        }
+                    ],
+                }
+            )
+            sts_response = await self.sts_client_private.assume_role(
+                RoleArn=self.sts_role_arn or "arn:aws:iam:::role/firecrest",
+                RoleSessionName=username,
+                Policy=bucket_policy,
+                DurationSeconds=self.ttl,
+            )
+            sts_credentials = sts_response["Credentials"]
+            sts_temporary_credentials = S3STSCredentials(
+                access_key_id=sts_credentials["AccessKeyId"],
+                secret_access_key=sts_credentials["SecretAccessKey"],
+                session_token=sts_credentials["SessionToken"],
+                expiration=sts_credentials["Expiration"].isoformat(),
+            )
             complete_external_multipart_upload_url = await _generate_presigned_url(
                 self.s3_client_public,
                 "complete_multipart_upload",
@@ -138,7 +171,6 @@ class S3Datatransfer(DataTransferBase):
                 self.ttl,
                 "POST",
             )
-
             get_download_url = await _generate_presigned_url(
                 self.s3_client_private,
                 "get_object",
@@ -146,7 +178,6 @@ class S3Datatransfer(DataTransferBase):
                 self.tenant,
                 self.ttl,
             )
-
             head_download_url = await _generate_presigned_url(
                 self.s3_client_private,
                 "head_object",
@@ -154,7 +185,6 @@ class S3Datatransfer(DataTransferBase):
                 self.tenant,
                 self.ttl,
             )
-
             parameters = {
                 "sbatch_directives": _format_directives(self.directives, account),
                 "download_head_url": head_download_url,
@@ -189,6 +219,7 @@ class S3Datatransfer(DataTransferBase):
                 "completeUploadUrl": complete_external_multipart_upload_url,
                 "maxPartSize": self.max_part_size,
                 "transfer_method": "s3",
+                "stsCredentials": sts_temporary_credentials,
             }
         )
 

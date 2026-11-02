@@ -1,5 +1,6 @@
 from typing import List, Literal, Optional
 from pydantic import Field
+from lib.models.base_model import CamelModel
 from lib.datatransfers.datatransfer_base import (
     DataTransferResponse,
     DataTransferRequest,
@@ -7,7 +8,19 @@ from lib.datatransfers.datatransfer_base import (
 )
 
 
+class S3STSCredentials(CamelModel):
+    access_key_id: str
+    secret_access_key: str
+    session_token: str
+    expiration: str
+
+
 class S3TransferResponse(DataTransferResponse):
+    sts_credentials: Optional[S3STSCredentials] = Field(
+        default=None,
+        nullable=True,
+        description="Temporary credentials restricted to the target bucket",
+    )
     download_url: Optional[str] = Field(default=None, nullable=True)
     parts_upload_urls: Optional[List[str]] = Field(default=None, nullable=True)
     complete_upload_url: Optional[str] = Field(default=None, nullable=True)
