@@ -1,0 +1,4059 @@
+openapi: 3.1.0
+info:
+  title: FirecREST
+  version: 2.6.2
+servers:
+- url: http://localhost:8000
+  description: Local environment
+paths:
+  /status/systems:
+    get:
+      tags:
+      - status
+      summary: Get Systems
+      description: Get the list of systems and health status
+      operationId: get_systems_status_systems_get
+      responses:
+        '200':
+          description: System list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSystemsResponse'
+        4XX:
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        5XX:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+  /status/{system_name}/nodes:
+    get:
+      tags:
+      - status
+      summary: Get System Nodes
+      description: Get the list of nodes of a `{system_name}`
+      operationId: get_system_nodes_status__system_name__nodes_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '200':
+          description: Nodes list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetNodesResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /status/{system_name}/reservations:
+    get:
+      tags:
+      - status
+      summary: Get System Reservations
+      description: Get the list of reservations of a `{system_name}`
+      operationId: get_system_reservations_status__system_name__reservations_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '200':
+          description: Reservations list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReservationsResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /status/{system_name}/partitions:
+    get:
+      tags:
+      - status
+      summary: Get System Partitions
+      description: Get the list of partitions of a `{system_name}`
+      operationId: get_system_partitions_status__system_name__partitions_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: show_hidden
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show hidden partitions (only applies to Slurm scheduler).
+          default: false
+          title: Show Hidden
+        description: Show hidden partitions (only applies to Slurm scheduler).
+      responses:
+        '200':
+          description: Partitions list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPartitionsResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /status/{system_name}/userinfo:
+    get:
+      tags:
+      - status
+      summary: Get Userinfo
+      description: Get current user information on a `{system_name}`
+      operationId: get_userinfo_status__system_name__userinfo_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '200':
+          description: User information returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /status/liveness/:
+    get:
+      tags:
+      - status
+      summary: Get Liveness
+      description: Get liveness status of FirecREST
+      operationId: get_liveness_status_liveness__get
+      responses:
+        '200':
+          description: Liveness status returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLiveness'
+        4XX:
+          description: Client Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        5XX:
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+  /compute/{system_name}/jobs:
+    post:
+      tags:
+      - compute
+      summary: Post Job Submit
+      description: Submit a new job
+      operationId: post_job_submit_compute__system_name__jobs_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostJobSubmitRequest'
+      responses:
+        '201':
+          description: Job submitted correctly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostJobSubmissionResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+    get:
+      tags:
+      - compute
+      summary: Get Jobs
+      description: Get status of all jobs
+      operationId: get_jobs_compute__system_name__jobs_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: allusers
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: If set to `true` returns all jobs visible by the current user,
+            otherwise only the current user owned jobs
+          default: false
+          title: Allusers
+        description: If set to `true` returns all jobs visible by the current user,
+          otherwise only the current user owned jobs
+      - name: account
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: If specified, filter jobs by account name
+          title: Account
+        description: If specified, filter jobs by account name
+      - name: name
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 235
+          - type: 'null'
+          description: If specified, filter jobs by name
+          title: Name
+        description: If specified, filter jobs by name
+      - name: time_window
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/JobsTimeWindow'
+          description: 'Time window used to look back for historical (completed, failed,
+            cancelled...) jobs. Does not affect currently pending or running jobs,
+            which are always returned. Not supported for PBS clusters: the parameter
+            is accepted but has no effect, and job history visibility there is bounded
+            by the scheduler''s own configuration instead'
+          default: 24h
+        description: 'Time window used to look back for historical (completed, failed,
+          cancelled...) jobs. Does not affect currently pending or running jobs, which
+          are always returned. Not supported for PBS clusters: the parameter is accepted
+          but has no effect, and job history visibility there is bounded by the scheduler''s
+          own configuration instead'
+      responses:
+        '200':
+          description: Jobs status returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetJobResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /compute/{system_name}/jobs/{job_id}:
+    get:
+      tags:
+      - compute
+      summary: Get Job
+      description: Get status of a job by `{job_id}`
+      operationId: get_job_compute__system_name__jobs__job_id__get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9]+$
+          description: Job id
+          title: Job Id
+        description: Job id
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '200':
+          description: Jobs status returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetJobResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+    delete:
+      tags:
+      - compute
+      summary: Delete Job Cancel
+      description: Cancel a job
+      operationId: delete_job_cancel_compute__system_name__jobs__job_id__delete
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9]+$
+          description: Job id
+          title: Job Id
+        description: Job id
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '204':
+          description: Job cancelled successfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /compute/{system_name}/jobs/{job_id}/metadata:
+    get:
+      tags:
+      - compute
+      summary: Get Job Metadata
+      description: Get metadata of a job by `{job_id}`
+      operationId: get_job_metadata_compute__system_name__jobs__job_id__metadata_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9]+$
+          description: Job id
+          title: Job Id
+        description: Job id
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      responses:
+        '200':
+          description: Jobs metadata returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetJobMetadataResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /compute/{system_name}/jobs/{job_id}/attach:
+    put:
+      tags:
+      - compute
+      summary: Attach
+      description: Attach a procces to a job by `{job_id}`
+      operationId: attach_compute__system_name__jobs__job_id__attach_put
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9]+$
+          description: Job id
+          title: Job Id
+        description: Job id
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostJobAttachRequest'
+      responses:
+        '204':
+          description: Process attached succesfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/upload:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Upload
+      description: Create asynchronous upload operation
+      operationId: post_upload_filesystem__system_name__transfer_upload_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFileUploadRequest'
+      responses:
+        '201':
+          description: Upload operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadFileResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/download:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Download
+      description: Create asynchronous download operation
+      operationId: post_download_filesystem__system_name__transfer_download_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFileDownloadRequest'
+      responses:
+        '201':
+          description: Download operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadFileResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/mv:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Move Mv
+      description: Create move file or directory operation (`mv`)
+      operationId: move_mv_filesystem__system_name__transfer_mv_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveRequest'
+      responses:
+        '201':
+          description: Move file or directory operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoveResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/cp:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Cp
+      description: Create copy file or directory operation (`cp`)
+      operationId: post_cp_filesystem__system_name__transfer_cp_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopyRequest'
+      responses:
+        '201':
+          description: Copy file or directory operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopyResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/rm:
+    delete:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Delete Rm
+      description: Create remove file or directory operation (`rm`)
+      operationId: delete_rm_filesystem__system_name__transfer_rm_delete
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: The path to delete
+          title: Path
+        description: The path to delete
+      - name: account
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+      responses:
+        '200':
+          description: Remove file or directory operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/compress:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Compress
+      description: Create compress file or directory operation (`tar`)
+      operationId: compress_filesystem__system_name__transfer_compress_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompressRequest'
+      responses:
+        '201':
+          description: Compress file or directory operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompressResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/transfer/extract:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Extract
+      description: Create extract file operation (`tar`)
+      operationId: extract_filesystem__system_name__transfer_extract_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractRequest'
+      responses:
+        '201':
+          description: Extract file or directory operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/chmod:
+    put:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Put Chmod
+      description: Change the permission mode of a file(`chmod`)
+      operationId: put_chmod_filesystem__system_name__ops_chmod_put
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFileChmodRequest'
+      responses:
+        '200':
+          description: File permissions changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutFileChmodResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/chown:
+    put:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Put Chown
+      description: Change the ownership of a given file (`chown`)
+      operationId: put_chown_filesystem__system_name__ops_chown_put
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFileChownRequest'
+      responses:
+        '200':
+          description: File ownership changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutFileChownResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/ls:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Ls
+      description: List the contents of the given directory (`ls`)
+      operationId: get_ls_filesystem__system_name__ops_ls_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: The path to list
+          title: Path
+        description: The path to list
+      - name: showHidden
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show hidden files
+          default: false
+          title: Showhidden
+        description: Show hidden files
+      - name: numericUid
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: List numeric user and group IDs
+          default: false
+          title: Numericuid
+        description: List numeric user and group IDs
+      - name: recursive
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Recursively list files and folders
+          default: false
+          title: Recursive
+        description: Recursively list files and folders
+      - name: dereference
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show information for the file the link references.
+          default: false
+          title: Dereference
+        description: Show information for the file the link references.
+      responses:
+        '200':
+          description: Directory listed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetDirectoryLsResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/head:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Head
+      description: Output the first part of file/s (`head`)
+      operationId: get_head_filesystem__system_name__ops_head_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: File path
+          title: Path
+        description: File path
+      - name: bytes
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: The output will be the first NUM bytes of each file.
+          title: Bytes
+        description: The output will be the first NUM bytes of each file.
+      - name: lines
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: The output will be the first NUM lines of each file.
+          title: Lines
+        description: The output will be the first NUM lines of each file.
+      - name: skipTrailing
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: The output will be the whole file, without the last NUM bytes/lines
+            of each file. NUM should be specified in the respective argument through
+            `bytes` or `lines`.
+          default: false
+          title: Skiptrailing
+        description: The output will be the whole file, without the last NUM bytes/lines
+          of each file. NUM should be specified in the respective argument through
+          `bytes` or `lines`.
+      responses:
+        '200':
+          description: Head operation finished successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileHeadResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/view:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get View
+      description: View file content
+      operationId: get_view_filesystem__system_name__ops_view_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: File path
+          title: Path
+        description: File path
+      - name: size
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Value, in bytes, of the size of data to be retrieved from the
+            file. Defaults to the system's `max_ops_file_size`.
+          title: Size
+        description: Value, in bytes, of the size of data to be retrieved from the
+          file. Defaults to the system's `max_ops_file_size`.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Value in bytes of the offset.
+          default: 0
+          title: Offset
+        description: Value in bytes of the offset.
+      responses:
+        '200':
+          description: View operation finished successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetViewFileResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/tail:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Tail
+      description: Output the last part of a file (`tail`)
+      operationId: get_tail_filesystem__system_name__ops_tail_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: File path
+          title: Path
+        description: File path
+      - name: bytes
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: The output will be the last NUM bytes of each file.
+          title: Bytes
+        description: The output will be the last NUM bytes of each file.
+      - name: lines
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: The output will be the last NUM lines of each file.
+          title: Lines
+        description: The output will be the last NUM lines of each file.
+      - name: skipHeading
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: The output will be the whole file, without the first NUM bytes/lines
+            of each file. NUM should be specified in the respective argument through
+            `bytes` or `lines`.
+          default: false
+          title: Skipheading
+        description: The output will be the whole file, without the first NUM bytes/lines
+          of each file. NUM should be specified in the respective argument through
+          `bytes` or `lines`.
+      responses:
+        '200':
+          description: '`tail` operation finished successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileTailResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/checksum:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Checksum
+      description: Output the checksum of a file (using SHA-256 algotithm)
+      operationId: get_checksum_filesystem__system_name__ops_checksum_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Target system
+          title: Path
+        description: Target system
+      responses:
+        '200':
+          description: Checksum returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileChecksumResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/file:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get File
+      description: Output the type of a file or directory
+      operationId: get_file_filesystem__system_name__ops_file_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: A file or folder path
+          title: Path
+        description: A file or folder path
+      responses:
+        '200':
+          description: Type returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileTypeResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/stat:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Stat
+      description: Output the `stat` of a file
+      operationId: get_stat_filesystem__system_name__ops_stat_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: A file or folder path
+          title: Path
+        description: A file or folder path
+      - name: dereference
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Follow symbolic links
+          default: false
+          title: Dereference
+        description: Follow symbolic links
+      responses:
+        '200':
+          description: Stat returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileStatResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/rm:
+    delete:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Delete Rm
+      description: Delete file or directory operation (`rm`)
+      operationId: delete_rm_filesystem__system_name__ops_rm_delete
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: The path to delete
+          title: Path
+        description: The path to delete
+      responses:
+        '204':
+          description: File or directory deleted successfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/mkdir:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Mkdir
+      description: Create directory operation (`mkdir`)
+      operationId: post_mkdir_filesystem__system_name__ops_mkdir_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostMakeDirRequest'
+      responses:
+        '201':
+          description: Directory created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMkdirResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/symlink:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Symlink
+      description: Create symlink operation (`ln`)
+      operationId: post_symlink_filesystem__system_name__ops_symlink_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFileSymlinkRequest'
+      responses:
+        '201':
+          description: Symlink created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostFileSymlinkResponse'
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/download:
+    get:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Get Download
+      description: Download a small file
+      operationId: get_download_filesystem__system_name__ops_download_get
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: A file to download
+          title: Path
+        description: A file to download
+      responses:
+        '200':
+          description: File downloaded successfully
+          content:
+            application/json:
+              schema: {}
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/upload:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Upload
+      description: Upload a small file
+      operationId: post_upload_filesystem__system_name__ops_upload_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Specify path where file should be uploaded.
+          title: Path
+        description: Specify path where file should be uploaded.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_post_upload_filesystem__system_name__ops_upload_post'
+      responses:
+        '204':
+          description: File uploaded successfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/compress:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Compress
+      description: Compress files and directories using `tar` command
+      operationId: post_compress_filesystem__system_name__ops_compress_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCompressRequest'
+      responses:
+        '204':
+          description: File and/or directories compressed successfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+  /filesystem/{system_name}/ops/extract:
+    post:
+      tags:
+      - filesystem
+      - filesystem
+      summary: Post Extract
+      description: Extract `tar` `gzip` archives
+      operationId: post_extract_filesystem__system_name__ops_extract_post
+      security:
+      - APIAuthDependency: []
+      - HTTPBearer: []
+      parameters:
+      - name: system_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: System Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostExtractRequest'
+      responses:
+        '204':
+          description: File extracted successfully
+        4XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Client Error
+        5XX:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+          description: Server Error
+components:
+  schemas:
+    AccountsModel:
+      properties:
+        name:
+          type: string
+          title: Name
+        default:
+          type: boolean
+          title: Default
+      type: object
+      required:
+      - name
+      - default
+      title: AccountsModel
+    ApResponseErrorType:
+      type: string
+      enum:
+      - error
+      - validation
+      title: ApResponseErrorType
+    ApiResponseError:
+      properties:
+        errorType:
+          $ref: '#/components/schemas/ApResponseErrorType'
+          default: error
+        message:
+          type: string
+          title: Message
+        causedBy:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Causedby
+          nullable: true
+        data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Data
+          nullable: true
+        user:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: User
+          nullable: true
+      type: object
+      required:
+      - message
+      title: ApiResponseError
+    BackendServiceType:
+      type: string
+      enum:
+      - s3
+      - filesystem
+      - ssh
+      - scheduler
+      - exception
+      title: BackendServiceType
+      description: Types of services that can be health-checked.
+    Body_post_upload_filesystem__system_name__ops_upload_post:
+      properties:
+        file:
+          type: string
+          contentMediaType: application/octet-stream
+          title: File
+          description: File to be uploaded as `multipart/form-data`
+      type: object
+      required:
+      - file
+      title: Body_post_upload_filesystem__system_name__ops_upload_post
+    BucketLifecycleConfiguration:
+      properties:
+        days:
+          type: integer
+          title: Days
+          description: Number of days after which objects will expire automatically.
+          default: 10
+      type: object
+      title: BucketLifecycleConfiguration
+      description: Configuration for automatic object lifecycle in storage buckets.
+    CompressRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Target path of the compress operation
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+        matchPattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matchpattern
+          description: Regex pattern to filter files to compress
+          nullable: true
+        dereference:
+          type: boolean
+          title: Dereference
+          description: If set to `true`, it follows symbolic links and archive the
+            files they point to instead of the links themselves.
+          default: false
+          nullable: false
+        compression:
+          $ref: '#/components/schemas/CompressionType'
+          description: Defines the type of compression to be used. By default gzip
+            is used.
+          default: gzip
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: CompressRequest
+      examples:
+      - account: group
+        compression: none
+        dereference: 'true'
+        matchPattern: '*./[ab].*\.txt'
+        sourcePath: /home/user/dir
+        targetPath: /home/user/file.tar.gz
+    CompressResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+      type: object
+      required:
+      - transferJob
+      title: CompressResponse
+    CompressionType:
+      type: string
+      enum:
+      - none
+      - bzip2
+      - gzip
+      - xz
+      title: CompressionType
+    ContentUnit:
+      type: string
+      enum:
+      - lines
+      - bytes
+      title: ContentUnit
+    CopyRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Target path of the copy operation
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+        dereference:
+          type: boolean
+          title: Dereference
+          description: If set to `true`, it follows symbolic links and copies the
+            files they point to instead of the links themselves.
+          default: false
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: CopyRequest
+      examples:
+      - account: group
+        dereference: 'true'
+        sourcePath: /home/user/dir/file.orig
+        targetPath: /home/user/dir/file.new
+    CopyResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+      type: object
+      required:
+      - transferJob
+      title: CopyResponse
+    DataOperation:
+      properties:
+        datatransfer_jobs_directives:
+          items:
+            type: string
+          type: array
+          title: Datatransfer Jobs Directives
+          description: Custom scheduler flags passed to data transfer jobs (e.g. `-pxfer`
+            for a dedicated partition).
+        max_ops_file_size:
+          type: integer
+          title: Max Ops File Size
+          description: Maximum file size (in bytes) allowed for direct upload and
+            download. Larger files will go through the staging area.
+          default: 5242880
+        data_transfer:
+          anyOf:
+          - oneOf:
+            - $ref: '#/components/schemas/S3DataTransfer'
+            - $ref: '#/components/schemas/WormholeDataTransfer'
+            - $ref: '#/components/schemas/StreamerDataTransfer'
+            discriminator:
+              propertyName: serviceType
+              mapping:
+                s3: '#/components/schemas/S3DataTransfer'
+                streamer: '#/components/schemas/StreamerDataTransfer'
+                wormhole: '#/components/schemas/WormholeDataTransfer'
+          - type: 'null'
+          title: Data Transfer
+          description: Data transfer service configuration
+          nullable: true
+      type: object
+      title: DataOperation
+    DeleteResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+      type: object
+      required:
+      - transferJob
+      title: DeleteResponse
+    DownloadFileResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+        transferDirectives:
+          anyOf:
+          - $ref: '#/components/schemas/WormholeTransferResponse'
+          - $ref: '#/components/schemas/S3TransferResponse'
+          - $ref: '#/components/schemas/StreamerTransferResponse'
+          title: Transferdirectives
+          description: Data transfer parameters specific to the transfer method
+      type: object
+      required:
+      - transferJob
+      - transferDirectives
+      title: DownloadFileResponse
+    ExtractRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Path to the directory where to extract the compressed file
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+        compression:
+          $ref: '#/components/schemas/CompressionType'
+          description: Defines the type of compression to be used. By default gzip
+            is used.
+          default: gzip
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: ExtractRequest
+      examples:
+      - account: group
+        compression: none
+        sourcePath: /home/user/dir/file.tar.gz
+        targetPath: /home/user/dir
+    ExtractResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+      type: object
+      required:
+      - transferJob
+      title: ExtractResponse
+    File:
+      properties:
+        name:
+          type: string
+          title: Name
+        type:
+          type: string
+          title: Type
+        linkTarget:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Linktarget
+          nullable: true
+        user:
+          type: string
+          title: User
+        group:
+          type: string
+          title: Group
+        permissions:
+          type: string
+          title: Permissions
+        lastModified:
+          type: string
+          title: Lastmodified
+        size:
+          type: string
+          title: Size
+      type: object
+      required:
+      - name
+      - type
+      - user
+      - group
+      - permissions
+      - lastModified
+      - size
+      title: File
+    FileChecksum:
+      properties:
+        algorithm:
+          type: string
+          title: Algorithm
+          default: SHA-256
+        checksum:
+          type: string
+          title: Checksum
+      type: object
+      required:
+      - checksum
+      title: FileChecksum
+    FileContent:
+      properties:
+        content:
+          type: string
+          title: Content
+        contentType:
+          $ref: '#/components/schemas/ContentUnit'
+        startPosition:
+          type: integer
+          title: Startposition
+        endPosition:
+          type: integer
+          title: Endposition
+      type: object
+      required:
+      - content
+      - contentType
+      - startPosition
+      - endPosition
+      title: FileContent
+    FileStat:
+      properties:
+        mode:
+          type: integer
+          title: Mode
+        ino:
+          type: integer
+          title: Ino
+        dev:
+          type: integer
+          title: Dev
+        nlink:
+          type: integer
+          title: Nlink
+        uid:
+          type: integer
+          title: Uid
+        gid:
+          type: integer
+          title: Gid
+        size:
+          type: integer
+          title: Size
+        atime:
+          type: integer
+          title: Atime
+        ctime:
+          type: integer
+          title: Ctime
+        mtime:
+          type: integer
+          title: Mtime
+      type: object
+      required:
+      - mode
+      - ino
+      - dev
+      - nlink
+      - uid
+      - gid
+      - size
+      - atime
+      - ctime
+      - mtime
+      title: FileStat
+    FileSystem:
+      properties:
+        path:
+          type: string
+          title: Path
+          description: Mount path for the file system.
+        dataType:
+          $ref: '#/components/schemas/FileSystemDataType'
+          description: File system purpose/type.
+        defaultWorkDir:
+          type: boolean
+          title: Defaultworkdir
+          description: Mark this as the default working directory.
+          default: false
+      type: object
+      required:
+      - path
+      - dataType
+      title: FileSystem
+      description: Defines a cluster file system and its type.
+    FileSystemDataType:
+      type: string
+      enum:
+      - users
+      - store
+      - archive
+      - apps
+      - scratch
+      - project
+      title: FileSystemDataType
+      description: Data types for cluster file systems.
+    FilesystemServiceHealth:
+      properties:
+        serviceType:
+          $ref: '#/components/schemas/BackendServiceType'
+          description: Type of the service being checked.
+        lastChecked:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lastchecked
+          description: Timestamp of the last health check.
+          nullable: true
+        latency:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency
+          description: Service response latency in seconds.
+          nullable: true
+        healthy:
+          type: boolean
+          title: Healthy
+          description: True if the service is healthy.
+          default: false
+          nullable: false
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+          description: Optional status message.
+          nullable: true
+        path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Path
+          description: Path of the monitored file system.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: FilesystemServiceHealth
+      description: Health check for a mounted file system.
+    GetDirectoryLsResponse:
+      properties:
+        output:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/File'
+            type: array
+          - type: 'null'
+          title: Output
+          nullable: true
+      type: object
+      title: GetDirectoryLsResponse
+    GetFileChecksumResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/FileChecksum'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: GetFileChecksumResponse
+    GetFileHeadResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/FileContent'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: GetFileHeadResponse
+    GetFileStatResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/FileStat'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: GetFileStatResponse
+    GetFileTailResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/FileContent'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: GetFileTailResponse
+    GetFileTypeResponse:
+      properties:
+        output:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Output
+          example: directory
+          nullable: true
+      type: object
+      title: GetFileTypeResponse
+    GetJobMetadataResponse:
+      properties:
+        jobs:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/JobMetadataModel'
+            type: array
+          - type: 'null'
+          title: Jobs
+          nullable: true
+      type: object
+      title: GetJobMetadataResponse
+    GetJobResponse:
+      properties:
+        jobs:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/JobModel'
+            type: array
+          - type: 'null'
+          title: Jobs
+          nullable: true
+      type: object
+      title: GetJobResponse
+    GetLiveness:
+      properties:
+        healthcheckRuns:
+          additionalProperties:
+            type: string
+            format: date-time
+          type: object
+          title: Healthcheckruns
+        lastUpdate:
+          type: integer
+          title: Lastupdate
+      type: object
+      title: GetLiveness
+    GetNodesResponse:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/NodeModel'
+          type: array
+          title: Nodes
+      type: object
+      required:
+      - nodes
+      title: GetNodesResponse
+    GetPartitionsResponse:
+      properties:
+        partitions:
+          items:
+            $ref: '#/components/schemas/PartitionModel'
+          type: array
+          title: Partitions
+      type: object
+      required:
+      - partitions
+      title: GetPartitionsResponse
+    GetReservationsResponse:
+      properties:
+        reservations:
+          items:
+            $ref: '#/components/schemas/ReservationModel'
+          type: array
+          title: Reservations
+      type: object
+      required:
+      - reservations
+      title: GetReservationsResponse
+    GetSystemsResponse:
+      properties:
+        systems:
+          items:
+            $ref: '#/components/schemas/HPCCluster'
+          type: array
+          title: Systems
+      type: object
+      required:
+      - systems
+      title: GetSystemsResponse
+    GetViewFileResponse:
+      properties:
+        output:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Output
+          nullable: true
+      type: object
+      title: GetViewFileResponse
+    HPCCluster:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Unique name for the cluster. This field is case insensitive.
+        ssh:
+          $ref: '#/components/schemas/SSHClientPool'
+          description: SSH configuration for accessing the cluster nodes.
+        scheduler:
+          $ref: '#/components/schemas/Scheduler'
+          description: Job scheduler configuration.
+        servicesHealth:
+          anyOf:
+          - items:
+              anyOf:
+              - $ref: '#/components/schemas/SchedulerServiceHealth'
+              - $ref: '#/components/schemas/FilesystemServiceHealth'
+              - $ref: '#/components/schemas/SSHServiceHealth'
+              - $ref: '#/components/schemas/S3ServiceHealth'
+              - $ref: '#/components/schemas/HealthCheckException'
+            type: array
+          - type: 'null'
+          title: Serviceshealth
+          description: Optional health information for different services in the cluster.
+          nullable: true
+        probing:
+          $ref: '#/components/schemas/ProbingServices'
+          description: Probing configuration for monitoring the cluster's services.
+        lastHealthCheck:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lasthealthcheck
+          description: Timestamp of the last health check.
+        fileSystems:
+          items:
+            $ref: '#/components/schemas/FileSystem'
+          type: array
+          title: Filesystems
+          description: List of mounted file systems on the cluster, such as scratch
+            or home directories.
+        dataOperation:
+          $ref: '#/components/schemas/DataOperation'
+          description: Data transfer backend configuration. More details in [this
+            section](../arch/external_storage/README.md).
+          default:
+            datatransfer_jobs_directives: []
+            max_ops_file_size: 5242880
+          nullable: false
+      type: object
+      required:
+      - name
+      - ssh
+      - scheduler
+      - probing
+      title: HPCCluster
+      description: 'Definition of an HPC cluster, including SSH access, scheduling,
+        and
+
+        filesystem layout. More info in
+
+        [the systems'' section](../arch/systems//README.md).'
+    HealthCheckException:
+      properties:
+        serviceType:
+          $ref: '#/components/schemas/BackendServiceType'
+          description: Type of the service being checked.
+        lastChecked:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lastchecked
+          description: Timestamp of the last health check.
+          nullable: true
+        latency:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency
+          description: Service response latency in seconds.
+          nullable: true
+        healthy:
+          type: boolean
+          title: Healthy
+          description: True if the service is healthy.
+          default: false
+          nullable: false
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+          description: Optional status message.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: HealthCheckException
+      description: Generic health check error placeholder.
+    JobDescriptionModel:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+          description: Name for the job
+          nullable: true
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Charge job resources to specified account
+          nullable: true
+        reservation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reservation
+          description: Reservation to be used for the job
+          nullable: true
+        partition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Partition
+          description: Partition to be used for the job
+          nullable: true
+        workingDirectory:
+          type: string
+          title: Workingdirectory
+          description: Job working directory
+        standardInput:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standardinput
+          description: Standard input file name
+          nullable: true
+        standardOutput:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standardoutput
+          description: Standard output file name
+          nullable: true
+        standardError:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standarderror
+          description: Standard error file name
+          nullable: true
+        env:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - items:
+              type: string
+            type: array
+          title: Env
+          description: Dictionary of environment variables to set in the job context
+          default:
+            F7T_version: v2.0.0
+          nullable: false
+        constraints:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Constraints
+          description: Job constraints
+          nullable: true
+        nodes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Nodes
+          description: Number of nodes
+          nullable: true
+        tasksPerNode:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Taskspernode
+          description: Tasks per node
+          nullable: true
+        cpusPerTask:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cpuspertask
+          description: CPUs per task
+          nullable: true
+        memoryPerNode:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Memorypernode
+          description: Memory per node, in MiB
+          nullable: true
+        timeLimit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Timelimit
+          description: Wall time limit, in minutes
+          nullable: true
+        script:
+          type: string
+          title: Script
+          description: Script for the job
+        scriptPath:
+          type: string
+          title: Scriptpath
+          description: Path to the job in target system
+      type: object
+      required:
+      - workingDirectory
+      title: JobDescriptionModel
+    JobMetadataModel:
+      properties:
+        jobId:
+          type: string
+          title: Jobid
+        script:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Script
+          nullable: true
+        standardInput:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standardinput
+          nullable: true
+        standardOutput:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standardoutput
+          nullable: true
+        standardError:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Standarderror
+          nullable: true
+      type: object
+      required:
+      - jobId
+      title: JobMetadataModel
+    JobModel:
+      properties:
+        jobId:
+          type: string
+          title: Jobid
+        name:
+          type: string
+          title: Name
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        tasks:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/JobTask'
+            type: array
+          - type: 'null'
+          title: Tasks
+          nullable: true
+        time:
+          $ref: '#/components/schemas/JobTime'
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          nullable: true
+        allocationNodes:
+          type: integer
+          title: Allocationnodes
+        cluster:
+          type: string
+          title: Cluster
+        group:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Group
+          nullable: true
+        nodes:
+          type: string
+          title: Nodes
+        partition:
+          type: string
+          title: Partition
+        killRequestUser:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Killrequestuser
+          nullable: true
+        user:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: User
+        workingDirectory:
+          type: string
+          title: Workingdirectory
+        priority:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Priority
+          nullable: true
+        allocationCpus:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Allocationcpus
+          description: CPUs allocated to the job
+          nullable: true
+        requestedMemory:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Requestedmemory
+          description: Memory requested, in MiB
+          nullable: true
+        maxRss:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Maxrss
+          description: Peak resident memory, in bytes. Slurm reports the largest task
+            of the largest step, PBS the whole job
+          nullable: true
+        allocationGpus:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Allocationgpus
+          description: GPUs allocated to the job
+          nullable: true
+        consumedEnergy:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Consumedenergy
+          description: Energy consumed by the job, in joules, where the scheduler
+            is configured to measure it
+          nullable: true
+      type: object
+      required:
+      - jobId
+      - name
+      - status
+      - time
+      - allocationNodes
+      - cluster
+      - nodes
+      - partition
+      - user
+      - workingDirectory
+      title: JobModel
+    JobStatus:
+      properties:
+        state:
+          type: string
+          title: State
+        stateReason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Statereason
+          nullable: true
+        exitCode:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Exitcode
+          nullable: true
+        interruptSignal:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Interruptsignal
+          nullable: true
+      type: object
+      required:
+      - state
+      title: JobStatus
+    JobTask:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        time:
+          $ref: '#/components/schemas/JobTime'
+      type: object
+      required:
+      - id
+      - name
+      - status
+      - time
+      title: JobTask
+    JobTime:
+      properties:
+        elapsed:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Elapsed
+          nullable: true
+        start:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Start
+          nullable: true
+        end:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: End
+          nullable: true
+        suspended:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Suspended
+          nullable: true
+        limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Limit
+          nullable: true
+        submission:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Submission
+          description: Submission time (epoch seconds)
+          nullable: true
+        totalCpu:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Totalcpu
+          description: CPU time consumed by the job, in seconds
+          nullable: true
+      type: object
+      title: JobTime
+    JobsTimeWindow:
+      type: string
+      enum:
+      - 1h
+      - 8h
+      - 24h
+      - 3d
+      - 7d
+      title: JobsTimeWindow
+    MoveRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Target path of the move operation
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: MoveRequest
+      examples:
+      - account: group
+        sourcePath: /home/user/dir/file.orig
+        targetPath: /home/user/dir/file.new
+    MoveResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+      type: object
+      required:
+      - transferJob
+      title: MoveResponse
+    MultipartUpload:
+      properties:
+        use_split:
+          type: boolean
+          title: Use Split
+          description: Enable or disable splitting large files into parts when uploading
+            the file to the staging area.
+          default: false
+        max_part_size:
+          type: integer
+          title: Max Part Size
+          description: Maximum size (in bytes) for multipart data transfers. Default
+            is 2 GB.
+          default: 2147483648
+        parallel_runs:
+          type: integer
+          title: Parallel Runs
+          description: Number of parts to upload in parallel to the staging area.
+          default: 3
+        tmp_folder:
+          type: string
+          title: Tmp Folder
+          description: Temporary folder used for storing split parts during upload.
+          default: tmp
+      type: object
+      title: MultipartUpload
+      description: Configuration for multipart upload behavior.
+    NodeModel:
+      properties:
+        sockets:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Sockets
+          nullable: true
+        cores:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cores
+          nullable: true
+        threads:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Threads
+          nullable: true
+        cpus:
+          type: integer
+          title: Cpus
+        cpuLoad:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Cpuload
+          nullable: true
+        freeMemory:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Freememory
+          description: In MiB
+          nullable: true
+        features:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Features
+          nullable: true
+        name:
+          type: string
+          title: Name
+        address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address
+          nullable: true
+        hostname:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Hostname
+          nullable: true
+        state:
+          items:
+            $ref: '#/components/schemas/NodeState'
+          type: array
+          title: State
+        partitions:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Partitions
+          nullable: true
+        weight:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Weight
+          nullable: true
+        allocMemory:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Allocmemory
+          description: In MiB
+          nullable: true
+        allocCpus:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Alloccpus
+          nullable: true
+        idleCpus:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Idlecpus
+          nullable: true
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+          description: 'Why the node is drained or down (PBS: the node comment)'
+          nullable: true
+      type: object
+      required:
+      - cpus
+      - name
+      - state
+      title: NodeModel
+    NodeState:
+      type: string
+      enum:
+      - IDLE
+      - ALLOCATED
+      - MIXED
+      - DOWN
+      - DRAIN
+      - OFFLINE
+      - RESERVED
+      - COMPLETING
+      - BUSY
+      - POWERING_DOWN
+      - POWERING_UP
+      - UNKNOWN
+      title: NodeState
+    PartitionModel:
+      properties:
+        name:
+          type: string
+          title: Name
+        cpus:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cpus
+        totalNodes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Totalnodes
+        partition:
+          anyOf:
+          - type: string
+          - items:
+              type: string
+            type: array
+          title: Partition
+      type: object
+      required:
+      - name
+      - partition
+      title: PartitionModel
+    PosixGroupIdentified:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        default:
+          type: boolean
+          title: Default
+      type: object
+      required:
+      - id
+      - name
+      - default
+      title: PosixGroupIdentified
+    PosixIdentified:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: PosixIdentified
+    PostCompressRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Path to the compressed file
+        matchPattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matchpattern
+          description: Regex pattern to filter files to compress
+          nullable: true
+        dereference:
+          type: boolean
+          title: Dereference
+          description: If set to `true`, it follows symbolic links and archive the
+            files they point to instead of the links themselves.
+          default: false
+          nullable: false
+        compression:
+          $ref: '#/components/schemas/CompressionType'
+          description: Defines the type of compression to be used. By default gzip
+            is used.
+          default: gzip
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: PostCompressRequest
+      examples:
+      - compression: none
+        dereference: 'true'
+        matchPattern: '*./[ab].*\.txt'
+        sourcePath: /home/user/dir
+        targetPath: /home/user/file.tar.gz
+    PostExtractRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        targetPath:
+          type: string
+          title: Targetpath
+          description: Path to the directory where to extract the compressed file
+        compression:
+          $ref: '#/components/schemas/CompressionType'
+          description: Defines the type of compression to be used. By default gzip
+            is used.
+          default: gzip
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      - targetPath
+      title: PostExtractRequest
+      examples:
+      - compression: none
+        sourcePath: /home/user/dir/file.tar.gz
+        targetPath: /home/user/dir
+    PostFileDownloadRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        transferDirectives:
+          anyOf:
+          - $ref: '#/components/schemas/WormholeTransferRequest'
+          - $ref: '#/components/schemas/S3TransferRequest'
+          - $ref: '#/components/schemas/StreamerTransferRequest'
+          title: Transferdirectives
+          description: Data transfer parameters specific to the transfer method
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+      type: object
+      required:
+      - sourcePath
+      - transferDirectives
+      title: PostFileDownloadRequest
+      examples:
+      - account: group
+        sourcePath: /home/user/dir/file
+        transferDirectives:
+          transferMethod: s3
+    PostFileSymlinkRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        linkPath:
+          type: string
+          title: Linkpath
+          description: Path to the new symlink
+      type: object
+      required:
+      - sourcePath
+      - linkPath
+      title: PostFileSymlinkRequest
+      examples:
+      - link_path: /home/user/newlink
+        path: /home/user/dir
+    PostFileSymlinkResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/File'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: PostFileSymlinkResponse
+    PostFileUploadRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        transferDirectives:
+          anyOf:
+          - $ref: '#/components/schemas/WormholeTransferUploadRequest'
+          - $ref: '#/components/schemas/S3TransferRequest'
+          - $ref: '#/components/schemas/StreamerTransferRequest'
+          title: Transferdirectives
+          description: Data transfer parameters specific to the transfer method
+        account:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Account
+          description: Name of the account in the scheduler
+          nullable: true
+      type: object
+      required:
+      - sourcePath
+      - transferDirectives
+      title: PostFileUploadRequest
+      examples:
+      - account: group
+        sourcePath: /home/user/dir/file
+        transferDirectives:
+          fileSize: '7340032'
+          transferMethod: s3
+    PostJobAttachRequest:
+      properties:
+        command:
+          type: string
+          title: Command
+          description: Command to attach to the job
+      type: object
+      title: PostJobAttachRequest
+      examples:
+      - command: echo 'Attached with success' > $HOME/attach.out
+    PostJobSubmissionResponse:
+      properties:
+        jobId:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jobid
+          nullable: true
+      type: object
+      title: PostJobSubmissionResponse
+    PostJobSubmitRequest:
+      properties:
+        job:
+          $ref: '#/components/schemas/JobDescriptionModel'
+      type: object
+      required:
+      - job
+      title: PostJobSubmitRequest
+      examples:
+      - job:
+          account: myproject
+          env:
+            LD_LIBRARY_PATH: /path/to/library
+            PATH: /path/to/bin
+          name: Example with inline script
+          partition: partition_a
+          reservation: myreservation
+          script: '#!/bin/bash
+
+            --partition=part01
+
+            for i in {1..100}
+
+            do
+
+            echo $i
+
+            sleep 1
+
+            done'
+          standardError: count_to_100.err
+          standardInput: /dev/null
+          standardOutput: count_to_100.out
+          workingDirectory: '{{home_path}}'
+      - job:
+          account: myproject
+          env:
+            LD_LIBRARY_PATH: /path/to/library
+            PATH: /path/to/bin
+          name: Example with script path
+          partition: partition_a
+          reservation: myreservation
+          script_path: /path/to/batch_file.sh
+          standardError: count_to_100.err
+          standardInput: /dev/null
+          standardOutput: count_to_100.out
+          workingDirectory: '{{home_path}}'
+    PostMakeDirRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        parent:
+          type: boolean
+          title: Parent
+          description: If set to `true` creates all its parent directories if they
+            do not already exist
+          default: false
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      title: PostMakeDirRequest
+      examples:
+      - parent: 'true'
+        path: /home/user/dir/newdir
+    PostMkdirResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/File'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: PostMkdirResponse
+    ProbingService:
+      properties:
+        timeout:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Timeout
+          description: Timeout for specific health check, if not specified the default
+            of 10s is applied.
+          default: 10
+      type: object
+      title: ProbingService
+      description: Health check enable settings.
+    ProbingServices:
+      properties:
+        services:
+          anyOf:
+          - additionalProperties:
+              $ref: '#/components/schemas/ProbingService'
+            propertyNames:
+              $ref: '#/components/schemas/BackendServiceType'
+            type: object
+          - type: 'null'
+          title: Services
+          description: Services to be checked.
+        intervalCheck:
+          type: integer
+          title: Intervalcheck
+          description: Interval in seconds between cluster checks, if not specified
+            the default of 120s is applied.
+          default: 120
+      type: object
+      title: ProbingServices
+      description: Health check interval and list of services.
+    PutFileChmodRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        mode:
+          type: string
+          title: Mode
+          description: Mode in octal permission format
+      type: object
+      required:
+      - sourcePath
+      - mode
+      title: PutFileChmodRequest
+      examples:
+      - mode: '777'
+        path: /home/user/dir/file.out
+    PutFileChmodResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/File'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: PutFileChmodResponse
+    PutFileChownRequest:
+      properties:
+        sourcePath:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sourcepath
+          example: /home/user/dir
+          nullable: true
+        owner:
+          type: string
+          title: Owner
+          description: User name of the new user owner of the file
+          default: ''
+          nullable: false
+        group:
+          type: string
+          title: Group
+          description: Group name of the new group owner of the file
+          default: ''
+          nullable: false
+      type: object
+      required:
+      - sourcePath
+      title: PutFileChownRequest
+      examples:
+      - group: my-group
+        owner: user
+        path: /home/user/dir/file.out
+    PutFileChownResponse:
+      properties:
+        output:
+          anyOf:
+          - $ref: '#/components/schemas/File'
+          - type: 'null'
+          nullable: true
+      type: object
+      title: PutFileChownResponse
+    ReservationModel:
+      properties:
+        name:
+          type: string
+          title: Name
+        nodeList:
+          type: string
+          title: Nodelist
+        endTime:
+          type: integer
+          title: Endtime
+        startTime:
+          type: integer
+          title: Starttime
+        features:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Features
+          nullable: true
+        state:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: State
+          nullable: true
+        nodeCount:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Nodecount
+          nullable: true
+        maintenance:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Maintenance
+          description: Whether this is a maintenance reservation
+          nullable: true
+      type: object
+      required:
+      - name
+      - nodeList
+      - endTime
+      - startTime
+      title: ReservationModel
+    S3DataTransfer:
+      properties:
+        serviceType:
+          type: string
+          const: s3
+          title: Servicetype
+        name:
+          type: string
+          title: Name
+          description: Name identifier for the storage.
+        privateUrl:
+          type: string
+          format: password
+          title: Privateurl
+          description: Private/internal endpoint URL for the storage.
+          writeOnly: true
+        publicUrl:
+          type: string
+          title: Publicurl
+          description: Public/external URL for the storage.
+        accessKeyId:
+          type: string
+          format: password
+          title: Accesskeyid
+          description: Access key ID for S3-compatible storage.
+          writeOnly: true
+        secretAccessKey:
+          type: string
+          format: password
+          title: Secretaccesskey
+          description: Secret access key for storage. You can give directly the content
+            or the file path using `'secret_file:/path/to/file'`.
+          writeOnly: true
+        region:
+          type: string
+          title: Region
+          description: Region of the storage bucket.
+        ttl:
+          type: integer
+          title: Ttl
+          description: Time-to-live (in seconds) for generated URLs.
+        tenant:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tenant
+          description: Optional tenant identifier for multi-tenant setups.
+          nullable: true
+        multipart:
+          $ref: '#/components/schemas/MultipartUpload'
+          description: Settings for multipart upload, including chunk size and concurrency.
+        bucketLifecycleConfiguration:
+          $ref: '#/components/schemas/BucketLifecycleConfiguration'
+          description: Lifecycle policy settings for auto-deleting files after a given
+            number of days.
+        bucketNamePrefix:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bucketnameprefix
+          description: Optional prefix to apply to S3 bucket names.
+      type: object
+      required:
+      - serviceType
+      - name
+      - privateUrl
+      - publicUrl
+      - accessKeyId
+      - secretAccessKey
+      - region
+      - ttl
+      title: S3DataTransfer
+      description: Object storage configuration, including credentials, endpoints,
+        and upload behavior.
+    S3ServiceHealth:
+      properties:
+        serviceType:
+          $ref: '#/components/schemas/BackendServiceType'
+          description: Type of the service being checked.
+        lastChecked:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lastchecked
+          description: Timestamp of the last health check.
+          nullable: true
+        latency:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency
+          description: Service response latency in seconds.
+          nullable: true
+        healthy:
+          type: boolean
+          title: Healthy
+          description: True if the service is healthy.
+          default: false
+          nullable: false
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+          description: Optional status message.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: S3ServiceHealth
+      description: Health status of S3-compatible storage.
+    S3TransferRequest:
+      properties:
+        transferMethod:
+          type: string
+          const: s3
+          title: Transfermethod
+        fileSize:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Filesize
+          description: Size of the file to upload in bytes
+          nullable: true
+      type: object
+      required:
+      - transferMethod
+      title: S3TransferRequest
+    S3TransferResponse:
+      properties:
+        transferMethod:
+          type: string
+          const: s3
+          title: Transfermethod
+        downloadUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Downloadurl
+          nullable: true
+        partsUploadUrls:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Partsuploadurls
+          nullable: true
+        completeUploadUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Completeuploadurl
+          nullable: true
+        maxPartSize:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Maxpartsize
+          nullable: true
+      type: object
+      required:
+      - transferMethod
+      title: S3TransferResponse
+    SSHClientPool:
+      properties:
+        host:
+          type: string
+          title: Host
+          description: SSH target hostname.
+        port:
+          type: integer
+          title: Port
+          description: SSH port.
+        proxyHost:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Proxyhost
+          description: Optional proxy host for tunneling.
+          nullable: true
+        proxyPort:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Proxyport
+          description: Optional proxy port.
+          nullable: true
+        maxClients:
+          type: integer
+          title: Maxclients
+          description: Maximum number of concurrent SSH clients (not a hard limit,
+            might be temporarily exceeded under heavy load).
+          default: 100
+        timeout:
+          $ref: '#/components/schemas/SSHTimeouts'
+          description: SSH timeout settings.
+      type: object
+      required:
+      - host
+      - port
+      title: SSHClientPool
+      description: SSH connection pool configuration for remote execution.
+    SSHServiceHealth:
+      properties:
+        serviceType:
+          $ref: '#/components/schemas/BackendServiceType'
+          description: Type of the service being checked.
+        lastChecked:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lastchecked
+          description: Timestamp of the last health check.
+          nullable: true
+        latency:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency
+          description: Service response latency in seconds.
+          nullable: true
+        healthy:
+          type: boolean
+          title: Healthy
+          description: True if the service is healthy.
+          default: false
+          nullable: false
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+          description: Optional status message.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: SSHServiceHealth
+      description: Health status of SSH service.
+    SSHTimeouts:
+      properties:
+        connection:
+          type: integer
+          title: Connection
+          description: Timeout (seconds) for initial SSH connection.
+          default: 5
+        login:
+          type: integer
+          title: Login
+          description: Timeout (seconds) for SSH login/auth.
+          default: 5
+        processSetup:
+          type: integer
+          title: Processsetup
+          description: Timeout (seconds) for opening the SSH channel and dispatching
+            the exec request for a command.
+          default: 5
+        commandExecution:
+          type: integer
+          title: Commandexecution
+          description: Timeout (seconds) for a command to finish producing output
+            and for its channel to close, once it has started.
+          default: 5
+        idleTimeout:
+          type: integer
+          title: Idletimeout
+          description: Max idle time (seconds) before disconnecting.
+          default: 60
+        keepAlive:
+          type: integer
+          title: Keepalive
+          description: Interval (seconds) for sending keep-alive messages.
+          default: 5
+      type: object
+      title: SSHTimeouts
+      description: Various SSH settings.
+    Scheduler:
+      properties:
+        type:
+          $ref: '#/components/schemas/SchedulerType'
+          description: Scheduler type.
+        connectionMode:
+          anyOf:
+          - $ref: '#/components/schemas/SchedulerConnectionMode'
+          - type: 'null'
+          description: Scheduler connection mode.
+          default: ssh
+        version:
+          type: string
+          title: Version
+          description: Scheduler version.
+        apiUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Apiurl
+          description: REST API endpoint for scheduler.
+          nullable: true
+        apiVersion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Apiversion
+          description: Scheduler API version.
+          nullable: true
+        timeout:
+          type: integer
+          title: Timeout
+          description: Timeout in seconds for scheduler communication with the API.
+          default: 10
+          nullable: false
+      type: object
+      required:
+      - type
+      - version
+      title: Scheduler
+      description: Cluster job scheduler configuration.
+    SchedulerConnectionMode:
+      type: string
+      enum:
+      - hybrid
+      - rest
+      - ssh
+      title: SchedulerConnectionMode
+      description: Modes to connect to the schedulers present in the system
+    SchedulerServiceHealth:
+      properties:
+        serviceType:
+          $ref: '#/components/schemas/BackendServiceType'
+          description: Type of the service being checked.
+        lastChecked:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Lastchecked
+          description: Timestamp of the last health check.
+          nullable: true
+        latency:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency
+          description: Service response latency in seconds.
+          nullable: true
+        healthy:
+          type: boolean
+          title: Healthy
+          description: True if the service is healthy.
+          default: false
+          nullable: false
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Message
+          description: Optional status message.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: SchedulerServiceHealth
+      description: Health check result for the job scheduler.
+    SchedulerType:
+      type: string
+      enum:
+      - slurm
+      - pbs
+      title: SchedulerType
+      description: Supported job scheduler types.
+    ServiceAccount:
+      properties:
+        clientId:
+          type: string
+          title: Clientid
+          description: Service account client ID.
+        secret:
+          type: string
+          format: password
+          title: Secret
+          description: Service account secret token. You can give directly the content
+            or the file path using `'secret_file:/path/to/file'`.
+          writeOnly: true
+      type: object
+      required:
+      - clientId
+      - secret
+      title: ServiceAccount
+      description: Internal service account credentials.
+    StreamerDataTransfer:
+      properties:
+        serviceType:
+          type: string
+          const: streamer
+          title: Servicetype
+        pypiIndexUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pypiindexurl
+          description: Optional local PyPI index URL for installing dependencies.
+        host:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Host
+          description: The interface to use for listening incoming connections
+          nullable: true
+        portRange:
+          prefixItems:
+          - type: integer
+          - type: integer
+          type: array
+          maxItems: 2
+          minItems: 2
+          title: Portrange
+          description: Port range for establishing connections.
+          default:
+          - 5665
+          - 5675
+        publicIps:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Publicips
+          description: List of public IP addresses where server can be reached.
+          nullable: true
+        waitTimeout:
+          type: integer
+          title: Waittimeout
+          description: How long to wait for a connection before exiting (in seconds)
+          default: 86400
+          nullable: false
+        inboundTransferLimit:
+          type: integer
+          title: Inboundtransferlimit
+          description: Limit how much data can be received (in bytes)
+          default: 5368709120
+          nullable: false
+      type: object
+      required:
+      - serviceType
+      title: StreamerDataTransfer
+    StreamerTransferRequest:
+      properties:
+        transferMethod:
+          type: string
+          const: streamer
+          title: Transfermethod
+      type: object
+      required:
+      - transferMethod
+      title: StreamerTransferRequest
+    StreamerTransferResponse:
+      properties:
+        transferMethod:
+          type: string
+          const: streamer
+          title: Transfermethod
+        coordinates:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Coordinates
+          nullable: true
+      type: object
+      required:
+      - transferMethod
+      title: StreamerTransferResponse
+    TransferJob:
+      properties:
+        jobId:
+          type: string
+          title: Jobid
+        system:
+          type: string
+          title: System
+        workingDirectory:
+          type: string
+          title: Workingdirectory
+        logs:
+          $ref: '#/components/schemas/TransferJobLogs'
+      type: object
+      required:
+      - jobId
+      - system
+      - workingDirectory
+      - logs
+      title: TransferJob
+    TransferJobLogs:
+      properties:
+        outputLog:
+          type: string
+          title: Outputlog
+        errorLog:
+          type: string
+          title: Errorlog
+      type: object
+      required:
+      - outputLog
+      - errorLog
+      title: TransferJobLogs
+    UploadFileResponse:
+      properties:
+        transferJob:
+          $ref: '#/components/schemas/TransferJob'
+        transferDirectives:
+          anyOf:
+          - $ref: '#/components/schemas/WormholeTransferResponse'
+          - $ref: '#/components/schemas/S3TransferResponse'
+          - $ref: '#/components/schemas/StreamerTransferResponse'
+          title: Transferdirectives
+          description: Data transfer parameters specific to the transfer method
+      type: object
+      required:
+      - transferJob
+      - transferDirectives
+      title: UploadFileResponse
+    UserInfoResponse:
+      properties:
+        user:
+          $ref: '#/components/schemas/PosixIdentified'
+        groups:
+          items:
+            $ref: '#/components/schemas/PosixGroupIdentified'
+          type: array
+          title: Groups
+        accounts:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AccountsModel'
+            type: array
+          - type: 'null'
+          title: Accounts
+      type: object
+      required:
+      - user
+      - groups
+      title: UserInfoResponse
+    WormholeDataTransfer:
+      properties:
+        serviceType:
+          type: string
+          const: wormhole
+          title: Servicetype
+        pypiIndexUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pypiindexurl
+          description: Optional local PyPI index URL for installing dependencies.
+          nullable: true
+      type: object
+      required:
+      - serviceType
+      title: WormholeDataTransfer
+    WormholeTransferRequest:
+      properties:
+        transferMethod:
+          type: string
+          const: wormhole
+          title: Transfermethod
+      type: object
+      required:
+      - transferMethod
+      title: WormholeTransferRequest
+    WormholeTransferResponse:
+      properties:
+        transferMethod:
+          type: string
+          const: wormhole
+          title: Transfermethod
+        wormholeCode:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Wormholecode
+          nullable: true
+      type: object
+      required:
+      - transferMethod
+      title: WormholeTransferResponse
+    WormholeTransferUploadRequest:
+      properties:
+        transferMethod:
+          type: string
+          const: wormhole
+          title: Transfermethod
+        wormholeCode:
+          type: string
+          title: Wormholecode
+          description: Wormhole code to use for the transfer
+          nullable: false
+      type: object
+      required:
+      - transferMethod
+      - wormholeCode
+      title: WormholeTransferUploadRequest
+  securitySchemes:
+    APIAuthDependency:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes: {}
+          tokenUrl: http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token
+    HTTPBearer:
+      type: http
+      scheme: bearer
