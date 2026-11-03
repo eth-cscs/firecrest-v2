@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `PLANNED` node state. Slurm nodes reserved by the backfill scheduler for a pending job (`PLANNED`/`PLND`) are now reported as `PLANNED` instead of `UNKNOWN`.
+- ***⚠️ API Breaking*** Added `PLANNED` node state. Slurm nodes reserved by the backfill scheduler for a pending job (`PLANNED`/`PLND`) are now reported as `PLANNED` instead of `UNKNOWN`.
 
 ## [2.6.2]
 
