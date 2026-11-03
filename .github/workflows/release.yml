@@ -91,16 +91,25 @@ jobs:
         echo "        - \"http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs\"" >> f7t-api-config.local-env-empty.yaml
         echo "ssh_credentials: {type: "SSHStaticKeys", keys:{}}" >> f7t-api-config.local-env-empty.yaml
         echo "clusters: []" >> f7t-api-config.local-env-empty.yaml
-    - name: Generate OpenAPI file
-      uses: column-st/fastapi-openapi-specs-action@v1.0.2
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        installDependencies: pip install -r requirements.txt
-        moduleDir: firecrest
-        fileName: main
-        appName: app
-        outputName: openapi
-        outputExtension: yaml
-        yaml_config_file: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
+        python-version: "3.12"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt pyyaml
+    - name: Generate OpenAPI file
+      env:
+        YAML_CONFIG_FILE: ${{ github.workspace }}/f7t-api-config.local-env-empty.yaml
+        PYTHONPATH: ${{ github.workspace }}
+      run: |
+        python - <<'EOF'
+        import yaml
+        from firecrest.main import app
+        with open("openapi.yaml", "w") as f:
+            yaml.dump(app.openapi(), f, sort_keys=False)
+        EOF
     - name: Move New OpenAPI file
       run: |
         mkdir openapi_
