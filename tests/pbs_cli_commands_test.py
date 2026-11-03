@@ -3,6 +3,9 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import pytest
+
+from lib.exceptions import PbsRequestError
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.pbs.cli_commands.qstat_command import QstatCommand
 from lib.scheduler_clients.pbs.cli_commands.qsub_command import QsubCommand
@@ -33,11 +36,24 @@ def test_qsub_resource_flags():
     )
 
 
-def test_qsub_chunk_without_nodes():
-    # PBS needs a chunk count in select; without nodes it is a single chunk
-    cmd = _qsub(cpus_per_task=4)
-    assert cmd.endswith("-l select=1:ncpus=4:ompthreads=4")
-    assert "place=" not in cmd
+@pytest.mark.parametrize(
+    "resources",
+    [{"tasks_per_node": 4}, {"cpus_per_task": 4}, {"memory_per_node": 512}],
+)
+def test_qsub_per_node_resources_need_nodes(resources):
+    # A select would replace the script's own; PBS rejects them without one
+    with pytest.raises(PbsRequestError):
+        _qsub(**resources)
+
+
+def test_qsub_chunk_only_sets_given_resources():
+    assert _qsub(nodes=2, tasks_per_node=4).endswith(
+        "-l select=2:mpiprocs=4 -l place=scatter"
+    )
+    # ompthreads needs tasksPerNode
+    assert _qsub(nodes=2, cpus_per_task=4).endswith(
+        "-l select=2 -l place=scatter"
+    )
 
 
 def test_qsub_nodes_only():
@@ -45,7 +61,9 @@ def test_qsub_nodes_only():
 
 
 def test_qsub_without_resources():
+    # leaves the script's own #PBS -l lines alone
     assert "-l " not in _qsub()
+    assert _qsub(time_limit=30).endswith("-l walltime=00:30:00")
 
 
 def test_commands_print_times_in_utc():

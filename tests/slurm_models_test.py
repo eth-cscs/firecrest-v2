@@ -135,7 +135,8 @@ def test_node_slurmrestd_fields():
     )
     assert node.free_memory == 521216
     assert node.idle_cpus == 64
-    assert node.cpu_load == 18
+    # load average x 100 in slurmrestd
+    assert node.cpu_load == 0.18
     assert node.partitions == ["debug", "compute"]
     assert node.reason == "Bad DIMM"
 
@@ -169,3 +170,18 @@ def test_reservation_not_maintenance():
         }
     )
     assert reservation.maintenance is False
+
+
+@pytest.mark.parametrize(
+    "cpu_load,expected",
+    [
+        (305, 3.05),  # slurmrestd before v0.0.40
+        ({"set": False, "infinite": False, "number": 0}, None),
+        (3.53, 3.53),  # sinfo already divides by 100
+    ],
+)
+def test_node_cpu_load(cpu_load, expected):
+    node = SlurmNode.model_validate(
+        {"name": "n1", "cpus": 4, "state": ["IDLE"], "cpu_load": cpu_load}
+    )
+    assert node.cpu_load == expected

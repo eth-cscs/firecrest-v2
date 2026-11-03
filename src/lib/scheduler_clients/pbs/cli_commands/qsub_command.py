@@ -5,7 +5,7 @@
 
 import re
 import shlex
-from lib.exceptions import PbsError
+from lib.exceptions import PbsError, PbsRequestError
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.ssh_clients.ssh_client import BaseCommand
 
@@ -41,24 +41,30 @@ class QsubCommand(BaseCommand):
         if self.job_description.standard_output:
             cmd.append(f"-o {shlex.quote(self.job_description.standard_output)}")
 
-        # One select chunk per node; place=scatter keeps chunks on separate
-        # nodes, like Slurm's --nodes
+        # A command line select replaces the script's whole select, so it is
+        # only sent when nodes is given. Per-node resources can't be sent
+        # without it: PBS rejects them next to a script's select.
         tasks = self.job_description.tasks_per_node
         cpus = self.job_description.cpus_per_task
-        chunk = []
-        if tasks or cpus:
-            chunk.append(f"ncpus={(tasks or 1) * (cpus or 1)}")
-        if tasks:
-            chunk.append(f"mpiprocs={tasks}")
-        if cpus:
-            chunk.append(f"ompthreads={cpus}")
-        if self.job_description.memory_per_node:
-            # PBS "mb" is MiB, matching memory_per_node
-            chunk.append(f"mem={self.job_description.memory_per_node}mb")
-        if self.job_description.nodes or chunk:
-            select = [str(self.job_description.nodes or 1)] + chunk
-            cmd.append(f"-l select={':'.join(select)}")
+        memory = self.job_description.memory_per_node
+        if not self.job_description.nodes and (tasks or cpus or memory):
+            raise PbsRequestError(
+                "tasksPerNode, cpusPerTask and memoryPerNode require nodes on PBS"
+            )
         if self.job_description.nodes:
+            # One chunk per node; place=scatter keeps chunks on separate
+            # nodes, like Slurm's --nodes
+            select = [str(self.job_description.nodes)]
+            if tasks and cpus:
+                select.append(f"ncpus={tasks * cpus}")
+            if tasks:
+                select.append(f"mpiprocs={tasks}")
+                if cpus:
+                    select.append(f"ompthreads={cpus}")
+            if memory:
+                # PBS "mb" is MiB, matching memory_per_node
+                select.append(f"mem={memory}mb")
+            cmd.append(f"-l select={':'.join(select)}")
             cmd.append("-l place=scatter")
         if self.job_description.time_limit:
             hours, minutes = divmod(self.job_description.time_limit, 60)

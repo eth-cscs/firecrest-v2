@@ -95,6 +95,8 @@ def test_systems_nodes(
         nodes = GetNodesResponse(**response.json())
         assert len(nodes.nodes) == 1
         assert nodes.nodes[0].reason == ""
+        # slurmrestd's cpu_load 305 is load average x 100
+        assert nodes.nodes[0].cpu_load == 3.05
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )

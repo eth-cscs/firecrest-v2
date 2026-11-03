@@ -324,14 +324,18 @@ class SlurmNode(NodeModel):
         if "state" in kwargs:
             state = kwargs.get("state", [])
             kwargs["state"] = [_map_slurm_state(s) for s in state]
-        # slurmrestd names: free_mem (MiB, NO_VAL struct), alloc_idle_cpus,
-        # cpu_load (load average x 100)
+        # slurmrestd names: free_mem (MiB, NO_VAL struct), alloc_idle_cpus
         if "free_memory" not in kwargs and "free_mem" in kwargs:
             kwargs["free_memory"] = slurm_int_to_int(kwargs["free_mem"])
         if "idle_cpus" not in kwargs and "alloc_idle_cpus" in kwargs:
             kwargs["idle_cpus"] = kwargs["alloc_idle_cpus"]
-        if isinstance(kwargs.get("cpu_load"), dict):
-            kwargs["cpu_load"] = slurm_int_to_int(kwargs["cpu_load"])
+        # slurmrestd reports cpu_load as load average x 100 (an int, or a
+        # number struct from v0.0.40); sinfo already divides it and gives a float
+        cpu_load = kwargs.get("cpu_load")
+        if isinstance(cpu_load, dict):
+            cpu_load = kwargs["cpu_load"] = slurm_int_to_int(cpu_load)
+        if isinstance(cpu_load, int):
+            kwargs["cpu_load"] = cpu_load / 100
         if isinstance(kwargs.get("partitions"), str):
             kwargs["partitions"] = kwargs["partitions"].split(",")
         super().__init__(**kwargs)
