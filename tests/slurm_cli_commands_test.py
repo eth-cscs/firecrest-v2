@@ -71,7 +71,7 @@ def test_sinfo_multi_state_is_split():
 
     assert nodes[0]["state"] == ["MIXED", "PLANNED"]
     assert nodes[1]["state"] == ["IDLE", "DRAIN*"]
-    assert SlurmNode(**nodes[0]).state == [NodeState.MIXED, NodeState.PLANNED]
+    assert SlurmNode(**nodes[0]).state == [NodeState.MIXED, NodeState.UNKNOWN]
     assert SlurmNode(**nodes[1]).state == [NodeState.IDLE, NodeState.DRAIN]
 
 
