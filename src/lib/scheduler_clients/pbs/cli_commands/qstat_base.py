@@ -25,7 +25,9 @@ class QstatBaseCommand(BaseCommand):
         self.name = name
 
     def get_command(self) -> str:
-        cmd = ["qstat", "-F", "json", "-f"] + self.ids
+        # qstat prints times in local time without a zone; force UTC so
+        # parse_timestamp can read them. env also works in csh login shells.
+        cmd = ["env", "TZ=UTC", "qstat", "-F", "json", "-f"] + self.ids
         # removed the -A options, since it is not an option in qstat command,
         # then the account filtering is done on the client-side
         return " ".join(cmd)

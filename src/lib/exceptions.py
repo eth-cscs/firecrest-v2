@@ -48,6 +48,10 @@ class PbsError(SchedulerError):
     pass
 
 
+class PbsRequestError(PbsError, SchedulerRequestError):
+    pass
+
+
 class SSHServiceError(Exception):
     pass
 

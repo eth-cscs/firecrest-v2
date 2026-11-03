@@ -79,6 +79,27 @@ async def test_submit_job(client, ssh_client, mocked_ssh_qsub_output, pbs_cluste
         assert response.json() is not None
 
 
+async def test_submit_job_per_node_resources_without_nodes(
+    client, ssh_client, mocked_ssh_qsub_output, pbs_cluster
+):
+    request_body = {
+        "job": {
+            "name": "test1",
+            "working_directory": "/home/test1",
+            "script": "#!/bin/bash\n#PBS -l select=2:ncpus=4\nhostname",
+            "memoryPerNode": 2048,
+        }
+    }
+
+    async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_qsub_output)]):
+        response = client.post(
+            "/compute/{cluster_name}/jobs".format(cluster_name=pbs_cluster.name),
+            json=request_body,
+        )
+        assert response.status_code == 400
+        assert "require nodes" in response.text
+
+
 async def test_get_job(client, ssh_client, mocked_ssh_qstat_output, pbs_cluster):
 
     async with ssh_client.mocked_output([MockedCommand(**mocked_ssh_qstat_output)]):

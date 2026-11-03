@@ -94,6 +94,9 @@ def test_systems_nodes(
         assert response.json() is not None
         nodes = GetNodesResponse(**response.json())
         assert len(nodes.nodes) == 1
+        assert nodes.nodes[0].reason == ""
+        # slurmrestd's cpu_load 305 is load average x 100
+        assert nodes.nodes[0].cpu_load == 3.05
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )
@@ -177,6 +180,8 @@ def test_systems_reservations(
         reservations = GetReservationsResponse(**response.json())
         assert len(reservations.reservations) == 1
         assert reservations.reservations[0].state == "inactive"
+        assert reservations.reservations[0].node_count == 1
+        assert reservations.reservations[0].maintenance is True
         timeout = aiohttp.ClientTimeout(
             total=slurm_cluster_with_api_config.scheduler.timeout
         )
