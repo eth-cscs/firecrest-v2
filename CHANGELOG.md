@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added logging of errors when health checks fail. Before, errors were omitted in the logs.
-- Added `PLANNED` node state. Slurm nodes reserved by the backfill scheduler for a pending job (`PLANNED`/`PLND`) are now reported as `PLANNED` instead of `UNKNOWN`.
 - Added configurable bucket name prefix for S3 data transfer operation
 - Job submission accepts resource requests (`nodes`, `tasksPerNode`, `cpusPerTask`, `memoryPerNode`, `timeLimit`), since slurmrestd does not parse `#SBATCH` lines. On Slurm over SSH they are passed to `sbatch` as `--nodes`, `--ntasks-per-node`, `--cpus-per-task`, `--mem` and `--time`; on PBS to `qsub` as `-l select=<nodes>:ncpus=…:mpiprocs=…:ompthreads=…:mem=…`, `-l place=scatter` and `-l walltime`. Since a `select` replaces the one in the job script, PBS only gets it when `nodes` is set, and `tasksPerNode`, `cpusPerTask` or `memoryPerNode` without `nodes` are rejected with `400`.
 - Jobs report `time.submission`, `time.totalCpu`, `allocationCpus`, `requestedMemory`, `maxRss`, `allocationGpus` and `consumedEnergy` where the scheduler provides them (Slurm REST and PBS).
