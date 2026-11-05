@@ -2,7 +2,7 @@
     "stdout": "\"/home/test1\":\ntotal 4\ndrwxrwxr-x 3 test1 test1 4096 2024-06-14T09:01:25 \"new\"\n\n\"/home/test1/new\":\ntotal 4\ndrwxrwxr-x 2 test1 test1 4096 2024-06-14T09:01:25 \"new-new\"\n\n\"/home/test1/new/new-new\":\ntotal 0",
     "stderr": "",
     "exit_code": 0,
-    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -R -- '/home/test1'"
+    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -R -- /home/test1"
 
 }
 

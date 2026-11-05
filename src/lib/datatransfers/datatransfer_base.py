@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+import shlex
 from typing import List, Optional
 import uuid
 from enum import Enum
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from importlib import resources as imp_resources
 from typing import Literal
 from lib.models.base_model import CamelModel
@@ -109,9 +110,13 @@ def _format_directives(directives: List[str], account: str):
 
 def _build_script(filename: str, parameters):
 
+    # Shell scripts are not HTML: arguments are quoted with `shell_quote`
+    # in the templates, and HTML escaping would corrupt `&` and `'` in them.
     script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
+        loader=FileSystemLoader(imp_resources.files(scripts)),
+        autoescape=select_autoescape(),
     )
+    script_environment.filters["shell_quote"] = shlex.quote
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)

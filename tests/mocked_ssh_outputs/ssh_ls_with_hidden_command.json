@@ -2,7 +2,7 @@
     "stdout": "total 178738665\ndrwxr-xr-x   2       99      99        8192 2020-07-09T17:24:00 \".check_fs\"\ndrwxrwx---   4 root     csstaff        4096 2016-11-24T13:53:51 \".ior\"\ndrwxr-xr-x   2 root     root           4096 2017-10-10T01:46:38 \".mmLockDir\"\ndrwxr-xr-x   6 root     root          32768 2024-07-03T20:19:42 \".mmbackupCfg\"",
     "stderr": "",
     "exit_code": 0,
-    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -A -- '/home'"
+    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -A -- /home"
 
 }
 

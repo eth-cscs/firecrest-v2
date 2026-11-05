@@ -3,6 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shlex
+
 # commands
 
 
@@ -30,7 +32,7 @@ class MkdirCommand(BaseCommandWithTimeout):
         if self.parent:
             # if set shows entrys starting with . (not including . and/or .. dirs)
             options = "-p "
-        return f"{super().get_command()} mkdir {options} -- '{self.target_path}' && {self.ls_command.get_command()}"
+        return f"{super().get_command()} mkdir {options} -- {shlex.quote(self.target_path)} && {self.ls_command.get_command()}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
 

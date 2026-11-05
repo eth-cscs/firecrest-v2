@@ -2,7 +2,7 @@
     "stdout": "total 16\ndrwx------ 2 service-account-firecrest-sample service-account-firecrest-sample 4096 2024-03-07T14:29:21 \"service-account-firecrest-sample\"\ndrwx------ 1 test1                            test1                            4096 2024-04-09T11:59:43 \"test1\"\ndrwx------ 2 test2                            test2                            4096 2024-03-07T14:29:20 \"test2\"\ndrwx------ 2 testuser                         testuser                         4096 2024-03-07T14:29:20 \"testuser\"",
     "stderr": "",
     "exit_code": 0,
-    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -- '/home'"
+    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -- /home"
 
 }
 

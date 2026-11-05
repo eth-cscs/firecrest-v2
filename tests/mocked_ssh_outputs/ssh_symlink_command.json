@@ -2,5 +2,5 @@
     "stdout": "lrwxrwxrwx 1 root root 8 2024-05-16T13:34:52 \"test\" -> \"test.txt\"",
     "stderr": "",
     "exit_code": 0,
-    "command":"ln -s -- '/home/symlink-test/test.txt' '/home/symlink-test/link.txt'"
+    "command":"ln -s -- /home/symlink-test/test.txt /home/symlink-test/link.txt"
 }

@@ -8,7 +8,7 @@
 
 echo $(date -u) "Extract Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-status=$(tar -x{{compression_flag}}f '{{ source_path }}' -C '{{ target_path }}')
+status=$(tar -x{{compression_flag}}f {{ source_path | shell_quote }} -C {{ target_path | shell_quote }})
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully extracted."

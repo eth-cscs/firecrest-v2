@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shlex
 
 from firecrest.filesystem.ops.commands.base_command_with_timeout import (
     BaseCommandWithTimeout,
@@ -25,7 +26,7 @@ class SymlinkCommand(BaseCommandWithTimeout):
 
     def get_command(self) -> str:
 
-        return f"{super().get_command()} ln -s -- '{self.target_path}' '{self.link_path}' && {self.ls_command.get_command()}"
+        return f"{super().get_command()} ln -s -- {shlex.quote(self.target_path)} {shlex.quote(self.link_path)} && {self.ls_command.get_command()}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:

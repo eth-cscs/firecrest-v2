@@ -3,6 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shlex
+
 # commands
 from fastapi import status, HTTPException
 from firecrest.filesystem.ops.commands.base_command_with_timeout import (
@@ -34,7 +36,7 @@ class ChecksumCommand(BaseCommandWithTimeout):
         self.target_path = target_path
 
     def get_command(self) -> str:
-        return f"{super().get_command()} {available_algorithms[self.selected_algorithm]} -- '{self.target_path}'"
+        return f"{super().get_command()} {available_algorithms[self.selected_algorithm]} -- {shlex.quote(self.target_path)}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         # Example of sha256sum output
