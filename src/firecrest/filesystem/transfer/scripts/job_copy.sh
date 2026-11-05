@@ -16,7 +16,7 @@ else
     derefparam="d"
 fi
 
-status=$(cp --force -R${derefparam} --preserve=all -- '{{ source_path }}' '{{ target_path }}')
+status=$(cp --force -R${derefparam} --preserve=all -- {{ source_path | shell_quote }} {{ target_path | shell_quote }})
 
 
 if [[ "$?" == '0' ]]

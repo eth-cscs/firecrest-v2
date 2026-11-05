@@ -5,10 +5,11 @@
 
 import uuid
 import os
+import shlex
 from fastapi import Depends, Path, Query, status, HTTPException
 from typing import Annotated, Any, List, Optional
 from importlib import resources as imp_resources
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # plugins
 from firecrest.config import HPCCluster, BackendServiceType
@@ -85,9 +86,13 @@ class JobHelper:
 
 def _build_script(filename: str, parameters):
 
+    # Shell scripts are not HTML: arguments are quoted with `shell_quote`
+    # in the templates, and HTML escaping would corrupt `&` and `'` in them.
     script_environment = Environment(
-        loader=FileSystemLoader(imp_resources.files(scripts)), autoescape=True
+        loader=FileSystemLoader(imp_resources.files(scripts)),
+        autoescape=select_autoescape(),
     )
+    script_environment.filters["shell_quote"] = shlex.quote
     script_template = script_environment.get_template(filename)
 
     script_code = script_template.render(parameters)

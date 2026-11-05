@@ -56,7 +56,7 @@ class LsBaseCommand(BaseCommandWithTimeout):
         if self.dereference:
             options += "-L "
 
-        return f"{super().get_command()} ls " f"{options}" f"-- '{self.target_path}'"
+        return f"{super().get_command()} ls " f"{options}" f"-- {shlex.quote(self.target_path)}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         # Example of ls output

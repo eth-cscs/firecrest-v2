@@ -3,6 +3,6 @@
     "stdout": "\"/home/test1\":\ntotal 16\ndrwxr-xr-x 3 root  root  4096 2024-08-02T07:00:14 \"a\"\ndrwxr-xr-x 2 root  root  4096 2024-08-02T07:00:35 \"b\"\ndrwxr-xr-x 2 test1 users 4096 2022-03-15T11:35:24 \"bin\"\ndrwxr-xr-x 2 test1 users 4096 2024-08-02T07:23:04 \"test\"\n\n\"/home/test1/a\":\ntotal 4\ndrwxr-xr-x 2 root root 4096 2024-08-02T07:00:18 \"tt\"\n\n\"/home/test1/a/tt\":\ntotal 0\n-rw-r--r-- 1 root root 0 2024-08-02T07:00:18 \"file\"\n\n\"/home/test1/b\":\ntotal 4\ndrwxr-xr-x 2 root root 4096 2024-08-02T07:00:18 \"tt_link\"\n\n\"/home/test1/b/tt_link\":\ntotal 0\n-rw-r--r-- 1 root root 0 2024-08-02T07:00:18 \"file\"\n\n\"/home/test1/bin\":\ntotal 0\n\n\"/home/test1/test\":\ntotal 0\n",
     "stderr": "",
     "exit_code": 0,
-    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -R -L -- '/home/test1'"
+    "command":"ls -l --quoting-style=c --time-style='+%Y-%m-%dT%H:%M:%S' -R -L -- /home/test1"
 
 }

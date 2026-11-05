@@ -9,7 +9,9 @@
 
 echo $(date -u) "Ingress File Transfer Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-if [ -d "{{ target_path }}" ]; then
+target_file={{ target_path | shell_quote }}
+
+if [ -d "$target_file" ]; then
     echo $(date -u) "targetPath must point to a file path: $target_file is a directory." >&2
     exit 3
 fi
@@ -21,10 +23,9 @@ do
     if [[ "$status" == '200' ]]
     then
         echo $(date -u) "File to transfer found in S3 bucket"
-        echo $(date -u) "Downloading file to: {{ target_path }} ..."
+        echo $(date -u) "Downloading file to: $target_file ..."
 
         range_length={{ max_part_size }}
-        target_file="{{ target_path }}"
 
         download_complete="false"
         downloaded_data_count=0

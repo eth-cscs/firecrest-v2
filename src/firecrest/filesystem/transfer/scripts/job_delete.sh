@@ -9,7 +9,7 @@
 
 echo $(date -u) "Delete Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-status=$(rm -R  -- '{{ path }}')
+status=$(rm -R  -- {{ path | shell_quote }})
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully deleted."

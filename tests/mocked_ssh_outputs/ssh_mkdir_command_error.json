@@ -2,5 +2,5 @@
     "stdout": "",
     "stderr": "mkdir: cannot create directory '/home': File exists\n",
     "exit_code": 1,
-    "command":"mkdir  -- '/home'"
+    "command":"mkdir  -- /home"
 }

@@ -2,5 +2,5 @@
     "stdout": "6d4c4f9ac2c9228c274dea099d83141d8b8cd1aa8902319d6d8313c767a7f93c  /home/README.md",
     "stderr": "",
     "exit_code": 0,
-    "command":"sha256sum -- '/home/README.md'"
+    "command":"sha256sum -- /home/README.md"
 }
