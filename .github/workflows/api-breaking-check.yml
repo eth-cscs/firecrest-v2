@@ -1,0 +1,101 @@
+name: API breaking change check
+
+# Fails a PR that introduces breaking OpenAPI changes unless the PR adds an
+# entry marked "***⚠️ API Breaking***" to CHANGELOG.md.
+# Make this check required in the branch protection rules to block the merge.
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  api-breaking-check:
+    runs-on: ubuntu-latest
+    env:
+      BREAKING_MARKER: "***⚠️ API Breaking***"
+      YAML_CONFIG_FILE: ${{ github.workspace }}/f7t-api-config.openapi.yaml
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          path: head
+          fetch-depth: 0
+
+      - name: Checkout PR base
+        uses: actions/checkout@v4
+        with:
+          path: base
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create minimal FirecREST config
+        run: |
+          cat > "$YAML_CONFIG_FILE" <<'EOF'
+          apis_root_path: ""
+          doc_servers:
+            - url: "http://localhost:8000"
+              description: "Local environment"
+          auth:
+            authentication:
+              scopes: {}
+              tokenUrl: "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/token"
+              publicCerts:
+                - "http://keycloak:8080/auth/realms/kcrealm/protocol/openid-connect/certs"
+          ssh_credentials: {type: "SSHStaticKeys", keys: {}}
+          clusters: []
+          EOF
+
+      - name: Generate OpenAPI specs
+        run: |
+          mkdir -p specs
+          for rev in base head; do
+            pip install -q -r "$rev/requirements.txt" pyyaml
+            PYTHONPATH="$rev/src" python - "$rev" <<'EOF'
+          import sys
+          import yaml
+          from firecrest.main import app
+          with open(f"specs/{sys.argv[1]}.yaml", "w") as f:
+              yaml.dump(app.openapi(), f, sort_keys=False)
+          EOF
+          done
+
+      - name: Run oasdiff (detect breaking changes)
+        id: oasdiff
+        uses: oasdiff/oasdiff-action/breaking@main
+        with:
+          base: specs/base.yaml
+          revision: specs/head.yaml
+
+      - name: Require changelog entry for breaking changes
+        working-directory: head
+        env:
+          BREAKING: ${{ steps.oasdiff.outputs.breaking }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [[ -z "$BREAKING" || "$BREAKING" == "No breaking changes" ]]; then
+            echo "✅ No breaking API changes found"
+            exit 0
+          fi
+
+          {
+            echo "### Breaking API changes"
+            echo '```'
+            echo "$BREAKING"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if git diff "$BASE_SHA...$HEAD_SHA" -- CHANGELOG.md | grep '^+' | grep -qF -- "$BREAKING_MARKER"; then
+            echo "✅ Breaking API changes are documented in CHANGELOG.md"
+          else
+            echo "::error file=CHANGELOG.md::This PR introduces breaking API changes. Add a CHANGELOG.md entry starting with '$BREAKING_MARKER' describing them."
+            echo "$BREAKING"
+            exit 1
+          fi
