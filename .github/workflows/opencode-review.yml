@@ -1,31 +1,69 @@
 name: opencode-review
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  # Conversation comments use the default branch's workflow, including for fork PRs.
+  issue_comment:
+    types: [created]
+
+# Allow the worker to read PR data, react to requests, and post the final comment.
+# Worker jobs restrict these permissions separately; only reaction and finishing jobs can write.
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  review:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  authorize:
+    # Reject non-PR comments and bot requests before starting a runner.
+    # The helper validates the full command and checks the author's current write access.
+    if: >-
+      github.repository == 'eth-cscs/firecrest-v2' &&
+      github.event.issue.pull_request &&
+      github.event.comment.user.type == 'User' &&
+      github.event.sender.type == 'User' &&
+      github.actor == github.event.comment.user.login &&
+      startsWith(github.event.comment.body, '/oc-review')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    concurrency:
-      group: opencode-review-${{ github.event.issue.number || github.event.pull_request.number }}
-      cancel-in-progress: true
+    timeout-minutes: 5
+    # This job checks access but has no inference key or permission to post comments.
     permissions:
-      id-token: write
       contents: read
-      pull-requests: write
-      issues: write
+    outputs:
+      authorized: ${{ steps.access.outputs.authorized }}
     steps:
-      - uses: actions/checkout@v6
+      # Never execute an authorization helper supplied by the PR.
+      - name: Checkout default-branch authorization helper
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.repository.default_branch }}
+          path: default-branch
           persist-credentials: false
-
-      - uses: anomalyco/opencode/github@latest
+      # Query the author's current repository permission.
+      # Write and admin qualify; GitHub reports maintain as write.
+      # Noncommands and users without write access return authorized=false.
+      # A missing collaborator counts as no access; other API errors fail this job.
+      - name: Check repository write access
+        id: access
         env:
-          CSCS_INFERENCE_API_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
-        with:
-          agent: grumpy-reviewer
-          model: cscs/moonshotai/Kimi-K2.7-Code
-          share: false
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 default-branch/.github/review/host/context.py authorize \
+            --event-name "$GITHUB_EVENT_NAME" \
+            --event-path "$GITHUB_EVENT_PATH" \
+            --repository "$GITHUB_REPOSITORY" \
+            --github-output "$GITHUB_OUTPUT"
+
+  review:
+    needs: authorize
+    if: needs.authorize.outputs.authorized == 'true'
+    # Only an authorized request can cancel an earlier review for the same PR.
+    # Reviews for other PRs use different concurrency groups.
+    concurrency:
+      group: opencode-review-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    # Load trusted worker code from master (the default branch), not the PR's head or target branch.
+    uses: eth-cscs/firecrest-v2/.github/workflows/opencode-review-worker.yml@master
+    # Forward only the inference key; the worker pulls its image without registry credentials.
+    secrets:
+      CSCS_INFERENCE_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}

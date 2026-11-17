@@ -1,0 +1,64 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "cscs/zai-org/GLM-5.3",
+  "default_agent": "grumpy-reviewer",
+  "agents": {
+    "grumpy-reviewer": {
+      "description": "Inspect PR changes and gather evidence for the final review",
+      "mode": "primary",
+      "steps": 24,
+      "system": "{file:/opt/reviewer/grumpy-reviewer.md}",
+      "permissions": [
+        { "action": "subagent", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "review-finalizer": {
+      "description": "Write the final review from existing inspection evidence without tools",
+      "mode": "primary",
+      "steps": 2,
+      "system": "{file:/opt/reviewer/grumpy-reviewer.md}",
+      "permissions": [
+        { "action": "*", "resource": "*", "effect": "deny" }
+      ]
+    }
+  },
+  "share": "disabled",
+  "websearch": { "provider": "tinyfish" },
+  "instructions": ["/instructions/AGENTS.md"],
+  "permissions": [
+    { "action": "edit", "resource": "*", "effect": "deny" },
+    { "action": "external_directory", "resource": "/input/pr-source", "effect": "allow" },
+    { "action": "external_directory", "resource": "/input/pr-source/**", "effect": "allow" },
+    { "action": "external_directory", "resource": "/input/context.md", "effect": "allow" }
+  ],
+  "providers": {
+    "cscs": {
+      "package": "@opencode/ai/providers/openai-compatible",
+      "name": "CSCS Inference",
+      "env": ["CSCS_INFERENCE_API_KEY"],
+      "settings": {
+        "baseURL": "https://api.inference.cscs.ch/v1",
+        "apiKey": "{env:CSCS_INFERENCE_API_KEY}",
+        "headerTimeout": 240000,
+        "chunkTimeout": 240000
+      },
+      "models": {
+        "zai-org/GLM-5.3": {
+          "name": "GLM-5.3 [CSCS]",
+          "limit": { "context": 1048576, "output": 32768 },
+          "body": { "max_tokens": 16384, "reasoning_effort": "high" },
+          "capabilities": {
+            "tools": true,
+            "reasoning": { "supported": true },
+            "input": ["text"],
+            "output": ["text"]
+          },
+          "compatibility": { "reasoningField": "reasoning", "maxTokensField": "max_tokens" },
+          "variants": [
+            { "id": "review-final", "body": { "max_tokens": 32768, "reasoning_effort": "low", "tool_choice": "none" } }
+          ]
+        }
+      }
+    }
+  }
+}

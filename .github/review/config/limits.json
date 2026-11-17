@@ -1,0 +1,6 @@
+{
+  "inspection_seconds": 1200,
+  "finalization_seconds": 300,
+  "execution_overhead_seconds": 110,
+  "termination_grace_seconds": 5
+}
