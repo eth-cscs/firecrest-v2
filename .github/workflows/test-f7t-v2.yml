@@ -37,3 +37,18 @@ jobs:
         pip install -r ./requirements-testing.txt
     - name: Run PyTest
       run: pytest
+
+  review_helpers_test:
+    # OpenCode reviewer host helpers (standard library only; no model or credentials).
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    - name: Run reviewer helper tests
+      run: |
+        pip install pytest
+        # Bypass the repository pytest.ini (testpaths/env for the API tests).
+        pytest -c /dev/null --rootdir . .github/review/host/tests
