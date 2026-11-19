@@ -31,16 +31,12 @@ class TailCommand(BaseCommandWithTimeout):
     ) -> str:
         options = ""
         if self.file_bytes:
-            if self.skip_heading:
-                options += f"--bytes='+{self.file_bytes}' "
-            else:
-                options += f"--bytes='{self.file_bytes}' "
+            value = f"+{self.file_bytes}" if self.skip_heading else str(self.file_bytes)
+            options += f"--bytes={shlex.quote(value)} "
 
         if self.lines:
-            if self.skip_heading:
-                options += f"--lines='+{self.lines}' "
-            else:
-                options += f"--lines='{self.lines}' "
+            value = f"+{self.lines}" if self.skip_heading else str(self.lines)
+            options += f"--lines={shlex.quote(value)} "
 
         return f"{super().get_command()} tail {options}-- {shlex.quote(self.target_path)}"
 

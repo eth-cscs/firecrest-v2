@@ -100,6 +100,38 @@ def test_path_is_passed_as_a_single_argument(command):
             ChownCommand(target_path="/home/f", owner="user", group=HOSTILE_NAME),
             id="group",
         ),
+        pytest.param(
+            HeadCommand(target_path="/home/f", file_bytes=HOSTILE_NAME), id="head-bytes"
+        ),
+        pytest.param(
+            HeadCommand(target_path="/home/f", lines=HOSTILE_NAME), id="head-lines"
+        ),
+        pytest.param(
+            HeadCommand(
+                target_path="/home/f", file_bytes=HOSTILE_NAME, skip_trailing=True
+            ),
+            id="head-bytes-skip-trailing",
+        ),
+        pytest.param(
+            HeadCommand(target_path="/home/f", lines=HOSTILE_NAME, skip_trailing=True),
+            id="head-lines-skip-trailing",
+        ),
+        pytest.param(
+            TailCommand(target_path="/home/f", file_bytes=HOSTILE_NAME), id="tail-bytes"
+        ),
+        pytest.param(
+            TailCommand(target_path="/home/f", lines=HOSTILE_NAME), id="tail-lines"
+        ),
+        pytest.param(
+            TailCommand(
+                target_path="/home/f", file_bytes=HOSTILE_NAME, skip_heading=True
+            ),
+            id="tail-bytes-skip-heading",
+        ),
+        pytest.param(
+            TailCommand(target_path="/home/f", lines=HOSTILE_NAME, skip_heading=True),
+            id="tail-lines-skip-heading",
+        ),
     ],
 )
 def test_other_string_arguments_are_quoted(command):
