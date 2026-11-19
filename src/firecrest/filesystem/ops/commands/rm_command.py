@@ -3,6 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shlex
+
 # commands
 
 
@@ -23,7 +25,7 @@ class RmCommand(BaseCommandWithTimeout):
 
     def get_command(self) -> str:
         return (
-            f"{super().get_command()} rm -r --interactive=never -- '{self.target_path}'"
+            f"{super().get_command()} rm -r --interactive=never -- {shlex.quote(self.target_path)}"
         )
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):

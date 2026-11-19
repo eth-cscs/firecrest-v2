@@ -2,5 +2,5 @@
     "stdout": "",
     "stderr": "",
     "exit_code": 0,
-    "command":"rm -r --interactive=never -- '/home/file-to-delete'"
+    "command":"rm -r --interactive=never -- /home/file-to-delete"
 }

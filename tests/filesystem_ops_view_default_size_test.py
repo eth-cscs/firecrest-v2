@@ -27,7 +27,7 @@ async def test_view_without_size_is_capped_by_max_ops_file_size(
         stdout="ABCDEFGHIJ",
         stderr="",
         exit_code=0,
-        command="dd if='/home/readme.txt' bs=1048576 skip=0 count=2",
+        command="dd if=/home/readme.txt bs=1048576 skip=0 count=2",
     )
     async with ssh_client.mocked_output([command]):
         response = client.get(

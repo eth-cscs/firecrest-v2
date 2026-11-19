@@ -2,6 +2,6 @@
     "stdout": "",
     "stderr": "mkdir: cannot create directory '/home/test': Permission denied\n",
     "exit_code": 1,
-    "command":"mkdir  -- '/home/test'"
+    "command":"mkdir  -- /home/test"
 }
 

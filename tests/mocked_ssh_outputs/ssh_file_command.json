@@ -2,6 +2,6 @@
     "stdout": "Unicode text, UTF-8 text, with very long lines (489)",
     "stderr": "",
     "exit_code": 0,
-    "command":"file -b -- '/home/README.md'"
+    "command":"file -b -- /home/README.md"
 }
 

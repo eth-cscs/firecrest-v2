@@ -20,4 +20,4 @@ pip install -r requirements.txt
 cd src
 echo $(date -u) "Starting firecrest streamer in {{operation}} mode..."
 
-python -m streamer server --secret {{secret}} --host {{host}} {% for ip in public_ips %} --public-ips {{ip}} {% endfor %} --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{target_path}}
+python -m streamer server --secret {{secret}} --host {{host}} {% for ip in public_ips %} --public-ips {{ip}} {% endfor %} --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{ target_path | shell_quote }}

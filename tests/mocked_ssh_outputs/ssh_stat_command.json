@@ -2,7 +2,7 @@
     "stdout": "81a4 64317775 50 1 26191 1000 8 1689669477 1685517840 1685517840",
     "stderr": "",
     "exit_code": 0,
-    "command":"stat --dereference -c '%f %i %d %h %u %g %s %X %Y %Z' -- '/home/test1/data.big'"
+    "command":"stat --dereference -c '%f %i %d %h %u %g %s %X %Y %Z' -- /home/test1/data.big"
 }
 
 

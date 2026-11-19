@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.2]
 
+### Security
+
+- Filesystem operations now shell-quote every caller-supplied path, name and
+  argument before it reaches the login node. The `ops/*` commands (`ls`, `rm`,
+  `mkdir`, `chmod`, `chown`, `stat`, `file`, `checksum`, `head`, `tail`, `dd`,
+  `symlink`, `base64` upload/download and `compress`/`extract`) and the
+  `transfer/*` job scripts (`mv`, `cp`, `rm`, `compress`, `extract`, the S3 and
+  streamer transfers) previously interpolated the path into a single-quoted
+  shell word with no escaping, so a name containing a single quote broke out of
+  the quoting and the rest ran as a shell command on the login node as the user
+  the token maps to — including names that already exist in a shared directory,
+  which run when another user operates on them. Arguments are now passed through
+  `shlex.quote`; the job templates render them with a `shell_quote` filter and
+  no longer HTML-escape (which silently corrupted `&` and `'` in valid names).
+
 ### Added
 
 - Added logging of errors when health checks fail. Before, errors were omitted in the logs.

@@ -2,5 +2,5 @@
     "stdout": "mode of 'test.txt' retained as 0777 (rwxrwxrwx)\n-rwxrwxrwx 1 root root 0 2024-05-16T12:03:18 \"test.txt\"",
     "stderr": "",
     "exit_code": 0,
-    "command":"chmod -v '777' -- '/home/chmod-test/test.txt'"
+    "command":"chmod -v 777 -- /home/chmod-test/test.txt"
 }

@@ -20,12 +20,12 @@ if $latest_python -c 'import sys; sys.exit(0 if sys.version_info < (3, 8) else 1
 fi
 
 {% if operation == "send" %}  
-if [ ! -f "{{target_path}}" ]; then
+if [ ! -f {{ target_path | shell_quote }} ]; then
     echo "Error: source file does not exist."
     exit 1
 fi
 {% elif operation == "receive" %}
-if [ -f "{{target_path}}" ]; then
+if [ -f {{ target_path | shell_quote }} ]; then
     echo "Error: destination file already exist."
     exit 1
 fi
@@ -47,4 +47,4 @@ pip install firecrest-streamer {% if pypi_index_url is not none %} --index-url {
 
 echo $(date -u) "Starting firecrest streamer in {{operation}} mode..."
 
-streamer server --secret {{secret}} --host {{host}} {% for ip in public_ips %} --public-ips {{ip}} {% endfor %} --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{target_path}}
+streamer server --secret {{secret}} --host {{host}} {% for ip in public_ips %} --public-ips {{ip}} {% endfor %} --port-range {{port_range}} --wait-timeout {{wait_timeout}} --inbound-transfer-limit {{inbound_transfer_limit}} {{operation}} --path {{ target_path | shell_quote }}

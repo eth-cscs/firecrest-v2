@@ -3,6 +3,8 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import shlex
+
 # commands
 from firecrest.filesystem.ops.commands.base_command_with_timeout import (
     BaseCommandWithTimeout,
@@ -30,7 +32,7 @@ class StatCommand(BaseCommandWithTimeout):
         deref = ""
         if self.dereference:
             deref = "--dereference"
-        return f"{super().get_command()} stat {deref} -c '%f %i %d %h %u %g %s %X %Y %Z' -- '{self.target_path}'"
+        return f"{super().get_command()} stat {deref} -c '%f %i %d %h %u %g %s %X %Y %Z' -- {shlex.quote(self.target_path)}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int = 0):
         if exit_status != 0:

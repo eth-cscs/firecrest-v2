@@ -5,6 +5,7 @@
 
 from enum import Enum
 import os
+import shlex
 
 from fastapi import HTTPException, status
 
@@ -76,13 +77,20 @@ class TarCommand(BaseCommandWithTimeout):
         source_file = os.path.basename(self.source_path)
 
         if self.match_pattern:
-            return f"{super().get_command()} bash -c \"cd {source_dir}; {super().get_command()} find . -type f -regex '{self.match_pattern}' -print0 | tar {options} -czvf '{self.target_path}' --null --files-from - \""
+            # Quote each argument for the inner shell, then quote the whole
+            # pipeline once more for the outer one: bash -c re-parses it.
+            pipeline = (
+                f"cd {shlex.quote(source_dir)}; "
+                f"{super().get_command()} find . -type f -regex {shlex.quote(self.match_pattern)} -print0 "
+                f"| tar {options} -czvf {shlex.quote(self.target_path)} --null --files-from - "
+            )
+            return f"{super().get_command()} bash -c {shlex.quote(pipeline)}"
 
-        return f"{super().get_command()} tar {options} -c{self.compression_flag}vf '{self.target_path}' -C '{source_dir}' '{source_file}'"
+        return f"{super().get_command()} tar {options} -c{self.compression_flag}vf {shlex.quote(self.target_path)} -C {shlex.quote(source_dir)} {shlex.quote(source_file)}"
 
     def get_extract_command(self) -> str:
 
-        return f"{super().get_command()} tar -x{self.compression_flag}f '{self.source_path}' -C '{self.target_path}'"
+        return f"{super().get_command()} tar -x{self.compression_flag}f {shlex.quote(self.source_path)} -C {shlex.quote(self.target_path)}"
 
     def parse_output(self, stdout: str, stderr: str, exit_status: int):
         if exit_status != 0:

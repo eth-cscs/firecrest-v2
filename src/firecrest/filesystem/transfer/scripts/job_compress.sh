@@ -11,7 +11,7 @@ echo $(date -u) "Compress Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
 {% if match_pattern %}
 
-status=$(cd {{ source_dir }}; find . -type f -regex '{{ match_pattern }}' -print0 | tar {{ options }} -c{{compression_flag}}vf '{{ target_path }}' --null --files-from - )
+status=$(cd {{ source_dir | shell_quote }}; find . -type f -regex {{ match_pattern | shell_quote }} -print0 | tar {{ options }} -c{{compression_flag}}vf {{ target_path | shell_quote }} --null --files-from - )
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully compressed."
@@ -24,7 +24,7 @@ fi
 
 {% else %}
 
-status=$(tar {{ options }} -c{{compression_flag}}vf '{{ target_path }}' -C '{{ source_dir }}'  '{{ source_file }}')
+status=$(tar {{ options }} -c{{compression_flag}}vf {{ target_path | shell_quote }} -C {{ source_dir | shell_quote }}  {{ source_file | shell_quote }})
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully compressed."

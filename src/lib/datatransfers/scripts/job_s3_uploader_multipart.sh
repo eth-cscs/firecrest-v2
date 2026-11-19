@@ -173,7 +173,7 @@ tmp_directory="{{ F7T_TMP_FOLDER }}"
 parallel_run={{ F7T_MP_PARALLEL_RUN }}
 use_split={{ F7T_MP_USE_SPLIT }}
 num_parts={{ F7T_MP_NUM_PARTS }}
-input_file={{ F7T_MP_INPUT_FILE }}
+input_file={{ F7T_MP_INPUT_FILE | shell_quote }}
 complete_multipart_url='{{ F7T_MP_COMPLETE_URL | safe }}'
 
 echo $(date -u) "Upload File Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"

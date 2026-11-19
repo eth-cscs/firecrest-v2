@@ -16,4 +16,4 @@ pip install magic-wormhole --index-url {{pypi_index_url}}
 
 echo $(date -u) "Waiting until file to transfer is available..."
 
-wormhole receive {{wormhole_code}} --accept-file --output-file {{target_path}}
+wormhole receive {{ wormhole_code | shell_quote }} --accept-file --output-file {{ target_path | shell_quote }}

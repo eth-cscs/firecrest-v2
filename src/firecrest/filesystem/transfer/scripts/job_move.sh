@@ -9,7 +9,7 @@
 
 echo $(date -u) "Move Files Job (id:${SLURM_JOB_ID:-${PBS_JOBID:-unknown}})"
 
-status=$(mv  -- '{{ source_path }}' '{{ target_path }}')
+status=$(mv  -- {{ source_path | shell_quote }} {{ target_path | shell_quote }})
 if [[ "$?" == '0' ]]
 then
     echo $(date -u) "Files were successfully moved."
