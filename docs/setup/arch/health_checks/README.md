@@ -12,6 +12,7 @@ As you can see in the figure above, when enabled the periodic health check will 
 2. Workload manager and scheduler (via SSH or API calls, depending the service)
 3. Filesystem availability (read only)
 4. Object storage availability (S3 interface is reachable or not)
+5. Scheduler nodes (optional; the result can be used as a cache for the nodes endpoint)
 
 ## Probing configuration
 
@@ -36,13 +37,38 @@ The `interval_check` field defines how often, in seconds, the health checks are 
 
 Note: the `probing` section is mandatory in the configuration, even if empty.
 
+### Cached nodes information
+
+The `nodes` service fetches the list of nodes from the scheduler at every health check, using the cluster service account. When `use_as_cache` is set to `true`, the `/status/{system_name}/nodes` endpoint returns the nodes fetched by the last successful check instead of querying the scheduler on each request. This reduces the load on the scheduler, at the cost of returning data up to `interval_check` seconds old.
+
+!!! example "Serve the nodes endpoint from the health check data"
+    ```yaml
+  probing:
+    interval_check: 60
+    services:
+      nodes:
+        timeout: 20
+        use_as_cache: true
+    ```
+
+Responses served from the cache include a `cachedAt` timestamp with the time the nodes were fetched by the health check:
+
+```json
+{
+    "nodes": [ ... ],
+    "cachedAt": "2026-01-02T03:04:05.123456Z"
+}
+```
+
+If the check has not run yet, or its last execution failed, the endpoint falls back to querying the scheduler directly and `cachedAt` is `null`. `use_as_cache` is only supported by the `nodes` service. The node list itself is not included in the `servicesHealth` report of `/status/systems`.
+
 ## Status reports
 
 When consulting the API endpoint `/status/systems` you can see the status of health checks on the response JSON. The filed `servicesHealth` is composed of a list of `serviceTypes` as listed above.
 
 The common format includes:
 
-- `serviceType`: can be (1) `ssh`, (2) `scheduler`, (3) `filesystem`, and (4) `s3`.
+- `serviceType`: can be (1) `ssh`, (2) `scheduler`, (3) `filesystem`, (4) `s3`, and (5) `nodes`.
 - `lastChecked`: timestamp of the last time the periodic test was performed
 - `latency`: is used to establish if the service is healthy or not (depends on the configuration of FirecREST)
 - `healthy`: `true` or `false`
