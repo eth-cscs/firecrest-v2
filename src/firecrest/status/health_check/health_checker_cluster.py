@@ -21,6 +21,9 @@ from firecrest.status.health_check.checks.health_check_scheduler import (
 from firecrest.status.health_check.checks.health_check_ssh import (
     SSHHealthCheck,
 )
+from firecrest.status.health_check.checks.health_check_nodes import (
+    NodesHealthCheck,
+)
 from firecrest.status.health_check.checks.health_check_s3 import (
     S3HealthCheck,
 )
@@ -76,6 +79,15 @@ class ClusterHealthChecker:
                         timeout=services[BackendServiceType.scheduler].timeout,
                     )
                     checks += [schedulerCheck.check()]
+
+                if BackendServiceType.nodes in services:
+                    nodesCheck = NodesHealthCheck(
+                        system=self.cluster,
+                        auth=auth,
+                        token=token,
+                        timeout=services[BackendServiceType.nodes].timeout,
+                    )
+                    checks += [nodesCheck.check()]
 
                 if BackendServiceType.ssh in services:
                     sshCheck = SSHHealthCheck(
