@@ -32,6 +32,7 @@ from typing import List, Optional
 from lib.models.base_model import CamelModel
 from lib.models.config_model import LoadFileSecretStr, Oidc, SSHUserKeys
 from lib.datatransfers.datatransfer_base import DataTransferType
+from lib.scheduler_clients.models import NodeModel
 
 
 class MultipartUpload(BaseModel):
@@ -113,6 +114,7 @@ class BackendServiceType(str, Enum):
     filesystem = "filesystem"
     ssh = "ssh"
     scheduler = "scheduler"
+    nodes = "nodes"
 
     # Special value used by the health checker to identify exceptions; not a real service type.
     exception = "exception"
@@ -234,6 +236,21 @@ class S3ServiceHealth(BaseServiceHealth):
     pass
 
 
+class NodesServiceHealth(BaseServiceHealth):
+    """Health check result for the scheduler nodes query.
+
+    The fetched nodes are kept in memory so they can be served by the
+    `/status/{system_name}/nodes` endpoint when `use_as_cache` is enabled;
+    they are not included in the serialized health report.
+    """
+
+    nodes: Optional[List[NodeModel]] = Field(
+        None,
+        description="Nodes fetched by the last successful health check.",
+        exclude=True,
+    )
+
+
 class HealthCheckException(BaseServiceHealth):
     """Generic health check error placeholder."""
 
@@ -246,6 +263,14 @@ class ProbingService(CamelModel):
     timeout: Optional[int] = Field(
         10,
         description="Timeout for specific health check, if not specified the default of 10s is applied.",
+    )
+    use_as_cache: bool = Field(
+        False,
+        description=(
+            "Only applies to the `nodes` service: when enabled, the nodes fetched by the "
+            "health check are returned by the `/status/{system_name}/nodes` endpoint "
+            "instead of querying the scheduler on every request."
+        ),
     )
 
 
@@ -262,6 +287,15 @@ class ProbingServices(CamelModel):
             "interval_check", "interval"
         ),  # Backward compatibility
     )
+
+    @pydantic.model_validator(mode="after")
+    def check_use_as_cache(self) -> Self:
+        for service_type, service in (self.services or {}).items():
+            if service.use_as_cache and service_type != BackendServiceType.nodes:
+                raise ValueError(
+                    f"`use_as_cache` is only supported by the `nodes` service, not `{BackendServiceType(service_type).value}`."
+                )
+        return self
 
 
 class BaseDataTransfer(CamelModel):
@@ -470,6 +504,7 @@ class HPCCluster(CamelModel):
             | FilesystemServiceHealth
             | SSHServiceHealth
             | S3ServiceHealth
+            | NodesServiceHealth
             | HealthCheckException
         ]
     ] = Field(

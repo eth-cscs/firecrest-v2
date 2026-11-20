@@ -6,6 +6,8 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from pydantic import Field
+
 
 # configs
 from firecrest.config import HPCCluster
@@ -31,6 +33,13 @@ class GetSystemsResponse(CamelModel):
 
 class GetNodesResponse(CamelModel):
     nodes: List[NodeModel]
+    cached_at: Optional[datetime] = Field(
+        None,
+        description=(
+            "When the nodes were fetched by the `nodes` health check, if the response "
+            "was served from the cache; `null` if the scheduler was queried directly."
+        ),
+    )
 
 
 class GetPartitionsResponse(CamelModel):
