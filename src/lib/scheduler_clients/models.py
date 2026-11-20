@@ -48,6 +48,7 @@ class NodeState(str, Enum):
     BUSY = "BUSY"
     POWERING_DOWN = "POWERING_DOWN"
     POWERING_UP = "POWERING_UP"
+    PLANNED = "PLANNED"
     UNKNOWN = "UNKNOWN"
 
 
