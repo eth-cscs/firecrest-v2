@@ -218,8 +218,11 @@ class SlurmCliClient(SlurmBaseClient):
         scancel = ScancelCommand(username, job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, scancel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmNode] | None:
         sinfo = SinfoCommand()
+        sinfo.execute_timeout = timeout
         return await self.__executed_ssh_cmd(username, jwt_token, sinfo)
 
     async def get_reservations(
@@ -286,6 +289,9 @@ class SlurmCliClient(SlurmBaseClient):
 
         return accounts if len(accounts) > 0 else None
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmPing] | None:
         scontrolping = ScontrolPingCommand()
+        scontrolping.execute_timeout = timeout
         return await self.__executed_ssh_cmd(username, jwt_token, scontrolping)

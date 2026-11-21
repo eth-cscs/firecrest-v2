@@ -31,7 +31,7 @@ Health check execution is configured through the `probing` section of the cluste
         timeout: 10
     ```
 
-Each service listed under the `services` subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. If the entire `services` section is omitted, all health checks for the specific cluster are disabled.
+Each service listed under the `services` subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. Health checks run their scheduler and SSH commands with this timeout instead of `ssh.timeout.command_execution` and `scheduler.timeout`, so a check can be given more time than regular user requests. For checks that use SSH, the timeout must be lower than `ssh.timeout.idle_timeout` minus `ssh.timeout.process_setup`. If the entire `services` section is omitted, all health checks for the specific cluster are disabled.
 
 The `interval_check` field defines how often, in seconds, the health checks are executed for the cluster. If not specified, the default interval is 120 seconds. For backward compatibility the `interval` field is still accepted and behaves identically to`interval_check`, however it is deprecated and it should be replaced with the new field.
 

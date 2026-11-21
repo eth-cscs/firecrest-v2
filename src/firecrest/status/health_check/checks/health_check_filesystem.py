@@ -36,6 +36,7 @@ class FilesystemHealthCheck(HealthCheckBase):
         health.path = self.path
 
         ls = LsCommand(self.path, no_recursion=True)
+        ls.execute_timeout = self.timeout
         async with self.ssh_client.get_client(
             self.auth.username,
             self.token["access_token"],

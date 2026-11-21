@@ -28,6 +28,10 @@ import logging
 
 class BaseCommand(ABC):
 
+    # Overrides the SSH client's `execute_timeout` for this command only
+    # (e.g. health checks, which allow the longer probing timeout).
+    execute_timeout: int | None = None
+
     @abstractmethod
     def get_command(self) -> str:
         pass
@@ -95,7 +99,8 @@ class SSHClient:
                 ) from e
 
             try:
-                async with asyncio.timeout(self.execute_timeout):
+                execute_timeout = command.execute_timeout or self.execute_timeout
+                async with asyncio.timeout(execute_timeout):
                     if stdin:
                         process.stdin.write(stdin.encode())
                         process.stdin.write_eof()

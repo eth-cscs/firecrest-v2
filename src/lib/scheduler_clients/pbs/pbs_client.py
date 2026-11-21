@@ -131,8 +131,11 @@ class PbsClient(SchedulerBaseClient):
         qdel = QdelCommand(username=username, job_id=job_id)
         return await self.__executed_ssh_cmd(username, jwt_token, qdel)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[PbsNode] | None:
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[PbsNode] | None:
         nodes = PbsnodesCommand()
+        nodes.execute_timeout = timeout
         res = await self.__executed_ssh_cmd(username, jwt_token, nodes)
         # Apply PBS model
         if res:
@@ -162,6 +165,9 @@ class PbsClient(SchedulerBaseClient):
     ) -> List[PbsAccounts] | None:
         return None
 
-    async def ping(self, username: str, jwt_token: str) -> List[PbsPing] | None:
+    async def ping(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[PbsPing] | None:
         ping_cmd = PbsPingCommand()
+        ping_cmd.execute_timeout = timeout
         return await self.__executed_ssh_cmd(username, jwt_token, ping_cmd)

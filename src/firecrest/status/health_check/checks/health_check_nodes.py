@@ -22,13 +22,13 @@ class NodesHealthCheck(HealthCheckBase):
 
     async def execute_check(self) -> NodesServiceHealth:
 
-        self.scheduler_client = await SchedulerClientDependency(ignore_health=True)(
+        scheduler_client = await SchedulerClientDependency(ignore_health=True)(
             system_name=self.system.name
         )
 
         async with asyncio.timeout(self.timeout):
-            nodes = await self.scheduler_client.get_nodes(
-                self.auth.username, self.token["access_token"]
+            nodes = await scheduler_client.get_nodes(
+                self.auth.username, self.token["access_token"], timeout=self.timeout
             )
 
         health = NodesServiceHealth(service_type=BackendServiceType.nodes)

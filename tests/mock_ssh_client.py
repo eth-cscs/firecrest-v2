@@ -3,6 +3,7 @@
 # Please, refer to the LICENSE file in the root directory.
 # SPDX-License-Identifier: BSD-3-Clause
 
+import asyncio
 from contextlib import asynccontextmanager
 from socket import AF_INET
 from typing import List
@@ -43,12 +44,14 @@ class MockedCommand(CamelModel):
     exit_code: int = 0
     command: str = None
     swallow_stdin: bool = False
+    # Seconds to wait before answering, to simulate a slow command
+    delay: float = 0
 
 
 class MockedSSHClient(SSHClient):
 
-    def __init__(self, conn):
-        super().__init__(conn=conn)
+    def __init__(self, conn, execute_timeout: float = 5):
+        super().__init__(conn=conn, execute_timeout=execute_timeout)
 
 
 class MockSSHClientPool(SSHClientPool):
@@ -71,6 +74,8 @@ class MockSSHClientPool(SSHClientPool):
 
         for command in self.commands:
             if process.command.find(command.command) >= 0:
+                if command.delay:
+                    await asyncio.sleep(command.delay)
                 process.stdout.write(command.stdout)
                 process.stderr.write(command.stderr)
                 process.exit(command.exit_code)
@@ -91,4 +96,4 @@ class MockSSHClientPool(SSHClientPool):
             async with asyncssh.connect(
                 host="localhost", port=port, known_hosts=None
             ) as conn:
-                yield MockedSSHClient(conn)
+                yield MockedSSHClient(conn, execute_timeout=self.execute_timeout)

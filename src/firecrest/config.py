@@ -264,14 +264,23 @@ class ProbingService(CamelModel):
         10,
         description="Timeout for specific health check, if not specified the default of 10s is applied.",
     )
+    # Only valid for the `nodes` service; enforced by ProbingServices.check_use_as_cache.
     use_as_cache: bool = Field(
         False,
         description=(
             "Only applies to the `nodes` service: when enabled, the nodes fetched by the "
             "health check are returned by the `/status/{system_name}/nodes` endpoint "
-            "instead of querying the scheduler on every request."
+            "instead of querying the scheduler on every request. Cached nodes are fetched "
+            "with the cluster service account, so every caller sees the service account's "
+            "view of the nodes; do not enable it if the scheduler restricts node visibility "
+            "per user (e.g. Slurm `PrivateData=nodes`)."
         ),
     )
+
+    @pydantic.field_validator("timeout", mode="before")
+    def default_timeout(cls, value):
+        # An explicit `timeout: null` would disable `asyncio.timeout` entirely.
+        return 10 if value is None else value
 
 
 class ProbingServices(CamelModel):
@@ -293,7 +302,7 @@ class ProbingServices(CamelModel):
         for service_type, service in (self.services or {}).items():
             if service.use_as_cache and service_type != BackendServiceType.nodes:
                 raise ValueError(
-                    f"`use_as_cache` is only supported by the `nodes` service, not `{BackendServiceType(service_type).value}`."
+                    f"`use_as_cache` is only supported by the `nodes` service, not `{service_type.value}`."
                 )
         return self
 
@@ -530,6 +539,24 @@ class HPCCluster(CamelModel):
         ),
         nullable=False,
     )
+
+    @pydantic.model_validator(mode="after")
+    def check_probing_timeouts(self) -> Self:
+        # Health checks run their SSH commands with the probing timeout instead of
+        # `ssh.timeout.command_execution`. The SSH connection pool closes connections
+        # idle for longer than `idle_timeout`, so a check must finish well before that.
+        ssh_services = {BackendServiceType.ssh, BackendServiceType.filesystem}
+        if self.scheduler.connection_mode == SchedulerConnectionMode.ssh:
+            ssh_services |= {BackendServiceType.scheduler, BackendServiceType.nodes}
+        limit = self.ssh.timeout.idle_timeout - self.ssh.timeout.process_setup
+        for service_type, service in (self.probing.services or {}).items():
+            if service_type in ssh_services and service.timeout >= limit:
+                raise ValueError(
+                    f"Cluster '{self.name}': probing timeout of `{service_type.value}` "
+                    f"({service.timeout}s) must be lower than `ssh.timeout.idle_timeout` "
+                    f"minus `ssh.timeout.process_setup` ({limit}s)."
+                )
+        return self
 
 
 class OpenFGA(CamelModel):

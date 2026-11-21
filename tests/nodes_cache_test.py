@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from importlib import resources as impresources
 from unittest.mock import AsyncMock, patch
 
+import aiohttp
 import pytest
 from aioresponses import aioresponses
 from pydantic import ValidationError
@@ -41,12 +42,14 @@ def nodes_url(cluster):
 
 
 @contextmanager
-def nodes_probing(cluster, use_as_cache: bool, health=None, only_nodes=False):
+def nodes_probing(cluster, use_as_cache: bool, health=None, only_nodes=False, timeout=10):
     """Temporarily enable the nodes probe (and optionally its health) on a cluster."""
     original_services = cluster.probing.services
     original_health = cluster.servicesHealth
     services = {} if only_nodes else dict(original_services or {})
-    services[BackendServiceType.nodes] = ProbingService(use_as_cache=use_as_cache)
+    services[BackendServiceType.nodes] = ProbingService(
+        use_as_cache=use_as_cache, timeout=timeout
+    )
     cluster.probing.services = services
     if health is not None:
         cluster.servicesHealth = list(original_health or []) + [health]
@@ -84,7 +87,9 @@ async def test_nodes_health_check_stores_nodes(
     mocked_nodes_get_response, slurm_cluster_with_api_config
 ):
     cluster = slurm_cluster_with_api_config
-    with nodes_probing(cluster, use_as_cache=True, only_nodes=True), aioresponses() as mocked, patch(
+    probe_timeout = cluster.scheduler.timeout + 7
+    with nodes_probing(cluster, use_as_cache=True, only_nodes=True, timeout=probe_timeout), \
+            aioresponses() as mocked, patch(
         "firecrest.status.health_check.health_checker_cluster.AsyncOAuth2Client.fetch_token",
         new=AsyncMock(return_value=mocked_token_response()),
     ):
@@ -97,6 +102,9 @@ async def test_nodes_health_check_stores_nodes(
         assert health[0].healthy
         assert len(health[0].nodes) == 1
         assert health[0].last_checked is not None
+        # the health check gives slurmrestd the probing timeout
+        (call,) = [c for calls in mocked.requests.values() for c in calls]
+        assert call.kwargs["timeout"] == aiohttp.ClientTimeout(total=probe_timeout)
         # nodes are kept in memory but not exposed in the health report
         assert "nodes" not in health[0].model_dump(by_alias=True)
 
