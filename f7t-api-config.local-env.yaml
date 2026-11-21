@@ -51,6 +51,9 @@ clusters:
     services:
       scheduler:
         timeout: 20
+      nodes:
+        timeout: 20
+        use_as_cache: true
       filesystem:
         timeout: 20
       ssh:
@@ -104,6 +107,9 @@ clusters:
         timeout: 5
       scheduler:
         timeout: 5
+      nodes:
+        timeout: 5
+        use_as_cache: true
       storage:
         timeout: 20
   file_systems:
@@ -157,6 +163,9 @@ clusters:
         timeout: 10
       scheduler:
         timeout: 20
+      nodes:
+        timeout: 20
+        use_as_cache: true
       filesystem:
         timeout: 10
       storage:

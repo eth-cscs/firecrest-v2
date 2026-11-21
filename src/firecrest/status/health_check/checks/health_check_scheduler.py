@@ -44,7 +44,7 @@ class SchedulerHealthCheck(HealthCheckBase):
 
         health = SchedulerServiceHealth(service_type=BackendServiceType.scheduler)
         pings: List[SchedPing] = await self.scheduler_client.ping(
-            self.auth.username, self.token["access_token"]
+            self.auth.username, self.token["access_token"], timeout=self.timeout
         )
         health.healthy = all(ping_is_up(ping) for ping in pings)
         health.message = str(pings)

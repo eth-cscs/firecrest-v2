@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, Path, Query, status
 from typing import Annotated, Any
 
 # configs
-from firecrest.config import HPCCluster, BackendServiceType
+from firecrest.config import HPCCluster, BackendServiceType, NodesServiceHealth
 from firecrest.status.commands.id_command import IdCommand
 from firecrest.plugins import settings
 
@@ -65,6 +65,25 @@ async def get_systems() -> Any:
     return {"systems": settings.clusters}
 
 
+def _get_cached_nodes_health(system: HPCCluster) -> NodesServiceHealth | None:
+    """Last successful `nodes` health check holding nodes, if caching is enabled."""
+    services = system.probing.services or {}
+    probing = services.get(BackendServiceType.nodes)
+    if probing is None or not probing.use_as_cache:
+        return None
+    health = next(
+        (
+            service
+            for service in system.servicesHealth or []
+            if isinstance(service, NodesServiceHealth)
+        ),
+        None,
+    )
+    if health is None or not health.healthy or not health.nodes:
+        return None
+    return health
+
+
 @router_on_systen.get(
     "/nodes",
     description="Get the list of nodes of a `{system_name}`",
@@ -78,7 +97,17 @@ async def get_system_nodes(
         Path(alias="system_name", description="Target system"),
         Depends(SchedulerClientDependency(ignore_health=True)),
     ] = None,
+    system: HPCCluster = Depends(
+        ServiceAvailabilityDependency(
+            service_type=BackendServiceType.nodes, ignore_health=True
+        ),
+        use_cache=False,
+    ),
 ) -> Any:
+    cached = _get_cached_nodes_health(system)
+    if cached is not None:
+        return {"nodes": cached.nodes, "cached_at": cached.last_checked}
+
     username = ApiAuthHelper.get_auth().username
     access_token = ApiAuthHelper.get_access_token()
     try:

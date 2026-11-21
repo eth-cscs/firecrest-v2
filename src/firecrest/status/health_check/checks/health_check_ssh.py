@@ -30,6 +30,7 @@ class SSHHealthCheck(HealthCheckBase):
         health.healthy = True
 
         truecmd = TrueCommand()
+        truecmd.execute_timeout = self.timeout
         async with self.ssh_client.get_client(
             self.auth.username, self.token["access_token"]
         ) as client:

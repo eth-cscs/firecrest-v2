@@ -314,9 +314,11 @@ class SlurmRestClient(SlurmBaseClient):
                 return True
             await _slurm_unexpected_response(response)
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmNode] | None:
         client = await self.get_aiohttp_client()
-        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        timeout = aiohttp.ClientTimeout(total=timeout or self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/nodes"
         async with client.get(
@@ -417,9 +419,11 @@ class SlurmRestClient(SlurmBaseClient):
             ]
             return accounts or None
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmPing] | None:
         client = await self.get_aiohttp_client()
-        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        timeout = aiohttp.ClientTimeout(total=timeout or self.timeout)
         headers = _slurm_headers(username, jwt_token, self.username_claim)
         url = f"{self.api_url}/slurm/v{self.api_version}/ping"
         async with client.get(

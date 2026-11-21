@@ -75,7 +75,9 @@ class SlurmBaseClient(SchedulerBaseClient):
         pass
 
     @abstractmethod
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmNode] | None:
         pass
 
     @abstractmethod
@@ -97,5 +99,7 @@ class SlurmBaseClient(SchedulerBaseClient):
         pass
 
     @abstractmethod
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
+    async def ping(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmPing] | None:
         pass

@@ -12,6 +12,7 @@ As you can see in the figure above, when enabled the periodic health check will 
 2. Workload manager and scheduler (via SSH or API calls, depending the service)
 3. Filesystem availability (read only)
 4. Object storage availability (S3 interface is reachable or not)
+5. Scheduler nodes (optional; the result can be used as a cache for the nodes endpoint)
 
 ## Probing configuration
 
@@ -30,11 +31,40 @@ Health check execution is configured through the `probing` section of the cluste
         timeout: 10
     ```
 
-Each service listed under the `services` subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. If the entire `services` section is omitted, all health checks for the specific cluster are disabled.
+Each service listed under the `services` subsection enables its corresponding health check. Omitting a service disables that specific check. It is allowed to specify a custom timeout, in seconds, for each service: the default is 10 seconds. If a check exceeds its configured timeout, it is considered failed. Health checks run their scheduler and SSH commands with this timeout instead of `ssh.timeout.command_execution` and `scheduler.timeout`, so a check can be given more time than regular user requests. For checks that use SSH, the timeout must be lower than `ssh.timeout.idle_timeout` minus `ssh.timeout.process_setup`. If the entire `services` section is omitted, all health checks for the specific cluster are disabled.
 
 The `interval_check` field defines how often, in seconds, the health checks are executed for the cluster. If not specified, the default interval is 120 seconds. For backward compatibility the `interval` field is still accepted and behaves identically to`interval_check`, however it is deprecated and it should be replaced with the new field.
 
 Note: the `probing` section is mandatory in the configuration, even if empty.
+
+### Cached nodes information
+
+The `nodes` service fetches the list of nodes from the scheduler at every health check, using the cluster service account. When `use_as_cache` is set to `true`, the `/status/{system_name}/nodes` endpoint returns the nodes fetched by the last successful check instead of querying the scheduler on each request. This reduces the load on the scheduler, at the cost of returning data up to `interval_check` seconds old.
+
+!!! example "Serve the nodes endpoint from the health check data"
+    ```yaml
+  probing:
+    interval_check: 60
+    services:
+      nodes:
+        timeout: 20
+        use_as_cache: true
+    ```
+
+Responses served from the cache include a `cachedAt` timestamp with the time the nodes were fetched by the health check:
+
+```json
+{
+    "nodes": [ ... ],
+    "cachedAt": "2026-01-02T03:04:05.123456Z"
+}
+```
+
+If the check has not run yet, or its last execution failed, the endpoint falls back to querying the scheduler directly, as the calling user, and `cachedAt` is `null`. A non-null `cachedAt` therefore means the node list is what the cluster service account saw at that time, not the result of a query made as the caller.
+
+!!! warning "Node visibility"
+    Cached responses are shared by all users and reflect the service account's view of the nodes. If the scheduler limits node information per user (for example Slurm's `PrivateData=nodes`), enabling `use_as_cache` exposes the service account's view to every user: keep it disabled on those clusters.
+ `use_as_cache` is only supported by the `nodes` service. The node list itself is not included in the `servicesHealth` report of `/status/systems`.
 
 ## Status reports
 
@@ -42,7 +72,7 @@ When consulting the API endpoint `/status/systems` you can see the status of hea
 
 The common format includes:
 
-- `serviceType`: can be (1) `ssh`, (2) `scheduler`, (3) `filesystem`, and (4) `s3`.
+- `serviceType`: can be (1) `ssh`, (2) `scheduler`, (3) `filesystem`, (4) `s3`, and (5) `nodes`.
 - `lastChecked`: timestamp of the last time the periodic test was performed
 - `latency`: is used to establish if the service is healthy or not (depends on the configuration of FirecREST)
 - `healthy`: `true` or `false`

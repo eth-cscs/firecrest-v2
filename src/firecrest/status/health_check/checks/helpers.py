@@ -26,7 +26,7 @@ def log_health_check_error(service_type: BackendServiceType,
         case BackendServiceType.scheduler:
             log_data["error.system"] = system_name
             log_data["firecrest.username"] = username
-        case BackendServiceType.ssh:
+        case BackendServiceType.ssh | BackendServiceType.nodes:
             log_data["error.system"] = system_name
             log_data["firecrest.username"] = username
         case BackendServiceType.external_storage:

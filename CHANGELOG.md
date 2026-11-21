@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0]
+
+### Added
+
+- ***⚠️ API Breaking*** New `nodes` health check that periodically fetches the scheduler nodes. With `use_as_cache: true` in its probing settings, `/status/{system_name}/nodes` returns the nodes fetched by the last successful check instead of querying the scheduler on every request, with `cachedAt` set to when the nodes were fetched; when no cached data is available (check not yet run or failed) the scheduler is queried as before and `cachedAt` is `null`.
+
+### Changed
+
+- Health checks now run their scheduler and SSH commands with the probing `timeout` of the service instead of `ssh.timeout.command_execution` and `scheduler.timeout`, so they can be given more time than regular requests. A probing timeout of `null` now falls back to the 10s default instead of disabling the timeout. For services checked over SSH the probing timeout must be lower than `ssh.timeout.idle_timeout` minus `ssh.timeout.process_setup`, otherwise the configuration is rejected.
+
 ## [2.6.2]
 
 ### Security

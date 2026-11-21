@@ -71,7 +71,9 @@ class SchedulerBaseClient(ABC):
         pass
 
     @abstractmethod
-    async def get_nodes(self, username: str, jwt_token: str) -> List[NodeModel] | None:
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[NodeModel] | None:
         pass
 
     @abstractmethod

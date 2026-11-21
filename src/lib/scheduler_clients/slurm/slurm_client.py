@@ -117,8 +117,10 @@ class SlurmClient(SlurmBaseClient):
                 detail="Scheduler can't handle this request when configured to use rest connection mode",
             )
 
-    async def get_nodes(self, username: str, jwt_token: str) -> List[SlurmNode] | None:
-        res = await self.slurm_default_client.get_nodes(username, jwt_token)
+    async def get_nodes(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmNode] | None:
+        res = await self.slurm_default_client.get_nodes(username, jwt_token, timeout)
         if res is None:
             return None
         return [SlurmNode.model_validate(node) for node in res]
@@ -143,5 +145,7 @@ class SlurmClient(SlurmBaseClient):
     ) -> List[SlurmAccounts] | None:
         return await self.slurm_default_client.get_accounts(username, jwt_token)
 
-    async def ping(self, username: str, jwt_token: str) -> List[SlurmPing] | None:
-        return await self.slurm_default_client.ping(username, jwt_token)
+    async def ping(
+        self, username: str, jwt_token: str, timeout: int | None = None
+    ) -> List[SlurmPing] | None:
+        return await self.slurm_default_client.ping(username, jwt_token, timeout)
