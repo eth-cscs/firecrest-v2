@@ -60,7 +60,11 @@ Responses served from the cache include a `cachedAt` timestamp with the time the
 }
 ```
 
-If the check has not run yet, or its last execution failed, the endpoint falls back to querying the scheduler directly and `cachedAt` is `null`. `use_as_cache` is only supported by the `nodes` service. The node list itself is not included in the `servicesHealth` report of `/status/systems`.
+If the check has not run yet, or its last execution failed, the endpoint falls back to querying the scheduler directly, as the calling user, and `cachedAt` is `null`. A non-null `cachedAt` therefore means the node list is what the cluster service account saw at that time, not the result of a query made as the caller.
+
+!!! warning "Node visibility"
+    Cached responses are shared by all users and reflect the service account's view of the nodes. If the scheduler limits node information per user (for example Slurm's `PrivateData=nodes`), enabling `use_as_cache` exposes the service account's view to every user: keep it disabled on those clusters.
+ `use_as_cache` is only supported by the `nodes` service. The node list itself is not included in the `servicesHealth` report of `/status/systems`.
 
 ## Status reports
 

@@ -65,7 +65,7 @@ async def get_systems() -> Any:
     return {"systems": settings.clusters}
 
 
-def _get_cached_nodes(system: HPCCluster) -> NodesServiceHealth | None:
+def _get_cached_nodes_health(system: HPCCluster) -> NodesServiceHealth | None:
     """Last successful `nodes` health check holding nodes, if caching is enabled."""
     services = system.probing.services or {}
     probing = services.get(BackendServiceType.nodes)
@@ -104,7 +104,7 @@ async def get_system_nodes(
         use_cache=False,
     ),
 ) -> Any:
-    cached = _get_cached_nodes(system)
+    cached = _get_cached_nodes_health(system)
     if cached is not None:
         return {"nodes": cached.nodes, "cached_at": cached.last_checked}
 

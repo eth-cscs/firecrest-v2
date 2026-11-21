@@ -74,6 +74,12 @@ def test_use_as_cache_only_allowed_on_nodes():
         ProbingServices(services={"scheduler": {"use_as_cache": True}})
 
 
+def test_null_timeout_uses_default():
+    assert ProbingService(timeout=None).timeout == 10
+    services = ProbingServices(services={"nodes": {"timeout": None}}).services
+    assert services[BackendServiceType.nodes].timeout == 10
+
+
 async def test_nodes_health_check_stores_nodes(
     mocked_nodes_get_response, slurm_cluster_with_api_config
 ):
