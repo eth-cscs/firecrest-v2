@@ -63,7 +63,7 @@ class DataTransferLocation(CamelModel):
 
 
 class DataTransferOperation(CamelModel):
-    transfer_job: TransferJob
+    transfer_job: Optional[TransferJob]
     transfer_directives: DataTransferResponse = Field(
         None,
         description=("Provide method specific transfer directives"),

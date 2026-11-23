@@ -3,7 +3,6 @@ import json
 import uuid
 import os
 
-
 # storage
 from firecrest.filesystem.ops.commands.stat_command import StatCommand
 from fastapi import HTTPException
@@ -24,10 +23,16 @@ from lib.datatransfers.datatransfer_base import (
 from lib.scheduler_clients.models import JobDescriptionModel
 from lib.scheduler_clients.scheduler_base_client import SchedulerBaseClient
 from lib.ssh_clients.ssh_client import SSHClientPool
-from lib.datatransfers.s3.models import S3STSCredentials, S3TransferResponse
+from lib.datatransfers.s3.models import (
+    S3AccessMethod,
+    S3STSCredentials,
+    S3TransferResponse,
+)
 
 import logging
+
 logger = logging.getLogger("uvicorn.error")
+
 
 async def _generate_presigned_url(
     client,
@@ -87,6 +92,112 @@ class S3Datatransfer(DataTransferBase):
         self.system_name = system_name
 
     async def upload(
+        self,
+        source: DataTransferLocation,
+        target: DataTransferLocation,
+        username,
+        access_token,
+        account,
+    ) -> DataTransferOperation | None:
+        if source.transfer_directives.access_method == S3AccessMethod.sts:
+            return await self.generate_sts(target, username)
+        else:
+            return await self.upload_presigned(
+                source, target, username, access_token, account
+            )
+
+    async def generate_sts(
+        self, target: DataTransferLocation, username
+    ) -> DataTransferOperation | None:
+        # job_id = None
+        # object_name = f"{str(uuid.uuid4())}/{os.path.basename(target.path)}"
+
+        async with self.s3_client_private:
+            try:
+                await self.s3_client_private.create_bucket(**{"Bucket": username})
+                # Update lifecycle only for new buckets (not throwing the BucketAlreadyOwnedByYou exception)
+                await self.s3_client_private.put_bucket_lifecycle_configuration(
+                    Bucket=username,
+                    LifecycleConfiguration=self.bucket_lifecycle_configuration.to_json(),
+                )
+            except self.s3_client_private.exceptions.BucketAlreadyOwnedByYou:
+                pass
+
+            # Credentials are restricted to the bucket targeted by this transfer
+            bucket_resource = f"{self.tenant}:{username}" if self.tenant else username
+            bucket_policy = json.dumps(
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": ["s3:*"],
+                            "Resource": [
+                                f"arn:aws:s3:::{bucket_resource}",
+                                f"arn:aws:s3:::{bucket_resource}/*",
+                            ],
+                        }
+                    ],
+                }
+            )
+            sts_response = await self.sts_client_private.assume_role(
+                RoleArn=self.sts_role_arn or "arn:aws:iam:::role/firecrest",
+                RoleSessionName=username,
+                Policy=bucket_policy,
+                DurationSeconds=self.ttl,
+            )
+            sts_credentials = sts_response["Credentials"]
+            sts_temporary_credentials = S3STSCredentials(
+                access_key_id=sts_credentials["AccessKeyId"],
+                secret_access_key=sts_credentials["SecretAccessKey"],
+                session_token=sts_credentials["SessionToken"],
+                expiration=sts_credentials["Expiration"].isoformat(),
+            )
+
+            # parameters = {
+            #     "sbatch_directives": _format_directives(self.directives, account),
+            #     "download_head_url": head_download_url,
+            #     "download_url": get_download_url,
+            #     "target_path": target.path,
+            #     "max_part_size": str(self.max_part_size),
+            # }
+
+            # job_script = _build_script("job_s3_downloader.sh", parameters)
+            # job = JobHelper(
+            #     f"{self.work_dir}/{username}", job_script, "IngressFileTransfer"
+            # )
+
+            # job_id = await self.scheduler_client.submit_job(
+            #     job_description=JobDescriptionModel(**job.job_param),
+            #     username=username,
+            #     jwt_token=access_token,
+            # )
+
+        # transferJob = TransferJob(
+        #     job_id=job_id,
+        #     system=target.system,
+        #     working_directory=job.working_dir,
+        #     logs=TransferJobLogs(
+        #         output_log=job.job_param["standard_output"],
+        #         error_log=job.job_param["standard_error"],
+        #     ),
+        # )
+
+        transferJob = None
+
+        directives = S3TransferResponse(
+            **{
+                "maxPartSize": self.max_part_size,
+                "transfer_method": "s3",
+                "stsCredentials": sts_temporary_credentials,
+            }
+        )
+
+        return DataTransferOperation(
+            transferJob=transferJob, transfer_directives=directives
+        )
+
+    async def upload_presigned(
         self,
         source: DataTransferLocation,
         target: DataTransferLocation,
@@ -213,13 +324,23 @@ class S3Datatransfer(DataTransferBase):
                 error_log=job.job_param["standard_error"],
             ),
         )
+
+        # if self.directives.get("accessMethod") == "sts":
+        #     directives = S3TransferResponse(
+        #         **{
+        #             "maxPartSize": self.max_part_size,
+        #             "transfer_method": "s3",
+        #             "stsCredentials": sts_temporary_credentials,
+        #         }
+        #     )
+
+        # else:
         directives = S3TransferResponse(
             **{
                 "partsUploadUrls": post_external_upload_urls,
                 "completeUploadUrl": complete_external_multipart_upload_url,
                 "maxPartSize": self.max_part_size,
                 "transfer_method": "s3",
-                "stsCredentials": sts_temporary_credentials,
             }
         )
 

@@ -8,7 +8,10 @@ from pydantic import Field
 
 # models
 from firecrest.filesystem.models import FilesystemRequestBase
-from lib.datatransfers.datatransfer_base import DataTransferOperation
+from lib.datatransfers.datatransfer_base import (
+    DataTransferOperation,
+    TransferJob as DataTransferJob,
+)
 from lib.datatransfers.magic_wormhole.models import (
     WormholeTransferRequest,
     WormholeTransferResponse,
@@ -88,6 +91,10 @@ class TransferJob(CamelModel):
 
 
 class UploadFileResponse(DataTransferOperation):
+    transfer_job: Optional[DataTransferJob] = Field(
+        default=None,
+        description="Transfer job, omitted when S3 STS credentials are requested",
+    )
     transfer_directives: Union[
         WormholeTransferResponse | S3TransferResponse | StreamerTransferResponse
     ] = Field(
@@ -96,6 +103,7 @@ class UploadFileResponse(DataTransferOperation):
 
 
 class DownloadFileResponse(DataTransferOperation):
+    transfer_job: DataTransferJob
     transfer_directives: Union[
         WormholeTransferResponse | S3TransferResponse | StreamerTransferResponse
     ] = Field(

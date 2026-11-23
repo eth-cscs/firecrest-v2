@@ -56,7 +56,7 @@ fi
 echo "Bucket: $BUCKET"
 
 # -----------------------------------------------------------------------------
-# Request an upload to get the STS credentials (a 1 byte upload is enough)
+# Request STS credentials
 raw_response=$(curl -s -w "\n%{http_code}" --location --globoff "${F7T_URL}/filesystem/${F7T_SYSTEM}/transfer/upload" \
 --header "Content-Type: application/json" \
 --header "Authorization: Bearer ${ACCESS_TOKEN}" \
@@ -65,8 +65,8 @@ raw_response=$(curl -s -w "\n%{http_code}" --location --globoff "${F7T_URL}/file
   \"fileName\":\"sts_test.data\",
   \"account\":\"${SCHEDULER_ACCOUNT}\",
   \"transferDirectives\": {
-      \"fileSize\":\"1\",
-      \"transferMethod\":\"s3\"
+      \"transferMethod\":\"s3\",
+      \"accessMethod\":\"sts\"
   }
 }")
 http_status="${raw_response##*$'\n'}"

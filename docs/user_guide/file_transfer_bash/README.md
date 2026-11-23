@@ -6,6 +6,16 @@ For large file uploads, FirecREST provides upload URLs based on the S3 multipart
 
 Once all parts have been uploaded, the user must call the provided complete upload URL to finalize the transfer. After completion, a remote job moves the file from the staging storage to its final destination.
 
+When requesting `transferDirectives` with `transferMethod: "s3"` and `accessMethod: "sts"`, the response instead provides temporary S3 credentials in `transferDirectives.stsCredentials`. This mode does not submit a transfer job or move a file to the destination; the response omits `transferJob`.
+
+The [STS multipart example](./examples/multipart_upload_dd_sts.sh) uploads directly to that S3 bucket:
+
+```bash
+bash multipart_upload_dd_sts.sh <data_file> <system> <destination> <env_file> [<scheduler_account>]
+```
+
+Set `S3_URL` and `S3_REGION` in the environment file if the defaults (`http://localhost:9000` and `us-east-1`) are unsuitable. The bucket defaults to the token's `username` claim and can be overridden with `BUCKET`. The object key defaults to the input file's basename and can be set with `S3_OBJECT_KEY`. The destination is passed to the API but does not cause a file transfer to the HPC filesystem. The script requires curl with AWS Signature V4 support, jq, Python 3, and GNU dd.
+
 ### Commented example
 
 The first step is to determine the size of your large file, expressed in bytes. A reliable method is to use the command: `stat --printf "%s" "$LARGE_FILE_NAME"`.

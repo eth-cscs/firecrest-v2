@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Literal, Optional
 from pydantic import Field
 from lib.models.base_model import CamelModel
@@ -6,6 +7,10 @@ from lib.datatransfers.datatransfer_base import (
     DataTransferRequest,
     DataTransferType,
 )
+
+
+class S3AccessMethod(str, Enum):
+    sts = "sts"
 
 
 class S3STSCredentials(CamelModel):
@@ -31,5 +36,10 @@ class S3TransferResponse(DataTransferResponse):
 class S3TransferRequest(DataTransferRequest):
     file_size: Optional[int] = Field(
         None, description="Size of the file to upload in bytes", nullable=True
+    )
+    access_method: Optional[S3AccessMethod] = Field(
+        None,
+        description="Optional access method to the S3 storage (e.g. 'sts')",
+        nullable=True,
     )
     transfer_method: Literal[DataTransferType.s3,]
