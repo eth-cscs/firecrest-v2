@@ -131,11 +131,8 @@ class S3Datatransfer(DataTransferBase):
                     "Statement": [
                         {
                             "Effect": "Allow",
-                            "Action": ["s3:*"],
-                            "Resource": [
-                                f"arn:aws:s3:::{bucket_resource}",
-                                f"arn:aws:s3:::{bucket_resource}/*",
-                            ],
+                            "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
+                            "Resource": [f"arn:aws:s3:::{bucket_resource}/*"],
                         }
                     ],
                 }
@@ -244,36 +241,6 @@ class S3Datatransfer(DataTransferBase):
                         self.ttl,
                     )
                 )
-            # Credentials are restricted to the bucket targeted by this transfer
-            bucket_resource = f"{self.tenant}:{username}" if self.tenant else username
-            bucket_policy = json.dumps(
-                {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": ["s3:*"],
-                            "Resource": [
-                                f"arn:aws:s3:::{bucket_resource}",
-                                f"arn:aws:s3:::{bucket_resource}/*",
-                            ],
-                        }
-                    ],
-                }
-            )
-            sts_response = await self.sts_client_private.assume_role(
-                RoleArn=self.sts_role_arn or "arn:aws:iam:::role/firecrest",
-                RoleSessionName=username,
-                Policy=bucket_policy,
-                DurationSeconds=self.ttl,
-            )
-            sts_credentials = sts_response["Credentials"]
-            sts_temporary_credentials = S3STSCredentials(
-                access_key_id=sts_credentials["AccessKeyId"],
-                secret_access_key=sts_credentials["SecretAccessKey"],
-                session_token=sts_credentials["SessionToken"],
-                expiration=sts_credentials["Expiration"].isoformat(),
-            )
             complete_external_multipart_upload_url = await _generate_presigned_url(
                 self.s3_client_public,
                 "complete_multipart_upload",
@@ -325,16 +292,6 @@ class S3Datatransfer(DataTransferBase):
             ),
         )
 
-        # if self.directives.get("accessMethod") == "sts":
-        #     directives = S3TransferResponse(
-        #         **{
-        #             "maxPartSize": self.max_part_size,
-        #             "transfer_method": "s3",
-        #             "stsCredentials": sts_temporary_credentials,
-        #         }
-        #     )
-
-        # else:
         directives = S3TransferResponse(
             **{
                 "partsUploadUrls": post_external_upload_urls,
