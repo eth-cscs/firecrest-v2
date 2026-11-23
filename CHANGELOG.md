@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.6.3] - OPEN
 
 ### Fixed
-- Fixed missing quoting of close multipart protocol call in job s3-uploader-multipart.
 
+- Fixed missing quoting of close multipart protocol call in job s3-uploader-multipart.
 
 ## [2.6.2]
 
