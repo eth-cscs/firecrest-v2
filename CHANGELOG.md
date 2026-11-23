@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] - OPEN
+
+### Fixed
+- Fixed missing quoting of close multipart protocol call in job s3-uploader-multipart.
+
+
 ## [2.6.2]
 
 ### Security
@@ -46,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PBS node `freeMemory` and `allocMemory` are now reported in MiB, as for Slurm. They were in bytes, computed with decimal multipliers although PBS sizes are binary.
 - Slurm REST node `cpuLoad` is now the load average, as over SSH. slurmrestd reports it multiplied by 100.
 - Demo use cases: fixed packages for critical and high vulnerabilities ([CVE-2026-102268](https://www.cve.org/CVERecord?id=CVE-2026-102268), [CVE-2026-48526](https://www.cve.org/CVERecord?id=CVE-2026-48526), [CVE-2026-102271](https://www.cve.org/CVERecord?id=CVE-2026-102271), and [CVE-2026-102267](https://www.cve.org/CVERecord?id=CVE-2026-102267), among others moderates and lows).
-- Fixed missing quoting of close multipart protocol call in job s3-uploader-multipart.
 
 ## [2.6.1]
 
