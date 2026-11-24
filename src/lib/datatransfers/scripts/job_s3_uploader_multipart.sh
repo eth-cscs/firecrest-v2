@@ -255,7 +255,7 @@ echo "[INFO] Signaling multipart upload completion"
 completeUploadXML="<CompleteMultipartUpload xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">${etagsXML}</CompleteMultipartUpload>"
 
 # Complete multipart upload
-status=$(curl -f --show-error -s -i -o /dev/null -w "%{http_code}" -d "$completeUploadXML" -X POST $complete_multipart_url)
+status=$(curl -f --show-error -s -i -o /dev/null -w "%{http_code}" -d "$completeUploadXML" -X POST "$complete_multipart_url")
 
 if [[ "$status" == '200' ]]
 then
