@@ -1,0 +1,5 @@
+caller=cscs-review.yml # Use cscs-review-web.yml to enable web tools.
+mkdir -p .github/workflows &&
+  curl --fail --location --silent --show-error \
+    "https://github.com/eth-cscs/cscs-oc-review/releases/latest/download/$caller" \
+    --output .github/workflows/cscs-review.yml
