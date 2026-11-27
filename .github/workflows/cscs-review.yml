@@ -1,5 +1,18 @@
-caller=cscs-review.yml # Use cscs-review-web.yml to enable web tools.
-mkdir -p .github/workflows &&
-  curl --fail --location --silent --show-error \
-    "https://github.com/eth-cscs/cscs-oc-review/releases/latest/download/$caller" \
-    --output .github/workflows/cscs-review.yml
+name: CSCS review
+
+on:
+  # Conversation commands run the default branch's workflow, including for fork PRs.
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    # Central authorization runs before per-PR cancellation or inference.
+    uses: eth-cscs/cscs-oc-review/.github/workflows/review.yml@d28859bb6d58eac9d5e6a0c19046ceea3c19bc19 # v0.1.0
+    # Do not forward other repository or organization secrets.
+    secrets:
+      CSCS_INFERENCE_KEY: ${{ secrets.CSCS_INFERENCE_KEY }}
